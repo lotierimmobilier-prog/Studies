@@ -5,10 +5,13 @@ import { coutDeLaVie } from '../data/coutVie'
 import { formaterPrix, type PrixFormation } from '../data/prix'
 import type { Conseil } from '../data/conseil'
 
+/**
+ * Probabilité déclinée dans la couleur unique (bleu, teinte 214) :
+ * un bleu plus profond signale de meilleures chances.
+ */
 function couleurProba(p: number): string {
-  if (p >= 60) return 'var(--green)'
-  if (p >= 30) return 'var(--amber)'
-  return 'var(--red)'
+  const l = 66 - (p / 100) * 36 // 66% (faible) → 30% (élevé)
+  return `hsl(214 82% ${l}%)`
 }
 
 function libelleChance(p: number): string {
