@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/types.ts","./src/components/Resultats.tsx","./src/components/Stepper.tsx","./src/data/formations.ts","./src/data/labels.ts","./src/engine/simulate.ts","./src/engine/strategie.ts","./src/engine/__tests__/simulate.test.ts","./src/engine/__tests__/strategie.test.ts"],"version":"5.9.3"}

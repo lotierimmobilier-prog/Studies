@@ -1,0 +1,184 @@
+import type {
+  Formation,
+  ProfilEtudiant,
+  ResultatSimulation,
+} from '../types'
+
+/**
+ * Moteur de simulation du taux d'admission.
+ *
+ * L'estimation combine quatre sous-scores, chacun ramené sur 0-100 :
+ *  - académique  : adéquation des notes avec les matières clés de la formation
+ *  - passion     : correspondance entre les domaines aimés et le domaine visé
+ *  - motivation  : motivation auto-évaluée et cohérence du projet
+ *  - géographie  : proximité régionale (déterminante pour les licences de secteur)
+ *
+ * Ces sous-scores forment un « score d'adéquation » pondéré, qui module le
+ * taux d'accès historique de la formation pour produire une probabilité.
+ *
+ * ⚠️ Il s'agit d'une estimation pédagogique, pas d'une prédiction officielle.
+ */
+
+const clamp = (v: number, min = 0, max = 100) => Math.min(max, Math.max(min, v))
+
+/** Score académique : moyenne des notes pondérée par les matières clés (0-100). */
+export function scoreAcademique(
+  formation: Formation,
+  profil: ProfilEtudiant,
+): number {
+  const entries = Object.entries(formation.matieresCles) as [
+    keyof typeof formation.matieresCles,
+    number,
+  ][]
+
+  let sommePoids = 0
+  let sommeNotes = 0
+  for (const [matiere, poids] of entries) {
+    const note = profil.notes[matiere]
+    if (typeof note === 'number') {
+      sommeNotes += note * poids
+      sommePoids += poids
+    }
+  }
+
+  // Aucune matière clé renseignée : on retombe sur la moyenne générale saisie.
+  if (sommePoids === 0) {
+    const toutes = Object.values(profil.notes).filter(
+      (n): n is number => typeof n === 'number',
+    )
+    if (toutes.length === 0) return 50 // neutre faute d'information
+    const moyenne = toutes.reduce((a, b) => a + b, 0) / toutes.length
+    return clamp((moyenne / 20) * 100)
+  }
+
+  const moyennePonderee = sommeNotes / sommePoids // sur 20
+  return clamp((moyennePonderee / 20) * 100)
+}
+
+/** Score passion : 100 si le domaine visé fait partie des passions, sinon dégressif. */
+export function scorePassion(
+  formation: Formation,
+  profil: ProfilEtudiant,
+): number {
+  if (profil.passions.length === 0) return 50 // neutre
+  if (profil.passions.includes(formation.domaine)) return 100
+  // Domaines proches : on accorde un bonus partiel.
+  const proches: Record<string, string[]> = {
+    informatique: ['sciences', 'ingenieur'],
+    sciences: ['informatique', 'ingenieur', 'sante'],
+    ingenieur: ['sciences', 'informatique'],
+    sante: ['sciences'],
+    commerce: ['economie'],
+    economie: ['commerce'],
+    lettres: ['langues', 'communication'],
+    langues: ['lettres', 'communication'],
+    communication: ['lettres', 'langues', 'arts'],
+    social: ['sante'],
+    arts: ['communication'],
+  }
+  const voisins = proches[formation.domaine] ?? []
+  const aUnVoisin = profil.passions.some((p) => voisins.includes(p))
+  return aUnVoisin ? 65 : 25
+}
+
+/** Score motivation : combine motivation auto-évaluée et cohérence du projet (0-100). */
+export function scoreMotivation(profil: ProfilEtudiant): number {
+  const motivation = clamp((profil.motivation / 10) * 100)
+  const coherence = clamp((profil.coherenceProjet / 10) * 100)
+  return clamp(motivation * 0.6 + coherence * 0.4)
+}
+
+/** Score géographie : bonus de secteur pour les formations non sélectives. */
+export function scoreGeographie(
+  formation: Formation,
+  profil: ProfilEtudiant,
+): number {
+  if (profil.region === null) return 60 // légèrement favorable par défaut
+  const memeRegion = profil.region === formation.region
+  if (memeRegion) return 100
+  // Hors secteur : la mobilité limite la pénalité.
+  if (profil.mobilite) return 70
+  // Les licences non sélectives priorisent le secteur géographique : pénalité forte.
+  return formation.selectivite === 'non-selective' ? 30 : 55
+}
+
+/**
+ * Convertit le taux d'accès de base et le score d'adéquation en probabilité.
+ *
+ * Idée : un candidat « moyen » (adéquation ≈ 50) retrouve à peu près le taux
+ * d'accès de base. Un excellent dossier tire la probabilité vers le haut, un
+ * dossier faible la tire vers le bas, l'amplitude étant plus grande pour les
+ * formations très sélectives.
+ */
+export function combinerProbabilite(
+  tauxAccesBase: number,
+  scoreAdequation: number,
+): number {
+  const ecart = (scoreAdequation - 50) / 50 // dans [-1, 1]
+  // Amplitude d'ajustement : plus la formation est sélective, plus l'écart pèse.
+  const amplitude = 40 + (100 - tauxAccesBase) * 0.5
+  const proba = tauxAccesBase + ecart * amplitude
+  return Math.round(clamp(proba, 1, 99))
+}
+
+/** Simule l'admission pour une formation donnée. */
+export function simulerFormation(
+  formation: Formation,
+  profil: ProfilEtudiant,
+): ResultatSimulation {
+  const academique = Math.round(scoreAcademique(formation, profil))
+  const passion = Math.round(scorePassion(formation, profil))
+  const motivation = Math.round(scoreMotivation(profil))
+  const geographie = Math.round(scoreGeographie(formation, profil))
+
+  // Pondération des sous-scores dans l'adéquation globale.
+  const scoreAdequation =
+    academique * 0.5 +
+    passion * 0.2 +
+    motivation * 0.15 +
+    geographie * 0.15
+
+  const probabilite = combinerProbabilite(
+    formation.tauxAccesBase,
+    scoreAdequation,
+  )
+
+  const explications: string[] = []
+  if (academique >= 75)
+    explications.push('Vos résultats dans les matières clés sont un vrai atout.')
+  else if (academique < 45)
+    explications.push(
+      'Vos notes dans les matières déterminantes restent à consolider.',
+    )
+  if (passion === 100)
+    explications.push('La formation correspond pleinement à vos passions.')
+  else if (passion <= 25)
+    explications.push(
+      "Ce domaine est éloigné des passions que vous avez indiquées.",
+    )
+  if (geographie === 100)
+    explications.push('Formation dans votre région : priorité de secteur.')
+  else if (geographie <= 30)
+    explications.push(
+      'Formation hors secteur sans mobilité : accès plus difficile.',
+    )
+  if (motivation >= 80)
+    explications.push('Motivation et projet cohérents renforcent votre dossier.')
+
+  return {
+    formation,
+    probabilite,
+    details: { academique, passion, motivation, geographie },
+    explications,
+  }
+}
+
+/** Simule toutes les formations et les trie par probabilité décroissante. */
+export function simulerToutes(
+  formations: Formation[],
+  profil: ProfilEtudiant,
+): ResultatSimulation[] {
+  return formations
+    .map((f) => simulerFormation(f, profil))
+    .sort((a, b) => b.probabilite - a.probabilite)
+}
