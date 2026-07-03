@@ -1,7 +1,8 @@
-import type { ProfilEtudiant, ResultatSimulation } from '../types'
+import type { ResultatSimulation } from '../types'
 import { LABELS_DOMAINE } from '../data/labels'
 import { construireStrategie } from '../engine/strategie'
 import { coutDeLaVie } from '../data/coutVie'
+import { formaterPrix, type PrixFormation } from '../data/prix'
 
 function couleurProba(p: number): string {
   if (p >= 60) return 'var(--green)'
@@ -17,7 +18,13 @@ function libelleChance(p: number): string {
 }
 
 /** Carte détaillée d'une formation simulée. */
-function ResultItem({ r }: { r: ResultatSimulation }) {
+function ResultItem({
+  r,
+  prix,
+}: {
+  r: ResultatSimulation
+  prix?: PrixFormation
+}) {
   return (
     <div className="result-item">
       <div className="result-head">
@@ -78,8 +85,23 @@ function ResultItem({ r }: { r: ResultatSimulation }) {
         return (
           <div className="infos-reelles">
             {r.formation.statut && <span>🏛️ {r.formation.statut}</span>}
-            {r.formation.prixIndicatif && (
-              <span>💶 {r.formation.prixIndicatif}</span>
+            {prix ? (
+              <span
+                title={
+                  prix.source === 'scrape'
+                    ? "Prix récupéré sur le site de l'école"
+                    : prix.source === 'curated'
+                      ? 'Prix de référence'
+                      : 'Estimation par catégorie'
+                }
+              >
+                💶 {formaterPrix(prix)}
+                {prix.source === 'scrape' && ' ✓'}
+              </span>
+            ) : (
+              r.formation.prixIndicatif && (
+                <span>💶 {r.formation.prixIndicatif}</span>
+              )
             )}
             {r.formation.capacite !== undefined && (
               <span>🎓 {r.formation.capacite} places</span>
@@ -115,7 +137,7 @@ function ResultItem({ r }: { r: ResultatSimulation }) {
 
 interface ResultatsProps {
   resultats: ResultatSimulation[]
-  profil?: ProfilEtudiant
+  prix?: Map<string, PrixFormation>
   sourceReelle?: boolean
   onRecommencer: () => void
 }
@@ -123,6 +145,7 @@ interface ResultatsProps {
 /** Résultats groupés en une liste de vœux équilibrée (plusieurs choix). */
 export default function Resultats({
   resultats,
+  prix,
   sourceReelle = true,
   onRecommencer,
 }: ResultatsProps) {
@@ -152,7 +175,11 @@ export default function Resultats({
             {g.description}
           </p>
           {g.resultats.map((r) => (
-            <ResultItem key={r.formation.id} r={r} />
+            <ResultItem
+              key={r.formation.id}
+              r={r}
+              prix={prix?.get(r.formation.id)}
+            />
           ))}
         </section>
       ))}

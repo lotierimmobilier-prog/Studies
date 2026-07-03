@@ -16,10 +16,14 @@ explique les facteurs clés de chaque estimation.
 
 ```bash
 npm install
-npm run dev      # serveur de développement (Vite)
-npm run build    # build de production
-npm test         # tests unitaires du moteur de simulation (Vitest)
+npm run dev       # front (Vite) sur http://localhost:5173, proxy /api -> :8787
+npm run server    # service de prix (scraping) sur http://localhost:8787
+npm run build     # build de production du front
+npm test          # tests unitaires (Vitest) — moteur, données, serveur
 ```
+
+Le front fonctionne seul (repli sur prix indicatif) ; lancer aussi `npm run
+server` pour obtenir les frais de scolarité réels.
 
 ## Architecture
 
@@ -32,11 +36,34 @@ src/
   engine/
     simulate.ts            Moteur de scoring et d'estimation du taux d'admission
     __tests__/             Tests unitaires du moteur
+    coutVie.ts             Coût de la vie par ville (loyer, budget mensuel)
+    prix.ts                Client du service de prix (backend)
   components/
     Stepper.tsx            Barre de progression du formulaire
     Resultats.tsx          Affichage des résultats classés
   App.tsx                  Formulaire multi-étapes + orchestration
+
+server/                    Service de prix (scraping des frais de scolarité)
+  scraper.ts               Extraction du prix depuis le HTML d'un site d'école
+  registre.ts              Base curée de prix + estimation par catégorie
+  service.ts               Orchestration cache -> curé -> scraping -> estimation
+  cache.ts                 Cache disque avec TTL
+  index.ts                 Serveur HTTP (GET/POST /api/prix, /api/sante)
 ```
+
+### Service de prix (le « vrai plus » : frais de scolarité réels)
+
+L'open data Parcoursup ne contient pas les prix. Le navigateur ne pouvant pas
+lire les sites d'écoles (CORS), un **service backend** (`server/`) s'en charge :
+
+1. **cache** (30 jours) →
+2. **base curée** de prix connus (`registre.ts`) ; si une URL d'école est
+   connue, tentative de **scraping** pour un montant à jour →
+3. **estimation par catégorie** (public ~175 €/an, privé selon le type) en repli.
+
+API : `GET /api/prix?etablissement=&statut=&fili=` et `POST /api/prix` (lot).
+Le front interroge ce service et retombe silencieusement sur un prix indicatif
+si le service est indisponible.
 
 ### Modèle de simulation
 
@@ -72,16 +99,14 @@ s'appuiera sur les jeux de données ouverts officiels :
       (ambitieux / réalistes / valeurs sûres, `src/engine/strategie.ts`).
 - [x] **Coût de la vie par ville** : loyer moyen studio/T1 + budget mensuel
       indicatif (`src/data/coutVie.ts`).
-- [x] Prix **indicatif** dérivé du statut (public/privé).
+- [x] **Vrais prix / frais de scolarité** via un **service backend de scraping**
+      (`server/`) : base curée + scraping des sites d'écoles + estimation par
+      catégorie, avec cache. C'est le « vrai plus » du projet.
 
 ### Prochaines étapes
 
-- [ ] **Vrais prix / frais de scolarité par école** (le vrai plus du projet) :
-      l'open data ne contient pas les prix. Constituer une base de frais réels
-      par établissement (récupérés sur les sites des écoles / ONISEP). ⚠️ La
-      récupération automatique depuis les sites d'écoles nécessite un service
-      côté serveur (le navigateur est bloqué par CORS) — voir la décision
-      d'architecture à trancher.
+- [ ] Enrichir la base curée de prix (plus d'écoles) et ajouter des connecteurs
+      de scraping par école (chaque site a sa mise en page).
 - [ ] **Annonces immobilières** liées à la ville de la formation (logement
       étudiant), en complément du coût de la vie.
 - [ ] Filtrer/rechercher par domaine, ville, coût, sélectivité.

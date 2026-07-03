@@ -16,6 +16,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Île-de-France',
     domaine: 'sante',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 25,
     matieresCles: { physique_chimie: 3, svt: 3, mathematiques: 2 },
     attendus:
@@ -29,6 +30,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Île-de-France',
     domaine: 'droit',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 45,
     matieresCles: { francais: 2, histoire_geo: 2, philosophie: 2, ses: 1 },
     attendus:
@@ -42,6 +44,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Auvergne-Rhône-Alpes',
     domaine: 'informatique',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 60,
     matieresCles: { mathematiques: 3, informatique: 3, physique_chimie: 1 },
     attendus:
@@ -55,6 +58,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Occitanie',
     domaine: 'informatique',
     selectivite: 'selective',
+    statut: 'Public',
     tauxAccesBase: 30,
     matieresCles: { mathematiques: 3, informatique: 2, langues: 1 },
     attendus:
@@ -68,6 +72,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Île-de-France',
     domaine: 'ingenieur',
     selectivite: 'selective',
+    statut: 'Public',
     tauxAccesBase: 8,
     matieresCles: { mathematiques: 4, physique_chimie: 3 },
     attendus:
@@ -81,6 +86,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Nouvelle-Aquitaine',
     domaine: 'commerce',
     selectivite: 'selective',
+    statut: 'Public',
     tauxAccesBase: 22,
     matieresCles: { mathematiques: 3, ses: 2, langues: 2, histoire_geo: 1 },
     attendus:
@@ -94,6 +100,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Pays de la Loire',
     domaine: 'economie',
     selectivite: 'selective',
+    statut: 'Public',
     tauxAccesBase: 35,
     matieresCles: { ses: 3, mathematiques: 2, francais: 1 },
     attendus:
@@ -107,6 +114,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Hauts-de-France',
     domaine: 'social',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 40,
     matieresCles: { svt: 2, ses: 2, francais: 2, philosophie: 1 },
     attendus:
@@ -120,6 +128,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Bretagne',
     domaine: 'langues',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 70,
     matieresCles: { langues: 4, francais: 2 },
     attendus:
@@ -133,6 +142,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Auvergne-Rhône-Alpes',
     domaine: 'staps',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 35,
     matieresCles: { eps: 3, svt: 2, ses: 1 },
     attendus:
@@ -146,6 +156,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Grand Est',
     domaine: 'arts',
     selectivite: 'selective',
+    statut: 'Public',
     tauxAccesBase: 18,
     matieresCles: { arts: 4, francais: 1 },
     attendus:
@@ -159,6 +170,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Occitanie',
     domaine: 'economie',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 55,
     matieresCles: { mathematiques: 2, ses: 3, langues: 1 },
     attendus:
@@ -172,6 +184,7 @@ export const FORMATIONS: Formation[] = [
     region: "Provence-Alpes-Côte d'Azur",
     domaine: 'communication',
     selectivite: 'selective',
+    statut: 'Public',
     tauxAccesBase: 28,
     matieresCles: { francais: 3, langues: 2, ses: 1 },
     attendus:
@@ -185,6 +198,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Normandie',
     domaine: 'lettres',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 75,
     matieresCles: { francais: 4, philosophie: 2, histoire_geo: 1 },
     attendus:
@@ -198,6 +212,7 @@ export const FORMATIONS: Formation[] = [
     region: 'Bourgogne-Franche-Comté',
     domaine: 'sciences',
     selectivite: 'non-selective',
+    statut: 'Public',
     tauxAccesBase: 65,
     matieresCles: { mathematiques: 4, physique_chimie: 2, informatique: 1 },
     attendus:

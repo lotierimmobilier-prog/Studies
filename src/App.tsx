@@ -10,6 +10,7 @@ import {
   REGIONS,
 } from './data/labels'
 import { simulerToutes } from './engine/simulate'
+import { chargerPrix, type PrixFormation } from './data/prix'
 import Stepper from './components/Stepper'
 import Resultats from './components/Resultats'
 
@@ -32,9 +33,11 @@ export default function App() {
   const [statut, setStatut] = useState<Statut>('formulaire')
   const [formations, setFormations] = useState<Formation[]>([])
   const [sourceReelle, setSourceReelle] = useState(true)
+  const [prix, setPrix] = useState<Map<string, PrixFormation>>(new Map())
 
   const lancerSimulation = async () => {
     setStatut('chargement')
+    let liste: Formation[]
     try {
       // Données officielles en direct (open data fr-esr-parcoursup).
       // Si l'étudiant n'est pas mobile, on cible sa région pour prioriser le secteur.
@@ -43,15 +46,23 @@ export default function App() {
         limite: 300,
       })
       if (reelles.length === 0) throw new Error('Aucune formation renvoyée')
-      setFormations(reelles)
+      liste = reelles
       setSourceReelle(true)
-      setStatut('resultats')
     } catch {
       // Repli sur l'échantillon local si l'API est indisponible.
-      setFormations(FORMATIONS)
+      liste = FORMATIONS
       setSourceReelle(false)
-      setStatut('resultats')
     }
+    setFormations(liste)
+    setStatut('resultats')
+
+    // Prix des écoles récupérés côté serveur (scraping) pour les mieux classées.
+    const topPourPrix = simulerToutes(liste, profil)
+      .slice(0, 24)
+      .map((r) => r.formation)
+    chargerPrix(topPourPrix)
+      .then(setPrix)
+      .catch(() => setPrix(new Map()))
   }
 
   const setNote = (matiere: Matiere, valeur: string) => {
@@ -107,7 +118,7 @@ export default function App() {
         )}
         <Resultats
           resultats={resultats}
-          profil={profil}
+          prix={prix}
           sourceReelle={sourceReelle}
           onRecommencer={() => {
             setStatut('formulaire')

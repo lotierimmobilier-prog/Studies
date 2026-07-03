@@ -10,3 +10,6 @@ coverage
 # build artifacts
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+
+# cache serveur de prix
+.cache
