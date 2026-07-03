@@ -64,6 +64,18 @@ export interface Formation {
   matieresCles: Partial<Record<Matiere, number>>
   /** Attendus / description courte affichée à l'utilisateur. */
   attendus: string
+
+  // --- Champs issus de l'open data officiel (optionnels) ---
+  /** Statut de l'établissement (Public, Privé sous contrat, Privé…). */
+  statut?: string
+  /** Capacité d'accueil de la formation. */
+  capacite?: number
+  /** Coordonnées GPS [latitude, longitude]. */
+  coords?: [number, number]
+  /** Lien vers la fiche de la formation sur Parcoursup. */
+  lienParcoursup?: string
+  /** Estimation indicative des frais de scolarité (l'open data ne fournit pas le prix). */
+  prixIndicatif?: string
 }
 
 /** Profil saisi par l'étudiant. */

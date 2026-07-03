@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import type { Domaine, Matiere, ProfilEtudiant, Region } from './types'
+import type { Domaine, Formation, Matiere, ProfilEtudiant, Region } from './types'
 import { FORMATIONS } from './data/formations'
+import { chargerFormations } from './data/opendata'
 import {
   DOMAINES,
   LABELS_DOMAINE,
@@ -23,10 +24,35 @@ const PROFIL_INITIAL: ProfilEtudiant = {
   coherenceProjet: 5,
 }
 
+type Statut = 'formulaire' | 'chargement' | 'resultats' | 'erreur'
+
 export default function App() {
   const [etape, setEtape] = useState(0)
   const [profil, setProfil] = useState<ProfilEtudiant>(PROFIL_INITIAL)
-  const [termine, setTermine] = useState(false)
+  const [statut, setStatut] = useState<Statut>('formulaire')
+  const [formations, setFormations] = useState<Formation[]>([])
+  const [sourceReelle, setSourceReelle] = useState(true)
+
+  const lancerSimulation = async () => {
+    setStatut('chargement')
+    try {
+      // Données officielles en direct (open data fr-esr-parcoursup).
+      // Si l'étudiant n'est pas mobile, on cible sa région pour prioriser le secteur.
+      const reelles = await chargerFormations({
+        region: profil.mobilite ? null : profil.region,
+        limite: 300,
+      })
+      if (reelles.length === 0) throw new Error('Aucune formation renvoyée')
+      setFormations(reelles)
+      setSourceReelle(true)
+      setStatut('resultats')
+    } catch {
+      // Repli sur l'échantillon local si l'API est indisponible.
+      setFormations(FORMATIONS)
+      setSourceReelle(false)
+      setStatut('resultats')
+    }
+  }
 
   const setNote = (matiere: Matiere, valeur: string) => {
     setProfil((p) => {
@@ -50,18 +76,41 @@ export default function App() {
     }))
   }
 
-  const resultats = termine ? simulerToutes(FORMATIONS, profil) : []
+  if (statut === 'chargement') {
+    return (
+      <div className="app">
+        <header className="hero">
+          <h1>Simulation en cours…</h1>
+        </header>
+        <div className="card">
+          <div className="loading">
+            <div className="spinner" />
+            Interrogation des données officielles Parcoursup…
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-  if (termine) {
+  if (statut === 'resultats') {
+    const resultats = simulerToutes(formations, profil)
     return (
       <div className="app">
         <header className="hero">
           <h1>Vos résultats</h1>
         </header>
+        {!sourceReelle && (
+          <div className="error-box" style={{ marginBottom: '1.25rem' }}>
+            ⚠️ Les données officielles n'ont pas pu être chargées (réseau ou API
+            indisponible). Résultats calculés sur un échantillon de démonstration.
+          </div>
+        )}
         <Resultats
           resultats={resultats}
+          profil={profil}
+          sourceReelle={sourceReelle}
           onRecommencer={() => {
-            setTermine(false)
+            setStatut('formulaire')
             setEtape(0)
           }}
         />
@@ -233,7 +282,7 @@ export default function App() {
               Suivant →
             </button>
           ) : (
-            <button className="btn btn-primary" onClick={() => setTermine(true)}>
+            <button className="btn btn-primary" onClick={lancerSimulation}>
               Simuler mes chances 🚀
             </button>
           )}
@@ -241,8 +290,8 @@ export default function App() {
       </div>
 
       <footer className="footer">
-        Données d'exemple · Sources réelles (Parcoursup, data.gouv.fr, ONISEP) à
-        intégrer
+        Données en direct de l'open data officiel Parcoursup
+        (fr-esr-parcoursup) · outil pédagogique
       </footer>
     </div>
   )

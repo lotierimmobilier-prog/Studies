@@ -1,6 +1,7 @@
-import type { ResultatSimulation } from '../types'
+import type { ProfilEtudiant, ResultatSimulation } from '../types'
 import { LABELS_DOMAINE } from '../data/labels'
 import { construireStrategie } from '../engine/strategie'
+import { coutDeLaVie } from '../data/coutVie'
 
 function couleurProba(p: number): string {
   if (p >= 60) return 'var(--green)'
@@ -72,6 +73,35 @@ function ResultItem({ r }: { r: ResultatSimulation }) {
         </span>
       </div>
 
+      {(() => {
+        const cout = coutDeLaVie(r.formation.ville, r.formation.region)
+        return (
+          <div className="infos-reelles">
+            {r.formation.statut && <span>🏛️ {r.formation.statut}</span>}
+            {r.formation.prixIndicatif && (
+              <span>💶 {r.formation.prixIndicatif}</span>
+            )}
+            {r.formation.capacite !== undefined && (
+              <span>🎓 {r.formation.capacite} places</span>
+            )}
+            {r.formation.ville && (
+              <span title="Loyer moyen studio/T1, charges comprises (indicatif)">
+                🏠 Loyer ~{cout.loyerStudio} €/mois à {r.formation.ville}
+              </span>
+            )}
+            {r.formation.lienParcoursup && (
+              <a
+                href={r.formation.lienParcoursup}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Fiche Parcoursup ↗
+              </a>
+            )}
+          </div>
+        )
+      })()}
+
       {r.explications.length > 0 && (
         <ul className="explications">
           {r.explications.map((e, i) => (
@@ -85,11 +115,17 @@ function ResultItem({ r }: { r: ResultatSimulation }) {
 
 interface ResultatsProps {
   resultats: ResultatSimulation[]
+  profil?: ProfilEtudiant
+  sourceReelle?: boolean
   onRecommencer: () => void
 }
 
 /** Résultats groupés en une liste de vœux équilibrée (plusieurs choix). */
-export default function Resultats({ resultats, onRecommencer }: ResultatsProps) {
+export default function Resultats({
+  resultats,
+  sourceReelle = true,
+  onRecommencer,
+}: ResultatsProps) {
   const groupes = construireStrategie(resultats)
 
   return (
@@ -99,6 +135,12 @@ export default function Resultats({ resultats, onRecommencer }: ResultatsProps) 
         Pour maximiser vos chances, Parcoursup recommande une liste{' '}
         <strong>équilibrée</strong> : quelques vœux ambitieux, un socle de vœux
         réalistes, et des valeurs sûres. Voici plusieurs choix par catégorie.
+        {sourceReelle && (
+          <>
+            {' '}
+            Données issues de l'<strong>open data officiel Parcoursup</strong>.
+          </>
+        )}
       </p>
 
       {groupes.map((g) => (

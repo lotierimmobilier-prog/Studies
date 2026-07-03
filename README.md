@@ -62,13 +62,29 @@ s'appuiera sur les jeux de données ouverts officiels :
 | Coût / prix des formations | ONISEP + fiches établissements | Frais de scolarité (public/privé) |
 | Débouchés, contenu | **ONISEP** | Descriptions, poursuites d'études, métiers |
 
+### Fait
+
+- [x] **Chargement des données officielles en direct** via l'API Opendatasoft
+      (`fr-esr-parcoursup`) : taux d'accès réels, établissement, ville, région,
+      capacité, statut, lien Parcoursup (`src/data/opendata.ts`), avec repli sur
+      l'échantillon local si l'API est indisponible.
+- [x] **Proposer plusieurs choix** : liste de vœux équilibrée
+      (ambitieux / réalistes / valeurs sûres, `src/engine/strategie.ts`).
+- [x] **Coût de la vie par ville** : loyer moyen studio/T1 + budget mensuel
+      indicatif (`src/data/coutVie.ts`).
+- [x] Prix **indicatif** dérivé du statut (public/privé).
+
 ### Prochaines étapes
 
-- [ ] Remplacer `data/formations.ts` par un chargement des données officielles
-      (data.gouv.fr Parcoursup + carte des formations), avec **lieux** et **prix**.
+- [ ] **Vrais prix / frais de scolarité par école** (le vrai plus du projet) :
+      l'open data ne contient pas les prix. Constituer une base de frais réels
+      par établissement (récupérés sur les sites des écoles / ONISEP). ⚠️ La
+      récupération automatique depuis les sites d'écoles nécessite un service
+      côté serveur (le navigateur est bloqué par CORS) — voir la décision
+      d'architecture à trancher.
+- [ ] **Annonces immobilières** liées à la ville de la formation (logement
+      étudiant), en complément du coût de la vie.
 - [ ] Filtrer/rechercher par domaine, ville, coût, sélectivité.
-- [ ] **Proposer plusieurs choix** : pour le vœu « rêvé » de l'étudiant,
-      afficher des formations *alternatives* atteignables (plan B / valeurs sûres)
-      quand le premier choix est risqué, et confirmer quand il est réaliste.
-- [ ] Affiner le modèle de scoring avec les taux d'accès réels par profil.
+- [ ] Affiner le modèle de scoring avec les taux d'accès réels par profil de bac.
 - [ ] Fiches formation détaillées (attendus, débouchés, prix, carte).
+- [ ] Améliorer le coût de la vie (données par agglomération, transport, énergie).
