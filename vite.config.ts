@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// En développement, /api est relayé vers le serveur de prix (server/index.ts).
+// `base` : '/' en local, chemins relatifs ('./') pour GitHub Pages (sous-dossier
+// du dépôt) — injecté via VITE_BASE par le workflow de déploiement.
 export default defineConfig({
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react()],
   server: {
     proxy: {

@@ -1,0 +1,57 @@
+name: Déployer le front sur GitHub Pages
+
+# Déploie le site (front React) sur GitHub Pages.
+# - au push sur main (ou sur la branche de dev, pour tester avant la fusion) ;
+# - ou manuellement via « Run workflow ».
+#
+# Prérequis (une seule fois) : Settings → Pages → Source = « GitHub Actions ».
+#
+# En ligne, les données Parcoursup sont chargées en direct depuis le navigateur.
+# Les prix réels et le conseil IA basculent en repli (prix indicatifs, règles),
+# tant que le serveur (server/) n'est pas déployé séparément.
+
+on:
+  push:
+    branches:
+      - main
+      - claude/parcoursup-admission-simulator-2jy76p
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build
+        env:
+          # Chemins relatifs pour fonctionner sous le sous-dossier GitHub Pages.
+          VITE_BASE: './'
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
