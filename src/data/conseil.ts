@@ -2,6 +2,7 @@ import type { ProfilEtudiant, ResultatSimulation } from '../types'
 import { LABELS_DOMAINE, LABELS_MATIERE } from './labels'
 import type { Matiere } from '../types'
 import type { PrixFormation } from './prix'
+import type { AnalyseBulletin } from './bulletin'
 
 /**
  * Client du conseiller (backend). Récupère des conseils personnalisés — générés
@@ -17,17 +18,21 @@ export interface Conseil {
 const BASE = (import.meta.env.VITE_PRIX_API ?? '') as string
 
 /** Prépare un résumé compact du profil pour le backend. */
-function resumerProfil(profil: ProfilEtudiant) {
+function resumerProfil(profil: ProfilEtudiant, bulletin?: AnalyseBulletin | null) {
   const notes = (Object.entries(profil.notes) as [Matiere, number][])
     .filter(([, v]) => typeof v === 'number')
     .sort((a, b) => b[1] - a[1])
   return {
+    classe: profil.classe,
+    souhaits: profil.souhaits,
     meilleuresMatieres: notes.slice(0, 3).map(([m]) => LABELS_MATIERE[m]),
     region: profil.region,
     mobilite: profil.mobilite,
     passions: profil.passions.map((p) => LABELS_DOMAINE[p]),
     motivation: profil.motivation,
     coherenceProjet: profil.coherenceProjet,
+    appreciation: bulletin?.appreciationGlobale,
+    signaux: bulletin?.signaux,
   }
 }
 
@@ -59,6 +64,7 @@ export async function chargerConseil(
   profil: ProfilEtudiant,
   resultats: ResultatSimulation[],
   prix: Map<string, PrixFormation>,
+  bulletin?: AnalyseBulletin | null,
   fetchImpl: typeof fetch = fetch,
 ): Promise<Conseil> {
   const formations = resultats.slice(0, 12).map((r) => ({
@@ -74,7 +80,10 @@ export async function chargerConseil(
     const res = await fetchImpl(`${BASE}/api/conseil`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profil: resumerProfil(profil), formations }),
+      body: JSON.stringify({
+        profil: resumerProfil(profil, bulletin),
+        formations,
+      }),
     })
     if (!res.ok) throw new Error(String(res.status))
     return (await res.json()) as Conseil

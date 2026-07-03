@@ -118,7 +118,8 @@ body {
 
 input[type='number'],
 input[type='text'],
-select {
+select,
+textarea {
   width: 100%;
   padding: 0.55rem 0.7rem;
   background: var(--bg-elev);
@@ -126,12 +127,52 @@ select {
   border-radius: 9px;
   color: var(--text);
   font-size: 0.95rem;
+  font-family: inherit;
+}
+
+textarea {
+  resize: vertical;
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+/* Zone d'import de bulletin */
+.bulletin-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  background: rgba(56, 189, 248, 0.06);
+  margin-bottom: 1rem;
+}
+
+.bulletin-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.bulletin-analyse {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.1rem;
+  background: var(--bg-card);
+}
+
+.bulletin-analyse p {
+  margin: 0.3rem 0 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .range-row {

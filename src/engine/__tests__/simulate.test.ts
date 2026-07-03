@@ -24,6 +24,8 @@ const formation: Formation = {
 }
 
 const profilBase: ProfilEtudiant = {
+  classe: 'terminale',
+  souhaits: '',
   notes: {},
   region: null,
   mobilite: false,
@@ -112,6 +114,8 @@ describe('combinerProbabilite', () => {
 describe('simulerFormation', () => {
   it('produit une probabilité et des sous-scores cohérents', () => {
     const profil: ProfilEtudiant = {
+      classe: 'terminale',
+      souhaits: '',
       notes: { mathematiques: 18, informatique: 17 },
       region: 'Auvergne-Rhône-Alpes',
       mobilite: false,

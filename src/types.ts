@@ -78,8 +78,15 @@ export interface Formation {
   prixIndicatif?: string
 }
 
+/** Niveau scolaire de l'étudiant. */
+export type Classe = 'seconde' | 'premiere' | 'terminale'
+
 /** Profil saisi par l'étudiant. */
 export interface ProfilEtudiant {
+  /** Classe actuelle (oriente les conseils : spécialités en seconde, vœux ensuite). */
+  classe: Classe
+  /** Souhaits / projet exprimés librement par l'étudiant. */
+  souhaits: string
   /** Notes sur 20 par matière (partiel : seules les matières renseignées comptent). */
   notes: Partial<Record<Matiere, number>>
   region: Region | null

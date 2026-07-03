@@ -39,6 +39,25 @@ describe('conseilRegles', () => {
   })
 })
 
+describe('conseilRegles — seconde', () => {
+  it('propose des spécialités adaptées aux passions', () => {
+    const c = conseilRegles(
+      { ...profil, classe: 'seconde', passions: ['Informatique'] },
+      formations,
+    )
+    expect(c.join(' ')).toMatch(/NSI|Mathématiques/)
+    expect(c.join(' ')).toMatch(/spécialité/i)
+  })
+
+  it('reste utile même sans passion sélectionnée', () => {
+    const c = conseilRegles(
+      { ...profil, classe: 'seconde', passions: [] },
+      formations,
+    )
+    expect(c.length).toBeGreaterThan(0)
+  })
+})
+
 describe('obtenirConseil', () => {
   it('retombe sur les règles sans clé API', async () => {
     const saved = process.env.ANTHROPIC_API_KEY

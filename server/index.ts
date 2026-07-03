@@ -8,6 +8,11 @@ import {
   type FormationResume,
   type ProfilResume,
 } from './conseiller'
+import {
+  analyserBulletin,
+  BulletinNonConfigure,
+  type MediaType,
+} from './bulletin'
 
 /**
  * Serveur HTTP minimal (sans dépendance) exposant l'API de prix.
@@ -44,9 +49,16 @@ function envoyerJson(
   res.end(JSON.stringify(data))
 }
 
+const TAILLE_MAX_CORPS = 12 * 1024 * 1024 // 12 Mo (bulletins encodés en base64)
+
 async function lireCorps(req: import('node:http').IncomingMessage): Promise<string> {
   const morceaux: Buffer[] = []
-  for await (const c of req) morceaux.push(c as Buffer)
+  let total = 0
+  for await (const c of req) {
+    total += (c as Buffer).length
+    if (total > TAILLE_MAX_CORPS) throw new Error('Corps de requête trop volumineux')
+    morceaux.push(c as Buffer)
+  }
   return Buffer.concat(morceaux).toString('utf8')
 }
 
@@ -93,6 +105,27 @@ async function demarrer(): Promise<void> {
           liste.slice(0, 50).map((r) => obtenirPrix(r, { cache })),
         )
         return envoyerJson(res, 200, resultats)
+      }
+
+      if (url.pathname === '/api/bulletin' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const { fichier, mediaType } = JSON.parse(corps) as {
+          fichier: string
+          mediaType: MediaType
+        }
+        if (!fichier || !mediaType)
+          return envoyerJson(res, 400, { erreur: 'fichier et mediaType requis' })
+        try {
+          const analyse = await analyserBulletin(fichier, mediaType)
+          return envoyerJson(res, 200, analyse)
+        } catch (e) {
+          if (e instanceof BulletinNonConfigure)
+            return envoyerJson(res, 503, {
+              erreur: e.message,
+              configRequise: true,
+            })
+          throw e
+        }
       }
 
       if (url.pathname === '/api/conseil' && req.method === 'POST') {

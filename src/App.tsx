@@ -1,5 +1,12 @@
 import { useState } from 'react'
-import type { Domaine, Formation, Matiere, ProfilEtudiant, Region } from './types'
+import type {
+  Classe,
+  Domaine,
+  Formation,
+  Matiere,
+  ProfilEtudiant,
+  Region,
+} from './types'
 import { FORMATIONS } from './data/formations'
 import { chargerFormations } from './data/opendata'
 import {
@@ -12,12 +19,18 @@ import {
 import { simulerToutes } from './engine/simulate'
 import { chargerPrix, type PrixFormation } from './data/prix'
 import { chargerConseil, type Conseil } from './data/conseil'
+import {
+  analyserBulletin,
+  type AnalyseBulletin,
+} from './data/bulletin'
 import Stepper from './components/Stepper'
 import Resultats from './components/Resultats'
 
 const ETAPES = ['Résultats', 'Localisation', 'Passions', 'Motivation']
 
 const PROFIL_INITIAL: ProfilEtudiant = {
+  classe: 'terminale',
+  souhaits: '',
   notes: {},
   region: null,
   mobilite: false,
@@ -36,6 +49,26 @@ export default function App() {
   const [sourceReelle, setSourceReelle] = useState(true)
   const [prix, setPrix] = useState<Map<string, PrixFormation>>(new Map())
   const [conseil, setConseil] = useState<Conseil | null>(null)
+  const [bulletin, setBulletin] = useState<AnalyseBulletin | null>(null)
+  const [bulletinStatut, setBulletinStatut] = useState<
+    'idle' | 'analyse' | 'erreur'
+  >('idle')
+  const [bulletinErreur, setBulletinErreur] = useState('')
+
+  const importerBulletin = async (fichier: File) => {
+    setBulletinStatut('analyse')
+    setBulletinErreur('')
+    const res = await analyserBulletin(fichier)
+    if (!res.ok) {
+      setBulletinStatut('erreur')
+      setBulletinErreur(res.erreur)
+      return
+    }
+    setBulletin(res.analyse)
+    setBulletinStatut('idle')
+    // Pré-remplit les notes extraites.
+    setProfil((p) => ({ ...p, notes: { ...p.notes, ...res.analyse.notes } }))
+  }
 
   const lancerSimulation = async () => {
     setStatut('chargement')
@@ -66,7 +99,7 @@ export default function App() {
       .then((mapPrix) => {
         setPrix(mapPrix)
         // Conseils personnalisés (IA côté serveur si configurée, sinon règles).
-        return chargerConseil(profil, resultats, mapPrix)
+        return chargerConseil(profil, resultats, mapPrix, bulletin)
       })
       .then(setConseil)
       .catch(() => setConseil(null))
@@ -158,8 +191,74 @@ export default function App() {
           <>
             <h2>Vos résultats scolaires</h2>
             <p className="subtitle">
-              Indiquez vos moyennes sur 20 (laissez vide si non concerné·e).
+              Indiquez votre classe, puis vos moyennes — ou importez directement
+              votre bulletin.
             </p>
+
+            <div className="field" style={{ maxWidth: 260, marginBottom: '1rem' }}>
+              <label htmlFor="classe">Votre classe actuelle</label>
+              <select
+                id="classe"
+                value={profil.classe}
+                onChange={(e) =>
+                  setProfil((p) => ({
+                    ...p,
+                    classe: e.target.value as Classe,
+                  }))
+                }
+              >
+                <option value="seconde">Seconde</option>
+                <option value="premiere">Première</option>
+                <option value="terminale">Terminale</option>
+              </select>
+            </div>
+
+            <div className="bulletin-zone">
+              <div>
+                <strong>📄 Importer un bulletin</strong>
+                <div className="bulletin-hint">
+                  PDF ou image. L'IA extrait vos notes et analyse les
+                  appréciations.
+                </div>
+              </div>
+              <label className="btn btn-ghost" style={{ cursor: 'pointer' }}>
+                {bulletinStatut === 'analyse' ? 'Analyse…' : 'Choisir un fichier'}
+                <input
+                  type="file"
+                  accept="application/pdf,image/*"
+                  style={{ display: 'none' }}
+                  disabled={bulletinStatut === 'analyse'}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    if (f) importerBulletin(f)
+                    e.target.value = ''
+                  }}
+                />
+              </label>
+            </div>
+            {bulletinStatut === 'erreur' && (
+              <div className="error-box" style={{ margin: '0 0 1rem', padding: '0.75rem 1rem' }}>
+                ⚠️ {bulletinErreur}
+              </div>
+            )}
+            {bulletin && (
+              <div className="bulletin-analyse">
+                <div className="advice-tag">✦ Analyse du bulletin</div>
+                <p>{bulletin.appreciationGlobale}</p>
+                <div className="subscores">
+                  <span>
+                    Sérieux <b>{bulletin.signaux.serieux}/10</b>
+                  </span>
+                  <span>
+                    Participation <b>{bulletin.signaux.participation}/10</b>
+                  </span>
+                  <span>
+                    Progression <b>{bulletin.signaux.progression}/10</b>
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="grid">
               {MATIERES.map((m) => (
                 <div className="field" key={m}>
@@ -281,6 +380,26 @@ export default function App() {
                 />
                 <span className="range-value">{profil.coherenceProjet}/10</span>
               </div>
+            </div>
+            <div className="field" style={{ marginTop: '1.25rem' }}>
+              <label htmlFor="souhaits">
+                {profil.classe === 'seconde'
+                  ? 'Vos souhaits (métiers, domaines qui vous attirent) — pour vous conseiller des spécialités'
+                  : 'Votre projet / vos souhaits (facultatif)'}
+              </label>
+              <textarea
+                id="souhaits"
+                rows={3}
+                placeholder={
+                  profil.classe === 'seconde'
+                    ? 'Ex. : j\'aimerais travailler dans la santé ou l\'informatique…'
+                    : 'Ex. : devenir ingénieur, hésite entre prépa et BUT…'
+                }
+                value={profil.souhaits}
+                onChange={(e) =>
+                  setProfil((p) => ({ ...p, souhaits: e.target.value }))
+                }
+              />
             </div>
           </>
         )}

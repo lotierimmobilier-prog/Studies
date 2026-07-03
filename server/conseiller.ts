@@ -19,12 +19,17 @@ export interface FormationResume {
 }
 
 export interface ProfilResume {
+  classe?: 'seconde' | 'premiere' | 'terminale'
+  souhaits?: string
   meilleuresMatieres: string[]
   region: string | null
   mobilite: boolean
   passions: string[]
   motivation: number
   coherenceProjet: number
+  /** Synthèse des appréciations du bulletin (si analysé). */
+  appreciation?: string
+  signaux?: { serieux: number; participation: number; progression: number }
 }
 
 export interface Conseil {
@@ -32,11 +37,60 @@ export interface Conseil {
   source: 'ia' | 'regles'
 }
 
+/** Correspondance passion/domaine → spécialités conseillées (pour la seconde). */
+const SPECIALITES: Record<string, string[]> = {
+  Santé: ['SVT', 'Physique-Chimie', 'Mathématiques'],
+  Informatique: ['NSI', 'Mathématiques', 'Physique-Chimie'],
+  Ingénierie: ['Mathématiques', 'Physique-Chimie', 'Sciences de l\'ingénieur'],
+  Sciences: ['Mathématiques', 'Physique-Chimie', 'SVT'],
+  'Économie / Gestion': ['SES', 'Mathématiques', 'HGGSP'],
+  Commerce: ['SES', 'Mathématiques', 'LLCER'],
+  Droit: ['HGGSP', 'SES', 'HLP (Humanités)'],
+  Lettres: ['HLP (Humanités)', 'LLCER', 'HGGSP'],
+  Langues: ['LLCER', 'HLP (Humanités)', 'HGGSP'],
+  Arts: ['Arts', 'HLP (Humanités)', 'LLCER'],
+  'Sciences sociales': ['SES', 'HGGSP', 'SVT'],
+  'Sport (STAPS)': ['SVT', 'Mathématiques', 'EPS'],
+  Communication: ['HLP (Humanités)', 'LLCER', 'SES'],
+}
+
+/** Conseils spécifiques à un élève de seconde : choix de spécialités. */
+function conseilSeconde(profil: ProfilResume): string[] {
+  const out: string[] = []
+  const specs = new Set<string>()
+  for (const p of profil.passions) {
+    for (const s of SPECIALITES[p] ?? []) specs.add(s)
+  }
+  if (specs.size)
+    out.push(
+      `Vu vos centres d'intérêt, des spécialités cohérentes seraient : ${[...specs]
+        .slice(0, 4)
+        .join(', ')}.`,
+    )
+  else
+    out.push(
+      'Choisissez d\'abord 1 à 2 domaines qui vous plaisent : les spécialités en découleront.',
+    )
+  if (profil.meilleuresMatieres.length)
+    out.push(
+      `Vous réussissez en ${profil.meilleuresMatieres[0]} : gardez une spécialité qui valorise ce point fort.`,
+    )
+  out.push(
+    'En première, on garde 3 spécialités puis 2 en terminale : privilégiez celles qui ouvrent le plus de portes vers votre projet.',
+  )
+  if (profil.souhaits && profil.souhaits.trim())
+    out.push(
+      'Reliez vos spécialités à votre souhait exprimé : c\'est la cohérence du parcours qui compte le plus.',
+    )
+  return out
+}
+
 /** Conseils déterministes (repli), indépendants de toute API. */
 export function conseilRegles(
   profil: ProfilResume,
   formations: FormationResume[],
 ): string[] {
+  if (profil.classe === 'seconde') return conseilSeconde(profil)
   const out: string[] = []
   if (profil.meilleuresMatieres.length)
     out.push(
@@ -70,12 +124,15 @@ export function conseilRegles(
   return out
 }
 
-const SYSTEME = `Tu es un conseiller d'orientation post-bac français, expert de Parcoursup.
-Tu donnes des conseils concrets, bienveillants et actionnables à un lycéen.
+const SYSTEME = `Tu es un conseiller d'orientation français, expert de Parcoursup et du lycée.
+Tu donnes des conseils concrets, bienveillants et actionnables à un élève.
 Règles :
 - Réponds en français, en 3 à 5 conseils courts (une à deux phrases chacun).
-- Appuie-toi sur les données fournies (résultats, région, passions, motivation, prix).
-- Encourage une liste de vœux équilibrée (ambitieux / réalistes / valeurs sûres).
+- Adapte-toi à la classe de l'élève (champ "classe") :
+  * Si "seconde" : conseille surtout les SPÉCIALITÉS de première/terminale à choisir, en fonction de ses notes, de l'analyse de ses appréciations et de ses souhaits. Les formations listées ne sont qu'un horizon.
+  * Si "premiere" ou "terminale" : conseille une liste de vœux Parcoursup équilibrée (ambitieux / réalistes / valeurs sûres).
+- Exploite l'analyse du bulletin quand elle est fournie ("appreciation", "signaux") : sérieux, participation, progression.
+- Relie les conseils aux souhaits exprimés par l'élève.
 - Reste factuel : ce sont des estimations, jamais des garanties d'admission.
 - N'invente pas de chiffres qui ne sont pas fournis.`
 
