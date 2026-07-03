@@ -1,0 +1,84 @@
+import type { ProfilEtudiant, ResultatSimulation } from '../types'
+import { LABELS_DOMAINE, LABELS_MATIERE } from './labels'
+import type { Matiere } from '../types'
+import type { PrixFormation } from './prix'
+
+/**
+ * Client du conseiller (backend). Récupère des conseils personnalisés — générés
+ * par l'IA côté serveur si une clé est configurée, sinon par un moteur de règles.
+ * En cas d'indisponibilité, retombe sur des conseils calculés localement.
+ */
+
+export interface Conseil {
+  conseils: string[]
+  source: 'ia' | 'regles' | 'local'
+}
+
+const BASE = (import.meta.env.VITE_PRIX_API ?? '') as string
+
+/** Prépare un résumé compact du profil pour le backend. */
+function resumerProfil(profil: ProfilEtudiant) {
+  const notes = (Object.entries(profil.notes) as [Matiere, number][])
+    .filter(([, v]) => typeof v === 'number')
+    .sort((a, b) => b[1] - a[1])
+  return {
+    meilleuresMatieres: notes.slice(0, 3).map(([m]) => LABELS_MATIERE[m]),
+    region: profil.region,
+    mobilite: profil.mobilite,
+    passions: profil.passions.map((p) => LABELS_DOMAINE[p]),
+    motivation: profil.motivation,
+    coherenceProjet: profil.coherenceProjet,
+  }
+}
+
+/** Conseils de repli calculés dans le navigateur si le backend est injoignable. */
+function conseilLocal(
+  profil: ProfilEtudiant,
+  resultats: ResultatSimulation[],
+): string[] {
+  const out: string[] = []
+  const top = resultats[0]
+  if (top)
+    out.push(
+      `Formation la mieux placée pour votre profil : ${top.formation.nom} à ${top.formation.ville} (${top.probabilite}%).`,
+    )
+  const sures = resultats.filter((r) => r.probabilite >= 65).length
+  const ambitieux = resultats.filter((r) => r.probabilite < 35).length
+  out.push(
+    `Visez une liste équilibrée : ${ambitieux} vœu(x) ambitieux et ${sures} valeur(s) sûre(s).`,
+  )
+  if (!profil.mobilite && profil.region)
+    out.push(
+      `Sans mobilité, vos formations en ${profil.region} sont prioritaires pour vous.`,
+    )
+  return out
+}
+
+/** Récupère des conseils personnalisés depuis le backend. */
+export async function chargerConseil(
+  profil: ProfilEtudiant,
+  resultats: ResultatSimulation[],
+  prix: Map<string, PrixFormation>,
+  fetchImpl: typeof fetch = fetch,
+): Promise<Conseil> {
+  const formations = resultats.slice(0, 12).map((r) => ({
+    nom: r.formation.nom,
+    ville: r.formation.ville,
+    domaine: LABELS_DOMAINE[r.formation.domaine],
+    probabilite: r.probabilite,
+    selectivite: r.formation.selectivite,
+    prixAnnuel: prix.get(r.formation.id)?.prixAnnuel ?? null,
+  }))
+
+  try {
+    const res = await fetchImpl(`${BASE}/api/conseil`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profil: resumerProfil(profil), formations }),
+    })
+    if (!res.ok) throw new Error(String(res.status))
+    return (await res.json()) as Conseil
+  } catch {
+    return { conseils: conseilLocal(profil, resultats), source: 'local' }
+  }
+}

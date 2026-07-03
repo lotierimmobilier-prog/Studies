@@ -373,6 +373,30 @@ button.btn:active {
   color: var(--text);
 }
 
+.advice {
+  border: 1px solid var(--accent);
+  background: rgba(56, 189, 248, 0.1);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.4rem;
+}
+
+.advice-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.advice p {
+  margin: 0.35rem 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
 .disclaimer {
   font-size: 0.8rem;
   color: var(--text-muted);

@@ -3,6 +3,7 @@ import { LABELS_DOMAINE } from '../data/labels'
 import { construireStrategie } from '../engine/strategie'
 import { coutDeLaVie } from '../data/coutVie'
 import { formaterPrix, type PrixFormation } from '../data/prix'
+import type { Conseil } from '../data/conseil'
 
 function couleurProba(p: number): string {
   if (p >= 60) return 'var(--green)'
@@ -138,6 +139,7 @@ function ResultItem({
 interface ResultatsProps {
   resultats: ResultatSimulation[]
   prix?: Map<string, PrixFormation>
+  conseil?: Conseil | null
   sourceReelle?: boolean
   onRecommencer: () => void
 }
@@ -146,6 +148,7 @@ interface ResultatsProps {
 export default function Resultats({
   resultats,
   prix,
+  conseil,
   sourceReelle = true,
   onRecommencer,
 }: ResultatsProps) {
@@ -153,6 +156,16 @@ export default function Resultats({
 
   return (
     <div className="card">
+      {conseil && conseil.conseils.length > 0 && (
+        <div className="advice">
+          <div className="advice-tag">
+            {conseil.source === 'ia' ? '✦ Conseil personnalisé (IA)' : '✦ Conseil personnalisé'}
+          </div>
+          {conseil.conseils.map((c, i) => (
+            <p key={i}>{c}</p>
+          ))}
+        </div>
+      )}
       <h2>Votre liste de vœux conseillée</h2>
       <p className="subtitle">
         Pour maximiser vos chances, Parcoursup recommande une liste{' '}

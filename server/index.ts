@@ -3,6 +3,11 @@ import { join } from 'node:path'
 import type { PrixFormation, RequetePrix } from './types'
 import { CacheDisque } from './cache'
 import { obtenirPrix } from './service'
+import {
+  obtenirConseil,
+  type FormationResume,
+  type ProfilResume,
+} from './conseiller'
 
 /**
  * Serveur HTTP minimal (sans dépendance) exposant l'API de prix.
@@ -88,6 +93,18 @@ async function demarrer(): Promise<void> {
           liste.slice(0, 50).map((r) => obtenirPrix(r, { cache })),
         )
         return envoyerJson(res, 200, resultats)
+      }
+
+      if (url.pathname === '/api/conseil' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const { profil, formations } = JSON.parse(corps) as {
+          profil: ProfilResume
+          formations: FormationResume[]
+        }
+        if (!profil || !Array.isArray(formations))
+          return envoyerJson(res, 400, { erreur: 'profil et formations requis' })
+        const conseil = await obtenirConseil(profil, formations.slice(0, 12))
+        return envoyerJson(res, 200, conseil)
       }
 
       envoyerJson(res, 404, { erreur: 'route inconnue' })

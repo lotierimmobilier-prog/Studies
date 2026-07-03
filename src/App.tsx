@@ -11,6 +11,7 @@ import {
 } from './data/labels'
 import { simulerToutes } from './engine/simulate'
 import { chargerPrix, type PrixFormation } from './data/prix'
+import { chargerConseil, type Conseil } from './data/conseil'
 import Stepper from './components/Stepper'
 import Resultats from './components/Resultats'
 
@@ -34,6 +35,7 @@ export default function App() {
   const [formations, setFormations] = useState<Formation[]>([])
   const [sourceReelle, setSourceReelle] = useState(true)
   const [prix, setPrix] = useState<Map<string, PrixFormation>>(new Map())
+  const [conseil, setConseil] = useState<Conseil | null>(null)
 
   const lancerSimulation = async () => {
     setStatut('chargement')
@@ -55,14 +57,19 @@ export default function App() {
     }
     setFormations(liste)
     setStatut('resultats')
+    setConseil(null)
 
     // Prix des écoles récupérés côté serveur (scraping) pour les mieux classées.
-    const topPourPrix = simulerToutes(liste, profil)
-      .slice(0, 24)
-      .map((r) => r.formation)
+    const resultats = simulerToutes(liste, profil)
+    const topPourPrix = resultats.slice(0, 24).map((r) => r.formation)
     chargerPrix(topPourPrix)
-      .then(setPrix)
-      .catch(() => setPrix(new Map()))
+      .then((mapPrix) => {
+        setPrix(mapPrix)
+        // Conseils personnalisés (IA côté serveur si configurée, sinon règles).
+        return chargerConseil(profil, resultats, mapPrix)
+      })
+      .then(setConseil)
+      .catch(() => setConseil(null))
   }
 
   const setNote = (matiere: Matiere, valeur: string) => {
@@ -119,6 +126,7 @@ export default function App() {
         <Resultats
           resultats={resultats}
           prix={prix}
+          conseil={conseil}
           sourceReelle={sourceReelle}
           onRecommencer={() => {
             setStatut('formulaire')
