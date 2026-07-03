@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import type { Formation, ProfilEtudiant } from '../../types'
 import {
   scoreAcademique,
+  scoreSpecialites,
   scorePassion,
   scoreGeographie,
   scoreMotivation,
@@ -26,6 +27,7 @@ const formation: Formation = {
 const profilBase: ProfilEtudiant = {
   classe: 'terminale',
   souhaits: '',
+  specialites: [],
   notes: {},
   region: null,
   mobilite: false,
@@ -52,6 +54,31 @@ describe('scoreAcademique', () => {
   it('utilise la moyenne générale si aucune matière clé n\'est renseignée', () => {
     const profil = { ...profilBase, notes: { francais: 16, philosophie: 12 } }
     expect(scoreAcademique(formation, profil)).toBe(70)
+  })
+})
+
+describe('scoreSpecialites', () => {
+  // formation.domaine = 'informatique' → attendues : nsi, maths, physique_chimie
+  it('renvoie 50 (neutre) sans spécialité choisie', () => {
+    expect(scoreSpecialites(formation, profilBase)).toBe(50)
+  })
+
+  it('récompense des spécialités alignées', () => {
+    const profil = { ...profilBase, specialites: ['nsi' as const, 'maths' as const] }
+    expect(scoreSpecialites(formation, profil)).toBeGreaterThanOrEqual(70)
+  })
+
+  it('donne 100 pour les trois spécialités attendues', () => {
+    const profil = {
+      ...profilBase,
+      specialites: ['nsi' as const, 'maths' as const, 'physique_chimie' as const],
+    }
+    expect(scoreSpecialites(formation, profil)).toBe(100)
+  })
+
+  it('pénalise des spécialités hors sujet', () => {
+    const profil = { ...profilBase, specialites: ['hlp' as const, 'arts' as const] }
+    expect(scoreSpecialites(formation, profil)).toBe(25)
   })
 })
 
@@ -116,6 +143,7 @@ describe('simulerFormation', () => {
     const profil: ProfilEtudiant = {
       classe: 'terminale',
       souhaits: '',
+      specialites: [],
       notes: { mathematiques: 18, informatique: 17 },
       region: 'Auvergne-Rhône-Alpes',
       mobilite: false,

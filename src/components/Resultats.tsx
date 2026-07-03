@@ -74,6 +74,9 @@ function ResultItem({
           Académique <b>{r.details.academique}</b>
         </span>
         <span>
+          Spécialités <b>{r.details.specialites}</b>
+        </span>
+        <span>
           Passion <b>{r.details.passion}</b>
         </span>
         <span>

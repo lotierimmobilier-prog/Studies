@@ -3,6 +3,7 @@ import type {
   ProfilEtudiant,
   ResultatSimulation,
 } from '../types'
+import { SPECIALITES_PAR_DOMAINE } from '../data/labels'
 
 /**
  * Moteur de simulation du taux d'admission.
@@ -53,6 +54,23 @@ export function scoreAcademique(
 
   const moyennePonderee = sommeNotes / sommePoids // sur 20
   return clamp((moyennePonderee / 20) * 100)
+}
+
+/**
+ * Score spécialités : adéquation entre les spécialités choisies et celles
+ * valorisées par la formation. Neutre (50) si aucune spécialité n'est indiquée.
+ */
+export function scoreSpecialites(
+  formation: Formation,
+  profil: ProfilEtudiant,
+): number {
+  if (profil.specialites.length === 0) return 50 // neutre
+  const attendues = SPECIALITES_PAR_DOMAINE[formation.domaine] ?? []
+  if (attendues.length === 0) return 50
+  const communes = profil.specialites.filter((s) => attendues.includes(s)).length
+  const ratio = communes / Math.min(3, attendues.length)
+  // 0 correspondance → 25 ; toutes → 100.
+  return clamp(25 + ratio * 75)
 }
 
 /** Score passion : 100 si le domaine visé fait partie des passions, sinon dégressif. */
@@ -127,15 +145,17 @@ export function simulerFormation(
   profil: ProfilEtudiant,
 ): ResultatSimulation {
   const academique = Math.round(scoreAcademique(formation, profil))
+  const specialites = Math.round(scoreSpecialites(formation, profil))
   const passion = Math.round(scorePassion(formation, profil))
   const motivation = Math.round(scoreMotivation(profil))
   const geographie = Math.round(scoreGeographie(formation, profil))
 
   // Pondération des sous-scores dans l'adéquation globale.
   const scoreAdequation =
-    academique * 0.5 +
-    passion * 0.2 +
-    motivation * 0.15 +
+    academique * 0.45 +
+    specialites * 0.15 +
+    passion * 0.15 +
+    motivation * 0.1 +
     geographie * 0.15
 
   const probabilite = combinerProbabilite(
@@ -149,6 +169,12 @@ export function simulerFormation(
   else if (academique < 45)
     explications.push(
       'Vos notes dans les matières déterminantes restent à consolider.',
+    )
+  if (specialites >= 85)
+    explications.push('Vos spécialités correspondent bien aux attendus.')
+  else if (profil.specialites.length > 0 && specialites <= 40)
+    explications.push(
+      'Vos spécialités sont peu alignées avec les attendus de cette formation.',
     )
   if (passion === 100)
     explications.push('La formation correspond pleinement à vos passions.')
@@ -168,7 +194,7 @@ export function simulerFormation(
   return {
     formation,
     probabilite,
-    details: { academique, passion, motivation, geographie },
+    details: { academique, specialites, passion, motivation, geographie },
     explications,
   }
 }

@@ -21,6 +21,7 @@ export interface FormationResume {
 export interface ProfilResume {
   classe?: 'seconde' | 'premiere' | 'terminale'
   souhaits?: string
+  specialites?: string[]
   meilleuresMatieres: string[]
   region: string | null
   mobilite: boolean
@@ -131,6 +132,7 @@ Règles :
 - Adapte-toi à la classe de l'élève (champ "classe") :
   * Si "seconde" : conseille surtout les SPÉCIALITÉS de première/terminale à choisir, en fonction de ses notes, de l'analyse de ses appréciations et de ses souhaits. Les formations listées ne sont qu'un horizon.
   * Si "premiere" ou "terminale" : conseille une liste de vœux Parcoursup équilibrée (ambitieux / réalistes / valeurs sûres).
+- Tiens compte des spécialités choisies ("specialites") : signale si elles sont bien alignées avec les formations visées, ou si un ajustement serait utile.
 - Exploite l'analyse du bulletin quand elle est fournie ("appreciation", "signaux") : sérieux, participation, progression.
 - Relie les conseils aux souhaits exprimés par l'élève.
 - Reste factuel : ce sont des estimations, jamais des garanties d'admission.

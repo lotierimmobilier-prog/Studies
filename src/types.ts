@@ -46,6 +46,22 @@ export type Matiere =
   | 'eps'
   | 'arts'
 
+/** Spécialités de première / terminale (voie générale). */
+export type Specialite =
+  | 'maths'
+  | 'physique_chimie'
+  | 'svt'
+  | 'nsi'
+  | 'ses'
+  | 'hggsp'
+  | 'hlp'
+  | 'llcer'
+  | 'si'
+  | 'arts'
+  | 'llca'
+  | 'biologie_ecologie'
+  | 'eppcs'
+
 /** Sélectivité de la formation. */
 export type Selectivite = 'selective' | 'non-selective'
 
@@ -87,6 +103,8 @@ export interface ProfilEtudiant {
   classe: Classe
   /** Souhaits / projet exprimés librement par l'étudiant. */
   souhaits: string
+  /** Spécialités choisies (jusqu'à 3 en première, 2 en terminale). */
+  specialites: Specialite[]
   /** Notes sur 20 par matière (partiel : seules les matières renseignées comptent). */
   notes: Partial<Record<Matiere, number>>
   region: Region | null
@@ -108,6 +126,7 @@ export interface ResultatSimulation {
   /** Décomposition des sous-scores (0-100) pour la transparence. */
   details: {
     academique: number
+    specialites: number
     passion: number
     motivation: number
     geographie: number

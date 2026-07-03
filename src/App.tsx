@@ -6,6 +6,7 @@ import type {
   Matiere,
   ProfilEtudiant,
   Region,
+  Specialite,
 } from './types'
 import { FORMATIONS } from './data/formations'
 import { chargerFormations } from './data/opendata'
@@ -13,8 +14,10 @@ import {
   DOMAINES,
   LABELS_DOMAINE,
   LABELS_MATIERE,
+  LABELS_SPECIALITE,
   MATIERES,
   REGIONS,
+  SPECIALITES,
 } from './data/labels'
 import { simulerToutes } from './engine/simulate'
 import { chargerPrix, type PrixFormation } from './data/prix'
@@ -31,6 +34,7 @@ const ETAPES = ['Résultats', 'Localisation', 'Passions', 'Motivation']
 const PROFIL_INITIAL: ProfilEtudiant = {
   classe: 'terminale',
   souhaits: '',
+  specialites: [],
   notes: {},
   region: null,
   mobilite: false,
@@ -125,6 +129,16 @@ export default function App() {
         ? p.passions.filter((x) => x !== d)
         : [...p.passions, d],
     }))
+  }
+
+  const MAX_SPECIALITES = 3
+  const toggleSpecialite = (s: Specialite) => {
+    setProfil((p) => {
+      if (p.specialites.includes(s))
+        return { ...p, specialites: p.specialites.filter((x) => x !== s) }
+      if (p.specialites.length >= MAX_SPECIALITES) return p // limite atteinte
+      return { ...p, specialites: [...p.specialites, s] }
+    })
   }
 
   if (statut === 'chargement') {
@@ -275,6 +289,46 @@ export default function App() {
                   />
                 </div>
               ))}
+            </div>
+
+            <div style={{ marginTop: '1.4rem' }}>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: '0.85rem',
+                  color: 'var(--text-muted)',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                {profil.classe === 'seconde'
+                  ? 'Spécialités envisagées'
+                  : 'Vos spécialités'}{' '}
+                — jusqu'à {MAX_SPECIALITES} ({profil.specialites.length}/
+                {MAX_SPECIALITES})
+              </label>
+              <div className="chips">
+                {SPECIALITES.map((s) => {
+                  const on = profil.specialites.includes(s)
+                  const bloque =
+                    !on && profil.specialites.length >= MAX_SPECIALITES
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      className={`chip ${on ? 'selected' : ''}`}
+                      disabled={bloque}
+                      style={
+                        bloque
+                          ? { opacity: 0.4, cursor: 'not-allowed' }
+                          : undefined
+                      }
+                      onClick={() => toggleSpecialite(s)}
+                    >
+                      {LABELS_SPECIALITE[s]}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </>
         )}

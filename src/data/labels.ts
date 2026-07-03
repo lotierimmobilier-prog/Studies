@@ -1,4 +1,4 @@
-import type { Domaine, Matiere, Region } from '../types'
+import type { Domaine, Matiere, Region, Specialite } from '../types'
 
 export const LABELS_DOMAINE: Record<Domaine, string> = {
   sante: 'Santé',
@@ -59,6 +59,55 @@ export const MATIERES: Matiere[] = [
   'eps',
   'arts',
 ]
+
+export const LABELS_SPECIALITE: Record<Specialite, string> = {
+  maths: 'Mathématiques',
+  physique_chimie: 'Physique-Chimie',
+  svt: 'SVT',
+  nsi: 'NSI (informatique)',
+  ses: 'SES',
+  hggsp: 'HGGSP',
+  hlp: 'Humanités (HLP)',
+  llcer: 'LLCER (langues)',
+  si: "Sciences de l'ingénieur",
+  arts: 'Arts',
+  llca: "Langues de l'Antiquité",
+  biologie_ecologie: 'Biologie-écologie',
+  eppcs: 'EPS (EPPCS)',
+}
+
+export const SPECIALITES: Specialite[] = [
+  'maths',
+  'physique_chimie',
+  'svt',
+  'nsi',
+  'ses',
+  'hggsp',
+  'hlp',
+  'llcer',
+  'si',
+  'arts',
+  'llca',
+  'biologie_ecologie',
+  'eppcs',
+]
+
+/** Spécialités valorisées par domaine d'études (attendus fréquents). */
+export const SPECIALITES_PAR_DOMAINE: Record<Domaine, Specialite[]> = {
+  sante: ['svt', 'physique_chimie', 'maths'],
+  droit: ['hggsp', 'hlp', 'ses'],
+  informatique: ['nsi', 'maths', 'physique_chimie'],
+  ingenieur: ['maths', 'physique_chimie', 'si'],
+  sciences: ['maths', 'physique_chimie', 'svt'],
+  commerce: ['ses', 'maths', 'llcer'],
+  economie: ['ses', 'maths', 'hggsp'],
+  lettres: ['hlp', 'hggsp', 'llcer'],
+  langues: ['llcer', 'hlp', 'llca'],
+  arts: ['arts', 'hlp'],
+  social: ['ses', 'svt', 'hggsp'],
+  staps: ['svt', 'eppcs', 'physique_chimie'],
+  communication: ['hlp', 'ses', 'llcer'],
+}
 
 export const DOMAINES: Domaine[] = [
   'sante',

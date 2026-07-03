@@ -1,5 +1,5 @@
 import type { ProfilEtudiant, ResultatSimulation } from '../types'
-import { LABELS_DOMAINE, LABELS_MATIERE } from './labels'
+import { LABELS_DOMAINE, LABELS_MATIERE, LABELS_SPECIALITE } from './labels'
 import type { Matiere } from '../types'
 import type { PrixFormation } from './prix'
 import type { AnalyseBulletin } from './bulletin'
@@ -25,6 +25,7 @@ function resumerProfil(profil: ProfilEtudiant, bulletin?: AnalyseBulletin | null
   return {
     classe: profil.classe,
     souhaits: profil.souhaits,
+    specialites: profil.specialites.map((s) => LABELS_SPECIALITE[s]),
     meilleuresMatieres: notes.slice(0, 3).map(([m]) => LABELS_MATIERE[m]),
     region: profil.region,
     mobilite: profil.mobilite,
