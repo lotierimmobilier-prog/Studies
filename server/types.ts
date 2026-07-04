@@ -47,3 +47,38 @@ export interface RequeteAvis {
   etablissement: string
   ville?: string
 }
+
+/** Statut de modération d'un témoignage étudiant. */
+export type StatutTemoignage = 'approuve' | 'en_attente' | 'rejete'
+
+/** Témoignage d'un·e étudiant·e sur un établissement (contenu modéré). */
+export interface TemoignageEtudiant {
+  id: string
+  etablissement: string
+  /** Note sur 5 (entier 1-5). */
+  note: number
+  /** Commentaire libre (modéré). */
+  commentaire: string
+  /** Année d'études de l'auteur (facultatif), ex. 2024. */
+  annee?: number
+  statut: StatutTemoignage
+  /** Date de dépôt (ISO). */
+  dateMaj: string
+}
+
+/** Ce que le client envoie pour déposer un témoignage. */
+export interface RequeteTemoignage {
+  etablissement: string
+  note: number
+  commentaire: string
+  annee?: number
+}
+
+/** Synthèse publique des témoignages approuvés d'un établissement. */
+export interface SyntheseTemoignages {
+  etablissement: string
+  /** Moyenne des notes approuvées (sur 5), ou null si aucun avis. */
+  moyenne: number | null
+  nombre: number
+  temoignages: TemoignageEtudiant[]
+}

@@ -1006,3 +1006,149 @@ button.btn:active {
     display: none !important;
   }
 }
+
+/* ----------------------------------------------------------------------------
+   Avis étudiants (témoignages modérés)
+   ------------------------------------------------------------------------- */
+.avis-etudiants {
+  margin-top: 0.9rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.7rem;
+}
+.avis-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  padding: 0.2rem 0;
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.avis-chevron {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.etoiles {
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+.etoiles-vides {
+  color: var(--border);
+}
+.avis-panneau {
+  margin-top: 0.7rem;
+}
+.temoignages {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.temoignage {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+.temoignage-tete {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.25rem;
+}
+.temoignage-annee {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.temoignage-texte {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+.avis-form {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.avis-form-tete {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.avis-form-tete select {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.82rem;
+}
+.etoiles-choix {
+  display: inline-flex;
+  gap: 0.1rem;
+}
+.etoile-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--border);
+  padding: 0 0.05rem;
+  transition: color 0.1s;
+}
+.etoile-btn.active {
+  color: var(--accent);
+}
+.etoile-btn:hover {
+  color: var(--accent-strong);
+}
+.avis-form textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text);
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+.avis-form-pied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.avis-note-moderation {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+.avis-form-pied .btn {
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+}
+.avis-message {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.avis-message.ok {
+  color: hsl(150 55% 38%);
+}
+.avis-message.ko {
+  color: hsl(0 60% 50%);
+}

@@ -13,3 +13,6 @@ tsconfig.tsbuildinfo
 
 # cache serveur de prix
 .cache
+
+# données persistées du serveur (témoignages étudiants)
+.data

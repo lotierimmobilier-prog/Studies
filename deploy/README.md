@@ -31,6 +31,25 @@ curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claud
 > quota gratuit mensuel est inclus. Sans clé, l'app fonctionne : les notes ⭐ ne
 > s'affichent simplement pas.
 
+> **Avis étudiants (modération)** : les étudiants peuvent laisser une note ⭐ et
+> un commentaire (année d'études en option). Chaque avis est **modéré** avant
+> publication : règles automatiques (anti-insultes, anti-spam/coordonnées) +
+> modération fine par l'IA si `ANTHROPIC_API_KEY` est présente. Les avis stockés
+> sont dans `/opt/studies/.data/temoignages.json` sur le VPS. Pour l'endpoint de
+> modération manuelle (lister/valider/masquer), définis un jeton
+> `MODERATION_TOKEN` :
+>
+> ```bash
+> # lister les avis en attente
+> curl -H "x-moderation-token: $MODERATION_TOKEN" \
+>   "http://76.13.37.163/studies/api/temoignages/moderation?statut=en_attente"
+> # approuver (ou 'rejete') un avis
+> curl -X POST -H "x-moderation-token: $MODERATION_TOKEN" \
+>   -H 'Content-Type: application/json' \
+>   -d '{"id":"<id>","statut":"approuve"}' \
+>   http://76.13.37.163/studies/api/temoignages/moderation
+> ```
+
 Le site est alors en ligne sur **http://76.13.37.163/studies/**.
 
 ### Héberger plusieurs projets sur le même VPS

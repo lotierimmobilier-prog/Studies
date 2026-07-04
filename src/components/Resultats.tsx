@@ -22,6 +22,7 @@ import {
 import type { Conseil } from '../data/conseil'
 import Filtres from './Filtres'
 import MaListe from './MaListe'
+import AvisEtudiants from './AvisEtudiants'
 
 /** Bouton d'ajout/retrait d'un vœu dans « ma liste ». */
 function BoutonVoeu({
@@ -203,6 +204,8 @@ function ResultItem({
           ))}
         </ul>
       )}
+
+      <AvisEtudiants etablissement={r.formation.etablissement} />
     </div>
   )
 }

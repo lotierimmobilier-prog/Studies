@@ -19,8 +19,10 @@
 # Options (variables d'environnement) :
 #   SLUG=studies                 # sous-chemin + nom du projet (URL : /studies)
 #   API_PORT=8787                # port local de l'API Node (unique par projet !)
-#   ANTHROPIC_API_KEY=sk-ant-... # active l'IA (conseils + analyse de bulletin)
+#   ANTHROPIC_API_KEY=sk-ant-... # active l'IA (conseils + analyse de bulletin +
+#                                #   modération fine des avis étudiants)
 #   GOOGLE_MAPS_API_KEY=...      # active les avis Google (note ⭐ des écoles)
+#   MODERATION_TOKEN=...         # jeton pour l'endpoint de modération des avis
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
 #
@@ -109,12 +111,17 @@ if [ -n "${GOOGLE_MAPS_API_KEY:-}" ]; then
 else
   log "Pas de clé GOOGLE_MAPS_API_KEY : les notes Google ne s'affichent pas."
 fi
+if [ -n "${MODERATION_TOKEN:-}" ]; then
+  echo "MODERATION_TOKEN=${MODERATION_TOKEN}" >> "${APP_DIR}/.env"
+  log "Jeton MODERATION_TOKEN enregistré (endpoint de modération protégé)."
+fi
 
 log "(Re)démarrage de l'API « ${PM2_NAME} » (port ${API_PORT}) via pm2…"
+ENV_VARS="PORT=${API_PORT} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-} GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-} MODERATION_TOKEN=${MODERATION_TOKEN:-}"
 if pm2 describe "${PM2_NAME}" >/dev/null 2>&1; then
-  PORT="${API_PORT}" ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY:-}" pm2 restart "${PM2_NAME}" --update-env
+  env ${ENV_VARS} pm2 restart "${PM2_NAME}" --update-env
 else
-  PORT="${API_PORT}" ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY:-}" pm2 start "npx tsx server/index.ts" --name "${PM2_NAME}" --update-env
+  env ${ENV_VARS} pm2 start "npx tsx server/index.ts" --name "${PM2_NAME}" --update-env
 fi
 pm2 save
 pm2 startup systemd -u root --hp /root >/dev/null 2>&1 || true

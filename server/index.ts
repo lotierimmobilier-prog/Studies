@@ -1,9 +1,22 @@
 import { createServer } from 'node:http'
 import { join } from 'node:path'
-import type { AvisEcole, PrixFormation, RequeteAvis, RequetePrix } from './types'
+import type {
+  AvisEcole,
+  PrixFormation,
+  RequeteAvis,
+  RequetePrix,
+  RequeteTemoignage,
+  StatutTemoignage,
+} from './types'
 import { CacheDisque } from './cache'
 import { obtenirPrix } from './service'
 import { obtenirAvis } from './avis'
+import {
+  DepotTemoignages,
+  soumettreTemoignage,
+  synthese,
+  listerTous,
+} from './temoignages'
 import {
   obtenirConseil,
   type FormationResume,
@@ -24,6 +37,9 @@ import {
  *   POST /api/prix   body: RequetePrix[] → PrixFormation[]  (lot)
  *   GET  /api/avis?etablissement=&ville= → AvisEcole  (note Google ⭐)
  *   POST /api/avis   body: RequeteAvis[] → AvisEcole[]  (lot)
+ *   GET  /api/temoignages?etablissement= → SyntheseTemoignages (avis étudiants)
+ *   POST /api/temoignages body: RequeteTemoignage → soumission modérée
+ *   GET/POST /api/temoignages/moderation → modération (jeton MODERATION_TOKEN)
  *
  * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
  * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
@@ -38,6 +54,9 @@ const cache = new CacheDisque<PrixFormation>(
 const cacheAvis = new CacheDisque<AvisEcole>(
   join(process.cwd(), '.cache', 'avis.json'),
   CACHE_TTL,
+)
+const depotTemoignages = new DepotTemoignages(
+  join(process.cwd(), '.data', 'temoignages.json'),
 )
 
 function cors(res: import('node:http').ServerResponse): void {
@@ -72,6 +91,7 @@ async function lireCorps(req: import('node:http').IncomingMessage): Promise<stri
 async function demarrer(): Promise<void> {
   await cache.initialiser()
   await cacheAvis.initialiser()
+  await depotTemoignages.charger()
 
   const serveur = createServer(async (req, res) => {
     try {
@@ -138,6 +158,47 @@ async function demarrer(): Promise<void> {
           liste.slice(0, 50).map((r) => obtenirAvis(r, { cache: cacheAvis })),
         )
         return envoyerJson(res, 200, resultats)
+      }
+
+      if (url.pathname === '/api/temoignages' && req.method === 'GET') {
+        const etablissement = url.searchParams.get('etablissement') ?? ''
+        if (!etablissement)
+          return envoyerJson(res, 400, { erreur: 'etablissement requis' })
+        return envoyerJson(res, 200, await synthese(etablissement, depotTemoignages))
+      }
+
+      if (url.pathname === '/api/temoignages' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const req2 = JSON.parse(corps) as RequeteTemoignage
+        const resultat = await soumettreTemoignage(req2, { depot: depotTemoignages })
+        // 201 si publié/en attente, 422 si refusé par la modération.
+        return envoyerJson(res, resultat.ok ? 201 : 422, resultat)
+      }
+
+      // Modération (privé) : lister / changer le statut. Protégé par un jeton.
+      if (url.pathname === '/api/temoignages/moderation') {
+        const jeton = process.env.MODERATION_TOKEN
+        const fourni = req.headers['x-moderation-token']
+        if (!jeton || fourni !== jeton)
+          return envoyerJson(res, 401, { erreur: 'non autorisé' })
+
+        if (req.method === 'GET') {
+          const statut = (url.searchParams.get('statut') ?? undefined) as
+            | StatutTemoignage
+            | undefined
+          return envoyerJson(res, 200, await listerTous(depotTemoignages, statut))
+        }
+        if (req.method === 'POST') {
+          const corps = await lireCorps(req)
+          const { id, statut } = JSON.parse(corps) as {
+            id: string
+            statut: StatutTemoignage
+          }
+          if (!id || !statut)
+            return envoyerJson(res, 400, { erreur: 'id et statut requis' })
+          const ok = await depotTemoignages.majStatut(id, statut)
+          return envoyerJson(res, ok ? 200 : 404, { ok })
+        }
       }
 
       if (url.pathname === '/api/bulletin' && req.method === 'POST') {
