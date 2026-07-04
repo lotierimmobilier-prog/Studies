@@ -1,11 +1,47 @@
+import { useEffect, useMemo, useState } from 'react'
 import type { ResultatSimulation } from '../types'
 import { LABELS_DOMAINE } from '../data/labels'
 import { construireStrategie } from '../engine/strategie'
 import { recommander } from '../engine/recommandation'
+import {
+  filtrerResultats,
+  domainesDisponibles,
+  villesDisponibles,
+  type CriteresFiltre,
+} from '../engine/filtres'
 import { coutDeLaVie } from '../data/coutVie'
 import { formaterPrix, type PrixFormation } from '../data/prix'
 import { formaterAvis, type AvisEcole } from '../data/avis'
+import {
+  chargerListe,
+  sauvegarderListe,
+  basculerVoeu,
+  versVoeu,
+  type VoeuSauve,
+} from '../data/liste'
 import type { Conseil } from '../data/conseil'
+import Filtres from './Filtres'
+import MaListe from './MaListe'
+
+/** Bouton d'ajout/retrait d'un vœu dans « ma liste ». */
+function BoutonVoeu({
+  actif,
+  onClick,
+}: {
+  actif: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      className={`btn-voeu no-print${actif ? ' actif' : ''}`}
+      onClick={onClick}
+      aria-pressed={actif}
+    >
+      {actif ? '✓ Dans ma liste' : '＋ Ma liste'}
+    </button>
+  )
+}
 
 /** Puce « note Google ⭐ », rendue seulement si un avis est disponible. */
 function NoteGoogle({ avis }: { avis?: AvisEcole }) {
@@ -47,10 +83,14 @@ function ResultItem({
   r,
   prix,
   avis,
+  dansListe,
+  onToggleVoeu,
 }: {
   r: ResultatSimulation
   prix?: PrixFormation
   avis?: AvisEcole
+  dansListe: boolean
+  onToggleVoeu: () => void
 }) {
   return (
     <div className="result-item">
@@ -80,6 +120,7 @@ function ResultItem({
             {r.probabilite}%
           </div>
           <div className="proba-label">{libelleChance(r.probabilite)}</div>
+          <BoutonVoeu actif={dansListe} onClick={onToggleVoeu} />
         </div>
       </div>
 
@@ -175,10 +216,14 @@ function Recommandations({
   resultats,
   prix,
   avis,
+  estDansListe,
+  onToggleVoeu,
 }: {
   resultats: ResultatSimulation[]
   prix?: Map<string, PrixFormation>
   avis?: Map<string, AvisEcole>
+  estDansListe: (id: string) => boolean
+  onToggleVoeu: (r: ResultatSimulation) => void
 }) {
   const reco = recommander(resultats, 3)
   if (reco.length === 0) return null
@@ -242,6 +287,10 @@ function Recommandations({
                   </a>
                 )}
               </div>
+              <BoutonVoeu
+                actif={estDansListe(r.formation.id)}
+                onClick={() => onToggleVoeu(r)}
+              />
             </article>
           )
         })}
@@ -268,7 +317,30 @@ export default function Resultats({
   sourceReelle = true,
   onRecommencer,
 }: ResultatsProps) {
-  const groupes = construireStrategie(resultats)
+  const [criteres, setCriteres] = useState<CriteresFiltre>({})
+  const [voeux, setVoeux] = useState<VoeuSauve[]>(() => chargerListe())
+
+  // Persiste la liste de vœux à chaque modification.
+  useEffect(() => {
+    sauvegarderListe(voeux)
+  }, [voeux])
+
+  const estDansListe = (id: string) => voeux.some((v) => v.id === id)
+  const onToggleVoeu = (r: ResultatSimulation) =>
+    setVoeux((l) => basculerVoeu(l, versVoeu(r)))
+
+  const domaines = useMemo(() => domainesDisponibles(resultats), [resultats])
+  const villes = useMemo(() => villesDisponibles(resultats), [resultats])
+  const avecNote = useMemo(
+    () => (avis ? [...avis.values()].some((a) => a.note != null) : false),
+    [avis],
+  )
+
+  const resultatsFiltres = useMemo(
+    () => filtrerResultats(resultats, criteres, { prix, avis }),
+    [resultats, criteres, prix, avis],
+  )
+  const groupes = construireStrategie(resultatsFiltres)
 
   return (
     <div className="card">
@@ -283,7 +355,29 @@ export default function Resultats({
         </div>
       )}
 
-      <Recommandations resultats={resultats} prix={prix} avis={avis} />
+      <MaListe
+        voeux={voeux}
+        onRetirer={(id) => setVoeux((l) => l.filter((v) => v.id !== id))}
+        onVider={() => setVoeux([])}
+      />
+
+      <Filtres
+        criteres={criteres}
+        onChange={setCriteres}
+        domaines={domaines}
+        villes={villes}
+        avecNote={avecNote}
+        nbResultats={resultatsFiltres.length}
+        nbTotal={resultats.length}
+      />
+
+      <Recommandations
+        resultats={resultatsFiltres}
+        prix={prix}
+        avis={avis}
+        estDansListe={estDansListe}
+        onToggleVoeu={onToggleVoeu}
+      />
 
       <h2>Votre liste de vœux conseillée</h2>
       <p className="subtitle">
@@ -298,24 +392,32 @@ export default function Resultats({
         )}
       </p>
 
-      {groupes.map((g) => (
-        <section key={g.categorie} style={{ marginBottom: '1.75rem' }}>
-          <h3 style={{ margin: '0 0 0.15rem' }}>
-            {g.emoji} {g.titre}
-          </h3>
-          <p className="subtitle" style={{ margin: '0 0 0.9rem' }}>
-            {g.description}
-          </p>
-          {g.resultats.map((r) => (
-            <ResultItem
-              key={r.formation.id}
-              r={r}
-              prix={prix?.get(r.formation.id)}
-              avis={avis?.get(r.formation.id)}
-            />
-          ))}
-        </section>
-      ))}
+      {groupes.length === 0 ? (
+        <p className="subtitle">
+          Aucune formation ne correspond à ces filtres. Élargis ta recherche.
+        </p>
+      ) : (
+        groupes.map((g) => (
+          <section key={g.categorie} style={{ marginBottom: '1.75rem' }}>
+            <h3 style={{ margin: '0 0 0.15rem' }}>
+              {g.emoji} {g.titre}
+            </h3>
+            <p className="subtitle" style={{ margin: '0 0 0.9rem' }}>
+              {g.description}
+            </p>
+            {g.resultats.map((r) => (
+              <ResultItem
+                key={r.formation.id}
+                r={r}
+                prix={prix?.get(r.formation.id)}
+                avis={avis?.get(r.formation.id)}
+                dansListe={estDansListe(r.formation.id)}
+                onToggleVoeu={() => onToggleVoeu(r)}
+              />
+            ))}
+          </section>
+        ))
+      )}
 
       <div className="actions">
         <button className="btn btn-ghost" onClick={onRecommencer}>

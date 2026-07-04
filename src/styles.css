@@ -849,3 +849,160 @@ button.btn:active {
   color: var(--text-muted);
   font-weight: 500;
 }
+
+/* ----------------------------------------------------------------------------
+   Recherche & filtres
+   ------------------------------------------------------------------------- */
+.filtres {
+  margin: 0 0 1.5rem;
+  padding: 0.9rem 1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.filtres-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.filtres-row:last-of-type {
+  margin-bottom: 0;
+}
+.filtre-recherche {
+  flex: 1 1 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.filtres-row select {
+  flex: 1 1 150px;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 0.88rem;
+}
+.filtre-reset {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.9rem;
+}
+.filtres-compte {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 0.6rem;
+}
+
+/* ----------------------------------------------------------------------------
+   Bouton « ajouter à ma liste »
+   ------------------------------------------------------------------------- */
+.btn-voeu {
+  margin-top: 0.55rem;
+  padding: 0.32rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-strong);
+  background: var(--bg-card);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-voeu:hover {
+  background: var(--accent-tint);
+}
+.btn-voeu.actif {
+  color: #fff;
+  background: var(--accent);
+}
+
+/* ----------------------------------------------------------------------------
+   Ma liste de vœux (short-list sauvegardée)
+   ------------------------------------------------------------------------- */
+.maliste {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.1rem;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+}
+.maliste-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: space-between;
+}
+.maliste-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.maliste-actions .btn {
+  padding: 0.35rem 0.7rem;
+  font-size: 0.82rem;
+}
+.maliste-items {
+  margin: 0.8rem 0 0;
+  padding-left: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.maliste-items li {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+.maliste-nom {
+  font-weight: 600;
+}
+.maliste-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.maliste-retirer {
+  flex: 0 0 auto;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-elev);
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+}
+.maliste-retirer:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* ----------------------------------------------------------------------------
+   Impression / export PDF : n'imprimer que « Ma liste de vœux »
+   ------------------------------------------------------------------------- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .maliste,
+  .maliste * {
+    visibility: visible;
+  }
+  .maliste {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    border: none;
+    padding: 0;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
