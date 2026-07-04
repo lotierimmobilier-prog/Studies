@@ -7,6 +7,7 @@ import {
   scoreGeographie,
   scoreMotivation,
   combinerProbabilite,
+  ponderation,
   simulerFormation,
   simulerToutes,
 } from '../simulate'
@@ -135,6 +136,36 @@ describe('combinerProbabilite', () => {
   it('reste borné entre 1 et 99', () => {
     expect(combinerProbabilite(8, 0)).toBeGreaterThanOrEqual(1)
     expect(combinerProbabilite(90, 100)).toBeLessThanOrEqual(99)
+  })
+})
+
+describe('ponderation', () => {
+  const somme = (p: ReturnType<typeof ponderation>) =>
+    p.academique + p.specialites + p.passion + p.motivation + p.geographie
+
+  it('renvoie des poids qui somment à 1 (adéquation sur 0-100)', () => {
+    for (const domaine of ['sciences', 'arts', 'commerce', 'droit'] as const) {
+      expect(somme(ponderation({ ...formation, selectivite: 'selective', domaine }))).toBeCloseTo(1)
+    }
+    expect(somme(ponderation({ ...formation, selectivite: 'non-selective' }))).toBeCloseTo(1)
+  })
+
+  it('privilégie le secteur géographique pour les licences non sélectives', () => {
+    const p = ponderation({ ...formation, selectivite: 'non-selective' })
+    expect(p.geographie).toBeGreaterThan(p.passion)
+    expect(p.geographie).toBeGreaterThanOrEqual(0.25)
+  })
+
+  it('met le poids sur les notes et spécialités pour une filière scientifique sélective', () => {
+    const p = ponderation({ ...formation, selectivite: 'selective', domaine: 'sciences' })
+    expect(p.academique).toBeGreaterThanOrEqual(0.45)
+    expect(p.specialites).toBeGreaterThan(p.geographie)
+  })
+
+  it('renforce la passion pour une école d’art sélective', () => {
+    const art = ponderation({ ...formation, selectivite: 'selective', domaine: 'arts' })
+    const sci = ponderation({ ...formation, selectivite: 'selective', domaine: 'sciences' })
+    expect(art.passion).toBeGreaterThan(sci.passion)
   })
 })
 

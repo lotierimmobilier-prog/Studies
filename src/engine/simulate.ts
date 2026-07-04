@@ -1,4 +1,5 @@
 import type {
+  Domaine,
   Formation,
   ProfilEtudiant,
   ResultatSimulation,
@@ -21,6 +22,82 @@ import { SPECIALITES_PAR_DOMAINE } from '../data/labels'
  */
 
 const clamp = (v: number, min = 0, max = 100) => Math.min(max, Math.max(min, v))
+
+/**
+ * Pondération des sous-scores dans l'adéquation globale. La somme vaut 1, si
+ * bien que l'adéquation reste sur 0-100.
+ */
+export interface Ponderation {
+  academique: number
+  specialites: number
+  passion: number
+  motivation: number
+  geographie: number
+}
+
+// Profils de pondération selon la nature de la formation. Le poids de chaque
+// critère n'a pas le même sens partout : une prépa scientifique se joue sur les
+// notes et les spécialités, une licence non sélective sur le secteur
+// géographique, une école d'art sur la passion et la motivation.
+
+/** Licences non sélectives : priorité de secteur, notes moins discriminantes. */
+const P_SECTEUR: Ponderation = {
+  academique: 0.35,
+  specialites: 0.1,
+  passion: 0.15,
+  motivation: 0.1,
+  geographie: 0.3,
+}
+/** Filières scientifiques/techniques sélectives : notes + spécialités décisives. */
+const P_SCIENTIFIQUE: Ponderation = {
+  academique: 0.5,
+  specialites: 0.22,
+  passion: 0.12,
+  motivation: 0.08,
+  geographie: 0.08,
+}
+/** Arts, lettres, langues, communication, staps : passion et motivation renforcées. */
+const P_CREATIF: Ponderation = {
+  academique: 0.35,
+  specialites: 0.15,
+  passion: 0.25,
+  motivation: 0.17,
+  geographie: 0.08,
+}
+/** Commerce, économie, droit, social : équilibré, la motivation compte. */
+const P_TERTIAIRE: Ponderation = {
+  academique: 0.42,
+  specialites: 0.15,
+  passion: 0.15,
+  motivation: 0.16,
+  geographie: 0.12,
+}
+
+const FAMILLE: Record<Domaine, Ponderation> = {
+  sciences: P_SCIENTIFIQUE,
+  ingenieur: P_SCIENTIFIQUE,
+  informatique: P_SCIENTIFIQUE,
+  sante: P_SCIENTIFIQUE,
+  arts: P_CREATIF,
+  lettres: P_CREATIF,
+  langues: P_CREATIF,
+  communication: P_CREATIF,
+  staps: P_CREATIF,
+  commerce: P_TERTIAIRE,
+  economie: P_TERTIAIRE,
+  droit: P_TERTIAIRE,
+  social: P_TERTIAIRE,
+}
+
+/**
+ * Choisit la pondération adaptée à la formation : les licences non sélectives
+ * privilégient le secteur géographique ; les formations sélectives suivent le
+ * profil de leur domaine (scientifique, créatif, tertiaire).
+ */
+export function ponderation(formation: Formation): Ponderation {
+  if (formation.selectivite === 'non-selective') return P_SECTEUR
+  return FAMILLE[formation.domaine] ?? P_TERTIAIRE
+}
 
 /** Score académique : moyenne des notes pondérée par les matières clés (0-100). */
 export function scoreAcademique(
@@ -150,13 +227,14 @@ export function simulerFormation(
   const motivation = Math.round(scoreMotivation(profil))
   const geographie = Math.round(scoreGeographie(formation, profil))
 
-  // Pondération des sous-scores dans l'adéquation globale.
+  // Pondération des sous-scores adaptée à la nature de la formation.
+  const w = ponderation(formation)
   const scoreAdequation =
-    academique * 0.45 +
-    specialites * 0.15 +
-    passion * 0.15 +
-    motivation * 0.1 +
-    geographie * 0.15
+    academique * w.academique +
+    specialites * w.specialites +
+    passion * w.passion +
+    motivation * w.motivation +
+    geographie * w.geographie
 
   const probabilite = combinerProbabilite(
     formation.tauxAccesBase,
