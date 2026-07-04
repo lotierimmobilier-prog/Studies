@@ -123,6 +123,13 @@ export interface ResultatSimulation {
   formation: Formation
   /** Probabilité d'admission estimée en %. */
   probabilite: number
+  /**
+   * Score d'adéquation global (0-100) : à quel point la formation correspond
+   * au profil (notes, spécialités, passions, motivation, géographie), avant
+   * prise en compte de la sélectivité. Sert à mettre en avant les formations
+   * les plus « adaptées » à l'étudiant, indépendamment de la seule probabilité.
+   */
+  adequation: number
   /** Décomposition des sous-scores (0-100) pour la transparence. */
   details: {
     academique: number

@@ -1,6 +1,7 @@
 import type { ResultatSimulation } from '../types'
 import { LABELS_DOMAINE } from '../data/labels'
 import { construireStrategie } from '../engine/strategie'
+import { recommander } from '../engine/recommandation'
 import { coutDeLaVie } from '../data/coutVie'
 import { formaterPrix, type PrixFormation } from '../data/prix'
 import type { Conseil } from '../data/conseil'
@@ -142,6 +143,87 @@ function ResultItem({
   )
 }
 
+/**
+ * Bandeau « écoles adaptées » : met en avant les formations qui collent le
+ * mieux au profil (notes + spécialités + passions + région) tout en restant
+ * accessibles, avec les raisons de la mise en avant.
+ */
+function Recommandations({
+  resultats,
+  prix,
+}: {
+  resultats: ResultatSimulation[]
+  prix?: Map<string, PrixFormation>
+}) {
+  const reco = recommander(resultats, 3)
+  if (reco.length === 0) return null
+
+  return (
+    <section className="reco">
+      <div className="reco-head">
+        <span className="reco-tag">✨ Écoles adaptées à ton profil</span>
+        <p className="subtitle" style={{ margin: '0.35rem 0 0' }}>
+          Sélectionnées d'après tes notes, tes spécialités, tes passions et ta
+          région — en gardant des chances réalistes. Le meilleur point de départ
+          pour ta liste.
+        </p>
+      </div>
+      <div className="reco-grid">
+        {reco.map(({ resultat: r, raisons }, i) => {
+          const cout = coutDeLaVie(r.formation.ville, r.formation.region)
+          const p = prix?.get(r.formation.id)
+          return (
+            <article className="reco-card" key={r.formation.id}>
+              <div className="reco-rank">#{i + 1}</div>
+              <div className="reco-title">{r.formation.nom}</div>
+              <div className="reco-meta">
+                {r.formation.etablissement} · {r.formation.ville}
+              </div>
+              <div className="reco-scores">
+                <span
+                  className="reco-proba"
+                  style={{ color: couleurProba(r.probabilite) }}
+                >
+                  {r.probabilite}% <small>de chances</small>
+                </span>
+                <span className="reco-adeq" title="Correspondance avec ton profil">
+                  {r.adequation}/100 d'adéquation
+                </span>
+              </div>
+              {raisons.length > 0 && (
+                <ul className="reco-raisons">
+                  {raisons.map((raison, j) => (
+                    <li key={j}>{raison}</li>
+                  ))}
+                </ul>
+              )}
+              <div className="reco-facts">
+                {p ? (
+                  <span>💶 {formaterPrix(p)}</span>
+                ) : (
+                  r.formation.prixIndicatif && (
+                    <span>💶 {r.formation.prixIndicatif}</span>
+                  )
+                )}
+                <span>🏠 ~{cout.loyerStudio} €/mois</span>
+                {r.formation.lienParcoursup && (
+                  <a
+                    href={r.formation.lienParcoursup}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Parcoursup ↗
+                  </a>
+                )}
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 interface ResultatsProps {
   resultats: ResultatSimulation[]
   prix?: Map<string, PrixFormation>
@@ -172,6 +254,9 @@ export default function Resultats({
           ))}
         </div>
       )}
+
+      <Recommandations resultats={resultats} prix={prix} />
+
       <h2>Votre liste de vœux conseillée</h2>
       <p className="subtitle">
         Pour maximiser vos chances, Parcoursup recommande une liste{' '}

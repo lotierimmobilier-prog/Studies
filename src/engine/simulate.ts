@@ -194,6 +194,7 @@ export function simulerFormation(
   return {
     formation,
     probabilite,
+    adequation: Math.round(scoreAdequation),
     details: { academique, specialites, passion, motivation, geographie },
     explications,
   }

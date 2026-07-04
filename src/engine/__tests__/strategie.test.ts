@@ -17,6 +17,7 @@ function fakeResultat(id: string, probabilite: number): ResultatSimulation {
       attendus: '',
     },
     probabilite,
+    adequation: 50,
     details: {
       academique: 50,
       specialites: 50,
