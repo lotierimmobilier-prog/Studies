@@ -20,7 +20,11 @@ export interface PrixFormation {
   dateMaj: string
 }
 
-const BASE = (import.meta.env.VITE_PRIX_API ?? '') as string
+// Préfixe des appels API. Par défaut, on suit le sous-chemin de déploiement
+// (import.meta.env.BASE_URL, ex. « /studies/ » sur le VPS, « / » à la racine),
+// pour que l'API soit servie sous le même préfixe que le front. VITE_PRIX_API
+// permet de forcer une URL absolue (dev, backend séparé).
+const BASE = ((import.meta.env.VITE_PRIX_API ?? import.meta.env.BASE_URL ?? '') as string).replace(/\/$/, '')
 
 /** Formatte un prix annuel en libellé lisible. */
 export function formaterPrix(p: PrixFormation): string {

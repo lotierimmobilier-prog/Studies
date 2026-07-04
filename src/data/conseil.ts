@@ -15,7 +15,9 @@ export interface Conseil {
   source: 'ia' | 'regles' | 'local'
 }
 
-const BASE = (import.meta.env.VITE_PRIX_API ?? '') as string
+// Voir src/data/prix.ts : le préfixe API suit le sous-chemin de déploiement
+// (import.meta.env.BASE_URL), pour fonctionner à la racine ou sous « /studies ».
+const BASE = ((import.meta.env.VITE_PRIX_API ?? import.meta.env.BASE_URL ?? '') as string).replace(/\/$/, '')
 
 /** Prépare un résumé compact du profil pour le backend. */
 function resumerProfil(profil: ProfilEtudiant, bulletin?: AnalyseBulletin | null) {

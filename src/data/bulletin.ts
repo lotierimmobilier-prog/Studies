@@ -17,7 +17,9 @@ export type ResultatBulletin =
   | { ok: true; analyse: AnalyseBulletin }
   | { ok: false; erreur: string; configRequise?: boolean }
 
-const BASE = (import.meta.env.VITE_PRIX_API ?? '') as string
+// Voir src/data/prix.ts : le préfixe API suit le sous-chemin de déploiement
+// (import.meta.env.BASE_URL), pour fonctionner à la racine ou sous « /studies ».
+const BASE = ((import.meta.env.VITE_PRIX_API ?? import.meta.env.BASE_URL ?? '') as string).replace(/\/$/, '')
 
 const TYPES_OK: Record<string, string> = {
   'application/pdf': 'application/pdf',

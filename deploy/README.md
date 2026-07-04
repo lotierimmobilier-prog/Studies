@@ -1,9 +1,70 @@
-# Déploiement automatique sur le VPS
+# Déploiement sur le VPS
+
+Deux méthodes. **La méthode A (directe) est la plus simple** et n'a besoin
+d'aucune clé SSH ni secret GitHub — c'est celle à privilégier.
+
+---
+
+## Méthode A — déploiement direct sur le VPS (recommandée, sans clé SSH)
+
+Le script `deploy/vps-setup.sh` fait **tout** depuis le VPS : il récupère le
+dépôt (public), installe Node/nginx/pm2 au besoin, build le front, le sert sous
+un **sous-chemin** (`/studies`) et démarre l'API. Idempotent : relance-le pour
+mettre à jour.
+
+Connecté en **root** sur le VPS (`ssh root@76.13.37.163`), une seule commande :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh | bash
+```
+
+Pour activer l'IA (conseils + analyse de bulletin), passe ta clé API :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh \
+  | ANTHROPIC_API_KEY="sk-ant-..." bash
+```
+
+Le site est alors en ligne sur **http://76.13.37.163/studies/**.
+
+### Héberger plusieurs projets sur le même VPS
+
+Chaque projet est servi sous **son propre sous-chemin** et dépose sa config
+nginx dans `/etc/nginx/projets.d/` (inclus par le serveur principal), donc les
+projets ne se marchent pas dessus. Pour ce projet, le sous-chemin est `/studies`.
+Pour en ajouter un autre plus tard, choisis un `SLUG` et un **port d'API unique** :
+
+```bash
+SLUG=monsite API_PORT=8788 bash deploy/vps-setup.sh
+# -> servi sur http://76.13.37.163/monsite/
+```
+
+Variables disponibles : `SLUG` (sous-chemin), `API_PORT` (port local unique par
+projet), `ANTHROPIC_API_KEY`, `SERVER_NAME` (IP ou domaine), `REDIRECT_ROOT`
+(`1` = « / » redirige vers `/studies/`).
+
+### Vérifier / dépanner
+
+```bash
+pm2 status                          # « studies-api » doit être online
+curl localhost:8787/api/sante       # doit répondre {"ok":true}
+curl http://76.13.37.163/studies/api/sante
+sudo tail -f /var/log/nginx/error.log
+```
+
+---
+
+## Méthode B — déploiement automatique via GitHub Actions (clé SSH requise)
 
 Le workflow `.github/workflows/deploy-vps.yml` synchronise le site **à chaque
 push** vers le VPS : il envoie le front (statique) et le serveur Node (prix +
 IA), installe les dépendances et redémarre l'API. Voici la configuration à faire
 **une seule fois**.
+
+> Cette méthode sert le site **à la racine** (`/`). Elle dépend d'une clé SSH
+> bien formée dans le secret `VPS_SSH_KEY` (cause fréquente d'échec :
+> `error in libcrypto` = clé incomplète ou sans retour à la ligne final).
+> Si tu bloques dessus, utilise plutôt la **méthode A**.
 
 ## 1. Préparer le VPS (une fois)
 
