@@ -28,6 +28,7 @@ import {
 } from './data/bulletin'
 import Stepper from './components/Stepper'
 import Resultats from './components/Resultats'
+import Accueil from './components/Accueil'
 
 const ETAPES = ['Résultats', 'Localisation', 'Passions', 'Motivation']
 
@@ -46,6 +47,7 @@ const PROFIL_INITIAL: ProfilEtudiant = {
 type Statut = 'formulaire' | 'chargement' | 'resultats' | 'erreur'
 
 export default function App() {
+  const [vue, setVue] = useState<'accueil' | 'app'>('accueil')
   const [etape, setEtape] = useState(0)
   const [profil, setProfil] = useState<ProfilEtudiant>(PROFIL_INITIAL)
   const [statut, setStatut] = useState<Statut>('formulaire')
@@ -139,6 +141,10 @@ export default function App() {
       if (p.specialites.length >= MAX_SPECIALITES) return p // limite atteinte
       return { ...p, specialites: [...p.specialites, s] }
     })
+  }
+
+  if (vue === 'accueil') {
+    return <Accueil onCommencer={() => setVue('app')} />
   }
 
   if (statut === 'chargement') {

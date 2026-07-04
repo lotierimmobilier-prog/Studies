@@ -491,3 +491,238 @@ button.btn:active {
   font-size: 0.8rem;
   margin-top: 2.5rem;
 }
+
+/* ============ Page d'accueil ============ */
+.accueil {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.25rem 3rem;
+}
+
+.acc-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 0;
+}
+.acc-logo {
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.acc-nav-cta {
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+}
+
+.acc-hero {
+  text-align: center;
+  padding: 2.5rem 0 1rem;
+}
+.acc-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.acc-hero h1 {
+  font-size: clamp(2rem, 6vw, 3.4rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  margin: 0.6rem 0 0.9rem;
+  text-wrap: balance;
+}
+.acc-lede {
+  color: var(--text-muted);
+  max-width: 56ch;
+  margin: 0 auto;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+.acc-lede strong {
+  color: var(--text);
+}
+.acc-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+  margin: 1.6rem 0 0.9rem;
+}
+.acc-cta-main {
+  padding: 0.8rem 1.7rem;
+  font-size: 1rem;
+}
+.acc-cta-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.acc-cta-link:hover {
+  text-decoration: underline;
+}
+.acc-reassure {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+}
+
+.acc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin: 2.2rem 0;
+  padding: 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+}
+.acc-stats div {
+  text-align: center;
+}
+.acc-stats b {
+  display: block;
+  font-size: 1.5rem;
+  color: var(--accent-strong);
+  font-variant-numeric: tabular-nums;
+}
+.acc-stats span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.acc-section {
+  margin: 3rem 0;
+}
+.acc-section h2 {
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+  letter-spacing: -0.02em;
+  text-align: center;
+  text-wrap: balance;
+  margin: 0 0 0.4rem;
+}
+.acc-sub {
+  text-align: center;
+  color: var(--text-muted);
+  margin: 0 0 1.6rem;
+}
+.acc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1.6rem;
+}
+.acc-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  padding: 1.3rem;
+  box-shadow: var(--shadow);
+}
+.acc-card-emoji {
+  font-size: 1.7rem;
+  margin-bottom: 0.5rem;
+}
+.acc-card h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1.05rem;
+}
+.acc-card p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.acc-steps {
+  display: grid;
+  gap: 0.9rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.acc-step {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  padding: 1.1rem 1.2rem;
+}
+.acc-step-n {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--on-accent);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+}
+.acc-step h3 {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+}
+.acc-step p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.acc-joke {
+  border: 1px solid var(--accent);
+  border-left-width: 3px;
+  background: var(--accent-tint);
+  border-radius: var(--radius);
+  padding: 1.2rem 1.4rem;
+  margin: 3rem 0;
+}
+.acc-joke p {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+.acc-joke strong {
+  color: var(--text);
+}
+
+.acc-final {
+  text-align: center;
+  padding: 2.5rem 1.2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+  margin: 3rem 0 2rem;
+}
+.acc-final h2 {
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+}
+.acc-final p {
+  color: var(--text-muted);
+  margin: 0 0 1.4rem;
+}
+
+.acc-footer {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  max-width: 60ch;
+  margin: 0 auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
