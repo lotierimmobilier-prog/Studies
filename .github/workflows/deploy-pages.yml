@@ -10,11 +10,10 @@ name: Déployer le front sur GitHub Pages
 # Les prix réels et le conseil IA basculent en repli (prix indicatifs, règles),
 # tant que le serveur (server/) n'est pas déployé séparément.
 
+# Déclenchement manuel uniquement (le déploiement principal se fait sur le VPS
+# via deploy-vps.yml). Active « GitHub Actions » dans Settings → Pages avant de
+# lancer ce workflow depuis l'onglet Actions.
 on:
-  push:
-    branches:
-      - main
-      - claude/parcoursup-admission-simulator-2jy76p
   workflow_dispatch:
 
 permissions:

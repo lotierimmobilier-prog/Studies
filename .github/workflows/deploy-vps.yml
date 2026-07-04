@@ -26,6 +26,11 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # VPS_HOST est exposé pour permettre aux étapes de déploiement de se
+    # « mettre en pause » proprement tant que les secrets ne sont pas définis
+    # (le job reste vert au lieu d'échouer).
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
     steps:
       - uses: actions/checkout@v4
 
@@ -39,22 +44,30 @@ jobs:
           npm ci
           npm run build          # VITE_BASE par défaut = '/', servi à la racine du domaine
 
+      - name: Secrets non configurés — déploiement ignoré
+        if: ${{ env.VPS_HOST == '' }}
+        run: echo "::notice::Secrets VPS absents (VPS_HOST/VPS_USER/VPS_SSH_KEY). Voir deploy/README.md. Déploiement ignoré."
+
       - name: Charger la clé SSH
+        if: ${{ env.VPS_HOST != '' }}
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
       - name: Ajouter le VPS aux hôtes connus
+        if: ${{ env.VPS_HOST != '' }}
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Synchroniser le front (dist → nginx)
+        if: ${{ env.VPS_HOST != '' }}
         run: |
           rsync -az --delete dist/ \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${WEB_ROOT}/"
 
       - name: Synchroniser le serveur Node
+        if: ${{ env.VPS_HOST != '' }}
         run: |
           rsync -az --delete \
             server/ \
@@ -63,6 +76,7 @@ jobs:
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${APP_DIR}/"
 
       - name: Installer les dépendances et (re)démarrer l'API
+        if: ${{ env.VPS_HOST != '' }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
