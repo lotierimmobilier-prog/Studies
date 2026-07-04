@@ -26,3 +26,24 @@ export interface RequetePrix {
   /** Intitulé de la formation (aide au classement par catégorie). */
   formation?: string
 }
+
+/** Avis Google d'un établissement (note moyenne + nombre d'avis). */
+export interface AvisEcole {
+  etablissement: string
+  /** Note moyenne sur 5, ou null si inconnue. */
+  note: number | null
+  /** Nombre d'avis pris en compte, ou null si inconnu. */
+  nombreAvis: number | null
+  /** Provenance : Google Places, ou indisponible (clé absente / non trouvé). */
+  source: 'google' | 'indisponible'
+  /** Lien vers la fiche Google Maps, le cas échéant. */
+  urlMaps?: string
+  /** Date de mise à jour (ISO), injectée par l'appelant. */
+  dateMaj: string
+}
+
+/** Requête d'avis : le nom et la ville aident à identifier la bonne fiche. */
+export interface RequeteAvis {
+  etablissement: string
+  ville?: string
+}

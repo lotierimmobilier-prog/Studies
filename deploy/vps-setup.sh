@@ -20,6 +20,7 @@
 #   SLUG=studies                 # sous-chemin + nom du projet (URL : /studies)
 #   API_PORT=8787                # port local de l'API Node (unique par projet !)
 #   ANTHROPIC_API_KEY=sk-ant-... # active l'IA (conseils + analyse de bulletin)
+#   GOOGLE_MAPS_API_KEY=...      # active les avis Google (note ⭐ des écoles)
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
 #
@@ -93,19 +94,27 @@ done
 cd "${APP_DIR}"
 npm ci
 
-# Clé API (facultative) : active l'IA si fournie.
+# Clés API (facultatives), tracées dans .env pour référence. Elles sont surtout
+# transmises au process via l'environnement (pm2 les capte au démarrage).
+: > "${APP_DIR}/.env"
 if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
-  echo "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}" > "${APP_DIR}/.env"
+  echo "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}" >> "${APP_DIR}/.env"
   log "Clé ANTHROPIC_API_KEY enregistrée (IA activée)."
 else
   log "Pas de clé ANTHROPIC_API_KEY : prix en estimation, conseil en mode règles."
 fi
+if [ -n "${GOOGLE_MAPS_API_KEY:-}" ]; then
+  echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> "${APP_DIR}/.env"
+  log "Clé GOOGLE_MAPS_API_KEY enregistrée (avis Google activés)."
+else
+  log "Pas de clé GOOGLE_MAPS_API_KEY : les notes Google ne s'affichent pas."
+fi
 
 log "(Re)démarrage de l'API « ${PM2_NAME} » (port ${API_PORT}) via pm2…"
 if pm2 describe "${PM2_NAME}" >/dev/null 2>&1; then
-  PORT="${API_PORT}" pm2 restart "${PM2_NAME}" --update-env
+  PORT="${API_PORT}" ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY:-}" pm2 restart "${PM2_NAME}" --update-env
 else
-  PORT="${API_PORT}" pm2 start "npx tsx server/index.ts" --name "${PM2_NAME}" --update-env
+  PORT="${API_PORT}" ANTHROPIC_API_KEY="${ANTHROPIC_API_KEY:-}" GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY:-}" pm2 start "npx tsx server/index.ts" --name "${PM2_NAME}" --update-env
 fi
 pm2 save
 pm2 startup systemd -u root --hp /root >/dev/null 2>&1 || true

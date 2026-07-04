@@ -18,12 +18,18 @@ Connecté en **root** sur le VPS (`ssh root@76.13.37.163`), une seule commande :
 curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh | bash
 ```
 
-Pour activer l'IA (conseils + analyse de bulletin), passe ta clé API :
+Pour activer l'IA (conseils + analyse de bulletin) et les **avis Google** (note
+⭐ des écoles), passe les clés API :
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh \
-  | ANTHROPIC_API_KEY="sk-ant-..." bash
+  | ANTHROPIC_API_KEY="sk-ant-..." GOOGLE_MAPS_API_KEY="AIza..." bash
 ```
+
+> **Clé Google** : dans [Google Cloud Console](https://console.cloud.google.com/),
+> active l'API **Places API**, crée une clé API et restreins-la à cette API. Un
+> quota gratuit mensuel est inclus. Sans clé, l'app fonctionne : les notes ⭐ ne
+> s'affichent simplement pas.
 
 Le site est alors en ligne sur **http://76.13.37.163/studies/**.
 

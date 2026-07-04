@@ -21,6 +21,7 @@ import {
 } from './data/labels'
 import { simulerToutes } from './engine/simulate'
 import { chargerPrix, type PrixFormation } from './data/prix'
+import { chargerAvis, type AvisEcole } from './data/avis'
 import { chargerConseil, type Conseil } from './data/conseil'
 import {
   analyserBulletin,
@@ -54,6 +55,7 @@ export default function App() {
   const [formations, setFormations] = useState<Formation[]>([])
   const [sourceReelle, setSourceReelle] = useState(true)
   const [prix, setPrix] = useState<Map<string, PrixFormation>>(new Map())
+  const [avis, setAvis] = useState<Map<string, AvisEcole>>(new Map())
   const [conseil, setConseil] = useState<Conseil | null>(null)
   const [bulletin, setBulletin] = useState<AnalyseBulletin | null>(null)
   const [bulletinStatut, setBulletinStatut] = useState<
@@ -100,8 +102,8 @@ export default function App() {
 
     // Prix des écoles récupérés côté serveur (scraping) pour les mieux classées.
     const resultats = simulerToutes(liste, profil)
-    const topPourPrix = resultats.slice(0, 24).map((r) => r.formation)
-    chargerPrix(topPourPrix)
+    const top = resultats.slice(0, 24).map((r) => r.formation)
+    chargerPrix(top)
       .then((mapPrix) => {
         setPrix(mapPrix)
         // Conseils personnalisés (IA côté serveur si configurée, sinon règles).
@@ -109,6 +111,12 @@ export default function App() {
       })
       .then(setConseil)
       .catch(() => setConseil(null))
+
+    // Avis Google (note ⭐) récupérés en parallèle ; repli silencieux si absent.
+    setAvis(new Map())
+    chargerAvis(top)
+      .then(setAvis)
+      .catch(() => setAvis(new Map()))
   }
 
   const setNote = (matiere: Matiere, valeur: string) => {
@@ -179,6 +187,7 @@ export default function App() {
         <Resultats
           resultats={resultats}
           prix={prix}
+          avis={avis}
           conseil={conseil}
           sourceReelle={sourceReelle}
           onRecommencer={() => {

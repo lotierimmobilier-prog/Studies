@@ -842,3 +842,10 @@ button.btn:active {
 .reco-facts a:hover {
   text-decoration: underline;
 }
+
+/* Note Google (avis) : suffixe discret « · Google » */
+.avis-src {
+  font-size: 0.72em;
+  color: var(--text-muted);
+  font-weight: 500;
+}

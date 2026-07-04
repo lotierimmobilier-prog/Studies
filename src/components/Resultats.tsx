@@ -4,7 +4,27 @@ import { construireStrategie } from '../engine/strategie'
 import { recommander } from '../engine/recommandation'
 import { coutDeLaVie } from '../data/coutVie'
 import { formaterPrix, type PrixFormation } from '../data/prix'
+import { formaterAvis, type AvisEcole } from '../data/avis'
 import type { Conseil } from '../data/conseil'
+
+/** Puce « note Google ⭐ », rendue seulement si un avis est disponible. */
+function NoteGoogle({ avis }: { avis?: AvisEcole }) {
+  if (!avis) return null
+  const libelle = formaterAvis(avis)
+  if (!libelle) return null
+  const contenu = (
+    <>
+      ⭐ {libelle} <span className="avis-src">· Google</span>
+    </>
+  )
+  return avis.urlMaps ? (
+    <a href={avis.urlMaps} target="_blank" rel="noreferrer" title="Voir sur Google Maps">
+      {contenu}
+    </a>
+  ) : (
+    <span title="Avis Google">{contenu}</span>
+  )
+}
 
 /**
  * Probabilité déclinée dans la couleur unique (bleu, teinte 214) :
@@ -26,9 +46,11 @@ function libelleChance(p: number): string {
 function ResultItem({
   r,
   prix,
+  avis,
 }: {
   r: ResultatSimulation
   prix?: PrixFormation
+  avis?: AvisEcole
 }) {
   return (
     <div className="result-item">
@@ -93,6 +115,7 @@ function ResultItem({
         return (
           <div className="infos-reelles">
             {r.formation.statut && <span>🏛️ {r.formation.statut}</span>}
+            <NoteGoogle avis={avis} />
             {prix ? (
               <span
                 title={
@@ -151,9 +174,11 @@ function ResultItem({
 function Recommandations({
   resultats,
   prix,
+  avis,
 }: {
   resultats: ResultatSimulation[]
   prix?: Map<string, PrixFormation>
+  avis?: Map<string, AvisEcole>
 }) {
   const reco = recommander(resultats, 3)
   if (reco.length === 0) return null
@@ -205,6 +230,7 @@ function Recommandations({
                     <span>💶 {r.formation.prixIndicatif}</span>
                   )
                 )}
+                <NoteGoogle avis={avis?.get(r.formation.id)} />
                 <span>🏠 ~{cout.loyerStudio} €/mois</span>
                 {r.formation.lienParcoursup && (
                   <a
@@ -227,6 +253,7 @@ function Recommandations({
 interface ResultatsProps {
   resultats: ResultatSimulation[]
   prix?: Map<string, PrixFormation>
+  avis?: Map<string, AvisEcole>
   conseil?: Conseil | null
   sourceReelle?: boolean
   onRecommencer: () => void
@@ -236,6 +263,7 @@ interface ResultatsProps {
 export default function Resultats({
   resultats,
   prix,
+  avis,
   conseil,
   sourceReelle = true,
   onRecommencer,
@@ -255,7 +283,7 @@ export default function Resultats({
         </div>
       )}
 
-      <Recommandations resultats={resultats} prix={prix} />
+      <Recommandations resultats={resultats} prix={prix} avis={avis} />
 
       <h2>Votre liste de vœux conseillée</h2>
       <p className="subtitle">
@@ -283,6 +311,7 @@ export default function Resultats({
               key={r.formation.id}
               r={r}
               prix={prix?.get(r.formation.id)}
+              avis={avis?.get(r.formation.id)}
             />
           ))}
         </section>

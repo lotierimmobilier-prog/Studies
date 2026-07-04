@@ -8,11 +8,11 @@ name: Déployer sur le VPS
 #    (+ facultatif : ANTHROPIC_API_KEY pour le conseiller / l'analyse de bulletin)
 #  - Sur le VPS : Node 22, nginx, pm2, et les dossiers cibles créés.
 
+# Déclenchement MANUEL uniquement (Actions → « Déployer sur le VPS » → Run
+# workflow). Le déploiement recommandé se fait désormais directement sur le VPS
+# via deploy/vps-setup.sh (aucune clé SSH GitHub requise, voir deploy/README.md),
+# ce qui évite les échecs de CI liés à la clé SSH ou à l'accessibilité du VPS.
 on:
-  push:
-    branches:
-      - main
-      - claude/parcoursup-admission-simulator-2jy76p
   workflow_dispatch:
 
 concurrency:
@@ -79,21 +79,22 @@ jobs:
         if: ${{ env.VPS_HOST != '' }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' bash -s" <<'REMOTE'
+            "ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' GOOGLE_MAPS_API_KEY='${GOOGLE_MAPS_API_KEY}' bash -s" <<'REMOTE'
           set -e
           cd /opt/parcoursup
           npm ci
-          # Écrit la clé API dans l'environnement du service (si fournie).
-          if [ -n "$ANTHROPIC_API_KEY" ]; then
-            echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" > .env
-          fi
+          # Écrit les clés API dans l'environnement du service (si fournies).
+          : > .env
+          [ -n "$ANTHROPIC_API_KEY" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env
+          [ -n "$GOOGLE_MAPS_API_KEY" ] && echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
           # (Re)démarre l'API via pm2 (tsx exécute le TypeScript directement).
           if pm2 describe parcoursup-api > /dev/null 2>&1; then
-            pm2 restart parcoursup-api --update-env
+            ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" pm2 restart parcoursup-api --update-env
           else
-            PORT=8787 pm2 start "npx tsx server/index.ts" --name parcoursup-api --update-env
+            PORT=8787 ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" pm2 start "npx tsx server/index.ts" --name parcoursup-api --update-env
           fi
           pm2 save
           REMOTE
