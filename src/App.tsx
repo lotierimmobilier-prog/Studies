@@ -6,6 +6,7 @@ import type {
   Matiere,
   ProfilEtudiant,
   Region,
+  ResultatSimulation,
   Specialite,
 } from './types'
 import { FORMATIONS } from './data/formations'
@@ -49,6 +50,20 @@ const PROFIL_INITIAL: ProfilEtudiant = {
 }
 
 type Statut = 'formulaire' | 'chargement' | 'resultats' | 'erreur'
+
+/**
+ * Restreint les formations transmises à l'IA (conseil, questions) au domaine
+ * visé par l'élève (ses passions), pour un conseil ciblé. Repli sur tout si
+ * aucune passion n'est indiquée ou si rien ne correspond.
+ */
+function resultatsPourIA(
+  resultats: ResultatSimulation[],
+  profil: ProfilEtudiant,
+): ResultatSimulation[] {
+  if (profil.passions.length === 0) return resultats
+  const dans = resultats.filter((r) => profil.passions.includes(r.formation.domaine))
+  return dans.length > 0 ? dans : resultats
+}
 
 export default function App() {
   const [vue, setVue] = useState<'accueil' | 'app'>('accueil')
@@ -110,11 +125,13 @@ export default function App() {
     // Prix des écoles récupérés côté serveur (scraping) pour les mieux classées.
     const resultats = simulerToutes(liste, profil)
     const top = resultats.slice(0, 24).map((r) => r.formation)
+    // Le conseil IA se concentre sur le domaine visé (les passions).
+    const pourIA = resultatsPourIA(resultats, profil)
     chargerPrix(top)
       .then((mapPrix) => {
         setPrix(mapPrix)
         // Conseils personnalisés (IA côté serveur si configurée, sinon règles).
-        return chargerConseil(profil, resultats, mapPrix, bulletin)
+        return chargerConseil(profil, pourIA, mapPrix, bulletin)
       })
       .then(setConseil)
       .catch(() => setConseil(null))
@@ -203,7 +220,7 @@ export default function App() {
         <div className="card" style={{ marginBottom: '1.25rem' }}>
           <Affiner
             profil={profil}
-            resultats={resultats}
+            resultats={resultatsPourIA(resultats, profil)}
             prix={prix}
             bulletin={bulletin}
             onConseil={setConseil}
@@ -215,6 +232,7 @@ export default function App() {
           avis={avis}
           conseil={conseil}
           sourceReelle={sourceReelle}
+          domainesInteret={profil.passions}
           onRecommencer={() => {
             setStatut('formulaire')
             setEtape(0)

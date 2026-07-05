@@ -1254,3 +1254,12 @@ button.btn:active {
   opacity: 1;
   font-weight: 600;
 }
+
+/* Parcours d'exception (hors domaine, en bonus) */
+.exception {
+  margin-top: 0.5rem;
+  padding: 1rem 1.1rem 0.4rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+}

@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { ResultatSimulation } from '../types'
+import type { Domaine, ResultatSimulation } from '../types'
 import { LABELS_DOMAINE } from '../data/labels'
 import { construireStrategie } from '../engine/strategie'
-import { recommander } from '../engine/recommandation'
+import { recommander, scoreRecommandation } from '../engine/recommandation'
 import {
   filtrerResultats,
   domainesDisponibles,
@@ -308,8 +308,15 @@ interface ResultatsProps {
   avis?: Map<string, AvisEcole>
   conseil?: Conseil | null
   sourceReelle?: boolean
+  /** Domaines qui intéressent l'élève (ses passions) : filtre les résultats. */
+  domainesInteret?: Domaine[]
   onRecommencer: () => void
 }
+
+/** Nombre max de « parcours d'exception » hors domaine affichés en bonus. */
+const MAX_EXCEPTION = 3
+/** Adéquation minimale pour qu'un parcours hors domaine mérite d'être proposé. */
+const SEUIL_EXCEPTION = 60
 
 /** Résultats groupés en une liste de vœux équilibrée (plusieurs choix). */
 export default function Resultats({
@@ -318,6 +325,7 @@ export default function Resultats({
   avis,
   conseil,
   sourceReelle = true,
+  domainesInteret = [],
   onRecommencer,
 }: ResultatsProps) {
   const [criteres, setCriteres] = useState<CriteresFiltre>({})
@@ -343,7 +351,24 @@ export default function Resultats({
     () => filtrerResultats(resultats, criteres, { prix, avis }),
     [resultats, criteres, prix, avis],
   )
-  const groupes = construireStrategie(resultatsFiltres)
+
+  // On ne propose que les formations du/des domaine(s) qui intéressent l'élève.
+  // Les autres n'apparaissent qu'en « parcours d'exception » (bonus), si elles
+  // sont vraiment adaptées — pour ne pas noyer un projet de droit sous du sport
+  // ou du commerce.
+  const cibleDomaines = domainesInteret.length > 0
+  const { pertinents, exception } = useMemo(() => {
+    if (!cibleDomaines) return { pertinents: resultatsFiltres, exception: [] }
+    const dans = new Set(domainesInteret)
+    const pertinents = resultatsFiltres.filter((r) => dans.has(r.formation.domaine))
+    const exception = resultatsFiltres
+      .filter((r) => !dans.has(r.formation.domaine) && r.adequation >= SEUIL_EXCEPTION)
+      .sort((a, b) => scoreRecommandation(b) - scoreRecommandation(a))
+      .slice(0, MAX_EXCEPTION)
+    return { pertinents, exception }
+  }, [resultatsFiltres, domainesInteret, cibleDomaines])
+
+  const groupes = construireStrategie(pertinents)
 
   return (
     <div className="card">
@@ -370,12 +395,12 @@ export default function Resultats({
         domaines={domaines}
         villes={villes}
         avecNote={avecNote}
-        nbResultats={resultatsFiltres.length}
+        nbResultats={pertinents.length}
         nbTotal={resultats.length}
       />
 
       <Recommandations
-        resultats={resultatsFiltres}
+        resultats={pertinents}
         prix={prix}
         avis={avis}
         estDansListe={estDansListe}
@@ -395,9 +420,21 @@ export default function Resultats({
         )}
       </p>
 
+      {cibleDomaines && (
+        <p className="subtitle" style={{ marginTop: '-0.4rem' }}>
+          🎯 Filtré sur ton domaine :{' '}
+          <strong>
+            {domainesInteret.map((d) => LABELS_DOMAINE[d]).join(', ')}
+          </strong>
+          .
+        </p>
+      )}
+
       {groupes.length === 0 ? (
         <p className="subtitle">
-          Aucune formation ne correspond à ces filtres. Élargis ta recherche.
+          {cibleDomaines
+            ? "Aucune formation de ton domaine ne ressort avec ces filtres. Élargis ta recherche, ou regarde les parcours d'exception ci-dessous."
+            : 'Aucune formation ne correspond à ces filtres. Élargis ta recherche.'}
         </p>
       ) : (
         groupes.map((g) => (
@@ -420,6 +457,26 @@ export default function Resultats({
             ))}
           </section>
         ))
+      )}
+
+      {exception.length > 0 && (
+        <section className="exception">
+          <h3 style={{ margin: '0 0 0.15rem' }}>🌟 Parcours d'exception</h3>
+          <p className="subtitle" style={{ margin: '0 0 0.9rem' }}>
+            Hors de ton domaine, mais particulièrement adaptés à ton profil — à
+            considérer seulement si tu veux ouvrir tes horizons.
+          </p>
+          {exception.map((r) => (
+            <ResultItem
+              key={r.formation.id}
+              r={r}
+              prix={prix?.get(r.formation.id)}
+              avis={avis?.get(r.formation.id)}
+              dansListe={estDansListe(r.formation.id)}
+              onToggleVoeu={() => onToggleVoeu(r)}
+            />
+          ))}
+        </section>
       )}
 
       <div className="actions">
