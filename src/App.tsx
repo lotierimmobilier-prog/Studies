@@ -39,6 +39,7 @@ const PROFIL_INITIAL: ProfilEtudiant = {
   souhaits: '',
   specialites: [],
   notes: {},
+  matieresExclues: [],
   region: null,
   villes: [],
   mobilite: false,
@@ -136,6 +137,15 @@ export default function App() {
       }
       return { ...p, notes }
     })
+  }
+
+  const toggleExclusionMatiere = (matiere: Matiere) => {
+    setProfil((p) => ({
+      ...p,
+      matieresExclues: p.matieresExclues.includes(matiere)
+        ? p.matieresExclues.filter((m) => m !== matiere)
+        : [...p.matieresExclues, matiere],
+    }))
   }
 
   const togglePassion = (d: Domaine) => {
@@ -303,22 +313,39 @@ export default function App() {
               </div>
             )}
 
+            <p className="subtitle" style={{ margin: '0 0 0.6rem' }}>
+              Astuce : tu peux <strong>exclure</strong> une matière peu
+              prioritaire pour ton projet — elle ne pénalisera pas ton
+              estimation.
+            </p>
             <div className="grid">
-              {MATIERES.map((m) => (
-                <div className="field" key={m}>
-                  <label htmlFor={m}>{LABELS_MATIERE[m]}</label>
-                  <input
-                    id={m}
-                    type="number"
-                    min={0}
-                    max={20}
-                    step={0.5}
-                    placeholder="—"
-                    value={profil.notes[m] ?? ''}
-                    onChange={(e) => setNote(m, e.target.value)}
-                  />
-                </div>
-              ))}
+              {MATIERES.map((m) => {
+                const exclue = profil.matieresExclues.includes(m)
+                return (
+                  <div className={`field${exclue ? ' field-exclue' : ''}`} key={m}>
+                    <label htmlFor={m}>{LABELS_MATIERE[m]}</label>
+                    <input
+                      id={m}
+                      type="number"
+                      min={0}
+                      max={20}
+                      step={0.5}
+                      placeholder="—"
+                      value={profil.notes[m] ?? ''}
+                      onChange={(e) => setNote(m, e.target.value)}
+                      disabled={exclue}
+                    />
+                    <button
+                      type="button"
+                      className="exclure-btn"
+                      onClick={() => toggleExclusionMatiere(m)}
+                      aria-pressed={exclue}
+                    >
+                      {exclue ? '↩ Réintégrer' : '✕ Exclure de l’analyse'}
+                    </button>
+                  </div>
+                )
+              })}
             </div>
 
             <div style={{ marginTop: '1.4rem' }}>

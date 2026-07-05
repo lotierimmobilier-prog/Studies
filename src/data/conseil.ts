@@ -31,14 +31,16 @@ function resumerProfil(
   bulletin?: AnalyseBulletin | null,
   reponses?: ReponseCiblage[],
 ) {
+  const exclues = new Set(profil.matieresExclues)
   const notes = (Object.entries(profil.notes) as [Matiere, number][])
-    .filter(([, v]) => typeof v === 'number')
+    .filter(([m, v]) => typeof v === 'number' && !exclues.has(m))
     .sort((a, b) => b[1] - a[1])
   return {
     classe: profil.classe,
     souhaits: profil.souhaits,
     specialites: profil.specialites.map((s) => LABELS_SPECIALITE[s]),
     meilleuresMatieres: notes.slice(0, 3).map(([m]) => LABELS_MATIERE[m]),
+    matieresExclues: profil.matieresExclues.map((m) => LABELS_MATIERE[m]),
     region: profil.region,
     villes: profil.villes,
     mobilite: profil.mobilite,

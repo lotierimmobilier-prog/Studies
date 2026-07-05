@@ -107,6 +107,8 @@ export interface ProfilEtudiant {
   specialites: Specialite[]
   /** Notes sur 20 par matière (partiel : seules les matières renseignées comptent). */
   notes: Partial<Record<Matiere, number>>
+  /** Matières exclues de l'analyse (non prioritaires pour le parcours visé). */
+  matieresExclues: Matiere[]
   region: Region | null
   /** Villes préférées (jusqu'à 2) pour étudier — affine l'adéquation géographique. */
   villes: string[]

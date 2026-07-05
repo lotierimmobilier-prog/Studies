@@ -23,6 +23,8 @@ export interface ProfilResume {
   souhaits?: string
   specialites?: string[]
   meilleuresMatieres: string[]
+  /** Matières que l'élève a écartées de l'analyse (non prioritaires). */
+  matieresExclues?: string[]
   region: string | null
   /** Villes visées en priorité (facultatif). */
   villes?: string[]
@@ -140,6 +142,7 @@ Règles :
 - Exploite EN PRIORITÉ les réponses de ciblage ("reponses") pour trancher entre les options (cursus court/long, alternance, priorité débouchés/passion/proximité/coût…) : c'est ce qui rend le conseil personnalisé.
 - Tiens compte des villes visées ("villes") si présentes : mets en avant les formations qui s'y trouvent.
 - Tiens compte des spécialités choisies ("specialites") : signale si elles sont bien alignées avec les formations visées, ou si un ajustement serait utile.
+- Respecte les matières écartées par l'élève ("matieresExclues") : ne lui reproche pas ses notes dans ces matières, considère-les comme non prioritaires pour son projet.
 - Exploite l'analyse du bulletin quand elle est fournie ("appreciation", "signaux") : sérieux, participation, progression.
 - Relie les conseils aux souhaits exprimés par l'élève.
 - Reste factuel : ce sont des estimations, jamais des garanties d'admission.

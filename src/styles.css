@@ -1227,3 +1227,30 @@ button.btn:active {
   font-weight: 600;
   color: hsl(150 55% 40%);
 }
+
+/* Exclusion d'une matière de l'analyse */
+.exclure-btn {
+  margin-top: 0.35rem;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.72rem;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+}
+.exclure-btn:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+.field-exclue {
+  opacity: 0.55;
+}
+.field-exclue label {
+  text-decoration: line-through;
+}
+.field-exclue .exclure-btn {
+  color: var(--accent-strong);
+  opacity: 1;
+  font-weight: 600;
+}

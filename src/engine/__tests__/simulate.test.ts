@@ -30,6 +30,7 @@ const profilBase: ProfilEtudiant = {
   souhaits: '',
   specialites: [],
   notes: {},
+  matieresExclues: [],
   region: null,
   villes: [],
   mobilite: false,
@@ -56,6 +57,26 @@ describe('scoreAcademique', () => {
   it('utilise la moyenne générale si aucune matière clé n\'est renseignée', () => {
     const profil = { ...profilBase, notes: { francais: 16, philosophie: 12 } }
     expect(scoreAcademique(formation, profil)).toBe(70)
+  })
+
+  it('ignore une matière clé exclue de l\'analyse', () => {
+    // Formation test : matières clés maths + informatique. On exclut les maths
+    // (note faible) → seul l'informatique (note forte) compte.
+    const profil = {
+      ...profilBase,
+      notes: { mathematiques: 4, informatique: 18 },
+      matieresExclues: ['mathematiques' as const],
+    }
+    expect(scoreAcademique(formation, profil)).toBe(90) // 18/20 seulement
+  })
+
+  it('exclut aussi les matières écartées de la moyenne de repli', () => {
+    const profil = {
+      ...profilBase,
+      notes: { francais: 16, philosophie: 6 },
+      matieresExclues: ['philosophie' as const],
+    }
+    expect(scoreAcademique(formation, profil)).toBe(80) // 16/20 seulement
   })
 })
 
@@ -188,6 +209,7 @@ describe('simulerFormation', () => {
       souhaits: '',
       specialites: [],
       notes: { mathematiques: 18, informatique: 17 },
+      matieresExclues: [],
       region: 'Auvergne-Rhône-Alpes',
       villes: [],
       mobilite: false,

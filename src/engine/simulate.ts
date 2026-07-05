@@ -1,6 +1,7 @@
 import type {
   Domaine,
   Formation,
+  Matiere,
   ProfilEtudiant,
   ResultatSimulation,
 } from '../types'
@@ -104,6 +105,7 @@ export function scoreAcademique(
   formation: Formation,
   profil: ProfilEtudiant,
 ): number {
+  const exclues = new Set(profil.matieresExclues ?? [])
   const entries = Object.entries(formation.matieresCles) as [
     keyof typeof formation.matieresCles,
     number,
@@ -112,6 +114,7 @@ export function scoreAcademique(
   let sommePoids = 0
   let sommeNotes = 0
   for (const [matiere, poids] of entries) {
+    if (exclues.has(matiere)) continue // matière volontairement écartée
     const note = profil.notes[matiere]
     if (typeof note === 'number') {
       sommeNotes += note * poids
@@ -119,11 +122,12 @@ export function scoreAcademique(
     }
   }
 
-  // Aucune matière clé renseignée : on retombe sur la moyenne générale saisie.
+  // Aucune matière clé (renseignée et non exclue) : on retombe sur la moyenne
+  // générale des matières prises en compte.
   if (sommePoids === 0) {
-    const toutes = Object.values(profil.notes).filter(
-      (n): n is number => typeof n === 'number',
-    )
+    const toutes = (Object.entries(profil.notes) as [Matiere, number][])
+      .filter(([m, n]) => typeof n === 'number' && !exclues.has(m))
+      .map(([, n]) => n)
     if (toutes.length === 0) return 50 // neutre faute d'information
     const moyenne = toutes.reduce((a, b) => a + b, 0) / toutes.length
     return clamp((moyenne / 20) * 100)

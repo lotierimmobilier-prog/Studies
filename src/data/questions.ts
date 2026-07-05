@@ -17,8 +17,9 @@ export interface QuestionCiblage {
 const BASE = ((import.meta.env.VITE_PRIX_API ?? import.meta.env.BASE_URL ?? '') as string).replace(/\/$/, '')
 
 function resumerProfil(profil: ProfilEtudiant) {
+  const exclues = new Set(profil.matieresExclues)
   const notes = (Object.entries(profil.notes) as [Matiere, number][])
-    .filter(([, v]) => typeof v === 'number')
+    .filter(([m, v]) => typeof v === 'number' && !exclues.has(m))
     .sort((a, b) => b[1] - a[1])
   return {
     classe: profil.classe,
