@@ -188,6 +188,13 @@ export function scoreGeographie(
   formation: Formation,
   profil: ProfilEtudiant,
 ): number {
+  // Ville explicitement souhaitée : meilleure adéquation géographique possible.
+  const villes = profil.villes ?? []
+  if (villes.length > 0) {
+    const villeFormation = formation.ville.trim().toLowerCase()
+    const souhaitee = villes.some((v) => v.trim().toLowerCase() === villeFormation)
+    if (souhaitee) return 100
+  }
   if (profil.region === null) return 60 // légèrement favorable par défaut
   const memeRegion = profil.region === formation.region
   if (memeRegion) return 100

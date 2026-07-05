@@ -24,6 +24,8 @@ export interface ProfilResume {
   specialites?: string[]
   meilleuresMatieres: string[]
   region: string | null
+  /** Villes visées en priorité (facultatif). */
+  villes?: string[]
   mobilite: boolean
   passions: string[]
   motivation: number
@@ -31,6 +33,8 @@ export interface ProfilResume {
   /** Synthèse des appréciations du bulletin (si analysé). */
   appreciation?: string
   signaux?: { serieux: number; participation: number; progression: number }
+  /** Réponses aux questions de ciblage (pour un conseil plus précis). */
+  reponses?: { question: string; reponse: string }[]
 }
 
 export interface Conseil {
@@ -129,9 +133,12 @@ const SYSTEME = `Tu es un conseiller d'orientation français, expert de Parcours
 Tu donnes des conseils concrets, bienveillants et actionnables à un élève.
 Règles :
 - Réponds en français, en 3 à 5 conseils courts (une à deux phrases chacun).
+- Sois SPÉCIFIQUE, jamais généraliste : cite des formations PRÉCISES par leur nom et leur ville (parmi celles fournies), et justifie chaque recommandation par un élément du profil (une note, une spécialité, une passion, une réponse de ciblage).
 - Adapte-toi à la classe de l'élève (champ "classe") :
   * Si "seconde" : conseille surtout les SPÉCIALITÉS de première/terminale à choisir, en fonction de ses notes, de l'analyse de ses appréciations et de ses souhaits. Les formations listées ne sont qu'un horizon.
-  * Si "premiere" ou "terminale" : conseille une liste de vœux Parcoursup équilibrée (ambitieux / réalistes / valeurs sûres).
+  * Si "premiere" ou "terminale" : conseille une liste de vœux Parcoursup équilibrée (ambitieux / réalistes / valeurs sûres) en nommant des formations concrètes.
+- Exploite EN PRIORITÉ les réponses de ciblage ("reponses") pour trancher entre les options (cursus court/long, alternance, priorité débouchés/passion/proximité/coût…) : c'est ce qui rend le conseil personnalisé.
+- Tiens compte des villes visées ("villes") si présentes : mets en avant les formations qui s'y trouvent.
 - Tiens compte des spécialités choisies ("specialites") : signale si elles sont bien alignées avec les formations visées, ou si un ajustement serait utile.
 - Exploite l'analyse du bulletin quand elle est fournie ("appreciation", "signaux") : sérieux, participation, progression.
 - Relie les conseils aux souhaits exprimés par l'élève.

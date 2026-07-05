@@ -19,8 +19,18 @@ export interface Conseil {
 // (import.meta.env.BASE_URL), pour fonctionner à la racine ou sous « /studies ».
 const BASE = ((import.meta.env.VITE_PRIX_API ?? import.meta.env.BASE_URL ?? '') as string).replace(/\/$/, '')
 
+/** Une réponse à une question de ciblage. */
+export interface ReponseCiblage {
+  question: string
+  reponse: string
+}
+
 /** Prépare un résumé compact du profil pour le backend. */
-function resumerProfil(profil: ProfilEtudiant, bulletin?: AnalyseBulletin | null) {
+function resumerProfil(
+  profil: ProfilEtudiant,
+  bulletin?: AnalyseBulletin | null,
+  reponses?: ReponseCiblage[],
+) {
   const notes = (Object.entries(profil.notes) as [Matiere, number][])
     .filter(([, v]) => typeof v === 'number')
     .sort((a, b) => b[1] - a[1])
@@ -30,12 +40,14 @@ function resumerProfil(profil: ProfilEtudiant, bulletin?: AnalyseBulletin | null
     specialites: profil.specialites.map((s) => LABELS_SPECIALITE[s]),
     meilleuresMatieres: notes.slice(0, 3).map(([m]) => LABELS_MATIERE[m]),
     region: profil.region,
+    villes: profil.villes,
     mobilite: profil.mobilite,
     passions: profil.passions.map((p) => LABELS_DOMAINE[p]),
     motivation: profil.motivation,
     coherenceProjet: profil.coherenceProjet,
     appreciation: bulletin?.appreciationGlobale,
     signaux: bulletin?.signaux,
+    reponses: reponses && reponses.length > 0 ? reponses : undefined,
   }
 }
 
@@ -68,6 +80,7 @@ export async function chargerConseil(
   resultats: ResultatSimulation[],
   prix: Map<string, PrixFormation>,
   bulletin?: AnalyseBulletin | null,
+  reponses?: ReponseCiblage[],
   fetchImpl: typeof fetch = fetch,
 ): Promise<Conseil> {
   const formations = resultats.slice(0, 12).map((r) => ({
@@ -84,7 +97,7 @@ export async function chargerConseil(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        profil: resumerProfil(profil, bulletin),
+        profil: resumerProfil(profil, bulletin, reponses),
         formations,
       }),
     })

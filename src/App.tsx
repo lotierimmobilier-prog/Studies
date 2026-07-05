@@ -30,6 +30,7 @@ import {
 import Stepper from './components/Stepper'
 import Resultats from './components/Resultats'
 import Accueil from './components/Accueil'
+import Affiner from './components/Affiner'
 
 const ETAPES = ['Résultats', 'Localisation', 'Passions', 'Motivation']
 
@@ -39,6 +40,7 @@ const PROFIL_INITIAL: ProfilEtudiant = {
   specialites: [],
   notes: {},
   region: null,
+  villes: [],
   mobilite: false,
   passions: [],
   motivation: 5,
@@ -84,8 +86,12 @@ export default function App() {
     try {
       // Données officielles en direct (open data fr-esr-parcoursup).
       // Si l'étudiant n'est pas mobile, on cible sa région pour prioriser le secteur.
+      // Si l'élève vise des villes précises (parfois hors région) ou est mobile,
+      // on élargit la recherche ; sinon on cible sa région (priorité de secteur).
+      const cibleRegion =
+        profil.mobilite || profil.villes.length > 0 ? null : profil.region
       const reelles = await chargerFormations({
-        region: profil.mobilite ? null : profil.region,
+        region: cibleRegion,
         limite: 300,
       })
       if (reelles.length === 0) throw new Error('Aucune formation renvoyée')
@@ -184,6 +190,15 @@ export default function App() {
             indisponible). Résultats calculés sur un échantillon de démonstration.
           </div>
         )}
+        <div className="card" style={{ marginBottom: '1.25rem' }}>
+          <Affiner
+            profil={profil}
+            resultats={resultats}
+            prix={prix}
+            bulletin={bulletin}
+            onConseil={setConseil}
+          />
+        </div>
         <Resultats
           resultats={resultats}
           prix={prix}
@@ -373,6 +388,31 @@ export default function App() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="field" style={{ maxWidth: 360 }}>
+              <label>Villes où tu aimerais étudier (2 max, facultatif)</label>
+              <div className="villes-inputs">
+                {[0, 1].map((i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    placeholder={i === 0 ? 'Ville n°1 (ex. Lyon)' : 'Ville n°2'}
+                    value={profil.villes[i] ?? ''}
+                    onChange={(e) =>
+                      setProfil((p) => {
+                        const villes = [...p.villes]
+                        villes[i] = e.target.value
+                        // Compacte et retire les vides.
+                        return { ...p, villes: villes.filter((v) => v.trim()) }
+                      })
+                    }
+                  />
+                ))}
+              </div>
+              <p className="field-hint">
+                Une formation dans l'une de ces villes est priorisée dans tes
+                résultats.
+              </p>
             </div>
             <label className="checkbox-row">
               <input

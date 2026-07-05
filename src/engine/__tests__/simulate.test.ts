@@ -31,6 +31,7 @@ const profilBase: ProfilEtudiant = {
   specialites: [],
   notes: {},
   region: null,
+  villes: [],
   mobilite: false,
   passions: [],
   motivation: 5,
@@ -115,6 +116,17 @@ describe('scoreGeographie', () => {
     const profil = { ...profilBase, region: 'Bretagne' as const, mobilite: true }
     expect(scoreGeographie(formation, profil)).toBe(70)
   })
+
+  it('récompense au maximum une ville préférée, même hors région', () => {
+    // La formation test est à Lyon ; l'élève est en Bretagne mais vise Lyon.
+    const profil = {
+      ...profilBase,
+      region: 'Bretagne' as const,
+      villes: ['lyon'],
+      mobilite: false,
+    }
+    expect(scoreGeographie(formation, profil)).toBe(100)
+  })
 })
 
 describe('scoreMotivation', () => {
@@ -177,6 +189,7 @@ describe('simulerFormation', () => {
       specialites: [],
       notes: { mathematiques: 18, informatique: 17 },
       region: 'Auvergne-Rhône-Alpes',
+      villes: [],
       mobilite: false,
       passions: ['informatique'],
       motivation: 9,

@@ -22,6 +22,7 @@ import {
   type FormationResume,
   type ProfilResume,
 } from './conseiller'
+import { obtenirQuestions } from './questions'
 import {
   analyserBulletin,
   BulletinNonConfigure,
@@ -232,6 +233,18 @@ async function demarrer(): Promise<void> {
           return envoyerJson(res, 400, { erreur: 'profil et formations requis' })
         const conseil = await obtenirConseil(profil, formations.slice(0, 12))
         return envoyerJson(res, 200, conseil)
+      }
+
+      if (url.pathname === '/api/questions' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const { profil, formations } = JSON.parse(corps) as {
+          profil: ProfilResume
+          formations: FormationResume[]
+        }
+        if (!profil || !Array.isArray(formations))
+          return envoyerJson(res, 400, { erreur: 'profil et formations requis' })
+        const questions = await obtenirQuestions(profil, formations.slice(0, 12))
+        return envoyerJson(res, 200, questions)
       }
 
       envoyerJson(res, 404, { erreur: 'route inconnue' })

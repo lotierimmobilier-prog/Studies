@@ -108,6 +108,8 @@ export interface ProfilEtudiant {
   /** Notes sur 20 par matière (partiel : seules les matières renseignées comptent). */
   notes: Partial<Record<Matiere, number>>
   region: Region | null
+  /** Villes préférées (jusqu'à 2) pour étudier — affine l'adéquation géographique. */
+  villes: string[]
   /** Accepte de s'éloigner de sa région pour étudier. */
   mobilite: boolean
   /** Domaines qui passionnent l'étudiant. */
