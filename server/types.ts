@@ -1,0 +1,84 @@
+/** Résultat de prix pour un établissement / une formation. */
+export interface PrixFormation {
+  etablissement: string
+  /** Frais de scolarité annuels en euros, ou null si inconnu. */
+  prixAnnuel: number | null
+  devise: 'EUR'
+  /** Les boursiers sont-ils exonérés (fréquent dans le public) ? */
+  gratuitBoursier?: boolean
+  /** Provenance de l'information. */
+  source: 'curated' | 'scrape' | 'estimation'
+  /** URL consultée (site de l'école) le cas échéant. */
+  url?: string
+  /** Précision lisible (ex. « droits nationaux », fourchette privée…). */
+  note?: string
+  /** Date de mise à jour (ISO), injectée par l'appelant. */
+  dateMaj: string
+}
+
+/** Requête de prix : on transmet ce que l'on connaît de la formation. */
+export interface RequetePrix {
+  etablissement: string
+  /** Statut de l'open data (Public / Privé sous contrat…). */
+  statut?: string
+  /** Filière très agrégée de l'open data (ex. 9_EcoleIngenieur). */
+  fili?: string
+  /** Intitulé de la formation (aide au classement par catégorie). */
+  formation?: string
+}
+
+/** Avis Google d'un établissement (note moyenne + nombre d'avis). */
+export interface AvisEcole {
+  etablissement: string
+  /** Note moyenne sur 5, ou null si inconnue. */
+  note: number | null
+  /** Nombre d'avis pris en compte, ou null si inconnu. */
+  nombreAvis: number | null
+  /** Provenance : Google Places, ou indisponible (clé absente / non trouvé). */
+  source: 'google' | 'indisponible'
+  /** Lien vers la fiche Google Maps, le cas échéant. */
+  urlMaps?: string
+  /** Date de mise à jour (ISO), injectée par l'appelant. */
+  dateMaj: string
+}
+
+/** Requête d'avis : le nom et la ville aident à identifier la bonne fiche. */
+export interface RequeteAvis {
+  etablissement: string
+  ville?: string
+}
+
+/** Statut de modération d'un témoignage étudiant. */
+export type StatutTemoignage = 'approuve' | 'en_attente' | 'rejete'
+
+/** Témoignage d'un·e étudiant·e sur un établissement (contenu modéré). */
+export interface TemoignageEtudiant {
+  id: string
+  etablissement: string
+  /** Note sur 5 (entier 1-5). */
+  note: number
+  /** Commentaire libre (modéré). */
+  commentaire: string
+  /** Année d'études de l'auteur (facultatif), ex. 2024. */
+  annee?: number
+  statut: StatutTemoignage
+  /** Date de dépôt (ISO). */
+  dateMaj: string
+}
+
+/** Ce que le client envoie pour déposer un témoignage. */
+export interface RequeteTemoignage {
+  etablissement: string
+  note: number
+  commentaire: string
+  annee?: number
+}
+
+/** Synthèse publique des témoignages approuvés d'un établissement. */
+export interface SyntheseTemoignages {
+  etablissement: string
+  /** Moyenne des notes approuvées (sur 5), ou null si aucun avis. */
+  moyenne: number | null
+  nombre: number
+  temoignages: TemoignageEtudiant[]
+}

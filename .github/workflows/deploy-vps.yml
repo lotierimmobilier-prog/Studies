@@ -1,0 +1,102 @@
+name: Déployer sur le VPS
+
+# Synchronisation automatique vers le VPS à chaque push (ou manuellement).
+# Envoie le front (statique) ET le serveur Node (prix + IA), puis redémarre l'API.
+#
+# Prérequis (voir deploy/README.md) :
+#  - Secrets du dépôt : VPS_HOST, VPS_USER, VPS_SSH_KEY
+#    (+ facultatif : ANTHROPIC_API_KEY pour le conseiller / l'analyse de bulletin)
+#  - Sur le VPS : Node 22, nginx, pm2, et les dossiers cibles créés.
+
+# Déclenchement MANUEL uniquement (Actions → « Déployer sur le VPS » → Run
+# workflow). Le déploiement recommandé se fait désormais directement sur le VPS
+# via deploy/vps-setup.sh (aucune clé SSH GitHub requise, voir deploy/README.md),
+# ce qui évite les échecs de CI liés à la clé SSH ou à l'accessibilité du VPS.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: true
+
+env:
+  WEB_ROOT: /var/www/parcoursup      # racine servie par nginx (front statique)
+  APP_DIR: /opt/parcoursup           # dossier du serveur Node sur le VPS
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # VPS_HOST est exposé pour permettre aux étapes de déploiement de se
+    # « mettre en pause » proprement tant que les secrets ne sont pas définis
+    # (le job reste vert au lieu d'échouer).
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer et builder le front
+        run: |
+          npm ci
+          npm run build          # VITE_BASE par défaut = '/', servi à la racine du domaine
+
+      - name: Secrets non configurés — déploiement ignoré
+        if: ${{ env.VPS_HOST == '' }}
+        run: echo "::notice::Secrets VPS absents (VPS_HOST/VPS_USER/VPS_SSH_KEY). Voir deploy/README.md. Déploiement ignoré."
+
+      - name: Charger la clé SSH
+        if: ${{ env.VPS_HOST != '' }}
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Ajouter le VPS aux hôtes connus
+        if: ${{ env.VPS_HOST != '' }}
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Synchroniser le front (dist → nginx)
+        if: ${{ env.VPS_HOST != '' }}
+        run: |
+          rsync -az --delete dist/ \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${WEB_ROOT}/"
+
+      - name: Synchroniser le serveur Node
+        if: ${{ env.VPS_HOST != '' }}
+        run: |
+          rsync -az --delete \
+            server/ \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${APP_DIR}/server/"
+          rsync -az package.json package-lock.json \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${APP_DIR}/"
+
+      - name: Installer les dépendances et (re)démarrer l'API
+        if: ${{ env.VPS_HOST != '' }}
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          MODERATION_TOKEN: ${{ secrets.MODERATION_TOKEN }}
+        run: |
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' GOOGLE_MAPS_API_KEY='${GOOGLE_MAPS_API_KEY}' MODERATION_TOKEN='${MODERATION_TOKEN}' bash -s" <<'REMOTE'
+          set -e
+          cd /opt/parcoursup
+          npm ci
+          # Écrit les clés API dans l'environnement du service (si fournies).
+          : > .env
+          [ -n "$ANTHROPIC_API_KEY" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env
+          [ -n "$GOOGLE_MAPS_API_KEY" ] && echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
+          [ -n "$MODERATION_TOKEN" ] && echo "MODERATION_TOKEN=$MODERATION_TOKEN" >> .env
+          # (Re)démarre l'API via pm2 (tsx exécute le TypeScript directement).
+          if pm2 describe parcoursup-api > /dev/null 2>&1; then
+            env PORT=8787 ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" MODERATION_TOKEN="$MODERATION_TOKEN" pm2 restart parcoursup-api --update-env
+          else
+            env PORT=8787 ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" MODERATION_TOKEN="$MODERATION_TOKEN" pm2 start "npx tsx server/index.ts" --name parcoursup-api --update-env
+          fi
+          pm2 save
+          REMOTE

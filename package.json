@@ -1,0 +1,31 @@
+{
+  "name": "parcoursup-simulator",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Simulateur de taux d'admission Parcoursup selon résultats, géolocalisation, passion et motivation",
+  "scripts": {
+    "dev": "vite",
+    "server": "tsx watch server/index.ts",
+    "start:server": "tsx server/index.ts",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.110.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
