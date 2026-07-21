@@ -22,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  WEB_ROOT: /var/www/vacances        # racine servie par nginx (front statique)
-  APP_DIR: /opt/vacances             # dossier du serveur Node sur le VPS
+  WEB_ROOT: /var/www/maisoncapendu        # racine servie par nginx (front statique)
+  APP_DIR: /opt/maisoncapendu             # dossier du serveur Node sur le VPS
 
 jobs:
   deploy:
@@ -85,7 +85,7 @@ jobs:
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
             "SESSION_SECRET='${SESSION_SECRET}' bash -s" <<'REMOTE'
           set -e
-          cd /opt/vacances
+          cd /opt/maisoncapendu
           npm ci
           # Secret de session : celui fourni, sinon un déjà généré, sinon nouveau.
           : > .env
@@ -99,10 +99,10 @@ jobs:
           chmod 600 .session_secret
           echo "SESSION_SECRET=$SESSION_SECRET" >> .env
           # (Re)démarre l'API via pm2 (tsx exécute le TypeScript directement).
-          if pm2 describe vacances-api > /dev/null 2>&1; then
-            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" pm2 restart vacances-api --update-env
+          if pm2 describe maisoncapendu-api > /dev/null 2>&1; then
+            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" pm2 restart maisoncapendu-api --update-env
           else
-            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" pm2 start "npx tsx server/index.ts" --name vacances-api --update-env
+            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" pm2 start "npx tsx server/index.ts" --name maisoncapendu-api --update-env
           fi
           pm2 save
           REMOTE

@@ -4,7 +4,7 @@
 # Récupère le dépôt (public), build le front, sert via nginx et démarre l'API.
 #
 # Multi-projets : ce projet (portail voyageurs) est servi sous un SOUS-CHEMIN
-# (par défaut « /vacances »). Tu peux héberger d'autres projets sur le même VPS
+# (par défaut « /maisoncapendu »). Tu peux héberger d'autres projets sur le même VPS
 # sous /autre-projet : chacun dépose sa propre config nginx dans
 # /etc/nginx/projets.d/ (via « include »), donc les projets ne se marchent pas
 # dessus.
@@ -18,7 +18,7 @@
 #   bash deploy/vps-setup.sh
 #
 # Options (variables d'environnement) :
-#   SLUG=vacances                # sous-chemin + nom du projet (URL : /vacances)
+#   SLUG=maisoncapendu                # sous-chemin + nom du projet (URL : /maisoncapendu)
 #   API_PORT=8788                # port local de l'API Node (unique par projet !)
 #   SESSION_SECRET=...           # clé secrète de signature des jetons de session
 #                                #   (fortement recommandé en production)
@@ -34,10 +34,10 @@
 #   Le portail lit les identifiants et infos de la maison dans, par ordre de
 #   priorité, ${APP_DIR}/.data/sejours.json puis server/data/sejours.json
 #   (exemple versionné). Pour la mise en service, crée ta config réelle :
-#     mkdir -p /opt/vacances/.data
-#     cp /opt/vacances/server/data/sejours.json /opt/vacances/.data/sejours.json
-#     nano /opt/vacances/.data/sejours.json   # remplis tes vrais codes/séjours
-#     pm2 restart vacances-api
+#     mkdir -p /opt/maisoncapendu/.data
+#     cp /opt/maisoncapendu/server/data/sejours.json /opt/maisoncapendu/.data/sejours.json
+#     nano /opt/maisoncapendu/.data/sejours.json   # remplis tes vrais codes/séjours
+#     pm2 restart maisoncapendu-api
 #   Ce fichier .data/ n'est pas écrasé par les mises à jour (relances du script).
 
 set -euo pipefail
@@ -45,7 +45,7 @@ set -euo pipefail
 # ------------------------------------------------------------------ paramètres
 REPO_URL="${REPO_URL:-https://github.com/lotierimmobilier-prog/Studies.git}"
 BRANCH="${BRANCH:-claude/airbnb-guest-portal-8o2bq8}"
-SLUG="${SLUG:-vacances}"                       # sous-chemin d'URL et nom du projet
+SLUG="${SLUG:-maisoncapendu}"                       # sous-chemin d'URL et nom du projet
 SERVER_NAME="${SERVER_NAME:-76.13.37.163}"    # IP ou nom de domaine
 API_PORT="${API_PORT:-8788}"                  # port local de l'API (unique/projet)
 REDIRECT_ROOT="${REDIRECT_ROOT:-1}"           # « / » -> « /<SLUG>/ »

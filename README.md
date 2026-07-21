@@ -102,8 +102,8 @@ Voir [`deploy/README.md`](deploy/README.md). En résumé, sur le VPS en root :
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh | bash
-# -> http://76.13.37.163/vacances/
+# -> http://76.13.37.163/maisoncapendu/
 ```
 
-Puis créez `/opt/vacances/.data/sejours.json` avec vos vraies informations
+Puis créez `/opt/maisoncapendu/.data/sejours.json` avec vos vraies informations
 (voir `deploy/README.md`).

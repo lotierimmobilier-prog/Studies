@@ -3,8 +3,8 @@
 # multi-projets (sous /etc/nginx/projets.d/). Cet exemple sert de référence si
 # tu préfères servir le site seul, à la racine du domaine.
 #
-# À adapter puis placer dans /etc/nginx/sites-available/vacances
-# puis : ln -s /etc/nginx/sites-available/vacances /etc/nginx/sites-enabled/
+# À adapter puis placer dans /etc/nginx/sites-available/maisoncapendu
+# puis : ln -s /etc/nginx/sites-available/maisoncapendu /etc/nginx/sites-enabled/
 #        nginx -t && systemctl reload nginx
 
 server {
@@ -12,7 +12,7 @@ server {
     server_name 76.13.37.163;   # ou ton nom de domaine
 
     # Front statique (build Vite)
-    root /var/www/vacances;
+    root /var/www/maisoncapendu;
     index index.html;
 
     # SPA : toutes les routes retombent sur index.html
