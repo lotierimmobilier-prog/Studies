@@ -1397,3 +1397,72 @@ button {
     display: none;
   }
 }
+
+/* ---------- Photo de façade (accueil) --------------------------------- */
+
+.hero-photo {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 340px;
+  overflow: hidden;
+  border-radius: var(--rayon) var(--rayon) 0 0;
+  box-shadow: var(--ombre-douce);
+}
+
+.hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Quand une photo est présente, le hero se raccorde dessous. */
+.hero-sejour--sous-photo {
+  border-radius: 0 0 var(--rayon) var(--rayon);
+}
+
+/* ---------- Admin : champ photo --------------------------------------- */
+
+.champ-photo .photo-apercu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.photo-apercu img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: var(--rayon-sm);
+  border: 2px solid var(--sable-fonce);
+}
+
+.photo-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.photo-depot {
+  padding: 22px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ocean-fonce);
+  background: var(--sable);
+  border: 2px dashed var(--ocean);
+  border-radius: var(--rayon-sm);
+  transition: background var(--transition);
+}
+
+.photo-depot:hover:not(:disabled) {
+  background: rgba(44, 166, 164, 0.08);
+}
+
+.photo-depot:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.champ-erreur {
+  font-size: 0.78rem;
+  color: var(--corail-fonce);
+}

@@ -65,7 +65,9 @@ export default function Portail({
       </nav>
 
       <main className="contenu">
-        {onglet === 'sejour' && <SectionSejour sejour={sejour} />}
+        {onglet === 'sejour' && (
+          <SectionSejour sejour={sejour} maison={maison} />
+        )}
         {onglet === 'acces' && <SectionAcces maison={maison} />}
         {onglet === 'tutoriels' && <SectionTutoriels tutoriels={tutoriels} />}
         {onglet === 'tourisme' && <SectionTourisme lieux={tourisme} />}

@@ -1,4 +1,5 @@
-import type { Sejour } from '../types'
+import type { Maison, Sejour } from '../types'
+import { urlMedia } from '../api'
 import { etatSejour, formaterDate, formaterHeure } from '../dates'
 
 /** Bandeau de compte à rebours selon la phase du séjour. */
@@ -45,10 +46,22 @@ const CHECKLIST_ARRIVEE = [
   { icone: '🏖️', texte: 'Repérer les bonnes adresses autour' },
 ]
 
-export default function SectionSejour({ sejour }: { sejour: Sejour }) {
+export default function SectionSejour({
+  sejour,
+  maison,
+}: {
+  sejour: Sejour
+  maison: Maison
+}) {
+  const photo = maison.photo ? urlMedia(maison.photo) : ''
   return (
     <section className="section">
-      <div className="hero-sejour">
+      {photo && (
+        <div className="hero-photo">
+          <img src={photo} alt={`Façade de ${maison.nom}`} />
+        </div>
+      )}
+      <div className={`hero-sejour ${photo ? 'hero-sejour--sous-photo' : ''}`}>
         <p className="hero-salut">Bonjour {sejour.nom},</p>
         <Compteur arrivee={sejour.arrivee} depart={sejour.depart} />
       </div>

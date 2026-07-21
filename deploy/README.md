@@ -40,6 +40,7 @@ avec votre mot de passe admin, et saisissez directement :
 
 Tout est enregistré dans `/opt/maisoncapendu/.data/config.json`, **jamais écrasé**
 par les mises à jour. L'exemple versionné de départ est `server/data/config.json`.
+Les photos uploadées (façade…) sont conservées dans `/opt/maisoncapendu/.data/uploads/`.
 
 ## Héberger plusieurs projets sur le même VPS
 

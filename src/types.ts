@@ -20,6 +20,8 @@ export interface NumeroUtile {
 export interface Maison {
   nom: string
   sousTitre?: string
+  /** Photo de la façade (chemin `api/media/…` ou URL), affichée à l'accueil. */
+  photo?: string
   adresse: string
   lienCarte?: string
   wifi: Wifi

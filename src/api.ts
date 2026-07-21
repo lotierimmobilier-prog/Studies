@@ -14,6 +14,16 @@ const CLE_JETON_ADMIN = 'portail-admin-jeton'
  */
 const BASE = import.meta.env.BASE_URL
 
+/**
+ * Résout l'URL d'un média : une URL absolue (http/https/data) est renvoyée
+ * telle quelle ; un chemin relatif (`api/media/…`) est préfixé par la base.
+ */
+export function urlMedia(chemin: string): string {
+  if (!chemin) return ''
+  if (/^(https?:|data:)/.test(chemin)) return chemin
+  return `${BASE}${chemin.replace(/^\//, '')}`
+}
+
 async function lireErreur(res: Response): Promise<string> {
   try {
     const data = (await res.json()) as { erreur?: string }
@@ -118,4 +128,25 @@ export async function enregistrerConfigAdmin(
     throw new Error('Session administrateur expirée.')
   }
   if (!res.ok) throw new Error(await lireErreur(res))
+}
+
+/** Envoie une image (photo de façade…) et renvoie son chemin `api/media/…`. */
+export async function envoyerImage(fichier: File): Promise<string> {
+  const jeton = jetonAdminEnregistre()
+  if (!jeton) throw new Error('Non connecté.')
+  const res = await fetch(`${BASE}api/admin/media`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': fichier.type || 'application/octet-stream',
+      Authorization: `Bearer ${jeton}`,
+    },
+    body: fichier,
+  })
+  if (res.status === 401) {
+    oublierJetonAdmin()
+    throw new Error('Session administrateur expirée.')
+  }
+  if (!res.ok) throw new Error(await lireErreur(res))
+  const { url } = (await res.json()) as { url: string }
+  return url
 }

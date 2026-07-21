@@ -121,6 +121,7 @@ export function validerConfiguration(brut: unknown): Configuration {
   const maison = {
     nom: chaine(maisonBrut.nom, 'Ma maison'),
     sousTitre: chaine(maisonBrut.sousTitre),
+    photo: chaine(maisonBrut.photo),
     adresse: chaine(maisonBrut.adresse),
     lienCarte: chaine(maisonBrut.lienCarte),
     wifi: {

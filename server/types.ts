@@ -28,6 +28,8 @@ export interface Wifi {
 export interface Maison {
   nom: string
   sousTitre?: string
+  /** Photo de la façade, en bannière d'accueil (chemin `api/media/…` ou URL). */
+  photo?: string
   adresse: string
   /** Lien Google Maps / Plans vers la maison. */
   lienCarte?: string

@@ -9,6 +9,12 @@ import {
   sejourParCode,
   verifierAdmin,
 } from './config'
+import {
+  enregistrerImage,
+  lireImage,
+  typeAccepte,
+  TAILLE_MAX_IMAGE,
+} from './media'
 import type { Configuration, ReponseConnexion } from './types'
 
 /**
@@ -52,6 +58,21 @@ async function lireCorps(req: IncomingMessage): Promise<string> {
   return Buffer.concat(morceaux).toString('utf8')
 }
 
+/** Lit le corps brut (binaire) d'une requête, jusqu'à `max` octets. */
+async function lireCorpsBinaire(
+  req: IncomingMessage,
+  max: number,
+): Promise<Buffer> {
+  const morceaux: Buffer[] = []
+  let total = 0
+  for await (const c of req) {
+    total += (c as Buffer).length
+    if (total > max) throw new Error('Fichier trop volumineux')
+    morceaux.push(c as Buffer)
+  }
+  return Buffer.concat(morceaux)
+}
+
 function jetonDepuisEntete(req: IncomingMessage): string | undefined {
   const entete = req.headers['authorization']
   if (!entete) return undefined
@@ -75,6 +96,21 @@ async function demarrer(): Promise<void> {
 
       if (url.pathname === '/api/sante') {
         return envoyerJson(res, 200, { ok: true })
+      }
+
+      // Service public des images uploadées (photo de façade…).
+      if (url.pathname.startsWith('/api/media/') && req.method === 'GET') {
+        const nom = decodeURIComponent(
+          url.pathname.slice('/api/media/'.length),
+        )
+        const image = await lireImage(nom)
+        if (!image) return envoyerJson(res, 404, { erreur: 'Image introuvable' })
+        cors(res)
+        res.writeHead(200, {
+          'Content-Type': image.contentType,
+          'Cache-Control': 'public, max-age=86400',
+        })
+        return res.end(image.donnees)
       }
 
       // ------------------------------------------------------------- voyageur
@@ -119,6 +155,22 @@ async function demarrer(): Promise<void> {
         if (!motDePasse || !verifierAdmin(motDePasse))
           return envoyerJson(res, 401, { erreur: 'Mot de passe incorrect.' })
         return envoyerJson(res, 200, { jeton: creerJeton('admin', 'admin') })
+      }
+
+      // Upload d'une image (jeton admin requis). Corps = octets bruts de l'image.
+      if (url.pathname === '/api/admin/media' && req.method === 'POST') {
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'admin')
+          return envoyerJson(res, 401, { erreur: 'Non autorisé.' })
+
+        const contentType = req.headers['content-type'] ?? ''
+        if (!typeAccepte(contentType))
+          return envoyerJson(res, 415, {
+            erreur: 'Format d’image non pris en charge (JPEG, PNG, WebP…).',
+          })
+        const donnees = await lireCorpsBinaire(req, TAILLE_MAX_IMAGE)
+        const url2 = await enregistrerImage(donnees, contentType)
+        return envoyerJson(res, 201, { url: url2 })
       }
 
       // Lecture / écriture de la configuration complète (jeton admin requis).

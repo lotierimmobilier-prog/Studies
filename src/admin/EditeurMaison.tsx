@@ -1,5 +1,6 @@
 import type { Maison, NumeroUtile } from '../types'
 import { Champ, ListeChaines, ZoneTexte } from './champs'
+import ChampPhoto from './ChampPhoto'
 
 export default function EditeurMaison({
   maison,
@@ -31,6 +32,12 @@ export default function EditeurMaison({
       </div>
 
       <div className="carte-edition">
+        <ChampPhoto
+          label="Photo de la façade (page d'accueil)"
+          valeur={maison.photo ?? ''}
+          onChange={(photo) => maj({ photo })}
+          aide="Affichée en grand sur la page d'accueil des voyageurs. Format paysage conseillé."
+        />
         <div className="grille-champs">
           <Champ
             label="Nom de la maison"
