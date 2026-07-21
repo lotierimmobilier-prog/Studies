@@ -1,163 +1,96 @@
-# Déploiement sur le VPS
+# Déploiement du portail voyageurs sur le VPS
 
-Deux méthodes. **La méthode A (directe) est la plus simple** et n'a besoin
-d'aucune clé SSH ni secret GitHub — c'est celle à privilégier.
+La méthode recommandée est **directe** : aucun secret GitHub ni clé SSH.
 
 ---
 
-## Méthode A — déploiement direct sur le VPS (recommandée, sans clé SSH)
+## Mise en ligne (méthode directe)
 
-Le script `deploy/vps-setup.sh` fait **tout** depuis le VPS : il récupère le
-dépôt (public), installe Node/nginx/pm2 au besoin, build le front, le sert sous
-un **sous-chemin** (`/studies`) et démarre l'API. Idempotent : relance-le pour
-mettre à jour.
+Le script `deploy/vps-setup.sh` fait tout depuis le VPS : il récupère le dépôt,
+installe Node/nginx/pm2 au besoin, build le front, le sert sous un **sous-chemin**
+(`/vacances` par défaut) et démarre l'API. Idempotent : relance-le pour mettre à
+jour.
 
 Connecté en **root** sur le VPS (`ssh root@76.13.37.163`), une seule commande :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh | bash
 ```
 
-Pour activer l'IA (conseils + analyse de bulletin) et les **avis Google** (note
-⭐ des écoles), passe les clés API :
+Le site est alors en ligne sur **http://76.13.37.163/vacances/**.
+
+Pour fixer votre propre secret de session (recommandé en production) :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh \
-  | ANTHROPIC_API_KEY="sk-ant-..." GOOGLE_MAPS_API_KEY="AIza..." bash
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh \
+  | SESSION_SECRET="une-longue-phrase-secrete" bash
 ```
 
-> **Clé Google** : dans [Google Cloud Console](https://console.cloud.google.com/),
-> active l'API **Places API**, crée une clé API et restreins-la à cette API. Un
-> quota gratuit mensuel est inclus. Sans clé, l'app fonctionne : les notes ⭐ ne
-> s'affichent simplement pas.
+> Sans `SESSION_SECRET`, le script en génère un automatiquement et le conserve
+> (`/opt/vacances/.session_secret`), pour ne pas déconnecter les voyageurs à
+> chaque mise à jour.
 
-> **Avis étudiants (modération)** : les étudiants peuvent laisser une note ⭐ et
-> un commentaire (année d'études en option). Chaque avis est **modéré** avant
-> publication : règles automatiques (anti-insultes, anti-spam/coordonnées) +
-> modération fine par l'IA si `ANTHROPIC_API_KEY` est présente. Les avis stockés
-> sont dans `/opt/studies/.data/temoignages.json` sur le VPS. Pour l'endpoint de
-> modération manuelle (lister/valider/masquer), définis un jeton
-> `MODERATION_TOKEN` :
->
-> ```bash
-> # lister les avis en attente
-> curl -H "x-moderation-token: $MODERATION_TOKEN" \
->   "http://76.13.37.163/studies/api/temoignages/moderation?statut=en_attente"
-> # approuver (ou 'rejete') un avis
-> curl -X POST -H "x-moderation-token: $MODERATION_TOKEN" \
->   -H 'Content-Type: application/json' \
->   -d '{"id":"<id>","statut":"approuve"}' \
->   http://76.13.37.163/studies/api/temoignages/moderation
-> ```
+## ⚙️ Configurer vos séjours et les infos de la maison
 
-Le site est alors en ligne sur **http://76.13.37.163/studies/**.
+Le portail lit **login/mot de passe**, dates de séjour et informations de la
+maison (codes, Wi-Fi, adresse…) dans un fichier JSON. Deux emplacements, par
+ordre de priorité :
 
-### Héberger plusieurs projets sur le même VPS
+1. `/opt/vacances/.data/sejours.json` → **votre configuration réelle** (non
+   versionnée, jamais écrasée par les mises à jour) ;
+2. `server/data/sejours.json` → l'exemple fourni (versionné).
 
-Chaque projet est servi sous **son propre sous-chemin** et dépose sa config
-nginx dans `/etc/nginx/projets.d/` (inclus par le serveur principal), donc les
-projets ne se marchent pas dessus. Pour ce projet, le sous-chemin est `/studies`.
-Pour en ajouter un autre plus tard, choisis un `SLUG` et un **port d'API unique** :
+Pour la mise en service, copiez l'exemple puis remplissez-le :
 
 ```bash
-SLUG=monsite API_PORT=8788 bash deploy/vps-setup.sh
+mkdir -p /opt/vacances/.data
+cp /opt/vacances/server/data/sejours.json /opt/vacances/.data/sejours.json
+nano /opt/vacances/.data/sejours.json   # vos vrais codes, Wi-Fi, séjours…
+pm2 restart vacances-api
+```
+
+Chaque séjour se déclare ainsi :
+
+```json
+{
+  "login": "dupont",
+  "motDePasse": "soleil2026",
+  "nom": "Famille Dupont",
+  "arrivee": "2026-08-03T16:00",
+  "depart": "2026-08-10T10:00",
+  "voyageurs": 5,
+  "messageHote": "Bienvenue !"
+}
+```
+
+## 🎬 Ajouter vos tutoriels vidéo et bonnes adresses
+
+- **Tutoriels vidéo** : éditez `src/data/tutoriels.ts`. Mettez vos vidéos en
+  ligne sur YouTube (réglage « Non répertoriée » conseillé) et collez leur ID.
+- **Tourisme / contacts** : éditez `src/data/tourisme.ts`.
+
+Après modification, relancez le script de déploiement pour rebuild le front.
+
+## Héberger plusieurs projets sur le même VPS
+
+Chaque projet est servi sous **son propre sous-chemin** avec un **port d'API
+unique**. Pour ce portail, le sous-chemin est `/vacances` et le port `8788`.
+Pour en ajouter un autre :
+
+```bash
+SLUG=monsite API_PORT=8789 bash deploy/vps-setup.sh
 # -> servi sur http://76.13.37.163/monsite/
 ```
 
-Variables disponibles : `SLUG` (sous-chemin), `API_PORT` (port local unique par
-projet), `ANTHROPIC_API_KEY`, `SERVER_NAME` (IP ou domaine), `REDIRECT_ROOT`
-(`1` = « / » redirige vers `/studies/`).
+Variables disponibles : `SLUG` (sous-chemin), `API_PORT` (port local unique),
+`SESSION_SECRET`, `SERVER_NAME` (IP ou domaine), `REDIRECT_ROOT` (`1` = « / »
+redirige vers `/vacances/`).
 
-### Vérifier / dépanner
+## Vérifier / dépanner
 
 ```bash
-pm2 status                          # « studies-api » doit être online
-curl localhost:8787/api/sante       # doit répondre {"ok":true}
-curl http://76.13.37.163/studies/api/sante
+pm2 status                          # « vacances-api » doit être online
+curl localhost:8788/api/sante       # doit répondre {"ok":true}
+curl http://76.13.37.163/vacances/api/sante
 sudo tail -f /var/log/nginx/error.log
 ```
-
----
-
-## Méthode B — déploiement automatique via GitHub Actions (clé SSH requise)
-
-Le workflow `.github/workflows/deploy-vps.yml` synchronise le site **à chaque
-push** vers le VPS : il envoie le front (statique) et le serveur Node (prix +
-IA), installe les dépendances et redémarre l'API. Voici la configuration à faire
-**une seule fois**.
-
-> Cette méthode sert le site **à la racine** (`/`). Elle dépend d'une clé SSH
-> bien formée dans le secret `VPS_SSH_KEY` (cause fréquente d'échec :
-> `error in libcrypto` = clé incomplète ou sans retour à la ligne final).
-> Si tu bloques dessus, utilise plutôt la **méthode A**.
-
-## 1. Préparer le VPS (une fois)
-
-Connecté en SSH sur le VPS (`ssh utilisateur@76.13.37.163`) :
-
-```bash
-# Node 22 + nginx + pm2
-curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get install -y nodejs nginx
-sudo npm install -g pm2
-
-# Dossiers cibles
-sudo mkdir -p /var/www/parcoursup /opt/parcoursup
-sudo chown -R "$USER" /var/www/parcoursup /opt/parcoursup
-
-# nginx : copier l'exemple fourni puis l'activer
-sudo cp /chemin/vers/deploy/nginx.conf.example /etc/nginx/sites-available/parcoursup
-sudo ln -sf /etc/nginx/sites-available/parcoursup /etc/nginx/sites-enabled/parcoursup
-sudo nginx -t && sudo systemctl reload nginx
-
-# Démarrer pm2 au boot
-pm2 startup   # exécuter la commande affichée
-```
-
-## 2. Créer une clé SSH de déploiement (une fois)
-
-Sur ta machine (ou le VPS), génère une paire de clés **sans passphrase** dédiée
-au déploiement, puis autorise la clé publique sur le VPS :
-
-```bash
-ssh-keygen -t ed25519 -f deploy_key -N ""
-ssh-copy-id -i deploy_key.pub utilisateur@76.13.37.163
-# (ou ajoute deploy_key.pub à ~/.ssh/authorized_keys sur le VPS)
-```
-
-## 3. Renseigner les secrets GitHub (une fois)
-
-Dépôt → **Settings → Secrets and variables → Actions → New repository secret** :
-
-| Secret | Valeur |
-| --- | --- |
-| `VPS_HOST` | `76.13.37.163` |
-| `VPS_USER` | ton utilisateur SSH sur le VPS |
-| `VPS_SSH_KEY` | le contenu de la **clé privée** `deploy_key` (tout le fichier) |
-| `ANTHROPIC_API_KEY` | *(facultatif)* ta clé API pour activer le conseiller IA et l'analyse de bulletin en ligne |
-
-## 4. C'est tout : ça se synchronise tout seul
-
-À chaque `git push` sur la branche, GitHub Actions :
-
-1. build le front,
-2. envoie `dist/` dans `/var/www/parcoursup` (servi par nginx),
-3. envoie `server/` dans `/opt/parcoursup`, installe les dépendances,
-4. (re)démarre l'API `parcoursup-api` via pm2.
-
-Le site est alors accessible sur **http://76.13.37.163**. Tu peux aussi lancer
-le déploiement à la main depuis l'onglet **Actions → Déployer sur le VPS → Run
-workflow**.
-
-## Vérifier / dépanner sur le VPS
-
-```bash
-pm2 status                 # l'API doit être "online"
-pm2 logs parcoursup-api    # logs de l'API
-curl localhost:8787/api/sante   # doit répondre {"ok":true}
-sudo tail -f /var/log/nginx/error.log
-```
-
-> Sans clé `ANTHROPIC_API_KEY`, le site fonctionne : les prix passent en
-> estimation et le conseil en mode règles. Avec la clé, l'IA (conseils +
-> analyse de bulletin) est active en ligne.

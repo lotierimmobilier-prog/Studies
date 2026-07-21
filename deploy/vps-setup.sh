@@ -3,42 +3,51 @@
 # Déploiement DIRECT sur le VPS — sans GitHub Actions ni clé SSH.
 # Récupère le dépôt (public), build le front, sert via nginx et démarre l'API.
 #
-# Multi-projets : ce projet est servi sous un SOUS-CHEMIN (par défaut « /studies »).
-# Tu peux héberger d'autres projets sur le même VPS sous /autre-projet : chacun
-# dépose sa propre config nginx dans /etc/nginx/projets.d/ (via « include »),
-# donc les projets ne se marchent pas dessus.
+# Multi-projets : ce projet (portail voyageurs) est servi sous un SOUS-CHEMIN
+# (par défaut « /vacances »). Tu peux héberger d'autres projets sur le même VPS
+# sous /autre-projet : chacun dépose sa propre config nginx dans
+# /etc/nginx/projets.d/ (via « include »), donc les projets ne se marchent pas
+# dessus.
 #
 # À lancer EN ROOT sur le VPS. Deux façons :
 #
 #   # 1) En une commande :
-#   curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh | bash
 #
 #   # 2) Depuis un clone du dépôt :
 #   bash deploy/vps-setup.sh
 #
 # Options (variables d'environnement) :
-#   SLUG=studies                 # sous-chemin + nom du projet (URL : /studies)
-#   API_PORT=8787                # port local de l'API Node (unique par projet !)
-#   ANTHROPIC_API_KEY=sk-ant-... # active l'IA (conseils + analyse de bulletin +
-#                                #   modération fine des avis étudiants)
-#   GOOGLE_MAPS_API_KEY=...      # active les avis Google (note ⭐ des écoles)
-#   MODERATION_TOKEN=...         # jeton pour l'endpoint de modération des avis
+#   SLUG=vacances                # sous-chemin + nom du projet (URL : /vacances)
+#   API_PORT=8788                # port local de l'API Node (unique par projet !)
+#   SESSION_SECRET=...           # clé secrète de signature des jetons de session
+#                                #   (fortement recommandé en production)
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
 #
 # Exemple pour un 2e projet plus tard :
-#   SLUG=monsite API_PORT=8788 bash deploy/vps-setup.sh
+#   SLUG=monsite API_PORT=8789 bash deploy/vps-setup.sh
 #
 # Le script est idempotent : relance-le pour mettre à jour le site.
+#
+# IMPORTANT — configuration des séjours :
+#   Le portail lit les identifiants et infos de la maison dans, par ordre de
+#   priorité, ${APP_DIR}/.data/sejours.json puis server/data/sejours.json
+#   (exemple versionné). Pour la mise en service, crée ta config réelle :
+#     mkdir -p /opt/vacances/.data
+#     cp /opt/vacances/server/data/sejours.json /opt/vacances/.data/sejours.json
+#     nano /opt/vacances/.data/sejours.json   # remplis tes vrais codes/séjours
+#     pm2 restart vacances-api
+#   Ce fichier .data/ n'est pas écrasé par les mises à jour (relances du script).
 
 set -euo pipefail
 
 # ------------------------------------------------------------------ paramètres
 REPO_URL="${REPO_URL:-https://github.com/lotierimmobilier-prog/Studies.git}"
-BRANCH="${BRANCH:-claude/parcoursup-admission-simulator-2jy76p}"
-SLUG="${SLUG:-studies}"                       # sous-chemin d'URL et nom du projet
+BRANCH="${BRANCH:-claude/airbnb-guest-portal-8o2bq8}"
+SLUG="${SLUG:-vacances}"                       # sous-chemin d'URL et nom du projet
 SERVER_NAME="${SERVER_NAME:-76.13.37.163}"    # IP ou nom de domaine
-API_PORT="${API_PORT:-8787}"                  # port local de l'API (unique/projet)
+API_PORT="${API_PORT:-8788}"                  # port local de l'API (unique/projet)
 REDIRECT_ROOT="${REDIRECT_ROOT:-1}"           # « / » -> « /<SLUG>/ »
 
 SRC_DIR="/opt/${SLUG}-src"                    # copie de travail du dépôt
@@ -87,7 +96,7 @@ mkdir -p "${WEB_ROOT}"
 rsync -a --delete "${SRC_DIR}/dist/" "${WEB_ROOT}/"
 
 # ------------------------------------------------------------------- serveur Node (API)
-log "Installation du serveur Node (prix + IA) dans ${APP_DIR}…"
+log "Installation du serveur Node (authentification + séjours) dans ${APP_DIR}…"
 mkdir -p "${APP_DIR}"
 rsync -a --delete "${SRC_DIR}/server/" "${APP_DIR}/server/"
 for f in package.json package-lock.json tsconfig.server.json; do
@@ -96,28 +105,22 @@ done
 cd "${APP_DIR}"
 npm ci
 
-# Clés API (facultatives), tracées dans .env pour référence. Elles sont surtout
-# transmises au process via l'environnement (pm2 les capte au démarrage).
+# Secret de signature des jetons de session. S'il n'est pas fourni, on en génère
+# un (persisté dans .env) pour ne pas invalider les sessions à chaque mise à jour.
 : > "${APP_DIR}/.env"
-if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
-  echo "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}" >> "${APP_DIR}/.env"
-  log "Clé ANTHROPIC_API_KEY enregistrée (IA activée)."
-else
-  log "Pas de clé ANTHROPIC_API_KEY : prix en estimation, conseil en mode règles."
+if [ -z "${SESSION_SECRET:-}" ] && [ -f "${APP_DIR}/.session_secret" ]; then
+  SESSION_SECRET="$(cat "${APP_DIR}/.session_secret")"
 fi
-if [ -n "${GOOGLE_MAPS_API_KEY:-}" ]; then
-  echo "GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}" >> "${APP_DIR}/.env"
-  log "Clé GOOGLE_MAPS_API_KEY enregistrée (avis Google activés)."
-else
-  log "Pas de clé GOOGLE_MAPS_API_KEY : les notes Google ne s'affichent pas."
+if [ -z "${SESSION_SECRET:-}" ]; then
+  SESSION_SECRET="$(head -c 32 /dev/urandom | base64)"
+  log "SESSION_SECRET généré automatiquement."
 fi
-if [ -n "${MODERATION_TOKEN:-}" ]; then
-  echo "MODERATION_TOKEN=${MODERATION_TOKEN}" >> "${APP_DIR}/.env"
-  log "Jeton MODERATION_TOKEN enregistré (endpoint de modération protégé)."
-fi
+printf '%s' "${SESSION_SECRET}" > "${APP_DIR}/.session_secret"
+chmod 600 "${APP_DIR}/.session_secret"
+echo "SESSION_SECRET=${SESSION_SECRET}" >> "${APP_DIR}/.env"
 
 log "(Re)démarrage de l'API « ${PM2_NAME} » (port ${API_PORT}) via pm2…"
-ENV_VARS="PORT=${API_PORT} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-} GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-} MODERATION_TOKEN=${MODERATION_TOKEN:-}"
+ENV_VARS="PORT=${API_PORT} SESSION_SECRET=${SESSION_SECRET}"
 if pm2 describe "${PM2_NAME}" >/dev/null 2>&1; then
   env ${ENV_VARS} pm2 restart "${PM2_NAME}" --update-env
 else

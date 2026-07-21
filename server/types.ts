@@ -1,84 +1,80 @@
-/** Résultat de prix pour un établissement / une formation. */
-export interface PrixFormation {
-  etablissement: string
-  /** Frais de scolarité annuels en euros, ou null si inconnu. */
-  prixAnnuel: number | null
-  devise: 'EUR'
-  /** Les boursiers sont-ils exonérés (fréquent dans le public) ? */
-  gratuitBoursier?: boolean
-  /** Provenance de l'information. */
-  source: 'curated' | 'scrape' | 'estimation'
-  /** URL consultée (site de l'école) le cas échéant. */
-  url?: string
-  /** Précision lisible (ex. « droits nationaux », fourchette privée…). */
-  note?: string
-  /** Date de mise à jour (ISO), injectée par l'appelant. */
-  dateMaj: string
+/** Types partagés côté serveur pour le portail voyageurs. */
+
+/** Coordonnées de l'hôte, affichées aux voyageurs connectés. */
+export interface Hote {
+  nom: string
+  telephone?: string
+  email?: string
+  /** Numéro WhatsApp au format international sans « + » (ex. « 33612345678 »). */
+  whatsapp?: string
 }
 
-/** Requête de prix : on transmet ce que l'on connaît de la formation. */
-export interface RequetePrix {
-  etablissement: string
-  /** Statut de l'open data (Public / Privé sous contrat…). */
-  statut?: string
-  /** Filière très agrégée de l'open data (ex. 9_EcoleIngenieur). */
-  fili?: string
-  /** Intitulé de la formation (aide au classement par catégorie). */
-  formation?: string
+/** Un numéro utile (urgences, taxi, médecin…). */
+export interface NumeroUtile {
+  libelle: string
+  numero: string
 }
 
-/** Avis Google d'un établissement (note moyenne + nombre d'avis). */
-export interface AvisEcole {
-  etablissement: string
-  /** Note moyenne sur 5, ou null si inconnue. */
-  note: number | null
-  /** Nombre d'avis pris en compte, ou null si inconnu. */
-  nombreAvis: number | null
-  /** Provenance : Google Places, ou indisponible (clé absente / non trouvé). */
-  source: 'google' | 'indisponible'
-  /** Lien vers la fiche Google Maps, le cas échéant. */
-  urlMaps?: string
-  /** Date de mise à jour (ISO), injectée par l'appelant. */
-  dateMaj: string
+/** Le Wi-Fi de la maison. */
+export interface Wifi {
+  reseau: string
+  motDePasse: string
 }
 
-/** Requête d'avis : le nom et la ville aident à identifier la bonne fiche. */
-export interface RequeteAvis {
-  etablissement: string
-  ville?: string
+/**
+ * Informations de la maison, communes à tous les séjours et **réservées aux
+ * voyageurs connectés** (codes, Wi-Fi, adresse précise…).
+ */
+export interface Maison {
+  nom: string
+  sousTitre?: string
+  adresse: string
+  /** Lien Google Maps / Plans vers la maison. */
+  lienCarte?: string
+  wifi: Wifi
+  /** Code de la boîte à clés / de la porte. */
+  codeAcces?: string
+  /** Instructions détaillées pour récupérer les clés / entrer. */
+  instructionsArrivee: string[]
+  /** Instructions de départ (clés, ménage, poubelles…). */
+  instructionsDepart: string[]
+  /** Stationnement. */
+  parking?: string
+  /** Règlement intérieur (points courts). */
+  reglement: string[]
+  hote: Hote
+  /** Numéros d'urgence et contacts utiles. */
+  numerosUtiles: NumeroUtile[]
 }
 
-/** Statut de modération d'un témoignage étudiant. */
-export type StatutTemoignage = 'approuve' | 'en_attente' | 'rejete'
-
-/** Témoignage d'un·e étudiant·e sur un établissement (contenu modéré). */
-export interface TemoignageEtudiant {
-  id: string
-  etablissement: string
-  /** Note sur 5 (entier 1-5). */
-  note: number
-  /** Commentaire libre (modéré). */
-  commentaire: string
-  /** Année d'études de l'auteur (facultatif), ex. 2024. */
-  annee?: number
-  statut: StatutTemoignage
-  /** Date de dépôt (ISO). */
-  dateMaj: string
+/** Un séjour = une réservation, avec son identifiant de connexion. */
+export interface Sejour {
+  login: string
+  motDePasse: string
+  /** Nom affiché (ex. « Famille Dupont »). */
+  nom: string
+  /** Date/heure d'arrivée au format ISO local (ex. « 2026-07-25T16:00 »). */
+  arrivee: string
+  /** Date/heure de départ au format ISO local. */
+  depart: string
+  /** Nombre de voyageurs (facultatif). */
+  voyageurs?: number
+  /** Petit mot personnalisé de l'hôte. */
+  messageHote?: string
 }
 
-/** Ce que le client envoie pour déposer un témoignage. */
-export interface RequeteTemoignage {
-  etablissement: string
-  note: number
-  commentaire: string
-  annee?: number
+/** Le séjour tel qu'il est renvoyé au client (sans le mot de passe). */
+export type SejourPublic = Omit<Sejour, 'motDePasse'>
+
+/** Fichier de configuration complet. */
+export interface Configuration {
+  maison: Maison
+  sejours: Sejour[]
 }
 
-/** Synthèse publique des témoignages approuvés d'un établissement. */
-export interface SyntheseTemoignages {
-  etablissement: string
-  /** Moyenne des notes approuvées (sur 5), ou null si aucun avis. */
-  moyenne: number | null
-  nombre: number
-  temoignages: TemoignageEtudiant[]
+/** Réponse d'une connexion réussie. */
+export interface ReponseConnexion {
+  jeton: string
+  sejour: SejourPublic
+  maison: Maison
 }
