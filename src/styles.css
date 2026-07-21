@@ -34,6 +34,13 @@
 
 html {
   scroll-behavior: smooth;
+  /* Taille de police racine FLUIDE : tout (basé sur rem/em) s'adapte
+     proportionnellement à la largeur de l'écran, du petit téléphone
+     (~15px) au grand écran (~18px). */
+  font-size: clamp(15px, 14.1px + 0.28vw, 18px);
+  /* Évite que le navigateur agrandisse la police en mode paysage (iOS). */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -42,6 +49,17 @@ body {
   background: var(--sable);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  /* Aucune barre de défilement horizontale, quel que soit l'écran.
+     « clip » (et non « hidden ») évite de créer un conteneur de défilement
+     qui casserait les en-têtes « sticky ». */
+  overflow-x: clip;
+}
+
+/* Les médias ne débordent jamais de leur conteneur. */
+img,
+video,
+iframe {
+  max-width: 100%;
 }
 
 h1,
