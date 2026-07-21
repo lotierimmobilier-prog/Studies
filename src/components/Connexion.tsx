@@ -2,14 +2,13 @@ import { useState, type FormEvent } from 'react'
 import { seConnecter } from '../api'
 import type { Session } from '../types'
 
-/** Écran de connexion : login + mot de passe fournis par l'hôte. */
+/** Écran de connexion voyageur : un simple code fourni par l'hôte. */
 export default function Connexion({
   onConnecte,
 }: {
   onConnecte: (session: Session) => void
 }) {
-  const [login, setLogin] = useState('')
-  const [motDePasse, setMotDePasse] = useState('')
+  const [code, setCode] = useState('')
   const [erreur, setErreur] = useState<string | null>(null)
   const [enCours, setEnCours] = useState(false)
 
@@ -18,7 +17,7 @@ export default function Connexion({
     setErreur(null)
     setEnCours(true)
     try {
-      const session = await seConnecter(login, motDePasse)
+      const session = await seConnecter(code)
       onConnecte(session)
     } catch (err) {
       setErreur((err as Error).message)
@@ -40,26 +39,16 @@ export default function Connexion({
 
         <form onSubmit={soumettre} className="connexion-form">
           <label>
-            Identifiant
+            Votre code d'accès
             <input
               type="text"
-              value={login}
-              onChange={(e) => setLogin(e.target.value)}
-              autoComplete="username"
-              placeholder="votre identifiant"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              placeholder="ex. SOLEIL"
+              autoComplete="off"
+              autoCapitalize="characters"
               required
               autoFocus
-            />
-          </label>
-          <label>
-            Mot de passe
-            <input
-              type="password"
-              value={motDePasse}
-              onChange={(e) => setMotDePasse(e.target.value)}
-              autoComplete="current-password"
-              placeholder="••••••••"
-              required
             />
           </label>
 
@@ -71,7 +60,7 @@ export default function Connexion({
         </form>
 
         <p className="connexion-aide">
-          Vos identifiants vous ont été communiqués par votre hôte. Un souci pour
+          Votre code d'accès vous a été communiqué par votre hôte. Un souci pour
           vous connecter&nbsp;? Contactez-le directement.
         </p>
       </div>

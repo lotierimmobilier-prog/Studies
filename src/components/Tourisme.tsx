@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { LIEUX } from '../data/tourisme'
 import type { LieuTourisme } from '../types'
 
 function CarteLieu({ lieu }: { lieu: LieuTourisme }) {
@@ -55,15 +54,15 @@ function CarteLieu({ lieu }: { lieu: LieuTourisme }) {
   )
 }
 
-export default function SectionTourisme() {
+export default function SectionTourisme({ lieux }: { lieux: LieuTourisme[] }) {
   const categories = useMemo(
-    () => ['Tout', ...Array.from(new Set(LIEUX.map((l) => l.categorie)))],
-    [],
+    () => ['Tout', ...Array.from(new Set(lieux.map((l) => l.categorie)))],
+    [lieux],
   )
   const [filtre, setFiltre] = useState('Tout')
 
   const liste =
-    filtre === 'Tout' ? LIEUX : LIEUX.filter((l) => l.categorie === filtre)
+    filtre === 'Tout' ? lieux : lieux.filter((l) => l.categorie === filtre)
 
   return (
     <section className="section">
@@ -85,11 +84,15 @@ export default function SectionTourisme() {
         ))}
       </div>
 
-      <div className="grille-lieux">
-        {liste.map((lieu) => (
-          <CarteLieu key={lieu.id} lieu={lieu} />
-        ))}
-      </div>
+      {liste.length === 0 ? (
+        <p className="vide">Aucune adresse pour le moment.</p>
+      ) : (
+        <div className="grille-lieux">
+          {liste.map((lieu) => (
+            <CarteLieu key={lieu.id} lieu={lieu} />
+          ))}
+        </div>
+      )}
     </section>
   )
 }

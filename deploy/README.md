@@ -11,65 +11,35 @@ installe Node/nginx/pm2 au besoin, build le front, le sert sous un **sous-chemin
 (`/maisoncapendu` par défaut) et démarre l'API. Idempotent : relance-le pour mettre à
 jour.
 
-Connecté en **root** sur le VPS (`ssh root@76.13.37.163`), une seule commande :
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh | bash
-```
-
-Le site est alors en ligne sur **http://76.13.37.163/maisoncapendu/**.
-
-Pour fixer votre propre secret de session (recommandé en production) :
+Connecté en **root** sur le VPS (`ssh root@76.13.37.163`), une seule commande —
+en choisissant votre **mot de passe d'administration** :
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh \
-  | SESSION_SECRET="une-longue-phrase-secrete" bash
+  | ADMIN_PASSWORD="votre-mot-de-passe-admin" bash
 ```
 
-> Sans `SESSION_SECRET`, le script en génère un automatiquement et le conserve
-> (`/opt/maisoncapendu/.session_secret`), pour ne pas déconnecter les voyageurs à
-> chaque mise à jour.
+- Le site voyageur : **http://76.13.37.163/maisoncapendu/**
+- L'administration : **http://76.13.37.163/maisoncapendu/#admin**
 
-## ⚙️ Configurer vos séjours et les infos de la maison
+> Sans `ADMIN_PASSWORD`, le mot de passe admin par défaut est **`admin`**
+> (à changer !). `SESSION_SECRET` (signature des jetons) est généré et conservé
+> automatiquement s'il n'est pas fourni.
 
-Le portail lit **login/mot de passe**, dates de séjour et informations de la
-maison (codes, Wi-Fi, adresse…) dans un fichier JSON. Deux emplacements, par
-ordre de priorité :
+## ⚙️ Tout se configure depuis l'administration
 
-1. `/opt/maisoncapendu/.data/sejours.json` → **votre configuration réelle** (non
-   versionnée, jamais écrasée par les mises à jour) ;
-2. `server/data/sejours.json` → l'exemple fourni (versionné).
+Plus besoin d'éditer de fichier : ouvrez **`/maisoncapendu/#admin`**, connectez-vous
+avec votre mot de passe admin, et saisissez directement :
 
-Pour la mise en service, copiez l'exemple puis remplissez-le :
+- **Séjours** — un *code* d'accès + un *prénom* d'accueil, les dates et un message
+  de bienvenue, pour chaque réservation ;
+- **La maison** — adresse, Wi-Fi, code boîte à clés, instructions d'arrivée/départ,
+  règlement, coordonnées de l'hôte, numéros utiles ;
+- **Tutoriels vidéo** — titre, catégorie, vidéo (YouTube/Vimeo/fichier), étapes ;
+- **Tourisme** — bonnes adresses avec contacts et vos conseils.
 
-```bash
-mkdir -p /opt/maisoncapendu/.data
-cp /opt/maisoncapendu/server/data/sejours.json /opt/maisoncapendu/.data/sejours.json
-nano /opt/maisoncapendu/.data/sejours.json   # vos vrais codes, Wi-Fi, séjours…
-pm2 restart maisoncapendu-api
-```
-
-Chaque séjour se déclare ainsi :
-
-```json
-{
-  "login": "dupont",
-  "motDePasse": "soleil2026",
-  "nom": "Famille Dupont",
-  "arrivee": "2026-08-03T16:00",
-  "depart": "2026-08-10T10:00",
-  "voyageurs": 5,
-  "messageHote": "Bienvenue !"
-}
-```
-
-## 🎬 Ajouter vos tutoriels vidéo et bonnes adresses
-
-- **Tutoriels vidéo** : éditez `src/data/tutoriels.ts`. Mettez vos vidéos en
-  ligne sur YouTube (réglage « Non répertoriée » conseillé) et collez leur ID.
-- **Tourisme / contacts** : éditez `src/data/tourisme.ts`.
-
-Après modification, relancez le script de déploiement pour rebuild le front.
+Tout est enregistré dans `/opt/maisoncapendu/.data/config.json`, **jamais écrasé**
+par les mises à jour. L'exemple versionné de départ est `server/data/config.json`.
 
 ## Héberger plusieurs projets sur le même VPS
 
@@ -83,8 +53,8 @@ SLUG=monsite API_PORT=8789 bash deploy/vps-setup.sh
 ```
 
 Variables disponibles : `SLUG` (sous-chemin), `API_PORT` (port local unique),
-`SESSION_SECRET`, `SERVER_NAME` (IP ou domaine), `REDIRECT_ROOT` (`1` = « / »
-redirige vers `/maisoncapendu/`).
+`ADMIN_PASSWORD`, `SESSION_SECRET`, `SERVER_NAME` (IP ou domaine),
+`REDIRECT_ROOT` (`1` = « / » redirige vers `/maisoncapendu/`).
 
 ## Vérifier / dépanner
 

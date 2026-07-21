@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { TUTORIELS } from '../data/tutoriels'
 import type { Tutoriel } from '../types'
 import VideoCapsule from './VideoCapsule'
 
@@ -38,17 +37,21 @@ function CarteTutoriel({ tuto }: { tuto: Tutoriel }) {
   )
 }
 
-export default function SectionTutoriels() {
+export default function SectionTutoriels({
+  tutoriels,
+}: {
+  tutoriels: Tutoriel[]
+}) {
   const categories = useMemo(
-    () => ['Tout', ...Array.from(new Set(TUTORIELS.map((t) => t.categorie)))],
-    [],
+    () => ['Tout', ...Array.from(new Set(tutoriels.map((t) => t.categorie)))],
+    [tutoriels],
   )
   const [filtre, setFiltre] = useState('Tout')
 
   const liste =
     filtre === 'Tout'
-      ? TUTORIELS
-      : TUTORIELS.filter((t) => t.categorie === filtre)
+      ? tutoriels
+      : tutoriels.filter((t) => t.categorie === filtre)
 
   return (
     <section className="section">
@@ -71,11 +74,15 @@ export default function SectionTutoriels() {
         ))}
       </div>
 
-      <div className="grille-tutos">
-        {liste.map((tuto) => (
-          <CarteTutoriel key={tuto.id} tuto={tuto} />
-        ))}
-      </div>
+      {liste.length === 0 ? (
+        <p className="vide">Aucun tutoriel pour le moment.</p>
+      ) : (
+        <div className="grille-tutos">
+          {liste.map((tuto) => (
+            <CarteTutoriel key={tuto.id} tuto={tuto} />
+          ))}
+        </div>
+      )}
     </section>
   )
 }

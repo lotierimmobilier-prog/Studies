@@ -1,0 +1,202 @@
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { timingSafeEqual } from 'node:crypto'
+import { dirname, join } from 'node:path'
+import type {
+  Configuration,
+  ContenuVoyageur,
+  Sejour,
+  SourceVideo,
+  Tutoriel,
+} from './types'
+
+/**
+ * Chargement et **écriture** de la configuration (maison, séjours, tutoriels,
+ * tourisme). Tout est édité depuis l'administration.
+ *
+ * Deux emplacements, par ordre de priorité en lecture :
+ *   1. `.data/config.json`        → configuration réelle (écrite par l'admin)
+ *   2. `server/data/config.json`  → l'exemple fourni (versionné)
+ *
+ * Les écritures vont toujours dans `.data/config.json` (jamais versionné, donc
+ * jamais écrasé par une mise à jour du code).
+ */
+
+const CHEMIN_PERSO = join(process.cwd(), '.data', 'config.json')
+const CHEMIN_EXEMPLE = join(process.cwd(), 'server', 'data', 'config.json')
+
+/** Mot de passe de l'administration (à définir en production). */
+const MOT_DE_PASSE_ADMIN = process.env.ADMIN_PASSWORD ?? 'admin'
+
+let config: Configuration | null = null
+
+export async function chargerConfiguration(): Promise<Configuration> {
+  const chemin = existsSync(CHEMIN_PERSO) ? CHEMIN_PERSO : CHEMIN_EXEMPLE
+  config = JSON.parse(await readFile(chemin, 'utf8')) as Configuration
+  return config
+}
+
+function courante(): Configuration {
+  if (!config) throw new Error('Configuration non chargée')
+  return config
+}
+
+/** Compare deux chaînes à temps constant (anti-timing). */
+function egaliteSure(a: string, b: string): boolean {
+  const ba = Buffer.from(a)
+  const bb = Buffer.from(b)
+  if (ba.length !== bb.length) return false
+  return timingSafeEqual(ba, bb)
+}
+
+/** Vérifie le mot de passe administrateur. */
+export function verifierAdmin(motDePasse: string): boolean {
+  return egaliteSure(motDePasse, MOT_DE_PASSE_ADMIN)
+}
+
+/** Normalise un code (insensible à la casse et aux espaces) pour comparaison. */
+function normaliserCode(code: string): string {
+  return code.trim().toLowerCase().replace(/\s+/g, '')
+}
+
+/** Retrouve un séjour par son code de connexion, ou `null`. */
+export function sejourParCode(code: string): Sejour | null {
+  const c = normaliserCode(code)
+  if (!c) return null
+  return (
+    courante().sejours.find((s) => normaliserCode(s.code) === c) ?? null
+  )
+}
+
+/** Assemble le contenu envoyé à un voyageur connecté. */
+export function contenuVoyageur(sejour: Sejour): ContenuVoyageur {
+  const c = courante()
+  return {
+    sejour,
+    maison: c.maison,
+    tutoriels: c.tutoriels,
+    tourisme: c.tourisme,
+  }
+}
+
+/** La configuration complète (pour l'administration). */
+export function configurationComplete(): Configuration {
+  return courante()
+}
+
+/**
+ * Enregistre une nouvelle configuration (depuis l'administration). Écrit dans
+ * `.data/config.json` et met à jour la copie en mémoire.
+ */
+export async function enregistrerConfiguration(
+  nouvelle: Configuration,
+): Promise<void> {
+  const propre = validerConfiguration(nouvelle)
+  await mkdir(dirname(CHEMIN_PERSO), { recursive: true })
+  await writeFile(CHEMIN_PERSO, JSON.stringify(propre, null, 2), 'utf8')
+  config = propre
+}
+
+// --------------------------------------------------------------- validation
+
+function chaine(v: unknown, defaut = ''): string {
+  return typeof v === 'string' ? v : defaut
+}
+
+function tableauChaines(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []
+}
+
+/**
+ * Nettoie/valide la configuration reçue de l'administration : on garantit la
+ * forme attendue (types corrects, tableaux présents) sans faire confiance
+ * aveuglément au corps de la requête.
+ */
+export function validerConfiguration(brut: unknown): Configuration {
+  const c = (brut ?? {}) as Record<string, unknown>
+  const maisonBrut = (c.maison ?? {}) as Record<string, unknown>
+  const wifiBrut = (maisonBrut.wifi ?? {}) as Record<string, unknown>
+  const hoteBrut = (maisonBrut.hote ?? {}) as Record<string, unknown>
+
+  const maison = {
+    nom: chaine(maisonBrut.nom, 'Ma maison'),
+    sousTitre: chaine(maisonBrut.sousTitre),
+    adresse: chaine(maisonBrut.adresse),
+    lienCarte: chaine(maisonBrut.lienCarte),
+    wifi: {
+      reseau: chaine(wifiBrut.reseau),
+      motDePasse: chaine(wifiBrut.motDePasse),
+    },
+    codeAcces: chaine(maisonBrut.codeAcces),
+    instructionsArrivee: tableauChaines(maisonBrut.instructionsArrivee),
+    instructionsDepart: tableauChaines(maisonBrut.instructionsDepart),
+    parking: chaine(maisonBrut.parking),
+    reglement: tableauChaines(maisonBrut.reglement),
+    hote: {
+      nom: chaine(hoteBrut.nom),
+      telephone: chaine(hoteBrut.telephone),
+      email: chaine(hoteBrut.email),
+      whatsapp: chaine(hoteBrut.whatsapp),
+    },
+    numerosUtiles: (Array.isArray(maisonBrut.numerosUtiles)
+      ? maisonBrut.numerosUtiles
+      : []
+    ).map((n) => {
+      const o = (n ?? {}) as Record<string, unknown>
+      return { libelle: chaine(o.libelle), numero: chaine(o.numero) }
+    }),
+  }
+
+  const sejours = (Array.isArray(c.sejours) ? c.sejours : []).map((s) => {
+    const o = (s ?? {}) as Record<string, unknown>
+    return {
+      code: chaine(o.code),
+      nom: chaine(o.nom),
+      arrivee: chaine(o.arrivee),
+      depart: chaine(o.depart),
+      voyageurs:
+        typeof o.voyageurs === 'number' ? o.voyageurs : undefined,
+      messageHote: chaine(o.messageHote),
+    }
+  })
+
+  const tutoriels: Tutoriel[] = (
+    Array.isArray(c.tutoriels) ? c.tutoriels : []
+  ).map((t, i) => {
+    const o = (t ?? {}) as Record<string, unknown>
+      const v = (o.video ?? {}) as Record<string, unknown>
+      const video: SourceVideo =
+        v.type === 'fichier'
+          ? { type: 'fichier', src: chaine(v.src) }
+          : v.type === 'vimeo'
+            ? { type: 'vimeo', id: chaine(v.id) }
+            : { type: 'youtube', id: chaine(v.id) }
+      return {
+        id: chaine(o.id) || `tuto-${i}`,
+        titre: chaine(o.titre),
+        categorie: chaine(o.categorie, 'Autres'),
+        icone: chaine(o.icone, '🎬'),
+        description: chaine(o.description),
+        video,
+        etapes: tableauChaines(o.etapes),
+      }
+  })
+
+  const tourisme = (Array.isArray(c.tourisme) ? c.tourisme : []).map((l, i) => {
+    const o = (l ?? {}) as Record<string, unknown>
+    return {
+      id: chaine(o.id) || `lieu-${i}`,
+      nom: chaine(o.nom),
+      categorie: chaine(o.categorie, 'Autres'),
+      icone: chaine(o.icone, '📍'),
+      description: chaine(o.description),
+      distance: chaine(o.distance),
+      telephone: chaine(o.telephone),
+      siteWeb: chaine(o.siteWeb),
+      lienCarte: chaine(o.lienCarte),
+      conseilHote: chaine(o.conseilHote),
+    }
+  })
+
+  return { maison, sejours, tutoriels, tourisme }
+}

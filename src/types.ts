@@ -33,7 +33,9 @@ export interface Maison {
 }
 
 export interface Sejour {
-  login: string
+  /** Code de connexion unique (choisi par l'admin). */
+  code: string
+  /** Nom ou prénom affiché à l'accueil. */
   nom: string
   arrivee: string
   depart: string
@@ -41,10 +43,21 @@ export interface Sejour {
   messageHote?: string
 }
 
+/** Contenu reçu par un voyageur connecté. */
 export interface Session {
   jeton: string
   sejour: Sejour
   maison: Maison
+  tutoriels: Tutoriel[]
+  tourisme: LieuTourisme[]
+}
+
+/** Configuration complète, éditée dans l'administration. */
+export interface Configuration {
+  maison: Maison
+  sejours: Sejour[]
+  tutoriels: Tutoriel[]
+  tourisme: LieuTourisme[]
 }
 
 /** Source d'une capsule vidéo : YouTube, Vimeo, ou fichier vidéo hébergé. */

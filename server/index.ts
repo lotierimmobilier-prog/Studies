@@ -3,30 +3,33 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { creerJeton, verifierJeton } from './auth'
 import {
   chargerConfiguration,
-  maison,
-  sansMotDePasse,
-  sejourParLogin,
-  verifierIdentifiants,
-} from './sejours'
-import type { ReponseConnexion } from './types'
+  configurationComplete,
+  contenuVoyageur,
+  enregistrerConfiguration,
+  sejourParCode,
+  verifierAdmin,
+} from './config'
+import type { Configuration, ReponseConnexion } from './types'
 
 /**
  * Serveur HTTP minimal (sans dépendance) pour le portail voyageurs.
  *
- *   GET  /api/sante         → { ok: true }
- *   POST /api/connexion     body { login, motDePasse } → { jeton, sejour, maison }
- *   GET  /api/sejour        header Authorization: Bearer <jeton>
- *                            → { sejour, maison }  (restaure une session)
+ * Côté voyageur (connexion par simple code) :
+ *   GET  /api/sante                → { ok: true }
+ *   POST /api/connexion  { code }  → { jeton, sejour, maison, tutoriels, tourisme }
+ *   GET  /api/sejour               → restaure la session (jeton voyageur)
  *
- * Les informations sensibles de la maison (codes, Wi-Fi, adresse) ne sont
- * renvoyées qu'après authentification.
+ * Côté administration (protégé par mot de passe ADMIN_PASSWORD) :
+ *   POST /api/admin/connexion { motDePasse } → { jeton }
+ *   GET  /api/admin/config                    → Configuration complète
+ *   PUT  /api/admin/config    body Config     → enregistre (et recharge)
  */
 
 const PORT = Number(process.env.PORT ?? 8788)
 
 function cors(res: ServerResponse): void {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
 }
 
@@ -36,7 +39,7 @@ function envoyerJson(res: ServerResponse, code: number, data: unknown): void {
   res.end(JSON.stringify(data))
 }
 
-const TAILLE_MAX_CORPS = 64 * 1024
+const TAILLE_MAX_CORPS = 1 * 1024 * 1024 // 1 Mo (config complète)
 
 async function lireCorps(req: IncomingMessage): Promise<string> {
   const morceaux: Buffer[] = []
@@ -74,45 +77,64 @@ async function demarrer(): Promise<void> {
         return envoyerJson(res, 200, { ok: true })
       }
 
-      // Connexion : vérifie login/mot de passe et renvoie un jeton + les infos.
-      if (url.pathname === '/api/connexion' && req.method === 'POST') {
-        const { login, motDePasse } = JSON.parse(await lireCorps(req)) as {
-          login?: string
-          motDePasse?: string
-        }
-        if (!login || !motDePasse)
-          return envoyerJson(res, 400, {
-            erreur: 'Login et mot de passe requis.',
-          })
+      // ------------------------------------------------------------- voyageur
 
-        const sejour = verifierIdentifiants(login, motDePasse)
+      // Connexion par code : renvoie un jeton + tout le contenu du séjour.
+      if (url.pathname === '/api/connexion' && req.method === 'POST') {
+        const { code } = JSON.parse(await lireCorps(req)) as { code?: string }
+        if (!code)
+          return envoyerJson(res, 400, { erreur: 'Code requis.' })
+
+        const sejour = sejourParCode(code)
         if (!sejour)
-          return envoyerJson(res, 401, {
-            erreur: 'Identifiant ou mot de passe incorrect.',
-          })
+          return envoyerJson(res, 401, { erreur: 'Code invalide.' })
 
         const reponse: ReponseConnexion = {
-          jeton: creerJeton(sejour.login),
-          sejour: sansMotDePasse(sejour),
-          maison: maison(),
+          jeton: creerJeton(sejour.code, 'voyageur'),
+          ...contenuVoyageur(sejour),
         }
         return envoyerJson(res, 200, reponse)
       }
 
-      // Restaure une session à partir d'un jeton (au rechargement de la page).
+      // Restaure une session voyageur à partir d'un jeton.
       if (url.pathname === '/api/sejour' && req.method === 'GET') {
-        const login = verifierJeton(jetonDepuisEntete(req))
-        if (!login)
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'voyageur')
           return envoyerJson(res, 401, { erreur: 'Session expirée.' })
 
-        const sejour = sejourParLogin(login)
+        const sejour = sejourParCode(charge.sub)
         if (!sejour)
           return envoyerJson(res, 401, { erreur: 'Séjour introuvable.' })
 
-        return envoyerJson(res, 200, {
-          sejour: sansMotDePasse(sejour),
-          maison: maison(),
-        })
+        return envoyerJson(res, 200, contenuVoyageur(sejour))
+      }
+
+      // ----------------------------------------------------------------- admin
+
+      // Connexion administrateur : renvoie un jeton admin.
+      if (url.pathname === '/api/admin/connexion' && req.method === 'POST') {
+        const { motDePasse } = JSON.parse(await lireCorps(req)) as {
+          motDePasse?: string
+        }
+        if (!motDePasse || !verifierAdmin(motDePasse))
+          return envoyerJson(res, 401, { erreur: 'Mot de passe incorrect.' })
+        return envoyerJson(res, 200, { jeton: creerJeton('admin', 'admin') })
+      }
+
+      // Lecture / écriture de la configuration complète (jeton admin requis).
+      if (url.pathname === '/api/admin/config') {
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'admin')
+          return envoyerJson(res, 401, { erreur: 'Non autorisé.' })
+
+        if (req.method === 'GET') {
+          return envoyerJson(res, 200, configurationComplete())
+        }
+        if (req.method === 'PUT') {
+          const nouvelle = JSON.parse(await lireCorps(req)) as Configuration
+          await enregistrerConfiguration(nouvelle)
+          return envoyerJson(res, 200, { ok: true })
+        }
       }
 
       envoyerJson(res, 404, { erreur: 'Route inconnue' })

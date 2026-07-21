@@ -24,7 +24,7 @@ export default function Portail({
   onDeconnexion: () => void
 }) {
   const [onglet, setOnglet] = useState<Onglet>('sejour')
-  const { maison, sejour } = session
+  const { maison, sejour, tutoriels, tourisme } = session
 
   return (
     <div className="portail">
@@ -67,8 +67,8 @@ export default function Portail({
       <main className="contenu">
         {onglet === 'sejour' && <SectionSejour sejour={sejour} />}
         {onglet === 'acces' && <SectionAcces maison={maison} />}
-        {onglet === 'tutoriels' && <SectionTutoriels />}
-        {onglet === 'tourisme' && <SectionTourisme />}
+        {onglet === 'tutoriels' && <SectionTutoriels tutoriels={tutoriels} />}
+        {onglet === 'tourisme' && <SectionTourisme lieux={tourisme} />}
         {onglet === 'contact' && <SectionContact maison={maison} />}
       </main>
 

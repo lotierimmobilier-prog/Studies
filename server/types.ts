@@ -47,11 +47,14 @@ export interface Maison {
   numerosUtiles: NumeroUtile[]
 }
 
-/** Un séjour = une réservation, avec son identifiant de connexion. */
+/**
+ * Un séjour = une réservation. Le voyageur se connecte avec un simple **code**,
+ * associé à son **nom/prénom** (pour l'accueillir) et à ses dates.
+ */
 export interface Sejour {
-  login: string
-  motDePasse: string
-  /** Nom affiché (ex. « Famille Dupont »). */
+  /** Code de connexion unique (ex. « SOLEIL2026 »). */
+  code: string
+  /** Nom ou prénom affiché à l'accueil (ex. « Marie » ou « Famille Dupont »). */
   nom: string
   /** Date/heure d'arrivée au format ISO local (ex. « 2026-07-25T16:00 »). */
   arrivee: string
@@ -63,18 +66,54 @@ export interface Sejour {
   messageHote?: string
 }
 
-/** Le séjour tel qu'il est renvoyé au client (sans le mot de passe). */
-export type SejourPublic = Omit<Sejour, 'motDePasse'>
+/** Source d'une capsule vidéo : YouTube, Vimeo, ou fichier vidéo hébergé. */
+export type SourceVideo =
+  | { type: 'youtube'; id: string }
+  | { type: 'vimeo'; id: string }
+  | { type: 'fichier'; src: string }
 
-/** Fichier de configuration complet. */
+/** Un tutoriel = une capsule vidéo + son explication pour un équipement. */
+export interface Tutoriel {
+  id: string
+  titre: string
+  categorie: string
+  icone: string
+  description: string
+  video: SourceVideo
+  etapes?: string[]
+}
+
+/** Une bonne adresse / activité touristique avec ses contacts. */
+export interface LieuTourisme {
+  id: string
+  nom: string
+  categorie: string
+  icone: string
+  description: string
+  distance?: string
+  telephone?: string
+  siteWeb?: string
+  lienCarte?: string
+  conseilHote?: string
+}
+
+/** Fichier de configuration complet (édité via l'administration). */
 export interface Configuration {
   maison: Maison
   sejours: Sejour[]
+  tutoriels: Tutoriel[]
+  tourisme: LieuTourisme[]
 }
 
-/** Réponse d'une connexion réussie. */
-export interface ReponseConnexion {
-  jeton: string
-  sejour: SejourPublic
+/** Contenu renvoyé à un voyageur connecté. */
+export interface ContenuVoyageur {
+  sejour: Sejour
   maison: Maison
+  tutoriels: Tutoriel[]
+  tourisme: LieuTourisme[]
+}
+
+/** Réponse d'une connexion voyageur réussie. */
+export interface ReponseConnexion extends ContenuVoyageur {
+  jeton: string
 }

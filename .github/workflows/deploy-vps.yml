@@ -81,14 +81,15 @@ jobs:
         if: ${{ env.VPS_HOST != '' }}
         env:
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "SESSION_SECRET='${SESSION_SECRET}' bash -s" <<'REMOTE'
+            "SESSION_SECRET='${SESSION_SECRET}' ADMIN_PASSWORD='${ADMIN_PASSWORD}' bash -s" <<'REMOTE'
           set -e
           cd /opt/maisoncapendu
           npm ci
-          # Secret de session : celui fourni, sinon un déjà généré, sinon nouveau.
           : > .env
+          # Secret de session : celui fourni, sinon un déjà généré, sinon nouveau.
           if [ -z "$SESSION_SECRET" ] && [ -f .session_secret ]; then
             SESSION_SECRET="$(cat .session_secret)"
           fi
@@ -98,11 +99,19 @@ jobs:
           printf '%s' "$SESSION_SECRET" > .session_secret
           chmod 600 .session_secret
           echo "SESSION_SECRET=$SESSION_SECRET" >> .env
+          # Mot de passe admin : celui fourni, sinon un déjà défini, sinon « admin ».
+          if [ -z "$ADMIN_PASSWORD" ] && [ -f .admin_password ]; then
+            ADMIN_PASSWORD="$(cat .admin_password)"
+          fi
+          [ -z "$ADMIN_PASSWORD" ] && ADMIN_PASSWORD="admin"
+          printf '%s' "$ADMIN_PASSWORD" > .admin_password
+          chmod 600 .admin_password
+          echo "ADMIN_PASSWORD=$ADMIN_PASSWORD" >> .env
           # (Re)démarre l'API via pm2 (tsx exécute le TypeScript directement).
           if pm2 describe maisoncapendu-api > /dev/null 2>&1; then
-            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" pm2 restart maisoncapendu-api --update-env
+            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" ADMIN_PASSWORD="$ADMIN_PASSWORD" pm2 restart maisoncapendu-api --update-env
           else
-            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" pm2 start "npx tsx server/index.ts" --name maisoncapendu-api --update-env
+            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" ADMIN_PASSWORD="$ADMIN_PASSWORD" pm2 start "npx tsx server/index.ts" --name maisoncapendu-api --update-env
           fi
           pm2 save
           REMOTE

@@ -22,6 +22,7 @@
 #   API_PORT=8788                # port local de l'API Node (unique par projet !)
 #   SESSION_SECRET=...           # clé secrète de signature des jetons de session
 #                                #   (fortement recommandé en production)
+#   ADMIN_PASSWORD=...           # mot de passe de l'administration (page /#admin)
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
 #
@@ -30,15 +31,12 @@
 #
 # Le script est idempotent : relance-le pour mettre à jour le site.
 #
-# IMPORTANT — configuration des séjours :
-#   Le portail lit les identifiants et infos de la maison dans, par ordre de
-#   priorité, ${APP_DIR}/.data/sejours.json puis server/data/sejours.json
-#   (exemple versionné). Pour la mise en service, crée ta config réelle :
-#     mkdir -p /opt/maisoncapendu/.data
-#     cp /opt/maisoncapendu/server/data/sejours.json /opt/maisoncapendu/.data/sejours.json
-#     nano /opt/maisoncapendu/.data/sejours.json   # remplis tes vrais codes/séjours
-#     pm2 restart maisoncapendu-api
-#   Ce fichier .data/ n'est pas écrasé par les mises à jour (relances du script).
+# CONFIGURATION DU CONTENU — tout se fait depuis l'ADMINISTRATION :
+#   Ouvre http://<serveur>/<SLUG>/#admin, connecte-toi avec ADMIN_PASSWORD, et
+#   saisis séjours (codes + prénoms), infos maison, tutoriels et tourisme. Tout
+#   est enregistré dans ${APP_DIR}/.data/config.json, jamais écrasé par les
+#   mises à jour (relances du script). L'exemple versionné est
+#   server/data/config.json.
 
 set -euo pipefail
 
@@ -119,8 +117,21 @@ printf '%s' "${SESSION_SECRET}" > "${APP_DIR}/.session_secret"
 chmod 600 "${APP_DIR}/.session_secret"
 echo "SESSION_SECRET=${SESSION_SECRET}" >> "${APP_DIR}/.env"
 
+# Mot de passe de l'administration (page /#admin). Conservé entre les mises à
+# jour dans .admin_password s'il n'est pas fourni de nouveau.
+if [ -z "${ADMIN_PASSWORD:-}" ] && [ -f "${APP_DIR}/.admin_password" ]; then
+  ADMIN_PASSWORD="$(cat "${APP_DIR}/.admin_password")"
+fi
+if [ -z "${ADMIN_PASSWORD:-}" ]; then
+  ADMIN_PASSWORD="admin"
+  log "ADMIN_PASSWORD non fourni : mot de passe admin par défaut « admin » (à changer !)."
+fi
+printf '%s' "${ADMIN_PASSWORD}" > "${APP_DIR}/.admin_password"
+chmod 600 "${APP_DIR}/.admin_password"
+echo "ADMIN_PASSWORD=${ADMIN_PASSWORD}" >> "${APP_DIR}/.env"
+
 log "(Re)démarrage de l'API « ${PM2_NAME} » (port ${API_PORT}) via pm2…"
-ENV_VARS="PORT=${API_PORT} SESSION_SECRET=${SESSION_SECRET}"
+ENV_VARS="PORT=${API_PORT} SESSION_SECRET=${SESSION_SECRET} ADMIN_PASSWORD=${ADMIN_PASSWORD}"
 if pm2 describe "${PM2_NAME}" >/dev/null 2>&1; then
   env ${ENV_VARS} pm2 restart "${PM2_NAME}" --update-env
 else

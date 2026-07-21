@@ -1,18 +1,21 @@
 # Espace voyageur — portail Airbnb 🏖️
 
 Un site **simple, moderne et épuré** pour accueillir vos voyageurs Airbnb.
-Chaque réservation dispose d'un **identifiant de connexion** qui donne accès à :
+Chaque réservation reçoit un **code d'accès** qui ouvre son espace personnel :
 
 - 🎬 **Tutoriels vidéo** — une capsule par équipement (Wi-Fi, climatisation,
   lave-vaisselle, TV, piscine…) avec explications pas à pas ;
 - 🔑 **Accès à la maison** — adresse, code de la boîte à clés, Wi-Fi,
   stationnement, instructions d'arrivée et de départ, règlement ;
-- 🧭 **Tourisme & bonnes adresses** — restaurants, plages, activités, services,
-  avec téléphone, itinéraire et vos conseils personnels ;
+- 🧭 **Tourisme & bonnes adresses** — restaurants, activités, services, avec
+  téléphone, itinéraire et vos conseils personnels ;
 - 📞 **Contact & urgences** — coordonnées de l'hôte (appel, WhatsApp, e-mail) et
   numéros utiles ;
 - 🗓️ **Rappel du séjour** — dates d'arrivée et de départ + compte à rebours, et
   un petit mot de bienvenue personnalisé.
+
+**Une administration intégrée** (`/#admin`) permet à l'hôte de tout saisir depuis
+le navigateur, sans toucher à aucun fichier.
 
 Ambiance vacances (palette sable / corail / océan), responsive (barre de
 navigation en bas sur mobile).
@@ -21,36 +24,44 @@ navigation en bas sur mobile).
 
 ```bash
 npm install
-npm run server    # API Node (connexion + séjours) sur http://localhost:8788
-npm run dev       # front (Vite) sur http://localhost:5173, proxy /api -> :8788
-npm run build     # build de production du front
+ADMIN_PASSWORD=secret npm run server   # API Node sur http://localhost:8788
+npm run dev                            # front (Vite) sur http://localhost:5173
+npm run build                          # build de production du front
 ```
 
-Identifiants de démonstration : **`demo` / `vacances`** (ou `dupont` /
-`soleil2026`).
+- Portail voyageur : <http://localhost:5173> — code de démo : **`SOLEIL`**
+- Administration : <http://localhost:5173/#admin> — mot de passe : celui d'`ADMIN_PASSWORD`
 
-## Personnaliser le contenu
+## L'administration
 
-Tout se configure dans quelques fichiers, sans connaissance technique poussée.
+Rendez-vous sur **`/#admin`**, connectez-vous avec le mot de passe admin
+(variable `ADMIN_PASSWORD`), puis gérez tout en quelques clics :
 
-| Ce que vous voulez changer | Fichier |
+| Onglet | Ce que vous saisissez |
 | --- | --- |
-| Séjours (login/mot de passe, dates, message) + infos maison (codes, Wi-Fi, adresse, règlement, contacts) | `server/data/sejours.json` (ou `.data/sejours.json` en production) |
-| Tutoriels vidéo (titre, vidéo YouTube/Vimeo, étapes) | `src/data/tutoriels.ts` |
-| Tourisme & bonnes adresses (avec contacts) | `src/data/tourisme.ts` |
+| **Séjours** | Un *code* d'accès + un *prénom* d'accueil, les dates d'arrivée/départ, le nombre de voyageurs, un message de bienvenue |
+| **La maison** | Adresse, Wi-Fi, code boîte à clés, instructions d'arrivée/départ, règlement, hôte, numéros utiles |
+| **Tutoriels** | Titre, catégorie, icône, vidéo (YouTube / Vimeo / fichier `.mp4`), étapes |
+| **Tourisme** | Bonnes adresses avec contacts et vos conseils |
 
-### Ajouter une capsule vidéo
+Cliquez sur **Enregistrer** : tout est sauvegardé côté serveur (dans
+`.data/config.json`) et immédiatement visible par les voyageurs.
 
-Dans `src/data/tutoriels.ts`, la vidéo accepte trois sources :
+> Astuce vidéo : mettez vos vidéos sur YouTube en **« Non répertoriée »** et
+> collez leur identifiant (ce qui suit `v=` ou `youtu.be/`).
 
-```ts
-video: { type: 'youtube', id: 'dQw4w9WgXcQ' }      // ID après « v= » / youtu.be/
-video: { type: 'vimeo', id: '76979871' }
-video: { type: 'fichier', src: '/videos/clim.mp4' } // fichier dans public/videos/
-```
+## Fonctionnement de la connexion
 
-> Astuce : sur YouTube, réglez la vidéo en **« Non répertoriée »** pour qu'elle
-> ne soit visible que via ce portail.
+- **Voyageur** : saisit son **code** (fourni par l'hôte). Le serveur renvoie un
+  **jeton signé** (HMAC) + tout le contenu de son séjour. La session est
+  restaurée automatiquement au rechargement.
+- **Admin** : se connecte avec `ADMIN_PASSWORD`, obtient un jeton admin qui
+  autorise la lecture et l'écriture de la configuration.
+- Les informations sensibles (codes, Wi-Fi, adresse) ne sont renvoyées
+  qu'**après connexion**.
+
+En production, définissez `SESSION_SECRET` (signature des jetons) et
+`ADMIN_PASSWORD` (accès admin).
 
 ## Architecture
 
@@ -58,52 +69,31 @@ video: { type: 'fichier', src: '/videos/clim.mp4' } // fichier dans public/video
 index.html                 Page hôte (polices, favicon, méta)
 src/
   main.tsx                 Point d'entrée React
-  App.tsx                  Connexion ↔ portail (restauration de session)
-  api.ts                   Appels à l'API (connexion, restauration) + jeton
+  App.tsx                  Aiguillage portail voyageur ↔ administration (#admin)
+  api.ts                   Appels API (voyageur + admin) et jetons
   types.ts                 Types partagés (Maison, Sejour, Tutoriel, ...)
   dates.ts                 Formatage FR + compte à rebours du séjour
-  styles.css               Thème « vacances », responsive (nav mobile en bas)
-  data/
-    tutoriels.ts           Capsules vidéo (éditable)
-    tourisme.ts            Bonnes adresses & contacts (éditable)
-  components/
-    Connexion.tsx          Écran de connexion (login + mot de passe)
-    Portail.tsx            Coque + navigation par onglets
-    Sejour.tsx             Accueil : compte à rebours, dates, mot de l'hôte
-    Acces.tsx              Accès maison (Wi-Fi, codes, arrivée/départ, règlement)
-    Tutoriels.tsx          Grille des capsules vidéo + filtres
-    Tourisme.tsx           Bonnes adresses + contacts + filtres
-    Contact.tsx            Hôte + numéros utiles
-    VideoCapsule.tsx       Lecteur (YouTube / Vimeo / fichier)
+  styles.css               Thème « vacances » + styles de l'admin
+  components/              Portail voyageur (Connexion par code, Séjour, Accès,
+                           Tutoriels, Tourisme, Contact, VideoCapsule)
+  admin/                   Administration (AdminApp, AdminLogin, AdminPanel,
+                           Editeur{Sejours,Maison,Tutoriels,Tourisme}, champs)
 
 server/                    API Node minimale (sans dépendance)
-  index.ts                 Serveur HTTP (/api/connexion, /api/sejour, /api/sante)
-  auth.ts                  Jetons de session signés (HMAC-SHA256)
-  sejours.ts               Chargement config + vérification des identifiants
+  index.ts                 Serveur HTTP (voyageur + admin)
+  auth.ts                  Jetons de session signés (HMAC), rôles voyageur/admin
+  config.ts                Lecture/écriture de la config, vérif code & admin
   types.ts                 Types serveur
-  data/sejours.json        Exemple de configuration (séjours + maison)
+  data/config.json         Exemple de configuration (maison, séjours, tutos, tourisme)
 ```
-
-## Fonctionnement de la connexion
-
-1. Le voyageur saisit son **login + mot de passe** (fournis par l'hôte).
-2. Le serveur vérifie les identifiants et renvoie un **jeton signé** (HMAC),
-   les infos de son séjour et les informations de la maison.
-3. Le jeton est conservé dans le navigateur : la session est **restaurée
-   automatiquement** au rechargement, sans redemander le mot de passe.
-4. Les informations sensibles (codes, Wi-Fi, adresse) ne sont renvoyées
-   qu'**après authentification**.
-
-En production, définissez `SESSION_SECRET` (clé de signature des jetons).
 
 ## Déploiement
 
 Voir [`deploy/README.md`](deploy/README.md). En résumé, sur le VPS en root :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh | bash
-# -> http://76.13.37.163/maisoncapendu/
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh \
+  | ADMIN_PASSWORD="votre-mot-de-passe" bash
+# Site :  http://76.13.37.163/maisoncapendu/
+# Admin : http://76.13.37.163/maisoncapendu/#admin
 ```
-
-Puis créez `/opt/maisoncapendu/.data/sejours.json` avec vos vraies informations
-(voir `deploy/README.md`).
