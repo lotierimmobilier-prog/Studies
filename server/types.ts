@@ -99,12 +99,20 @@ export interface LieuTourisme {
   conseilHote?: string
 }
 
+/** Une photo de la galerie (chemin `api/media/…` ou URL) + légende. */
+export interface PhotoGalerie {
+  id: string
+  url: string
+  legende?: string
+}
+
 /** Fichier de configuration complet (édité via l'administration). */
 export interface Configuration {
   maison: Maison
   sejours: Sejour[]
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
+  galerie: PhotoGalerie[]
 }
 
 /** Contenu renvoyé à un voyageur connecté. */
@@ -113,6 +121,7 @@ export interface ContenuVoyageur {
   maison: Maison
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
+  galerie: PhotoGalerie[]
 }
 
 /** Réponse d'une connexion voyageur réussie. */

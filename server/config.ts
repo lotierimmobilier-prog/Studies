@@ -76,6 +76,7 @@ export function contenuVoyageur(sejour: Sejour): ContenuVoyageur {
     maison: c.maison,
     tutoriels: c.tutoriels,
     tourisme: c.tourisme,
+    galerie: c.galerie,
   }
 }
 
@@ -199,5 +200,14 @@ export function validerConfiguration(brut: unknown): Configuration {
     }
   })
 
-  return { maison, sejours, tutoriels, tourisme }
+  const galerie = (Array.isArray(c.galerie) ? c.galerie : []).map((p, i) => {
+    const o = (p ?? {}) as Record<string, unknown>
+    return {
+      id: chaine(o.id) || `photo-${i}`,
+      url: chaine(o.url),
+      legende: chaine(o.legende),
+    }
+  })
+
+  return { maison, sejours, tutoriels, tourisme, galerie }
 }

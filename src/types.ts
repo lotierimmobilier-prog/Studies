@@ -45,6 +45,13 @@ export interface Sejour {
   messageHote?: string
 }
 
+/** Une photo de la galerie (chemin `api/media/…` ou URL) + légende. */
+export interface PhotoGalerie {
+  id: string
+  url: string
+  legende?: string
+}
+
 /** Contenu reçu par un voyageur connecté. */
 export interface Session {
   jeton: string
@@ -52,6 +59,7 @@ export interface Session {
   maison: Maison
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
+  galerie: PhotoGalerie[]
 }
 
 /** Configuration complète, éditée dans l'administration. */
@@ -60,6 +68,7 @@ export interface Configuration {
   sejours: Sejour[]
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
+  galerie: PhotoGalerie[]
 }
 
 /** Source d'une capsule vidéo : YouTube, Vimeo, ou fichier vidéo hébergé. */

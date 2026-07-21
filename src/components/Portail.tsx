@@ -4,17 +4,16 @@ import SectionSejour from './Sejour'
 import SectionAcces from './Acces'
 import SectionTutoriels from './Tutoriels'
 import SectionTourisme from './Tourisme'
+import SectionGalerie from './Galerie'
 import SectionContact from './Contact'
 
-type Onglet = 'sejour' | 'acces' | 'tutoriels' | 'tourisme' | 'contact'
-
-const ONGLETS: { id: Onglet; libelle: string; icone: string }[] = [
-  { id: 'sejour', libelle: 'Séjour', icone: '🏖️' },
-  { id: 'acces', libelle: 'Accès', icone: '🔑' },
-  { id: 'tutoriels', libelle: 'Tutos', icone: '🎬' },
-  { id: 'tourisme', libelle: 'Tourisme', icone: '🧭' },
-  { id: 'contact', libelle: 'Contact', icone: '📞' },
-]
+type Onglet =
+  | 'sejour'
+  | 'acces'
+  | 'galerie'
+  | 'tutoriels'
+  | 'tourisme'
+  | 'contact'
 
 export default function Portail({
   session,
@@ -24,7 +23,19 @@ export default function Portail({
   onDeconnexion: () => void
 }) {
   const [onglet, setOnglet] = useState<Onglet>('sejour')
-  const { maison, sejour, tutoriels, tourisme } = session
+  const { maison, sejour, tutoriels, tourisme, galerie } = session
+
+  // L'onglet Galerie n'apparaît que si des photos ont été ajoutées.
+  const onglets: { id: Onglet; libelle: string; icone: string }[] = [
+    { id: 'sejour', libelle: 'Séjour', icone: '🏖️' },
+    { id: 'acces', libelle: 'Accès', icone: '🔑' },
+    ...(galerie.length > 0
+      ? [{ id: 'galerie' as const, libelle: 'Photos', icone: '📸' }]
+      : []),
+    { id: 'tutoriels', libelle: 'Tutos', icone: '🎬' },
+    { id: 'tourisme', libelle: 'Tourisme', icone: '🧭' },
+    { id: 'contact', libelle: 'Contact', icone: '📞' },
+  ]
 
   return (
     <div className="portail">
@@ -48,7 +59,7 @@ export default function Portail({
       </header>
 
       <nav className="nav-onglets" aria-label="Sections">
-        {ONGLETS.map((o) => (
+        {onglets.map((o) => (
           <button
             key={o.id}
             type="button"
@@ -69,6 +80,7 @@ export default function Portail({
           <SectionSejour sejour={sejour} maison={maison} />
         )}
         {onglet === 'acces' && <SectionAcces maison={maison} />}
+        {onglet === 'galerie' && <SectionGalerie galerie={galerie} />}
         {onglet === 'tutoriels' && <SectionTutoriels tutoriels={tutoriels} />}
         {onglet === 'tourisme' && <SectionTourisme lieux={tourisme} />}
         {onglet === 'contact' && <SectionContact maison={maison} />}

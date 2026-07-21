@@ -5,12 +5,14 @@ import EditeurSejours from './EditeurSejours'
 import EditeurMaison from './EditeurMaison'
 import EditeurTutoriels from './EditeurTutoriels'
 import EditeurTourisme from './EditeurTourisme'
+import EditeurGalerie from './EditeurGalerie'
 
-type Onglet = 'sejours' | 'maison' | 'tutoriels' | 'tourisme'
+type Onglet = 'sejours' | 'maison' | 'galerie' | 'tutoriels' | 'tourisme'
 
 const ONGLETS: { id: Onglet; libelle: string; icone: string }[] = [
   { id: 'sejours', libelle: 'Séjours', icone: '🗓️' },
   { id: 'maison', libelle: 'La maison', icone: '🏠' },
+  { id: 'galerie', libelle: 'Galerie', icone: '📸' },
   { id: 'tutoriels', libelle: 'Tutoriels', icone: '🎬' },
   { id: 'tourisme', libelle: 'Tourisme', icone: '🧭' },
 ]
@@ -109,6 +111,12 @@ export default function AdminPanel({
           <EditeurMaison
             maison={config.maison}
             onChange={(maison) => patch({ maison })}
+          />
+        )}
+        {onglet === 'galerie' && (
+          <EditeurGalerie
+            galerie={config.galerie}
+            onChange={(galerie) => patch({ galerie })}
           />
         )}
         {onglet === 'tutoriels' && (

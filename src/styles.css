@@ -1466,3 +1466,204 @@ button {
   font-size: 0.78rem;
   color: var(--corail-fonce);
 }
+
+/* ---------- Galerie voyageur ------------------------------------------ */
+
+.grille-galerie {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.galerie-vignette {
+  position: relative;
+  padding: 0;
+  border: none;
+  border-radius: var(--rayon-sm);
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--sable-fonce);
+  box-shadow: var(--ombre-douce);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.galerie-vignette:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--ombre);
+}
+
+.galerie-vignette img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.galerie-legende {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18px 12px 10px;
+  font-size: 0.82rem;
+  color: #fff;
+  text-align: left;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
+}
+
+/* ---------- Lightbox -------------------------------------------------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(20, 26, 30, 0.9);
+  backdrop-filter: blur(4px);
+  animation: fondu 0.2s ease;
+}
+
+.lightbox-contenu {
+  max-width: min(1100px, 92vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lightbox-contenu img {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+  border-radius: var(--rayon-sm);
+}
+
+.lightbox-contenu figcaption {
+  color: #fff;
+  text-align: center;
+  font-size: 0.92rem;
+}
+
+.lightbox-fermer {
+  position: fixed;
+  top: 18px;
+  right: 22px;
+  width: 44px;
+  height: 44px;
+  font-size: 1.2rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 50%;
+  transition: background var(--transition);
+}
+
+.lightbox-fermer:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.lightbox-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  font-size: 2rem;
+  line-height: 1;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 50%;
+  transition: background var(--transition);
+}
+
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.lightbox-nav--gauche {
+  left: 16px;
+}
+.lightbox-nav--droite {
+  right: 16px;
+}
+
+/* ---------- Galerie (admin) ------------------------------------------- */
+
+.grille-galerie-admin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.galerie-carte-admin {
+  background: var(--blanc);
+  border-radius: var(--rayon-sm);
+  box-shadow: var(--ombre-douce);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.galerie-carte-admin img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.galerie-legende-input {
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 9px 11px;
+  border: none;
+  border-top: 1px solid var(--sable);
+  background: var(--creme);
+  color: var(--nuit);
+  width: 100%;
+}
+
+.galerie-legende-input:focus {
+  outline: none;
+  background: #fff;
+}
+
+.galerie-carte-actions {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-top: 1px solid var(--sable);
+}
+
+.galerie-carte-actions button {
+  flex: 1;
+  height: 32px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--nuit-doux);
+  background: var(--sable);
+  border: none;
+  border-radius: 8px;
+  transition: background var(--transition);
+}
+
+.galerie-carte-actions button:hover:not(:disabled) {
+  background: var(--sable-fonce);
+}
+
+.galerie-carte-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.galerie-carte-actions .galerie-supprimer {
+  color: var(--corail-fonce);
+  background: rgba(255, 122, 89, 0.12);
+}
+
+.galerie-carte-actions .galerie-supprimer:hover {
+  background: rgba(255, 122, 89, 0.25);
+}
