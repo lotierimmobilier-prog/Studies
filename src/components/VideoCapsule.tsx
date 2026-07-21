@@ -1,7 +1,9 @@
 import type { SourceVideo } from '../types'
+import { normaliserSource } from '../lienVideo'
 
 /** Construit l'URL d'intégration selon la source de la vidéo. */
-function urlEmbed(video: SourceVideo): string {
+function urlEmbed(source: SourceVideo): string {
+  const video = normaliserSource(source)
   switch (video.type) {
     case 'youtube':
       return `https://www.youtube-nocookie.com/embed/${video.id}`

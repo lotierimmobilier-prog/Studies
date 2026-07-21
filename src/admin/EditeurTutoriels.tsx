@@ -1,4 +1,9 @@
 import type { SourceVideo, Tutoriel } from '../types'
+import {
+  devinerSourceDepuisLien,
+  extraireIdVimeo,
+  extraireIdYoutube,
+} from '../lienVideo'
 import { Champ, CarteEdition, ListeChaines, ZoneTexte } from './champs'
 
 const TUTO_VIDE: Tutoriel = {
@@ -46,15 +51,26 @@ function EditeurVideo({
         />
       ) : (
         <Champ
-          label={video.type === 'youtube' ? 'ID YouTube' : 'ID Vimeo'}
-          valeur={video.id}
-          onChange={(id) => onChange({ type: video.type, id })}
-          placeholder={video.type === 'youtube' ? 'dQw4w9WgXcQ' : '76979871'}
-          aide={
-            video.type === 'youtube'
-              ? "L'identifiant après « v= » ou youtu.be/"
-              : "L'identifiant numérique de la vidéo Vimeo"
+          label={
+            video.type === 'youtube' ? 'Lien YouTube' : 'Lien Vimeo'
           }
+          valeur={video.id}
+          onChange={(entree) => {
+            // Colle un lien complet OU détecte l'autre plateforme au collage.
+            const devine = devinerSourceDepuisLien(entree)
+            if (devine) return onChange(devine)
+            const id =
+              video.type === 'youtube'
+                ? extraireIdYoutube(entree)
+                : extraireIdVimeo(entree)
+            onChange({ type: video.type, id })
+          }}
+          placeholder={
+            video.type === 'youtube'
+              ? 'https://www.youtube.com/watch?v=…'
+              : 'https://vimeo.com/…'
+          }
+          aide="Collez l'adresse complète de la vidéo — l'identifiant est reconnu automatiquement."
         />
       )}
     </div>
@@ -87,8 +103,8 @@ export default function EditeurTutoriels({
         <h2>Tutoriels vidéo</h2>
         <p>
           Une capsule vidéo par équipement. Mettez vos vidéos en ligne sur
-          YouTube (réglage « Non répertoriée » conseillé) et collez leur
-          identifiant.
+          YouTube (réglage « Non répertoriée » conseillé) et{' '}
+          <strong>collez simplement le lien</strong> de la vidéo.
         </p>
       </div>
 
