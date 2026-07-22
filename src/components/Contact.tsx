@@ -1,18 +1,22 @@
-import type { Maison } from '../types'
+import type { Maison, SectionTexte } from '../types'
 
 /** Nettoie un numéro pour les liens tel: / wa.me. */
 function numTel(n: string): string {
   return n.replace(/[^\d+]/g, '')
 }
 
-export default function SectionContact({ maison }: { maison: Maison }) {
+export default function SectionContact({
+  maison,
+  texte,
+}: {
+  maison: Maison
+  texte: SectionTexte
+}) {
   const { hote } = maison
   return (
     <section className="section">
-      <h1 className="section-titre">Contact & urgences</h1>
-      <p className="section-intro">
-        Nous restons joignables pendant tout votre séjour.
-      </p>
+      <h1 className="section-titre">{texte.titre}</h1>
+      <p className="section-intro">{texte.intro}</p>
 
       <div className="carte carte--hote">
         <span className="carte-etiquette">Votre hôte</span>

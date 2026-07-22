@@ -120,6 +120,33 @@ export interface PhotoGalerie {
   legende?: string
 }
 
+/** Un document téléchargeable (PDF « Guide d'accueil », etc.). */
+export interface Document {
+  id: string
+  titre: string
+  /** Chemin `api/media/…` du fichier, ou URL. */
+  url: string
+}
+
+/** Titre + intro d'une section. */
+export interface SectionTexte {
+  titre: string
+  intro: string
+}
+
+/** Tous les textes personnalisables du site voyageur. */
+export interface Textes {
+  connexionTitre: string
+  connexionSousTitre: string
+  checklistTitre: string
+  checklist: string[]
+  acces: SectionTexte
+  tutoriels: SectionTexte
+  tourisme: SectionTexte
+  galerie: SectionTexte
+  contact: SectionTexte
+}
+
 /** Fichier de configuration complet (édité via l'administration). */
 export interface Configuration {
   maison: Maison
@@ -127,6 +154,10 @@ export interface Configuration {
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
   galerie: PhotoGalerie[]
+  /** Documents téléchargeables (Guide d'accueil…). */
+  documents: Document[]
+  /** Textes personnalisables du site. */
+  textes: Textes
   /** Calendriers externes à synchroniser (liens iCal). */
   calendriers: CalendrierSource[]
 }
@@ -138,6 +169,8 @@ export interface ContenuVoyageur {
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
   galerie: PhotoGalerie[]
+  documents: Document[]
+  textes: Textes
 }
 
 /** Réponse d'une connexion voyageur réussie. */

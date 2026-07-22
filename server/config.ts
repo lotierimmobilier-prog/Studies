@@ -6,9 +6,46 @@ import type {
   Configuration,
   ContenuVoyageur,
   Sejour,
+  SectionTexte,
   SourceVideo,
+  Textes,
   Tutoriel,
 } from './types'
+
+/** Textes par défaut du site (utilisés tant que l'hôte ne les modifie pas). */
+export const TEXTES_DEFAUT: Textes = {
+  connexionTitre: 'Bienvenue',
+  connexionSousTitre: 'Votre espace voyageur pour un séjour en toute sérénité',
+  checklistTitre: 'Pour bien commencer',
+  checklist: [
+    '🔑 Récupérer les clés dans la boîte à clés',
+    '📶 Se connecter au Wi-Fi',
+    '❄️ Découvrir la climatisation et les équipements',
+    '🏖️ Repérer les bonnes adresses autour',
+  ],
+  acces: {
+    titre: 'Accès à la maison',
+    intro: 'Toutes les informations pratiques pour entrer et vous installer.',
+  },
+  tutoriels: {
+    titre: 'Tutoriels de la maison',
+    intro:
+      'De courtes vidéos pour prendre en main chaque équipement en toute simplicité.',
+  },
+  tourisme: {
+    titre: 'Tourisme & bonnes adresses',
+    intro: 'Nos coups de cœur pour profiter pleinement de la région.',
+  },
+  galerie: {
+    titre: 'La maison en photos',
+    intro:
+      "Découvrez votre lieu de vacances avant même d'y poser vos valises.",
+  },
+  contact: {
+    titre: 'Contact & urgences',
+    intro: 'Nous restons joignables pendant tout votre séjour.',
+  },
+}
 
 /**
  * Chargement et **écriture** de la configuration (maison, séjours, tutoriels,
@@ -32,7 +69,9 @@ let config: Configuration | null = null
 
 export async function chargerConfiguration(): Promise<Configuration> {
   const chemin = existsSync(CHEMIN_PERSO) ? CHEMIN_PERSO : CHEMIN_EXEMPLE
-  config = JSON.parse(await readFile(chemin, 'utf8')) as Configuration
+  // On normalise au chargement : garantit la présence de tous les champs
+  // (textes, documents…) même pour une config antérieure à leur ajout.
+  config = validerConfiguration(JSON.parse(await readFile(chemin, 'utf8')))
   return config
 }
 
@@ -77,6 +116,8 @@ export function contenuVoyageur(sejour: Sejour): ContenuVoyageur {
     tutoriels: c.tutoriels,
     tourisme: c.tourisme,
     galerie: c.galerie,
+    documents: c.documents,
+    textes: c.textes,
   }
 }
 
@@ -222,5 +263,63 @@ export function validerConfiguration(brut: unknown): Configuration {
     },
   )
 
-  return { maison, sejours, tutoriels, tourisme, galerie, calendriers }
+  const documents = (Array.isArray(c.documents) ? c.documents : []).map(
+    (d, i) => {
+      const o = (d ?? {}) as Record<string, unknown>
+      return {
+        id: chaine(o.id) || `doc-${i}`,
+        titre: chaine(o.titre, 'Document'),
+        url: chaine(o.url),
+      }
+    },
+  )
+
+  const textes = validerTextes(c.textes)
+
+  return {
+    maison,
+    sejours,
+    tutoriels,
+    tourisme,
+    galerie,
+    documents,
+    textes,
+    calendriers,
+  }
+}
+
+/** Reprend un texte fourni s'il est non vide, sinon la valeur par défaut. */
+function texteOuDefaut(v: unknown, defaut: string): string {
+  const s = typeof v === 'string' ? v.trim() : ''
+  return s || defaut
+}
+
+function section(v: unknown, defaut: SectionTexte): SectionTexte {
+  const o = (v ?? {}) as Record<string, unknown>
+  return {
+    titre: texteOuDefaut(o.titre, defaut.titre),
+    intro: texteOuDefaut(o.intro, defaut.intro),
+  }
+}
+
+/** Valide les textes en comblant chaque champ manquant par sa valeur par défaut. */
+export function validerTextes(brut: unknown): Textes {
+  const t = (brut ?? {}) as Record<string, unknown>
+  const checklist = Array.isArray(t.checklist)
+    ? t.checklist.filter((x): x is string => typeof x === 'string' && x.trim() !== '')
+    : []
+  return {
+    connexionTitre: texteOuDefaut(t.connexionTitre, TEXTES_DEFAUT.connexionTitre),
+    connexionSousTitre: texteOuDefaut(
+      t.connexionSousTitre,
+      TEXTES_DEFAUT.connexionSousTitre,
+    ),
+    checklistTitre: texteOuDefaut(t.checklistTitre, TEXTES_DEFAUT.checklistTitre),
+    checklist: checklist.length ? checklist : TEXTES_DEFAUT.checklist,
+    acces: section(t.acces, TEXTES_DEFAUT.acces),
+    tutoriels: section(t.tutoriels, TEXTES_DEFAUT.tutoriels),
+    tourisme: section(t.tourisme, TEXTES_DEFAUT.tourisme),
+    galerie: section(t.galerie, TEXTES_DEFAUT.galerie),
+    contact: section(t.contact, TEXTES_DEFAUT.contact),
+  }
 }

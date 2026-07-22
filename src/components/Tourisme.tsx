@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { LieuTourisme } from '../types'
+import type { LieuTourisme, SectionTexte } from '../types'
 
 function CarteLieu({ lieu }: { lieu: LieuTourisme }) {
   return (
@@ -54,7 +54,13 @@ function CarteLieu({ lieu }: { lieu: LieuTourisme }) {
   )
 }
 
-export default function SectionTourisme({ lieux }: { lieux: LieuTourisme[] }) {
+export default function SectionTourisme({
+  lieux,
+  texte,
+}: {
+  lieux: LieuTourisme[]
+  texte: SectionTexte
+}) {
   const categories = useMemo(
     () => ['Tout', ...Array.from(new Set(lieux.map((l) => l.categorie)))],
     [lieux],
@@ -66,10 +72,8 @@ export default function SectionTourisme({ lieux }: { lieux: LieuTourisme[] }) {
 
   return (
     <section className="section">
-      <h1 className="section-titre">Tourisme & bonnes adresses</h1>
-      <p className="section-intro">
-        Nos coups de cœur pour profiter pleinement de la région.
-      </p>
+      <h1 className="section-titre">{texte.titre}</h1>
+      <p className="section-intro">{texte.intro}</p>
 
       <div className="filtres">
         {categories.map((c) => (

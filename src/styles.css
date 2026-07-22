@@ -1704,3 +1704,52 @@ button {
   background: rgba(44, 166, 164, 0.1);
   border-radius: var(--rayon-sm);
 }
+
+/* ---------- Documents (voyageur) -------------------------------------- */
+
+.liste-documents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.doc-lien {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--sable);
+  border-radius: var(--rayon-sm);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.doc-lien:hover {
+  background: var(--sable-fonce);
+  transform: translateX(2px);
+}
+
+.doc-icone {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.doc-titre {
+  flex: 1;
+  font-weight: 600;
+  color: var(--nuit);
+}
+
+.doc-action {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ocean-fonce);
+  white-space: nowrap;
+}
+
+/* ---------- Documents (admin) ----------------------------------------- */
+
+.doc-actions-admin {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}

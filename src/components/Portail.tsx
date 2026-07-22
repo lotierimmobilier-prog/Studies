@@ -23,7 +23,8 @@ export default function Portail({
   onDeconnexion: () => void
 }) {
   const [onglet, setOnglet] = useState<Onglet>('sejour')
-  const { maison, sejour, tutoriels, tourisme, galerie } = session
+  const { maison, sejour, tutoriels, tourisme, galerie, documents, textes } =
+    session
 
   // L'onglet Galerie n'apparaît que si des photos ont été ajoutées.
   const onglets: { id: Onglet; libelle: string; icone: string }[] = [
@@ -77,13 +78,28 @@ export default function Portail({
 
       <main className="contenu">
         {onglet === 'sejour' && (
-          <SectionSejour sejour={sejour} maison={maison} />
+          <SectionSejour
+            sejour={sejour}
+            maison={maison}
+            documents={documents}
+            textes={textes}
+          />
         )}
-        {onglet === 'acces' && <SectionAcces maison={maison} />}
-        {onglet === 'galerie' && <SectionGalerie galerie={galerie} />}
-        {onglet === 'tutoriels' && <SectionTutoriels tutoriels={tutoriels} />}
-        {onglet === 'tourisme' && <SectionTourisme lieux={tourisme} />}
-        {onglet === 'contact' && <SectionContact maison={maison} />}
+        {onglet === 'acces' && (
+          <SectionAcces maison={maison} texte={textes.acces} />
+        )}
+        {onglet === 'galerie' && (
+          <SectionGalerie galerie={galerie} texte={textes.galerie} />
+        )}
+        {onglet === 'tutoriels' && (
+          <SectionTutoriels tutoriels={tutoriels} texte={textes.tutoriels} />
+        )}
+        {onglet === 'tourisme' && (
+          <SectionTourisme lieux={tourisme} texte={textes.tourisme} />
+        )}
+        {onglet === 'contact' && (
+          <SectionContact maison={maison} texte={textes.contact} />
+        )}
       </main>
 
       <footer className="pied">

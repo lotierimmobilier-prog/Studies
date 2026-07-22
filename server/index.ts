@@ -99,6 +99,18 @@ async function demarrer(): Promise<void> {
         return envoyerJson(res, 200, { ok: true })
       }
 
+      // Infos publiques (non sensibles) pour personnaliser l'écran de connexion.
+      if (url.pathname === '/api/public' && req.method === 'GET') {
+        const c = configurationComplete()
+        return envoyerJson(res, 200, {
+          nom: c.maison.nom,
+          sousTitre: c.maison.sousTitre ?? '',
+          photo: c.maison.photo ?? '',
+          titre: c.textes.connexionTitre,
+          sousTitreConnexion: c.textes.connexionSousTitre,
+        })
+      }
+
       // Service public des images uploadées (photo de façade…).
       if (url.pathname.startsWith('/api/media/') && req.method === 'GET') {
         const nom = decodeURIComponent(

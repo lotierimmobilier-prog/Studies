@@ -160,8 +160,8 @@ export async function synchroniserPlanning(): Promise<{
   }
 }
 
-/** Envoie une image (photo de façade…) et renvoie son chemin `api/media/…`. */
-export async function envoyerImage(fichier: File): Promise<string> {
+/** Envoie un fichier (image ou PDF) et renvoie son chemin `api/media/…`. */
+export async function envoyerFichier(fichier: File): Promise<string> {
   const jeton = jetonAdminEnregistre()
   if (!jeton) throw new Error('Non connecté.')
   const res = await fetch(`${BASE}api/admin/media`, {
@@ -179,4 +179,26 @@ export async function envoyerImage(fichier: File): Promise<string> {
   if (!res.ok) throw new Error(await lireErreur(res))
   const { url } = (await res.json()) as { url: string }
   return url
+}
+
+/** Alias historique (photo de façade, galerie). */
+export const envoyerImage = envoyerFichier
+
+/** Infos publiques (non sensibles) pour personnaliser l'écran de connexion. */
+export interface InfosPubliques {
+  nom: string
+  sousTitre: string
+  photo: string
+  titre: string
+  sousTitreConnexion: string
+}
+
+export async function chargerInfosPubliques(): Promise<InfosPubliques | null> {
+  try {
+    const res = await fetch(`${BASE}api/public`)
+    if (!res.ok) return null
+    return (await res.json()) as InfosPubliques
+  } catch {
+    return null
+  }
 }

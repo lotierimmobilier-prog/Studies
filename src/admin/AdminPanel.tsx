@@ -10,8 +10,15 @@ import EditeurMaison from './EditeurMaison'
 import EditeurTutoriels from './EditeurTutoriels'
 import EditeurTourisme from './EditeurTourisme'
 import EditeurGalerie from './EditeurGalerie'
+import EditeurTextes from './EditeurTextes'
 
-type Onglet = 'sejours' | 'maison' | 'galerie' | 'tutoriels' | 'tourisme'
+type Onglet =
+  | 'sejours'
+  | 'maison'
+  | 'galerie'
+  | 'tutoriels'
+  | 'tourisme'
+  | 'textes'
 
 const ONGLETS: { id: Onglet; libelle: string; icone: string }[] = [
   { id: 'sejours', libelle: 'Séjours', icone: '🗓️' },
@@ -19,6 +26,7 @@ const ONGLETS: { id: Onglet; libelle: string; icone: string }[] = [
   { id: 'galerie', libelle: 'Galerie', icone: '📸' },
   { id: 'tutoriels', libelle: 'Tutoriels', icone: '🎬' },
   { id: 'tourisme', libelle: 'Tourisme', icone: '🧭' },
+  { id: 'textes', libelle: 'Textes', icone: '📝' },
 ]
 
 export default function AdminPanel({
@@ -145,6 +153,8 @@ export default function AdminPanel({
           <EditeurMaison
             maison={config.maison}
             onChange={(maison) => patch({ maison })}
+            documents={config.documents}
+            onChangeDocuments={(documents) => patch({ documents })}
           />
         )}
         {onglet === 'galerie' && (
@@ -163,6 +173,12 @@ export default function AdminPanel({
           <EditeurTourisme
             tourisme={config.tourisme}
             onChange={(tourisme) => patch({ tourisme })}
+          />
+        )}
+        {onglet === 'textes' && (
+          <EditeurTextes
+            textes={config.textes}
+            onChange={(textes) => patch({ textes })}
           />
         )}
       </main>

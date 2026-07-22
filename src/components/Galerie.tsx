@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { PhotoGalerie } from '../types'
+import type { PhotoGalerie, SectionTexte } from '../types'
 import { urlMedia } from '../api'
 
 /** Fenêtre d'agrandissement (lightbox) d'une photo. */
@@ -66,17 +66,17 @@ function Lightbox({
 
 export default function SectionGalerie({
   galerie,
+  texte,
 }: {
   galerie: PhotoGalerie[]
+  texte: SectionTexte
 }) {
   const [ouvert, setOuvert] = useState<number | null>(null)
 
   return (
     <section className="section">
-      <h1 className="section-titre">La maison en photos</h1>
-      <p className="section-intro">
-        Découvrez votre lieu de vacances avant même d'y poser vos valises.
-      </p>
+      <h1 className="section-titre">{texte.titre}</h1>
+      <p className="section-intro">{texte.intro}</p>
 
       {galerie.length === 0 ? (
         <p className="vide">Aucune photo pour le moment.</p>

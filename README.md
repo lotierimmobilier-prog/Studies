@@ -40,10 +40,11 @@ Rendez-vous sur **`/#admin`**, connectez-vous avec le mot de passe admin
 | Onglet | Ce que vous saisissez |
 | --- | --- |
 | **Séjours** | Un *code* d'accès + un *prénom* d'accueil, les dates d'arrivée/départ, le nombre de voyageurs, un message de bienvenue. **Synchronisation du planning** : collez le lien iCal (Airbnb, Booking…) pour créer automatiquement les séjours aux bonnes dates |
-| **La maison** | **Photo de la façade** (bannière d'accueil, uploadée depuis l'appareil), adresse, Wi-Fi, code boîte à clés, instructions d'arrivée/départ, règlement, hôte, numéros utiles |
+| **La maison** | **Photo de la façade** (bannière d'accueil, uploadée depuis l'appareil), **documents PDF** (Guide d'accueil…), adresse, Wi-Fi, code boîte à clés, instructions d'arrivée/départ, règlement, hôte, numéros utiles |
 | **Galerie** | Plusieurs photos de la maison (upload multiple, légendes, réordonnancement) — visibles dans un onglet « Photos » avec agrandissement au clic |
 | **Tutoriels** | Titre, catégorie, icône, vidéo (YouTube / Vimeo / fichier `.mp4`), étapes |
 | **Tourisme** | Bonnes adresses avec contacts et vos conseils |
+| **Textes** | Tous les titres et messages du site (écran de connexion, checklist d'accueil, intros de chaque section) — champ vide = texte par défaut |
 
 Cliquez sur **Enregistrer** : tout est sauvegardé côté serveur (dans
 `.data/config.json`) et immédiatement visible par les voyageurs.

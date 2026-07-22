@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Maison } from '../types'
+import type { Maison, SectionTexte } from '../types'
 
 /** Bouton de copie pour un code / mot de passe. */
 function Copiable({ valeur }: { valeur: string }) {
@@ -21,13 +21,17 @@ function Copiable({ valeur }: { valeur: string }) {
   )
 }
 
-export default function SectionAcces({ maison }: { maison: Maison }) {
+export default function SectionAcces({
+  maison,
+  texte,
+}: {
+  maison: Maison
+  texte: SectionTexte
+}) {
   return (
     <section className="section">
-      <h1 className="section-titre">Accès à la maison</h1>
-      <p className="section-intro">
-        Toutes les informations pratiques pour entrer et vous installer.
-      </p>
+      <h1 className="section-titre">{texte.titre}</h1>
+      <p className="section-intro">{texte.intro}</p>
 
       <div className="grille-info">
         <div className="carte carte-info">

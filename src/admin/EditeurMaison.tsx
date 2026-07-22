@@ -1,13 +1,18 @@
-import type { Maison, NumeroUtile } from '../types'
+import type { Document, Maison, NumeroUtile } from '../types'
 import { Champ, ListeChaines, ZoneTexte } from './champs'
 import ChampPhoto from './ChampPhoto'
+import EditeurDocuments from './EditeurDocuments'
 
 export default function EditeurMaison({
   maison,
   onChange,
+  documents,
+  onChangeDocuments,
 }: {
   maison: Maison
   onChange: (m: Maison) => void
+  documents: Document[]
+  onChangeDocuments: (d: Document[]) => void
 }) {
   function maj(patch: Partial<Maison>) {
     onChange({ ...maison, ...patch })
@@ -84,6 +89,8 @@ export default function EditeurMaison({
           lignes={2}
         />
       </div>
+
+      <EditeurDocuments documents={documents} onChange={onChangeDocuments} />
 
       <div className="carte-edition">
         <ListeChaines

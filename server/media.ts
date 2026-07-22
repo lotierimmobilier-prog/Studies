@@ -11,16 +11,17 @@ import { join, basename, extname } from 'node:path'
 
 const DOSSIER = join(process.cwd(), '.data', 'uploads')
 
-/** Taille maximale d'une image : 10 Mo. */
-export const TAILLE_MAX_IMAGE = 10 * 1024 * 1024
+/** Taille maximale d'un fichier téléversé : 20 Mo (images et PDF). */
+export const TAILLE_MAX_IMAGE = 20 * 1024 * 1024
 
-/** Types d'image acceptés → extension de fichier. */
+/** Types acceptés (images + PDF) → extension de fichier. */
 const TYPES: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/png': 'png',
   'image/webp': 'webp',
   'image/gif': 'gif',
   'image/avif': 'avif',
+  'application/pdf': 'pdf',
 }
 
 const EXT_TYPES: Record<string, string> = {
@@ -30,6 +31,7 @@ const EXT_TYPES: Record<string, string> = {
   webp: 'image/webp',
   gif: 'image/gif',
   avif: 'image/avif',
+  pdf: 'application/pdf',
 }
 
 export function typeAccepte(contentType: string): boolean {

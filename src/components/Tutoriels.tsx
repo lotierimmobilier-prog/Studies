@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { Tutoriel } from '../types'
+import type { SectionTexte, Tutoriel } from '../types'
 import VideoCapsule from './VideoCapsule'
 
 function CarteTutoriel({ tuto }: { tuto: Tutoriel }) {
@@ -39,8 +39,10 @@ function CarteTutoriel({ tuto }: { tuto: Tutoriel }) {
 
 export default function SectionTutoriels({
   tutoriels,
+  texte,
 }: {
   tutoriels: Tutoriel[]
+  texte: SectionTexte
 }) {
   const categories = useMemo(
     () => ['Tout', ...Array.from(new Set(tutoriels.map((t) => t.categorie)))],
@@ -55,11 +57,8 @@ export default function SectionTutoriels({
 
   return (
     <section className="section">
-      <h1 className="section-titre">Tutoriels de la maison</h1>
-      <p className="section-intro">
-        De courtes vidéos pour prendre en main chaque équipement en toute
-        simplicité.
-      </p>
+      <h1 className="section-titre">{texte.titre}</h1>
+      <p className="section-intro">{texte.intro}</p>
 
       <div className="filtres">
         {categories.map((c) => (

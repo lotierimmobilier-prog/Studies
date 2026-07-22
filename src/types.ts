@@ -63,6 +63,32 @@ export interface PhotoGalerie {
   legende?: string
 }
 
+/** Un document téléchargeable (PDF « Guide d'accueil », etc.). */
+export interface Document {
+  id: string
+  titre: string
+  url: string
+}
+
+/** Titre + intro d'une section. */
+export interface SectionTexte {
+  titre: string
+  intro: string
+}
+
+/** Tous les textes personnalisables du site. */
+export interface Textes {
+  connexionTitre: string
+  connexionSousTitre: string
+  checklistTitre: string
+  checklist: string[]
+  acces: SectionTexte
+  tutoriels: SectionTexte
+  tourisme: SectionTexte
+  galerie: SectionTexte
+  contact: SectionTexte
+}
+
 /** Contenu reçu par un voyageur connecté. */
 export interface Session {
   jeton: string
@@ -71,6 +97,8 @@ export interface Session {
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
   galerie: PhotoGalerie[]
+  documents: Document[]
+  textes: Textes
 }
 
 /** Configuration complète, éditée dans l'administration. */
@@ -80,6 +108,8 @@ export interface Configuration {
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
   galerie: PhotoGalerie[]
+  documents: Document[]
+  textes: Textes
   calendriers: CalendrierSource[]
 }
 

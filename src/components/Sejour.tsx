@@ -1,4 +1,4 @@
-import type { Maison, Sejour } from '../types'
+import type { Document, Maison, Sejour, Textes } from '../types'
 import { urlMedia } from '../api'
 import { etatSejour, formaterDate, formaterHeure } from '../dates'
 
@@ -39,19 +39,16 @@ function Compteur({ arrivee, depart }: { arrivee: string; depart: string }) {
   )
 }
 
-const CHECKLIST_ARRIVEE = [
-  { icone: '🔑', texte: 'Récupérer les clés dans la boîte à clés' },
-  { icone: '📶', texte: 'Se connecter au Wi-Fi' },
-  { icone: '❄️', texte: 'Découvrir la climatisation et les équipements' },
-  { icone: '🏖️', texte: 'Repérer les bonnes adresses autour' },
-]
-
 export default function SectionSejour({
   sejour,
   maison,
+  documents,
+  textes,
 }: {
   sejour: Sejour
   maison: Maison
+  documents: Document[]
+  textes: Textes
 }) {
   const photo = maison.photo ? urlMedia(maison.photo) : ''
   return (
@@ -92,14 +89,36 @@ export default function SectionSejour({
         </div>
       </div>
 
+      {documents.length > 0 && (
+        <div className="carte">
+          <h2>📄 Documents</h2>
+          <div className="liste-documents">
+            {documents
+              .filter((d) => d.url)
+              .map((doc) => (
+                <a
+                  key={doc.id}
+                  className="doc-lien"
+                  href={urlMedia(doc.url)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <span className="doc-icone" aria-hidden="true">
+                    📄
+                  </span>
+                  <span className="doc-titre">{doc.titre}</span>
+                  <span className="doc-action">Ouvrir ↗</span>
+                </a>
+              ))}
+          </div>
+        </div>
+      )}
+
       <div className="carte">
-        <h2>Pour bien commencer</h2>
+        <h2>{textes.checklistTitre}</h2>
         <ul className="checklist">
-          {CHECKLIST_ARRIVEE.map((item) => (
-            <li key={item.texte}>
-              <span aria-hidden="true">{item.icone}</span>
-              {item.texte}
-            </li>
+          {textes.checklist.map((item, i) => (
+            <li key={i}>{item}</li>
           ))}
         </ul>
       </div>

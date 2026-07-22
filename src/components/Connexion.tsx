@@ -1,5 +1,5 @@
-import { useState, type FormEvent } from 'react'
-import { seConnecter } from '../api'
+import { useEffect, useState, type FormEvent } from 'react'
+import { chargerInfosPubliques, seConnecter, type InfosPubliques } from '../api'
 import type { Session } from '../types'
 
 /** Écran de connexion voyageur : un simple code fourni par l'hôte. */
@@ -11,6 +11,16 @@ export default function Connexion({
   const [code, setCode] = useState('')
   const [erreur, setErreur] = useState<string | null>(null)
   const [enCours, setEnCours] = useState(false)
+  const [infos, setInfos] = useState<InfosPubliques | null>(null)
+
+  useEffect(() => {
+    chargerInfosPubliques().then(setInfos)
+  }, [])
+
+  const titre = infos?.titre || 'Bienvenue'
+  const sousTitre =
+    infos?.sousTitreConnexion ||
+    'Votre espace voyageur pour un séjour en toute sérénité'
 
   async function soumettre(e: FormEvent) {
     e.preventDefault()
@@ -33,8 +43,8 @@ export default function Connexion({
           <span className="connexion-soleil" aria-hidden="true">
             ☀︎
           </span>
-          <h1>Bienvenue</h1>
-          <p>Votre espace voyageur pour un séjour en toute sérénité</p>
+          <h1>{titre}</h1>
+          <p>{sousTitre}</p>
         </div>
 
         <form onSubmit={soumettre} className="connexion-form">
