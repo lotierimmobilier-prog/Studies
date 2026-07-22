@@ -159,6 +159,8 @@ export function validerConfiguration(brut: unknown): Configuration {
       voyageurs:
         typeof o.voyageurs === 'number' ? o.voyageurs : undefined,
       messageHote: chaine(o.messageHote),
+      sourceUid: chaine(o.sourceUid) || undefined,
+      plateforme: chaine(o.plateforme) || undefined,
     }
   })
 
@@ -209,5 +211,16 @@ export function validerConfiguration(brut: unknown): Configuration {
     }
   })
 
-  return { maison, sejours, tutoriels, tourisme, galerie }
+  const calendriers = (Array.isArray(c.calendriers) ? c.calendriers : []).map(
+    (cal, i) => {
+      const o = (cal ?? {}) as Record<string, unknown>
+      return {
+        id: chaine(o.id) || `cal-${i}`,
+        url: chaine(o.url),
+        nom: chaine(o.nom),
+      }
+    },
+  )
+
+  return { maison, sejours, tutoriels, tourisme, galerie, calendriers }
 }

@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import type { Configuration } from '../types'
-import { enregistrerConfigAdmin, oublierJetonAdmin } from '../api'
+import {
+  enregistrerConfigAdmin,
+  oublierJetonAdmin,
+  synchroniserPlanning,
+} from '../api'
 import EditeurSejours from './EditeurSejours'
 import EditeurMaison from './EditeurMaison'
 import EditeurTutoriels from './EditeurTutoriels'
@@ -31,6 +35,8 @@ export default function AdminPanel({
     'repos',
   )
   const [messageErreur, setMessageErreur] = useState<string | null>(null)
+  const [syncEnCours, setSyncEnCours] = useState(false)
+  const [syncMessage, setSyncMessage] = useState<string | null>(null)
 
   function patch(p: Partial<Configuration>) {
     setConfig((c) => ({ ...c, ...p }))
@@ -49,6 +55,29 @@ export default function AdminPanel({
     } catch (err) {
       setMessageErreur((err as Error).message)
       setEtat('erreur')
+    }
+  }
+
+  async function synchroniser() {
+    setSyncEnCours(true)
+    setSyncMessage(null)
+    try {
+      // On enregistre d'abord (pour prendre en compte les liens iCal saisis).
+      await enregistrerConfigAdmin(config)
+      const { resultat, config: neuf } = await synchroniserPlanning()
+      setConfig(neuf)
+      setModifie(false)
+      const parts = [
+        `${resultat.ajouts} séjour(s) ajouté(s)`,
+        `${resultat.misAJour} mis à jour`,
+      ]
+      if (resultat.erreurs.length)
+        parts.push(`⚠︎ ${resultat.erreurs.join(' ; ')}`)
+      setSyncMessage(`✓ Synchronisation terminée : ${parts.join(', ')}.`)
+    } catch (err) {
+      setSyncMessage(`⚠︎ ${(err as Error).message}`)
+    } finally {
+      setSyncEnCours(false)
     }
   }
 
@@ -105,6 +134,11 @@ export default function AdminPanel({
           <EditeurSejours
             sejours={config.sejours}
             onChange={(sejours) => patch({ sejours })}
+            calendriers={config.calendriers}
+            onChangeCalendriers={(calendriers) => patch({ calendriers })}
+            onSync={synchroniser}
+            syncEnCours={syncEnCours}
+            syncMessage={syncMessage}
           />
         )}
         {onglet === 'maison' && (

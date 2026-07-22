@@ -1667,3 +1667,40 @@ button {
 .galerie-carte-actions .galerie-supprimer:hover {
   background: rgba(255, 122, 89, 0.25);
 }
+
+/* ---------- Admin : synchronisation du planning ----------------------- */
+
+.carte-sync {
+  background: linear-gradient(135deg, #f2fbfa, #eef6f5);
+  border: 1px solid #d7ebe9;
+}
+
+.sync-aide {
+  font-size: 0.85rem;
+  color: var(--nuit-doux);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+
+.sync-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-sync {
+  box-shadow: 0 6px 16px rgba(44, 166, 164, 0.3);
+}
+
+.sync-message {
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ocean-fonce);
+  background: rgba(44, 166, 164, 0.1);
+  border-radius: var(--rayon-sm);
+}

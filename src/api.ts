@@ -130,6 +130,36 @@ export async function enregistrerConfigAdmin(
   if (!res.ok) throw new Error(await lireErreur(res))
 }
 
+/** Résultat d'une synchronisation de planning. */
+export interface ResultatSync {
+  ajouts: number
+  misAJour: number
+  vues: number
+  erreurs: string[]
+}
+
+/** Lance la synchronisation des calendriers iCal et renvoie la config à jour. */
+export async function synchroniserPlanning(): Promise<{
+  resultat: ResultatSync
+  config: Configuration
+}> {
+  const jeton = jetonAdminEnregistre()
+  if (!jeton) throw new Error('Non connecté.')
+  const res = await fetch(`${BASE}api/admin/sync`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${jeton}` },
+  })
+  if (res.status === 401) {
+    oublierJetonAdmin()
+    throw new Error('Session administrateur expirée.')
+  }
+  if (!res.ok) throw new Error(await lireErreur(res))
+  return (await res.json()) as {
+    resultat: ResultatSync
+    config: Configuration
+  }
+}
+
 /** Envoie une image (photo de façade…) et renvoie son chemin `api/media/…`. */
 export async function envoyerImage(fichier: File): Promise<string> {
   const jeton = jetonAdminEnregistre()

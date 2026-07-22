@@ -15,6 +15,7 @@ import {
   typeAccepte,
   TAILLE_MAX_IMAGE,
 } from './media'
+import { synchroniser } from './sync'
 import type { Configuration, ReponseConnexion } from './types'
 
 /**
@@ -171,6 +172,18 @@ async function demarrer(): Promise<void> {
         const donnees = await lireCorpsBinaire(req, TAILLE_MAX_IMAGE)
         const url2 = await enregistrerImage(donnees, contentType)
         return envoyerJson(res, 201, { url: url2 })
+      }
+
+      // Synchronisation du planning (iCal) — jeton admin requis.
+      if (url.pathname === '/api/admin/sync' && req.method === 'POST') {
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'admin')
+          return envoyerJson(res, 401, { erreur: 'Non autorisé.' })
+        const resultat = await synchroniser()
+        return envoyerJson(res, 200, {
+          resultat,
+          config: configurationComplete(),
+        })
       }
 
       // Lecture / écriture de la configuration complète (jeton admin requis).

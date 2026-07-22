@@ -35,7 +35,7 @@ export interface Maison {
 }
 
 export interface Sejour {
-  /** Code de connexion unique (choisi par l'admin). */
+  /** Code de connexion unique (choisi par l'admin ou généré à l'import). */
   code: string
   /** Nom ou prénom affiché à l'accueil. */
   nom: string
@@ -43,6 +43,17 @@ export interface Sejour {
   depart: string
   voyageurs?: number
   messageHote?: string
+  /** Identifiant de la réservation d'origine (iCal), si importée. */
+  sourceUid?: string
+  /** Plateforme d'origine (ex. « Airbnb »), si importée. */
+  plateforme?: string
+}
+
+/** Un calendrier externe à synchroniser (lien iCal). */
+export interface CalendrierSource {
+  id: string
+  url: string
+  nom?: string
 }
 
 /** Une photo de la galerie (chemin `api/media/…` ou URL) + légende. */
@@ -69,6 +80,7 @@ export interface Configuration {
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
   galerie: PhotoGalerie[]
+  calendriers: CalendrierSource[]
 }
 
 /** Source d'une capsule vidéo : YouTube, Vimeo, ou fichier vidéo hébergé. */

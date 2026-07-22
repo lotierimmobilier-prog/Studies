@@ -66,6 +66,20 @@ export interface Sejour {
   voyageurs?: number
   /** Petit mot personnalisé de l'hôte. */
   messageHote?: string
+  /** Identifiant de la réservation d'origine (iCal), si importée. Sert à éviter
+   *  les doublons lors des synchronisations. */
+  sourceUid?: string
+  /** Plateforme d'origine (ex. « Airbnb »), si importée. */
+  plateforme?: string
+}
+
+/** Un calendrier externe à synchroniser (lien iCal Airbnb, Booking…). */
+export interface CalendrierSource {
+  id: string
+  /** URL d'export iCal (.ics) fournie par la plateforme. */
+  url: string
+  /** Nom de la plateforme / du logement (ex. « Airbnb »). */
+  nom?: string
 }
 
 /** Source d'une capsule vidéo : YouTube, Vimeo, ou fichier vidéo hébergé. */
@@ -113,6 +127,8 @@ export interface Configuration {
   tutoriels: Tutoriel[]
   tourisme: LieuTourisme[]
   galerie: PhotoGalerie[]
+  /** Calendriers externes à synchroniser (liens iCal). */
+  calendriers: CalendrierSource[]
 }
 
 /** Contenu renvoyé à un voyageur connecté. */

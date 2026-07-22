@@ -39,7 +39,7 @@ Rendez-vous sur **`/#admin`**, connectez-vous avec le mot de passe admin
 
 | Onglet | Ce que vous saisissez |
 | --- | --- |
-| **Séjours** | Un *code* d'accès + un *prénom* d'accueil, les dates d'arrivée/départ, le nombre de voyageurs, un message de bienvenue |
+| **Séjours** | Un *code* d'accès + un *prénom* d'accueil, les dates d'arrivée/départ, le nombre de voyageurs, un message de bienvenue. **Synchronisation du planning** : collez le lien iCal (Airbnb, Booking…) pour créer automatiquement les séjours aux bonnes dates |
 | **La maison** | **Photo de la façade** (bannière d'accueil, uploadée depuis l'appareil), adresse, Wi-Fi, code boîte à clés, instructions d'arrivée/départ, règlement, hôte, numéros utiles |
 | **Galerie** | Plusieurs photos de la maison (upload multiple, légendes, réordonnancement) — visibles dans un onglet « Photos » avec agrandissement au clic |
 | **Tutoriels** | Titre, catégorie, icône, vidéo (YouTube / Vimeo / fichier `.mp4`), étapes |
@@ -50,6 +50,20 @@ Cliquez sur **Enregistrer** : tout est sauvegardé côté serveur (dans
 
 > Astuce vidéo : mettez vos vidéos sur YouTube en **« Non répertoriée »** et
 > collez leur identifiant (ce qui suit `v=` ou `youtu.be/`).
+
+### Synchroniser le planning (Airbnb, Booking…)
+
+Dans l'onglet **Séjours**, collez le **lien iCal** d'export de votre calendrier
+(Airbnb : *Calendrier → Disponibilités → Synchroniser les calendriers →
+Exporter le calendrier*) puis cliquez sur **Synchroniser maintenant**. Le portail
+crée un séjour aux bonnes dates pour chaque réservation, avec un **code généré
+automatiquement** ; il ne reste qu'à ajouter le prénom du voyageur.
+
+> Pour des raisons de confidentialité, l'iCal des plateformes fournit les
+> **dates** mais **pas le nom du voyageur** — d'où la saisie du prénom à la main.
+> La synchronisation est **sans doublon** (réservations suivies par leur
+> identifiant) et met à jour les dates si une réservation est modifiée. Le
+> serveur doit pouvoir joindre la plateforme en HTTPS sortant.
 
 ## Fonctionnement de la connexion
 
