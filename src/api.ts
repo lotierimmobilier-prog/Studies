@@ -1,0 +1,204 @@
+import type { Configuration, Session } from './types'
+
+/**
+ * Appels à l'API du portail. En développement, Vite proxifie `/api` vers le
+ * serveur Node ; en production, nginx fait de même.
+ */
+
+const CLE_JETON = 'portail-code-jeton'
+const CLE_JETON_ADMIN = 'portail-admin-jeton'
+
+/**
+ * Préfixe des appels API : `/` en dev, `/<sous-chemin>/` en prod (injecté par
+ * Vite via `base`), pour fonctionner sous un sous-dossier (ex. `/maisoncapendu/`).
+ */
+const BASE = import.meta.env.BASE_URL
+
+/**
+ * Résout l'URL d'un média : une URL absolue (http/https/data) est renvoyée
+ * telle quelle ; un chemin relatif (`api/media/…`) est préfixé par la base.
+ */
+export function urlMedia(chemin: string): string {
+  if (!chemin) return ''
+  if (/^(https?:|data:)/.test(chemin)) return chemin
+  return `${BASE}${chemin.replace(/^\//, '')}`
+}
+
+async function lireErreur(res: Response): Promise<string> {
+  try {
+    const data = (await res.json()) as { erreur?: string }
+    return data.erreur ?? 'Une erreur est survenue.'
+  } catch {
+    return 'Une erreur est survenue.'
+  }
+}
+
+// ----------------------------------------------------------------- voyageur
+
+export function jetonEnregistre(): string | null {
+  return localStorage.getItem(CLE_JETON)
+}
+
+export function oublierJeton(): void {
+  localStorage.removeItem(CLE_JETON)
+}
+
+/** Connexion voyageur par simple code. */
+export async function seConnecter(code: string): Promise<Session> {
+  const res = await fetch(`${BASE}api/connexion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ code }),
+  })
+  if (!res.ok) throw new Error(await lireErreur(res))
+  const data = (await res.json()) as Session
+  localStorage.setItem(CLE_JETON, data.jeton)
+  return data
+}
+
+/** Restaure une session voyageur à partir du jeton enregistré. */
+export async function restaurerSession(): Promise<Session | null> {
+  const jeton = jetonEnregistre()
+  if (!jeton) return null
+  const res = await fetch(`${BASE}api/sejour`, {
+    headers: { Authorization: `Bearer ${jeton}` },
+  })
+  if (!res.ok) {
+    oublierJeton()
+    return null
+  }
+  const data = (await res.json()) as Omit<Session, 'jeton'>
+  return { jeton, ...data }
+}
+
+// -------------------------------------------------------------------- admin
+
+export function jetonAdminEnregistre(): string | null {
+  return localStorage.getItem(CLE_JETON_ADMIN)
+}
+
+export function oublierJetonAdmin(): void {
+  localStorage.removeItem(CLE_JETON_ADMIN)
+}
+
+/** Connexion administrateur par mot de passe. */
+export async function seConnecterAdmin(motDePasse: string): Promise<string> {
+  const res = await fetch(`${BASE}api/admin/connexion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ motDePasse }),
+  })
+  if (!res.ok) throw new Error(await lireErreur(res))
+  const { jeton } = (await res.json()) as { jeton: string }
+  localStorage.setItem(CLE_JETON_ADMIN, jeton)
+  return jeton
+}
+
+/** Charge la configuration complète (jeton admin requis). */
+export async function chargerConfigAdmin(): Promise<Configuration> {
+  const jeton = jetonAdminEnregistre()
+  if (!jeton) throw new Error('Non connecté.')
+  const res = await fetch(`${BASE}api/admin/config`, {
+    headers: { Authorization: `Bearer ${jeton}` },
+  })
+  if (res.status === 401) {
+    oublierJetonAdmin()
+    throw new Error('Session administrateur expirée.')
+  }
+  if (!res.ok) throw new Error(await lireErreur(res))
+  return (await res.json()) as Configuration
+}
+
+/** Enregistre la configuration complète (jeton admin requis). */
+export async function enregistrerConfigAdmin(
+  config: Configuration,
+): Promise<void> {
+  const jeton = jetonAdminEnregistre()
+  if (!jeton) throw new Error('Non connecté.')
+  const res = await fetch(`${BASE}api/admin/config`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jeton}`,
+    },
+    body: JSON.stringify(config),
+  })
+  if (res.status === 401) {
+    oublierJetonAdmin()
+    throw new Error('Session administrateur expirée.')
+  }
+  if (!res.ok) throw new Error(await lireErreur(res))
+}
+
+/** Résultat d'une synchronisation de planning. */
+export interface ResultatSync {
+  ajouts: number
+  misAJour: number
+  vues: number
+  erreurs: string[]
+}
+
+/** Lance la synchronisation des calendriers iCal et renvoie la config à jour. */
+export async function synchroniserPlanning(): Promise<{
+  resultat: ResultatSync
+  config: Configuration
+}> {
+  const jeton = jetonAdminEnregistre()
+  if (!jeton) throw new Error('Non connecté.')
+  const res = await fetch(`${BASE}api/admin/sync`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${jeton}` },
+  })
+  if (res.status === 401) {
+    oublierJetonAdmin()
+    throw new Error('Session administrateur expirée.')
+  }
+  if (!res.ok) throw new Error(await lireErreur(res))
+  return (await res.json()) as {
+    resultat: ResultatSync
+    config: Configuration
+  }
+}
+
+/** Envoie un fichier (image ou PDF) et renvoie son chemin `api/media/…`. */
+export async function envoyerFichier(fichier: File): Promise<string> {
+  const jeton = jetonAdminEnregistre()
+  if (!jeton) throw new Error('Non connecté.')
+  const res = await fetch(`${BASE}api/admin/media`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': fichier.type || 'application/octet-stream',
+      Authorization: `Bearer ${jeton}`,
+    },
+    body: fichier,
+  })
+  if (res.status === 401) {
+    oublierJetonAdmin()
+    throw new Error('Session administrateur expirée.')
+  }
+  if (!res.ok) throw new Error(await lireErreur(res))
+  const { url } = (await res.json()) as { url: string }
+  return url
+}
+
+/** Alias historique (photo de façade, galerie). */
+export const envoyerImage = envoyerFichier
+
+/** Infos publiques (non sensibles) pour personnaliser l'écran de connexion. */
+export interface InfosPubliques {
+  nom: string
+  sousTitre: string
+  photo: string
+  titre: string
+  sousTitreConnexion: string
+}
+
+export async function chargerInfosPubliques(): Promise<InfosPubliques | null> {
+  try {
+    const res = await fetch(`${BASE}api/public`)
+    if (!res.ok) return null
+    return (await res.json()) as InfosPubliques
+  } catch {
+    return null
+  }
+}

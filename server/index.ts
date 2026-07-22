@@ -1,84 +1,54 @@
 import { createServer } from 'node:http'
-import { join } from 'node:path'
-import type {
-  AvisEcole,
-  PrixFormation,
-  RequeteAvis,
-  RequetePrix,
-  RequeteTemoignage,
-  StatutTemoignage,
-} from './types'
-import { CacheDisque } from './cache'
-import { obtenirPrix } from './service'
-import { obtenirAvis } from './avis'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+import { creerJeton, verifierJeton } from './auth'
 import {
-  DepotTemoignages,
-  soumettreTemoignage,
-  synthese,
-  listerTous,
-} from './temoignages'
+  chargerConfiguration,
+  configurationComplete,
+  contenuVoyageur,
+  enregistrerConfiguration,
+  sejourParCode,
+  verifierAdmin,
+} from './config'
 import {
-  obtenirConseil,
-  type FormationResume,
-  type ProfilResume,
-} from './conseiller'
-import { obtenirQuestions } from './questions'
-import {
-  analyserBulletin,
-  BulletinNonConfigure,
-  type MediaType,
-} from './bulletin'
+  enregistrerImage,
+  lireImage,
+  typeAccepte,
+  TAILLE_MAX_IMAGE,
+} from './media'
+import { synchroniser } from './sync'
+import type { Configuration, ReponseConnexion } from './types'
 
 /**
- * Serveur HTTP minimal (sans dépendance) exposant l'API de prix.
+ * Serveur HTTP minimal (sans dépendance) pour le portail voyageurs.
  *
- *   GET  /api/sante                     → { ok: true }
- *   GET  /api/prix?etablissement=&statut=&fili=&formation=
- *                                        → PrixFormation
- *   POST /api/prix   body: RequetePrix[] → PrixFormation[]  (lot)
- *   GET  /api/avis?etablissement=&ville= → AvisEcole  (note Google ⭐)
- *   POST /api/avis   body: RequeteAvis[] → AvisEcole[]  (lot)
- *   GET  /api/temoignages?etablissement= → SyntheseTemoignages (avis étudiants)
- *   POST /api/temoignages body: RequeteTemoignage → soumission modérée
- *   GET/POST /api/temoignages/moderation → modération (jeton MODERATION_TOKEN)
+ * Côté voyageur (connexion par simple code) :
+ *   GET  /api/sante                → { ok: true }
+ *   POST /api/connexion  { code }  → { jeton, sejour, maison, tutoriels, tourisme }
+ *   GET  /api/sejour               → restaure la session (jeton voyageur)
  *
- * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
- * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
+ * Côté administration (protégé par mot de passe ADMIN_PASSWORD) :
+ *   POST /api/admin/connexion { motDePasse } → { jeton }
+ *   GET  /api/admin/config                    → Configuration complète
+ *   PUT  /api/admin/config    body Config     → enregistre (et recharge)
  */
 
-const PORT = Number(process.env.PORT ?? 8787)
-const CACHE_TTL = 1000 * 60 * 60 * 24 * 30 // 30 jours
-const cache = new CacheDisque<PrixFormation>(
-  join(process.cwd(), '.cache', 'prix.json'),
-  CACHE_TTL,
-)
-const cacheAvis = new CacheDisque<AvisEcole>(
-  join(process.cwd(), '.cache', 'avis.json'),
-  CACHE_TTL,
-)
-const depotTemoignages = new DepotTemoignages(
-  join(process.cwd(), '.data', 'temoignages.json'),
-)
+const PORT = Number(process.env.PORT ?? 8788)
 
-function cors(res: import('node:http').ServerResponse): void {
+function cors(res: ServerResponse): void {
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
 }
 
-function envoyerJson(
-  res: import('node:http').ServerResponse,
-  code: number,
-  data: unknown,
-): void {
+function envoyerJson(res: ServerResponse, code: number, data: unknown): void {
   cors(res)
   res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' })
   res.end(JSON.stringify(data))
 }
 
-const TAILLE_MAX_CORPS = 12 * 1024 * 1024 // 12 Mo (bulletins encodés en base64)
+const TAILLE_MAX_CORPS = 1 * 1024 * 1024 // 1 Mo (config complète)
 
-async function lireCorps(req: import('node:http').IncomingMessage): Promise<string> {
+async function lireCorps(req: IncomingMessage): Promise<string> {
   const morceaux: Buffer[] = []
   let total = 0
   for await (const c of req) {
@@ -89,10 +59,30 @@ async function lireCorps(req: import('node:http').IncomingMessage): Promise<stri
   return Buffer.concat(morceaux).toString('utf8')
 }
 
+/** Lit le corps brut (binaire) d'une requête, jusqu'à `max` octets. */
+async function lireCorpsBinaire(
+  req: IncomingMessage,
+  max: number,
+): Promise<Buffer> {
+  const morceaux: Buffer[] = []
+  let total = 0
+  for await (const c of req) {
+    total += (c as Buffer).length
+    if (total > max) throw new Error('Fichier trop volumineux')
+    morceaux.push(c as Buffer)
+  }
+  return Buffer.concat(morceaux)
+}
+
+function jetonDepuisEntete(req: IncomingMessage): string | undefined {
+  const entete = req.headers['authorization']
+  if (!entete) return undefined
+  const [type, valeur] = entete.split(' ')
+  return type === 'Bearer' ? valeur : undefined
+}
+
 async function demarrer(): Promise<void> {
-  await cache.initialiser()
-  await cacheAvis.initialiser()
-  await depotTemoignages.charger()
+  await chargerConfiguration()
 
   const serveur = createServer(async (req, res) => {
     try {
@@ -109,152 +99,129 @@ async function demarrer(): Promise<void> {
         return envoyerJson(res, 200, { ok: true })
       }
 
-      if (url.pathname === '/api/prix' && req.method === 'GET') {
-        const etablissement = url.searchParams.get('etablissement') ?? ''
-        if (!etablissement)
-          return envoyerJson(res, 400, { erreur: 'etablissement requis' })
-        const prix = await obtenirPrix(
-          {
-            etablissement,
-            statut: url.searchParams.get('statut') ?? undefined,
-            fili: url.searchParams.get('fili') ?? undefined,
-            formation: url.searchParams.get('formation') ?? undefined,
-          },
-          { cache },
+      // Infos publiques (non sensibles) pour personnaliser l'écran de connexion.
+      if (url.pathname === '/api/public' && req.method === 'GET') {
+        const c = configurationComplete()
+        return envoyerJson(res, 200, {
+          nom: c.maison.nom,
+          sousTitre: c.maison.sousTitre ?? '',
+          photo: c.maison.photo ?? '',
+          titre: c.textes.connexionTitre,
+          sousTitreConnexion: c.textes.connexionSousTitre,
+        })
+      }
+
+      // Service public des images uploadées (photo de façade…).
+      if (url.pathname.startsWith('/api/media/') && req.method === 'GET') {
+        const nom = decodeURIComponent(
+          url.pathname.slice('/api/media/'.length),
         )
-        return envoyerJson(res, 200, prix)
+        const image = await lireImage(nom)
+        if (!image) return envoyerJson(res, 404, { erreur: 'Image introuvable' })
+        cors(res)
+        res.writeHead(200, {
+          'Content-Type': image.contentType,
+          'Cache-Control': 'public, max-age=86400',
+        })
+        return res.end(image.donnees)
       }
 
-      if (url.pathname === '/api/prix' && req.method === 'POST') {
-        const corps = await lireCorps(req)
-        const liste = JSON.parse(corps) as RequetePrix[]
-        if (!Array.isArray(liste))
-          return envoyerJson(res, 400, { erreur: 'tableau attendu' })
-        const resultats = await Promise.all(
-          liste.slice(0, 50).map((r) => obtenirPrix(r, { cache })),
-        )
-        return envoyerJson(res, 200, resultats)
+      // ------------------------------------------------------------- voyageur
+
+      // Connexion par code : renvoie un jeton + tout le contenu du séjour.
+      if (url.pathname === '/api/connexion' && req.method === 'POST') {
+        const { code } = JSON.parse(await lireCorps(req)) as { code?: string }
+        if (!code)
+          return envoyerJson(res, 400, { erreur: 'Code requis.' })
+
+        const sejour = sejourParCode(code)
+        if (!sejour)
+          return envoyerJson(res, 401, { erreur: 'Code invalide.' })
+
+        const reponse: ReponseConnexion = {
+          jeton: creerJeton(sejour.code, 'voyageur'),
+          ...contenuVoyageur(sejour),
+        }
+        return envoyerJson(res, 200, reponse)
       }
 
-      if (url.pathname === '/api/avis' && req.method === 'GET') {
-        const etablissement = url.searchParams.get('etablissement') ?? ''
-        if (!etablissement)
-          return envoyerJson(res, 400, { erreur: 'etablissement requis' })
-        const avis = await obtenirAvis(
-          {
-            etablissement,
-            ville: url.searchParams.get('ville') ?? undefined,
-          },
-          { cache: cacheAvis },
-        )
-        return envoyerJson(res, 200, avis)
+      // Restaure une session voyageur à partir d'un jeton.
+      if (url.pathname === '/api/sejour' && req.method === 'GET') {
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'voyageur')
+          return envoyerJson(res, 401, { erreur: 'Session expirée.' })
+
+        const sejour = sejourParCode(charge.sub)
+        if (!sejour)
+          return envoyerJson(res, 401, { erreur: 'Séjour introuvable.' })
+
+        return envoyerJson(res, 200, contenuVoyageur(sejour))
       }
 
-      if (url.pathname === '/api/avis' && req.method === 'POST') {
-        const corps = await lireCorps(req)
-        const liste = JSON.parse(corps) as RequeteAvis[]
-        if (!Array.isArray(liste))
-          return envoyerJson(res, 400, { erreur: 'tableau attendu' })
-        const resultats = await Promise.all(
-          liste.slice(0, 50).map((r) => obtenirAvis(r, { cache: cacheAvis })),
-        )
-        return envoyerJson(res, 200, resultats)
+      // ----------------------------------------------------------------- admin
+
+      // Connexion administrateur : renvoie un jeton admin.
+      if (url.pathname === '/api/admin/connexion' && req.method === 'POST') {
+        const { motDePasse } = JSON.parse(await lireCorps(req)) as {
+          motDePasse?: string
+        }
+        if (!motDePasse || !verifierAdmin(motDePasse))
+          return envoyerJson(res, 401, { erreur: 'Mot de passe incorrect.' })
+        return envoyerJson(res, 200, { jeton: creerJeton('admin', 'admin') })
       }
 
-      if (url.pathname === '/api/temoignages' && req.method === 'GET') {
-        const etablissement = url.searchParams.get('etablissement') ?? ''
-        if (!etablissement)
-          return envoyerJson(res, 400, { erreur: 'etablissement requis' })
-        return envoyerJson(res, 200, await synthese(etablissement, depotTemoignages))
+      // Upload d'une image (jeton admin requis). Corps = octets bruts de l'image.
+      if (url.pathname === '/api/admin/media' && req.method === 'POST') {
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'admin')
+          return envoyerJson(res, 401, { erreur: 'Non autorisé.' })
+
+        const contentType = req.headers['content-type'] ?? ''
+        if (!typeAccepte(contentType))
+          return envoyerJson(res, 415, {
+            erreur: 'Format d’image non pris en charge (JPEG, PNG, WebP…).',
+          })
+        const donnees = await lireCorpsBinaire(req, TAILLE_MAX_IMAGE)
+        const url2 = await enregistrerImage(donnees, contentType)
+        return envoyerJson(res, 201, { url: url2 })
       }
 
-      if (url.pathname === '/api/temoignages' && req.method === 'POST') {
-        const corps = await lireCorps(req)
-        const req2 = JSON.parse(corps) as RequeteTemoignage
-        const resultat = await soumettreTemoignage(req2, { depot: depotTemoignages })
-        // 201 si publié/en attente, 422 si refusé par la modération.
-        return envoyerJson(res, resultat.ok ? 201 : 422, resultat)
+      // Synchronisation du planning (iCal) — jeton admin requis.
+      if (url.pathname === '/api/admin/sync' && req.method === 'POST') {
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'admin')
+          return envoyerJson(res, 401, { erreur: 'Non autorisé.' })
+        const resultat = await synchroniser()
+        return envoyerJson(res, 200, {
+          resultat,
+          config: configurationComplete(),
+        })
       }
 
-      // Modération (privé) : lister / changer le statut. Protégé par un jeton.
-      if (url.pathname === '/api/temoignages/moderation') {
-        const jeton = process.env.MODERATION_TOKEN
-        const fourni = req.headers['x-moderation-token']
-        if (!jeton || fourni !== jeton)
-          return envoyerJson(res, 401, { erreur: 'non autorisé' })
+      // Lecture / écriture de la configuration complète (jeton admin requis).
+      if (url.pathname === '/api/admin/config') {
+        const charge = verifierJeton(jetonDepuisEntete(req))
+        if (!charge || charge.role !== 'admin')
+          return envoyerJson(res, 401, { erreur: 'Non autorisé.' })
 
         if (req.method === 'GET') {
-          const statut = (url.searchParams.get('statut') ?? undefined) as
-            | StatutTemoignage
-            | undefined
-          return envoyerJson(res, 200, await listerTous(depotTemoignages, statut))
+          return envoyerJson(res, 200, configurationComplete())
         }
-        if (req.method === 'POST') {
-          const corps = await lireCorps(req)
-          const { id, statut } = JSON.parse(corps) as {
-            id: string
-            statut: StatutTemoignage
-          }
-          if (!id || !statut)
-            return envoyerJson(res, 400, { erreur: 'id et statut requis' })
-          const ok = await depotTemoignages.majStatut(id, statut)
-          return envoyerJson(res, ok ? 200 : 404, { ok })
+        if (req.method === 'PUT') {
+          const nouvelle = JSON.parse(await lireCorps(req)) as Configuration
+          await enregistrerConfiguration(nouvelle)
+          return envoyerJson(res, 200, { ok: true })
         }
       }
 
-      if (url.pathname === '/api/bulletin' && req.method === 'POST') {
-        const corps = await lireCorps(req)
-        const { fichier, mediaType } = JSON.parse(corps) as {
-          fichier: string
-          mediaType: MediaType
-        }
-        if (!fichier || !mediaType)
-          return envoyerJson(res, 400, { erreur: 'fichier et mediaType requis' })
-        try {
-          const analyse = await analyserBulletin(fichier, mediaType)
-          return envoyerJson(res, 200, analyse)
-        } catch (e) {
-          if (e instanceof BulletinNonConfigure)
-            return envoyerJson(res, 503, {
-              erreur: e.message,
-              configRequise: true,
-            })
-          throw e
-        }
-      }
-
-      if (url.pathname === '/api/conseil' && req.method === 'POST') {
-        const corps = await lireCorps(req)
-        const { profil, formations } = JSON.parse(corps) as {
-          profil: ProfilResume
-          formations: FormationResume[]
-        }
-        if (!profil || !Array.isArray(formations))
-          return envoyerJson(res, 400, { erreur: 'profil et formations requis' })
-        const conseil = await obtenirConseil(profil, formations.slice(0, 12))
-        return envoyerJson(res, 200, conseil)
-      }
-
-      if (url.pathname === '/api/questions' && req.method === 'POST') {
-        const corps = await lireCorps(req)
-        const { profil, formations } = JSON.parse(corps) as {
-          profil: ProfilResume
-          formations: FormationResume[]
-        }
-        if (!profil || !Array.isArray(formations))
-          return envoyerJson(res, 400, { erreur: 'profil et formations requis' })
-        const questions = await obtenirQuestions(profil, formations.slice(0, 12))
-        return envoyerJson(res, 200, questions)
-      }
-
-      envoyerJson(res, 404, { erreur: 'route inconnue' })
+      envoyerJson(res, 404, { erreur: 'Route inconnue' })
     } catch (e) {
       envoyerJson(res, 500, { erreur: (e as Error).message })
     }
   })
 
   serveur.listen(PORT, () => {
-    console.log(`API prix démarrée sur http://localhost:${PORT}`)
+    console.log(`Portail voyageurs — API démarrée sur http://localhost:${PORT}`)
   })
 }
 

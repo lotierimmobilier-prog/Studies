@@ -1,14 +1,14 @@
 name: Déployer le front sur GitHub Pages
 
-# Déploie le site (front React) sur GitHub Pages.
-# - au push sur main (ou sur la branche de dev, pour tester avant la fusion) ;
-# - ou manuellement via « Run workflow ».
+# Déploie le front React sur GitHub Pages (aperçu visuel uniquement).
+# - manuellement via « Run workflow ».
 #
 # Prérequis (une seule fois) : Settings → Pages → Source = « GitHub Actions ».
 #
-# En ligne, les données Parcoursup sont chargées en direct depuis le navigateur.
-# Les prix réels et le conseil IA basculent en repli (prix indicatifs, règles),
-# tant que le serveur (server/) n'est pas déployé séparément.
+# ⚠️ Le portail a besoin de son serveur Node (authentification + séjours) pour
+# fonctionner. GitHub Pages ne sert que le front statique : la connexion ne
+# marchera donc PAS ici. Pour un site pleinement fonctionnel, déployez sur le
+# VPS via deploy/vps-setup.sh (voir deploy/README.md).
 
 # Déclenchement manuel uniquement (le déploiement principal se fait sur le VPS
 # via deploy-vps.yml). Active « GitHub Actions » dans Settings → Pages avant de

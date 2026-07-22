@@ -1,17 +1,19 @@
 name: Déployer sur le VPS
 
-# Synchronisation automatique vers le VPS à chaque push (ou manuellement).
-# Envoie le front (statique) ET le serveur Node (prix + IA), puis redémarre l'API.
+# Synchronisation vers le VPS (manuelle). Envoie le front (statique) ET le
+# serveur Node (authentification + séjours), puis redémarre l'API.
 #
 # Prérequis (voir deploy/README.md) :
 #  - Secrets du dépôt : VPS_HOST, VPS_USER, VPS_SSH_KEY
-#    (+ facultatif : ANTHROPIC_API_KEY pour le conseiller / l'analyse de bulletin)
+#    (+ facultatif : SESSION_SECRET pour la signature des jetons de session)
 #  - Sur le VPS : Node 22, nginx, pm2, et les dossiers cibles créés.
+#
+# NB : le déploiement RECOMMANDÉ se fait directement sur le VPS via
+# deploy/vps-setup.sh (aucune clé SSH GitHub requise, multi-projets sous
+# sous-chemin). Ce workflow-ci sert le site à la racine du domaine.
 
 # Déclenchement MANUEL uniquement (Actions → « Déployer sur le VPS » → Run
-# workflow). Le déploiement recommandé se fait désormais directement sur le VPS
-# via deploy/vps-setup.sh (aucune clé SSH GitHub requise, voir deploy/README.md),
-# ce qui évite les échecs de CI liés à la clé SSH ou à l'accessibilité du VPS.
+# workflow).
 on:
   workflow_dispatch:
 
@@ -20,8 +22,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  WEB_ROOT: /var/www/parcoursup      # racine servie par nginx (front statique)
-  APP_DIR: /opt/parcoursup           # dossier du serveur Node sur le VPS
+  WEB_ROOT: /var/www/maisoncapendu        # racine servie par nginx (front statique)
+  APP_DIR: /opt/maisoncapendu             # dossier du serveur Node sur le VPS
 
 jobs:
   deploy:
@@ -72,31 +74,44 @@ jobs:
           rsync -az --delete \
             server/ \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${APP_DIR}/server/"
-          rsync -az package.json package-lock.json \
+          rsync -az package.json package-lock.json tsconfig.server.json \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${APP_DIR}/"
 
       - name: Installer les dépendances et (re)démarrer l'API
         if: ${{ env.VPS_HOST != '' }}
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-          MODERATION_TOKEN: ${{ secrets.MODERATION_TOKEN }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
         run: |
           ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-            "ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' GOOGLE_MAPS_API_KEY='${GOOGLE_MAPS_API_KEY}' MODERATION_TOKEN='${MODERATION_TOKEN}' bash -s" <<'REMOTE'
+            "SESSION_SECRET='${SESSION_SECRET}' ADMIN_PASSWORD='${ADMIN_PASSWORD}' bash -s" <<'REMOTE'
           set -e
-          cd /opt/parcoursup
+          cd /opt/maisoncapendu
           npm ci
-          # Écrit les clés API dans l'environnement du service (si fournies).
           : > .env
-          [ -n "$ANTHROPIC_API_KEY" ] && echo "ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY" >> .env
-          [ -n "$GOOGLE_MAPS_API_KEY" ] && echo "GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
-          [ -n "$MODERATION_TOKEN" ] && echo "MODERATION_TOKEN=$MODERATION_TOKEN" >> .env
+          # Secret de session : celui fourni, sinon un déjà généré, sinon nouveau.
+          if [ -z "$SESSION_SECRET" ] && [ -f .session_secret ]; then
+            SESSION_SECRET="$(cat .session_secret)"
+          fi
+          if [ -z "$SESSION_SECRET" ]; then
+            SESSION_SECRET="$(head -c 32 /dev/urandom | base64)"
+          fi
+          printf '%s' "$SESSION_SECRET" > .session_secret
+          chmod 600 .session_secret
+          echo "SESSION_SECRET=$SESSION_SECRET" >> .env
+          # Mot de passe admin : celui fourni, sinon un déjà défini, sinon « admin ».
+          if [ -z "$ADMIN_PASSWORD" ] && [ -f .admin_password ]; then
+            ADMIN_PASSWORD="$(cat .admin_password)"
+          fi
+          [ -z "$ADMIN_PASSWORD" ] && ADMIN_PASSWORD="admin"
+          printf '%s' "$ADMIN_PASSWORD" > .admin_password
+          chmod 600 .admin_password
+          echo "ADMIN_PASSWORD=$ADMIN_PASSWORD" >> .env
           # (Re)démarre l'API via pm2 (tsx exécute le TypeScript directement).
-          if pm2 describe parcoursup-api > /dev/null 2>&1; then
-            env PORT=8787 ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" MODERATION_TOKEN="$MODERATION_TOKEN" pm2 restart parcoursup-api --update-env
+          if pm2 describe maisoncapendu-api > /dev/null 2>&1; then
+            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" ADMIN_PASSWORD="$ADMIN_PASSWORD" pm2 restart maisoncapendu-api --update-env
           else
-            env PORT=8787 ANTHROPIC_API_KEY="$ANTHROPIC_API_KEY" GOOGLE_MAPS_API_KEY="$GOOGLE_MAPS_API_KEY" MODERATION_TOKEN="$MODERATION_TOKEN" pm2 start "npx tsx server/index.ts" --name parcoursup-api --update-env
+            env PORT=8788 SESSION_SECRET="$SESSION_SECRET" ADMIN_PASSWORD="$ADMIN_PASSWORD" pm2 start "npx tsx server/index.ts" --name maisoncapendu-api --update-env
           fi
           pm2 save
           REMOTE

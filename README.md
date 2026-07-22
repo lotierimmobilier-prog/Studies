@@ -1,115 +1,115 @@
-# Simulateur d'admission Parcoursup
+# Espace voyageur — portail Airbnb 🏖️
 
-Application web qui aide les étudiants à **choisir et simuler leurs chances
-d'admission** dans les formations de l'enseignement supérieur (Parcoursup),
-à partir de quatre critères :
+Un site **simple, moderne et épuré** pour accueillir vos voyageurs Airbnb.
+Chaque réservation reçoit un **code d'accès** qui ouvre son espace personnel :
 
-1. **Résultats scolaires** (notes par matière)
-2. **Géolocalisation** (secteur géographique / mobilité)
-3. **Passions** (domaines d'intérêt)
-4. **Motivation** (motivation et cohérence du projet)
+- 🎬 **Tutoriels vidéo** — une capsule par équipement (Wi-Fi, climatisation,
+  lave-vaisselle, TV, piscine…) avec explications pas à pas ;
+- 🔑 **Accès à la maison** — adresse, code de la boîte à clés, Wi-Fi,
+  stationnement, instructions d'arrivée et de départ, règlement ;
+- 🧭 **Tourisme & bonnes adresses** — restaurants, activités, services, avec
+  téléphone, itinéraire et vos conseils personnels ;
+- 📞 **Contact & urgences** — coordonnées de l'hôte (appel, WhatsApp, e-mail) et
+  numéros utiles ;
+- 🗓️ **Rappel du séjour** — dates d'arrivée et de départ + compte à rebours, et
+  un petit mot de bienvenue personnalisé.
 
-Le simulateur classe les formations par probabilité d'admission estimée et
-explique les facteurs clés de chaque estimation.
+**Une administration intégrée** (`/#admin`) permet à l'hôte de tout saisir depuis
+le navigateur, sans toucher à aucun fichier.
 
-## Démarrer
+Ambiance vacances (palette sable / corail / océan), responsive (barre de
+navigation en bas sur mobile).
+
+## Démarrer en local
 
 ```bash
 npm install
-npm run dev       # front (Vite) sur http://localhost:5173, proxy /api -> :8787
-npm run server    # service de prix (scraping) sur http://localhost:8787
-npm run build     # build de production du front
-npm test          # tests unitaires (Vitest) — moteur, données, serveur
+ADMIN_PASSWORD=secret npm run server   # API Node sur http://localhost:8788
+npm run dev                            # front (Vite) sur http://localhost:5173
+npm run build                          # build de production du front
 ```
 
-Le front fonctionne seul (repli sur prix indicatif) ; lancer aussi `npm run
-server` pour obtenir les frais de scolarité réels.
+- Portail voyageur : <http://localhost:5173> — code de démo : **`SOLEIL`**
+- Administration : <http://localhost:5173/#admin> — mot de passe : celui d'`ADMIN_PASSWORD`
+
+## L'administration
+
+Rendez-vous sur **`/#admin`**, connectez-vous avec le mot de passe admin
+(variable `ADMIN_PASSWORD`), puis gérez tout en quelques clics :
+
+| Onglet | Ce que vous saisissez |
+| --- | --- |
+| **Séjours** | Un *code* d'accès + un *prénom* d'accueil, les dates d'arrivée/départ, le nombre de voyageurs, un message de bienvenue. **Synchronisation du planning** : collez le lien iCal (Airbnb, Booking…) pour créer automatiquement les séjours aux bonnes dates |
+| **La maison** | **Photo de la façade** (bannière d'accueil, uploadée depuis l'appareil), **documents PDF** (Guide d'accueil…), adresse, Wi-Fi, code boîte à clés, instructions d'arrivée/départ, règlement, hôte, numéros utiles |
+| **Galerie** | Plusieurs photos de la maison (upload multiple, légendes, réordonnancement) — visibles dans un onglet « Photos » avec agrandissement au clic |
+| **Tutoriels** | Titre, catégorie, icône, vidéo (YouTube / Vimeo / fichier `.mp4`), étapes |
+| **Tourisme** | Bonnes adresses avec contacts et vos conseils |
+| **Textes** | Tous les titres et messages du site (écran de connexion, checklist d'accueil, intros de chaque section) — champ vide = texte par défaut |
+
+Cliquez sur **Enregistrer** : tout est sauvegardé côté serveur (dans
+`.data/config.json`) et immédiatement visible par les voyageurs.
+
+> Astuce vidéo : mettez vos vidéos sur YouTube en **« Non répertoriée »** et
+> collez leur identifiant (ce qui suit `v=` ou `youtu.be/`).
+
+### Synchroniser le planning (Airbnb, Booking…)
+
+Dans l'onglet **Séjours**, collez le **lien iCal** d'export de votre calendrier
+(Airbnb : *Calendrier → Disponibilités → Synchroniser les calendriers →
+Exporter le calendrier*) puis cliquez sur **Synchroniser maintenant**. Le portail
+crée un séjour aux bonnes dates pour chaque réservation, avec un **code généré
+automatiquement** ; il ne reste qu'à ajouter le prénom du voyageur.
+
+> Pour des raisons de confidentialité, l'iCal des plateformes fournit les
+> **dates** mais **pas le nom du voyageur** — d'où la saisie du prénom à la main.
+> La synchronisation est **sans doublon** (réservations suivies par leur
+> identifiant) et met à jour les dates si une réservation est modifiée. Le
+> serveur doit pouvoir joindre la plateforme en HTTPS sortant.
+
+## Fonctionnement de la connexion
+
+- **Voyageur** : saisit son **code** (fourni par l'hôte). Le serveur renvoie un
+  **jeton signé** (HMAC) + tout le contenu de son séjour. La session est
+  restaurée automatiquement au rechargement.
+- **Admin** : se connecte avec `ADMIN_PASSWORD`, obtient un jeton admin qui
+  autorise la lecture et l'écriture de la configuration.
+- Les informations sensibles (codes, Wi-Fi, adresse) ne sont renvoyées
+  qu'**après connexion**.
+
+En production, définissez `SESSION_SECRET` (signature des jetons) et
+`ADMIN_PASSWORD` (accès admin).
 
 ## Architecture
 
 ```
+index.html                 Page hôte (polices, favicon, méta)
 src/
-  types.ts                 Types partagés (Formation, ProfilEtudiant, ...)
-  data/
-    formations.ts          Échantillon de formations (données d'exemple)
-    labels.ts              Libellés d'affichage (domaines, matières, régions)
-  engine/
-    simulate.ts            Moteur de scoring et d'estimation du taux d'admission
-    __tests__/             Tests unitaires du moteur
-    coutVie.ts             Coût de la vie par ville (loyer, budget mensuel)
-    prix.ts                Client du service de prix (backend)
-  components/
-    Stepper.tsx            Barre de progression du formulaire
-    Resultats.tsx          Affichage des résultats classés
-  App.tsx                  Formulaire multi-étapes + orchestration
+  main.tsx                 Point d'entrée React
+  App.tsx                  Aiguillage portail voyageur ↔ administration (#admin)
+  api.ts                   Appels API (voyageur + admin) et jetons
+  types.ts                 Types partagés (Maison, Sejour, Tutoriel, ...)
+  dates.ts                 Formatage FR + compte à rebours du séjour
+  styles.css               Thème « vacances » + styles de l'admin
+  components/              Portail voyageur (Connexion par code, Séjour, Accès,
+                           Tutoriels, Tourisme, Contact, VideoCapsule)
+  admin/                   Administration (AdminApp, AdminLogin, AdminPanel,
+                           Editeur{Sejours,Maison,Tutoriels,Tourisme}, champs)
 
-server/                    Service de prix (scraping des frais de scolarité)
-  scraper.ts               Extraction du prix depuis le HTML d'un site d'école
-  registre.ts              Base curée de prix + estimation par catégorie
-  service.ts               Orchestration cache -> curé -> scraping -> estimation
-  cache.ts                 Cache disque avec TTL
-  index.ts                 Serveur HTTP (GET/POST /api/prix, /api/sante)
+server/                    API Node minimale (sans dépendance)
+  index.ts                 Serveur HTTP (voyageur + admin)
+  auth.ts                  Jetons de session signés (HMAC), rôles voyageur/admin
+  config.ts                Lecture/écriture de la config, vérif code & admin
+  types.ts                 Types serveur
+  data/config.json         Exemple de configuration (maison, séjours, tutos, tourisme)
 ```
 
-### Service de prix (le « vrai plus » : frais de scolarité réels)
+## Déploiement
 
-L'open data Parcoursup ne contient pas les prix. Le navigateur ne pouvant pas
-lire les sites d'écoles (CORS), un **service backend** (`server/`) s'en charge :
+Voir [`deploy/README.md`](deploy/README.md). En résumé, sur le VPS en root :
 
-1. **cache** (30 jours) →
-2. **base curée** de prix connus (`registre.ts`) ; si une URL d'école est
-   connue, tentative de **scraping** pour un montant à jour →
-3. **estimation par catégorie** (public ~175 €/an, privé selon le type) en repli.
-
-API : `GET /api/prix?etablissement=&statut=&fili=` et `POST /api/prix` (lot).
-Le front interroge ce service et retombe silencieusement sur un prix indicatif
-si le service est indisponible.
-
-### Modèle de simulation
-
-Chaque formation reçoit quatre sous-scores (0-100) — académique, passion,
-motivation, géographie — combinés en un **score d'adéquation** pondéré, qui
-module le **taux d'accès historique** de la formation pour produire une
-probabilité. Voir `src/engine/simulate.ts` pour le détail commenté.
-
-> ⚠️ Outil **pédagogique**. Les probabilités reposent sur un modèle simplifié
-> et des données d'exemple ; elles ne préjugent pas des décisions réelles.
-
-## Sources de données à intégrer (feuille de route)
-
-Les données actuelles sont des **exemples**. Pour une version réaliste, on
-s'appuiera sur les jeux de données ouverts officiels :
-
-| Besoin | Source | Détail |
-| --- | --- | --- |
-| Carte officielle des formations, critères, lieux, attendus | **[dossier.parcoursup.fr/Candidat/carte](https://dossier.parcoursup.fr/Candidat/carte)** | Source principale : chaque fiche formation (critères d'analyse des vœux, lieu, capacité) |
-| Site de dépôt des vœux | **[parcoursup.gouv.fr](https://www.parcoursup.gouv.fr/)** | Référence du fonctionnement des vœux |
-| Taux d'accès, vœux et propositions (open data officiel) | **[data.enseignementsup-recherche.gouv.fr — fr-esr-parcoursup](https://data.enseignementsup-recherche.gouv.fr/explore/assets/fr-esr-parcoursup/)** ([portail](https://data.enseignementsup-recherche.gouv.fr/pages/parcoursupdata/)) | Jeu annuel du ministère : taux d'accès, capacités, effectifs, filière, par formation — API Opendatasoft |
-| Lieux / géolocalisation | carte Parcoursup + base des établissements | Ville, adresse, coordonnées GPS |
-| Coût / prix des formations | ONISEP + fiches établissements | Frais de scolarité (public/privé) |
-| Débouchés, contenu | **ONISEP** | Descriptions, poursuites d'études, métiers |
-
-### Fait
-
-- [x] **Chargement des données officielles en direct** via l'API Opendatasoft
-      (`fr-esr-parcoursup`) : taux d'accès réels, établissement, ville, région,
-      capacité, statut, lien Parcoursup (`src/data/opendata.ts`), avec repli sur
-      l'échantillon local si l'API est indisponible.
-- [x] **Proposer plusieurs choix** : liste de vœux équilibrée
-      (ambitieux / réalistes / valeurs sûres, `src/engine/strategie.ts`).
-- [x] **Coût de la vie par ville** : loyer moyen studio/T1 + budget mensuel
-      indicatif (`src/data/coutVie.ts`).
-- [x] **Vrais prix / frais de scolarité** via un **service backend de scraping**
-      (`server/`) : base curée + scraping des sites d'écoles + estimation par
-      catégorie, avec cache. C'est le « vrai plus » du projet.
-
-### Prochaines étapes
-
-- [ ] Enrichir la base curée de prix (plus d'écoles) et ajouter des connecteurs
-      de scraping par école (chaque site a sa mise en page).
-- [ ] **Annonces immobilières** liées à la ville de la formation (logement
-      étudiant), en complément du coût de la vie.
-- [ ] Filtrer/rechercher par domaine, ville, coût, sélectivité.
-- [ ] Affiner le modèle de scoring avec les taux d'accès réels par profil de bac.
-- [ ] Fiches formation détaillées (attendus, débouchés, prix, carte).
-- [ ] Améliorer le coût de la vie (données par agglomération, transport, énergie).
+```bash
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/airbnb-guest-portal-8o2bq8/deploy/vps-setup.sh \
+  | ADMIN_PASSWORD="votre-mot-de-passe" bash
+# Site :  http://76.13.37.163/maisoncapendu/
+# Admin : http://76.13.37.163/maisoncapendu/#admin
+```

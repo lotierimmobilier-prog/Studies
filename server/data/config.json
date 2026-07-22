@@ -1,0 +1,199 @@
+{
+  "maison": {
+    "nom": "Maison Capendu",
+    "sousTitre": "Votre maison de vacances",
+    "adresse": "14 chemin des Oliviers, 11700 Capendu",
+    "lienCarte": "https://maps.google.com/?q=Capendu",
+    "wifi": {
+      "reseau": "MaisonCapendu",
+      "motDePasse": "vacances2026"
+    },
+    "codeAcces": "2580",
+    "instructionsArrivee": [
+      "L'arrivée se fait à partir de 16h00. La boîte à clés se trouve à droite du portail, sur le mur en pierre.",
+      "Tapez le code d'accès indiqué ci-dessus pour ouvrir la boîte et récupérer le trousseau (2 clés : portail + porte d'entrée).",
+      "Le portail s'ouvre en tournant la clé vers la gauche. La grande clé ouvre la porte d'entrée principale.",
+      "Merci de bien refermer le portail derrière vous, et de remettre les clés dans la boîte à clés à votre départ."
+    ],
+    "instructionsDepart": [
+      "Le départ se fait avant 10h00, merci de respecter cet horaire pour laisser le temps au ménage.",
+      "Rassemblez les serviettes utilisées dans la salle de bain et lancez le lave-vaisselle si nécessaire.",
+      "Sortez les poubelles dans les conteneurs situés à 50 m à gauche en sortant (tri : jaune = emballages, vert = verre).",
+      "Fermez bien les fenêtres et les volets, éteignez la climatisation, et remettez les clés dans la boîte à clés (code inchangé)."
+    ],
+    "parking": "Deux places de stationnement gratuites sont disponibles devant la maison, le long du mur en pierre.",
+    "reglement": [
+      "Maison non-fumeur (vous pouvez fumer sur la terrasse extérieure).",
+      "Animaux acceptés sur demande auprès de l'hôte.",
+      "Merci de respecter le voisinage : pas de bruit après 22h00.",
+      "La piscine n'est pas surveillée : les enfants doivent être accompagnés d'un adulte."
+    ],
+    "hote": {
+      "nom": "Votre hôte",
+      "telephone": "+33 6 12 34 56 78",
+      "email": "contact@maisoncapendu.fr",
+      "whatsapp": "33612345678"
+    },
+    "numerosUtiles": [
+      { "libelle": "Hôte (urgence maison)", "numero": "+33 6 12 34 56 78" },
+      { "libelle": "SAMU (urgences médicales)", "numero": "15" },
+      { "libelle": "Police / Gendarmerie", "numero": "17" },
+      { "libelle": "Pompiers", "numero": "18" },
+      { "libelle": "Urgences (Europe)", "numero": "112" },
+      { "libelle": "Médecin de garde", "numero": "3237" }
+    ]
+  },
+  "sejours": [
+    {
+      "code": "SOLEIL",
+      "nom": "Marie",
+      "arrivee": "2026-07-25T16:00",
+      "depart": "2026-08-01T10:00",
+      "voyageurs": 4,
+      "messageHote": "Bienvenue dans notre maison ! Nous sommes ravis de vous accueillir. N'hésitez pas à nous contacter pour la moindre question. Excellent séjour à vous et profitez bien ! ☀️"
+    }
+  ],
+  "tutoriels": [
+    {
+      "id": "wifi",
+      "titre": "Se connecter au Wi-Fi",
+      "categorie": "Essentiels",
+      "icone": "📶",
+      "description": "Comment vous connecter au réseau Wi-Fi de la maison en quelques secondes, sur téléphone comme sur ordinateur.",
+      "video": { "type": "youtube", "id": "dQw4w9WgXcQ" },
+      "etapes": [
+        "Ouvrez les réglages Wi-Fi de votre appareil.",
+        "Sélectionnez le réseau indiqué dans l'onglet « Accès ».",
+        "Saisissez le mot de passe (attention aux majuscules)."
+      ]
+    },
+    {
+      "id": "clim",
+      "titre": "Utiliser la climatisation",
+      "categorie": "Confort",
+      "icone": "❄️",
+      "description": "Régler la température, le mode froid/chaud et la minuterie avec la télécommande de la climatisation réversible.",
+      "video": { "type": "youtube", "id": "dQw4w9WgXcQ" },
+      "etapes": [
+        "Appuyez sur le bouton ON/OFF de la télécommande.",
+        "Choisissez le mode : flocon = froid, soleil = chaud.",
+        "Réglez la température entre 21 et 24°C pour un confort optimal.",
+        "Pensez à l'éteindre en quittant la pièce ou la maison."
+      ]
+    },
+    {
+      "id": "lave-vaisselle",
+      "titre": "Le lave-vaisselle",
+      "categorie": "Cuisine",
+      "icone": "🍽️",
+      "description": "Où trouver les pastilles, choisir le bon programme et lancer un cycle sans se tromper.",
+      "video": { "type": "youtube", "id": "dQw4w9WgXcQ" },
+      "etapes": [
+        "Les pastilles sont dans le placard sous l'évier.",
+        "Placez une pastille dans le bac de la porte.",
+        "Sélectionnez le programme « Eco » (le plus économique).",
+        "Fermez la porte et appuyez sur Départ."
+      ]
+    },
+    {
+      "id": "lave-linge",
+      "titre": "Le lave-linge",
+      "categorie": "Buanderie",
+      "icone": "🧺",
+      "description": "Faire une machine simplement : lessive, programme et essorage.",
+      "video": { "type": "youtube", "id": "dQw4w9WgXcQ" },
+      "etapes": []
+    },
+    {
+      "id": "tv",
+      "titre": "Télévision & streaming",
+      "categorie": "Confort",
+      "icone": "📺",
+      "description": "Allumer la TV, changer de source et accéder aux applications de streaming.",
+      "video": { "type": "youtube", "id": "dQw4w9WgXcQ" },
+      "etapes": [
+        "Allumez la TV avec la télécommande noire (bouton rouge).",
+        "Appuyez sur « Source » et choisissez « Smart TV ».",
+        "Ouvrez l'application souhaitée (vos comptes personnels recommandés)."
+      ]
+    },
+    {
+      "id": "piscine",
+      "titre": "La piscine & la douche extérieure",
+      "categorie": "Extérieur",
+      "icone": "🏊",
+      "description": "Consignes de sécurité, système de filtration et douche extérieure.",
+      "video": { "type": "youtube", "id": "dQw4w9WgXcQ" },
+      "etapes": [
+        "La piscine n'est pas surveillée : surveillez les enfants en permanence.",
+        "La filtration se déclenche automatiquement, n'y touchez pas.",
+        "Douchez-vous avant la baignade pour préserver l'eau."
+      ]
+    }
+  ],
+  "tourisme": [
+    {
+      "id": "cite-carcassonne",
+      "nom": "Cité de Carcassonne",
+      "categorie": "À faire",
+      "icone": "🏰",
+      "description": "La célèbre cité médiévale classée à l'UNESCO, à quelques minutes : remparts, château comtal et ruelles.",
+      "distance": "15 min en voiture",
+      "lienCarte": "https://maps.google.com/?q=Cité+de+Carcassonne",
+      "conseilHote": "Allez-y en fin de journée : la lumière sur les remparts est magnifique et il y a moins de monde."
+    },
+    {
+      "id": "resto-village",
+      "nom": "Le Bistrot du Village",
+      "categorie": "Restaurants",
+      "icone": "🍽️",
+      "description": "Cuisine locale et généreuse dans une ambiance chaleureuse, produits du terroir.",
+      "distance": "5 min à pied",
+      "telephone": "+33 4 68 00 00 00",
+      "lienCarte": "https://maps.google.com/?q=restaurant+Capendu",
+      "conseilHote": "Notre adresse préférée ! Réservez la veille et goûtez le cassoulet maison."
+    },
+    {
+      "id": "marche",
+      "nom": "Marché local",
+      "categorie": "À faire",
+      "icone": "🧺",
+      "description": "Marché typique : produits locaux, fromages, olives, vins de la région.",
+      "distance": "10 min à pied",
+      "conseilHote": "Idéal pour composer un pique-nique. Goûtez les fromages de la région !"
+    },
+    {
+      "id": "domaine-vin",
+      "nom": "Domaine viticole",
+      "categorie": "À faire",
+      "icone": "🍷",
+      "description": "Dégustation de vins des Corbières et du Minervois, visite d'un domaine familial.",
+      "distance": "15 min en voiture",
+      "telephone": "+33 4 68 11 11 11",
+      "conseilHote": "Réservez une visite guidée avec dégustation. Les vins des Corbières sont exceptionnels."
+    },
+    {
+      "id": "pharmacie",
+      "nom": "Pharmacie",
+      "categorie": "Services",
+      "icone": "💊",
+      "description": "Pharmacie la plus proche, ouverte du lundi au samedi.",
+      "distance": "7 min à pied",
+      "telephone": "+33 4 68 22 22 22",
+      "lienCarte": "https://maps.google.com/?q=pharmacie+Capendu"
+    },
+    {
+      "id": "supermarche",
+      "nom": "Supermarché & épicerie",
+      "categorie": "Services",
+      "icone": "🛒",
+      "description": "Pour vos courses : supermarché bien achalandé à proximité.",
+      "distance": "5 min en voiture",
+      "lienCarte": "https://maps.google.com/?q=supermarché+Capendu"
+    }
+  ],
+  "galerie": [],
+  "documents": [],
+  "textes": {},
+  "calendriers": []
+}

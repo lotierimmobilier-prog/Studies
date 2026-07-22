@@ -1,147 +1,148 @@
-// Types partagés de l'application Simulateur Parcoursup
+/** Types du portail voyageurs (côté navigateur). */
 
-/** Grands domaines d'études, utilisés pour relier passions et formations. */
-export type Domaine =
-  | 'sante'
-  | 'droit'
-  | 'informatique'
-  | 'ingenieur'
-  | 'sciences'
-  | 'commerce'
-  | 'economie'
-  | 'lettres'
-  | 'langues'
-  | 'arts'
-  | 'social'
-  | 'staps'
-  | 'communication'
+export interface Wifi {
+  reseau: string
+  motDePasse: string
+}
 
-/** Régions administratives (métropole) pour la géolocalisation. */
-export type Region =
-  | 'Auvergne-Rhône-Alpes'
-  | 'Bourgogne-Franche-Comté'
-  | 'Bretagne'
-  | 'Centre-Val de Loire'
-  | 'Corse'
-  | 'Grand Est'
-  | 'Hauts-de-France'
-  | 'Île-de-France'
-  | 'Normandie'
-  | 'Nouvelle-Aquitaine'
-  | 'Occitanie'
-  | 'Pays de la Loire'
-  | "Provence-Alpes-Côte d'Azur"
+export interface Hote {
+  nom: string
+  telephone?: string
+  email?: string
+  whatsapp?: string
+}
 
-/** Matières scolaires évaluées (notes sur 20). */
-export type Matiere =
-  | 'mathematiques'
-  | 'physique_chimie'
-  | 'svt'
-  | 'francais'
-  | 'philosophie'
-  | 'histoire_geo'
-  | 'ses'
-  | 'langues'
-  | 'informatique'
-  | 'eps'
-  | 'arts'
+export interface NumeroUtile {
+  libelle: string
+  numero: string
+}
 
-/** Spécialités de première / terminale (voie générale). */
-export type Specialite =
-  | 'maths'
-  | 'physique_chimie'
-  | 'svt'
-  | 'nsi'
-  | 'ses'
-  | 'hggsp'
-  | 'hlp'
-  | 'llcer'
-  | 'si'
-  | 'arts'
-  | 'llca'
-  | 'biologie_ecologie'
-  | 'eppcs'
+export interface Maison {
+  nom: string
+  sousTitre?: string
+  /** Photo de la façade (chemin `api/media/…` ou URL), affichée à l'accueil. */
+  photo?: string
+  adresse: string
+  lienCarte?: string
+  wifi: Wifi
+  codeAcces?: string
+  instructionsArrivee: string[]
+  instructionsDepart: string[]
+  parking?: string
+  reglement: string[]
+  hote: Hote
+  numerosUtiles: NumeroUtile[]
+}
 
-/** Sélectivité de la formation. */
-export type Selectivite = 'selective' | 'non-selective'
+export interface Sejour {
+  /** Code de connexion unique (choisi par l'admin ou généré à l'import). */
+  code: string
+  /** Nom ou prénom affiché à l'accueil. */
+  nom: string
+  arrivee: string
+  depart: string
+  voyageurs?: number
+  messageHote?: string
+  /** Identifiant de la réservation d'origine (iCal), si importée. */
+  sourceUid?: string
+  /** Plateforme d'origine (ex. « Airbnb »), si importée. */
+  plateforme?: string
+}
 
-/** Une formation Parcoursup (échantillon de données). */
-export interface Formation {
+/** Un calendrier externe à synchroniser (lien iCal). */
+export interface CalendrierSource {
+  id: string
+  url: string
+  nom?: string
+}
+
+/** Une photo de la galerie (chemin `api/media/…` ou URL) + légende. */
+export interface PhotoGalerie {
+  id: string
+  url: string
+  legende?: string
+}
+
+/** Un document téléchargeable (PDF « Guide d'accueil », etc.). */
+export interface Document {
+  id: string
+  titre: string
+  url: string
+}
+
+/** Titre + intro d'une section. */
+export interface SectionTexte {
+  titre: string
+  intro: string
+}
+
+/** Tous les textes personnalisables du site. */
+export interface Textes {
+  connexionTitre: string
+  connexionSousTitre: string
+  checklistTitre: string
+  checklist: string[]
+  acces: SectionTexte
+  tutoriels: SectionTexte
+  tourisme: SectionTexte
+  galerie: SectionTexte
+  contact: SectionTexte
+}
+
+/** Contenu reçu par un voyageur connecté. */
+export interface Session {
+  jeton: string
+  sejour: Sejour
+  maison: Maison
+  tutoriels: Tutoriel[]
+  tourisme: LieuTourisme[]
+  galerie: PhotoGalerie[]
+  documents: Document[]
+  textes: Textes
+}
+
+/** Configuration complète, éditée dans l'administration. */
+export interface Configuration {
+  maison: Maison
+  sejours: Sejour[]
+  tutoriels: Tutoriel[]
+  tourisme: LieuTourisme[]
+  galerie: PhotoGalerie[]
+  documents: Document[]
+  textes: Textes
+  calendriers: CalendrierSource[]
+}
+
+/** Source d'une capsule vidéo : YouTube, Vimeo, ou fichier vidéo hébergé. */
+export type SourceVideo =
+  | { type: 'youtube'; id: string }
+  | { type: 'vimeo'; id: string }
+  | { type: 'fichier'; src: string }
+
+/** Un tutoriel = une capsule vidéo + son explication pour un équipement. */
+export interface Tutoriel {
+  id: string
+  titre: string
+  categorie: string
+  /** Emoji d'illustration. */
+  icone: string
+  description: string
+  video: SourceVideo
+  /** Étapes détaillées (facultatif). */
+  etapes?: string[]
+}
+
+/** Une bonne adresse / activité touristique avec ses contacts. */
+export interface LieuTourisme {
   id: string
   nom: string
-  etablissement: string
-  ville: string
-  region: Region
-  domaine: Domaine
-  selectivite: Selectivite
-  /** Taux d'accès historique moyen (part des candidats ayant reçu une proposition), en %. */
-  tauxAccesBase: number
-  /** Matières déterminantes et leur poids relatif (somme libre, normalisée à l'usage). */
-  matieresCles: Partial<Record<Matiere, number>>
-  /** Attendus / description courte affichée à l'utilisateur. */
-  attendus: string
-
-  // --- Champs issus de l'open data officiel (optionnels) ---
-  /** Statut de l'établissement (Public, Privé sous contrat, Privé…). */
-  statut?: string
-  /** Capacité d'accueil de la formation. */
-  capacite?: number
-  /** Coordonnées GPS [latitude, longitude]. */
-  coords?: [number, number]
-  /** Lien vers la fiche de la formation sur Parcoursup. */
-  lienParcoursup?: string
-  /** Estimation indicative des frais de scolarité (l'open data ne fournit pas le prix). */
-  prixIndicatif?: string
-}
-
-/** Niveau scolaire de l'étudiant. */
-export type Classe = 'seconde' | 'premiere' | 'terminale'
-
-/** Profil saisi par l'étudiant. */
-export interface ProfilEtudiant {
-  /** Classe actuelle (oriente les conseils : spécialités en seconde, vœux ensuite). */
-  classe: Classe
-  /** Souhaits / projet exprimés librement par l'étudiant. */
-  souhaits: string
-  /** Spécialités choisies (jusqu'à 3 en première, 2 en terminale). */
-  specialites: Specialite[]
-  /** Notes sur 20 par matière (partiel : seules les matières renseignées comptent). */
-  notes: Partial<Record<Matiere, number>>
-  /** Matières exclues de l'analyse (non prioritaires pour le parcours visé). */
-  matieresExclues: Matiere[]
-  region: Region | null
-  /** Villes préférées (jusqu'à 2) pour étudier — affine l'adéquation géographique. */
-  villes: string[]
-  /** Accepte de s'éloigner de sa région pour étudier. */
-  mobilite: boolean
-  /** Domaines qui passionnent l'étudiant. */
-  passions: Domaine[]
-  /** Motivation auto-évaluée pour son projet (0-10). */
-  motivation: number
-  /** Cohérence perçue entre le projet et le parcours (0-10). */
-  coherenceProjet: number
-}
-
-/** Résultat de simulation pour une formation donnée. */
-export interface ResultatSimulation {
-  formation: Formation
-  /** Probabilité d'admission estimée en %. */
-  probabilite: number
-  /**
-   * Score d'adéquation global (0-100) : à quel point la formation correspond
-   * au profil (notes, spécialités, passions, motivation, géographie), avant
-   * prise en compte de la sélectivité. Sert à mettre en avant les formations
-   * les plus « adaptées » à l'étudiant, indépendamment de la seule probabilité.
-   */
-  adequation: number
-  /** Décomposition des sous-scores (0-100) pour la transparence. */
-  details: {
-    academique: number
-    specialites: number
-    passion: number
-    motivation: number
-    geographie: number
-  }
-  /** Explications lisibles des facteurs clés. */
-  explications: string[]
+  categorie: string
+  icone: string
+  description: string
+  distance?: string
+  telephone?: string
+  siteWeb?: string
+  lienCarte?: string
+  /** Recommandation personnelle de l'hôte. */
+  conseilHote?: string
 }

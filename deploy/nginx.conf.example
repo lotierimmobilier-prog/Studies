@@ -1,14 +1,18 @@
-# Exemple de configuration nginx pour le VPS.
-# À adapter puis placer dans /etc/nginx/sites-available/parcoursup
-# puis : ln -s /etc/nginx/sites-available/parcoursup /etc/nginx/sites-enabled/
+# Exemple de configuration nginx pour le portail voyageurs.
+# En pratique, le script deploy/vps-setup.sh génère automatiquement une config
+# multi-projets (sous /etc/nginx/projets.d/). Cet exemple sert de référence si
+# tu préfères servir le site seul, à la racine du domaine.
+#
+# À adapter puis placer dans /etc/nginx/sites-available/maisoncapendu
+# puis : ln -s /etc/nginx/sites-available/maisoncapendu /etc/nginx/sites-enabled/
 #        nginx -t && systemctl reload nginx
 
 server {
     listen 80;
     server_name 76.13.37.163;   # ou ton nom de domaine
 
-    # Front statique (build Vite déposé par le workflow)
-    root /var/www/parcoursup;
+    # Front statique (build Vite)
+    root /var/www/maisoncapendu;
     index index.html;
 
     # SPA : toutes les routes retombent sur index.html
@@ -16,9 +20,9 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
-    # API Node (prix + IA), proxyfiée vers le service pm2 sur le port 8787
+    # API Node (authentification + séjours), proxyfiée vers pm2 sur le port 8788
     location /api/ {
-        proxy_pass http://127.0.0.1:8787;
+        proxy_pass http://127.0.0.1:8788;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
