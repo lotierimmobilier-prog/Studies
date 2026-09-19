@@ -1,0 +1,92 @@
+{
+  "parcoursup_2025": {
+    "titre": "Parcoursup 2025 — vœux et réponses des établissements",
+    "portail": "data.enseignementsup-recherche.gouv.fr",
+    "dataset_id": "fr-esr-parcoursup",
+    "url_csv": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup/exports/csv?delimiter=%3B&with_bom=false",
+    "url_meta": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup",
+    "collecte_utc": "2026-09-19T06:36:55+00:00",
+    "octets": 12880727,
+    "sha256": "649c64e406463157bf09f8bd997cbe1fa25f7a35a5e294145f294b53dfd0c18e"
+  },
+  "parcoursup_2024": {
+    "titre": "Parcoursup 2024 — vœux et réponses des établissements",
+    "portail": "data.enseignementsup-recherche.gouv.fr",
+    "dataset_id": "fr-esr-parcoursup_2024",
+    "url_csv": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup_2024/exports/csv?delimiter=%3B&with_bom=false",
+    "url_meta": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup_2024",
+    "collecte_utc": "2026-09-19T06:37:02+00:00",
+    "octets": 12533241,
+    "sha256": "48710a84ff9c3c9217a626e15b4d7951b49fb4b0206ae344e63a4a55bba54cb8"
+  },
+  "parcoursup_2023": {
+    "titre": "Parcoursup 2023 — vœux et réponses des établissements",
+    "portail": "data.enseignementsup-recherche.gouv.fr",
+    "dataset_id": "fr-esr-parcoursup_2023",
+    "url_csv": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup_2023/exports/csv?delimiter=%3B&with_bom=false",
+    "url_meta": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup_2023",
+    "collecte_utc": "2026-09-19T06:37:07+00:00",
+    "octets": 12459072,
+    "sha256": "17bf324788b9f23a8a9e2d9ad4dd27fa0c3f8ca36494a4987254feb447c1bf67"
+  },
+  "cartographie_formations": {
+    "titre": "Cartographie des formations Parcoursup",
+    "portail": "data.enseignementsup-recherche.gouv.fr",
+    "dataset_id": "fr-esr-cartographie_formations_parcoursup",
+    "url_csv": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-cartographie_formations_parcoursup/exports/csv?delimiter=%3B&with_bom=false",
+    "url_meta": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-cartographie_formations_parcoursup",
+    "collecte_utc": "2026-09-19T06:37:26+00:00",
+    "octets": 90050828,
+    "sha256": "103d137c31c12f8186c43f2736cf07a2233bfbe359a3124ff845cbfc84ba9bfd"
+  },
+  "crous_logement": {
+    "titre": "Logements CROUS — France entière",
+    "portail": "data.enseignementsup-recherche.gouv.fr",
+    "dataset_id": "fr_crous_logement_france_entiere",
+    "url_csv": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr_crous_logement_france_entiere/exports/csv?delimiter=%3B&with_bom=false",
+    "url_meta": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr_crous_logement_france_entiere",
+    "collecte_utc": "2026-09-19T06:37:29+00:00",
+    "octets": 1448849,
+    "sha256": "cfe268eff4f0567b7adae5f26d5d7f0625616f150c8e28faba2d3b4324569c98"
+  },
+  "crous_restauration": {
+    "titre": "Lieux de restauration CROUS — France entière",
+    "portail": "data.enseignementsup-recherche.gouv.fr",
+    "dataset_id": "fr_crous_restauration_france_entiere",
+    "url_csv": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr_crous_restauration_france_entiere/exports/csv?delimiter=%3B&with_bom=false",
+    "url_meta": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr_crous_restauration_france_entiere",
+    "collecte_utc": "2026-09-19T06:37:31+00:00",
+    "octets": 639892,
+    "sha256": "f052580ff8445d7f3c526b5c1dafdf4e3664a6fc2be7455360cba86366a8bbc2"
+  },
+  "loyers_communes": {
+    "titre": "Indicateur des loyers par commune, millésimé (ANIL / CEREMA)",
+    "portail": "public.opendatasoft.com",
+    "dataset_id": "indicateur-loyers-communes-millesime",
+    "url_csv": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/indicateur-loyers-communes-millesime/exports/csv?delimiter=%3B&with_bom=false",
+    "url_meta": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/indicateur-loyers-communes-millesime",
+    "collecte_utc": "2026-09-19T06:37:44+00:00",
+    "octets": 23850307,
+    "sha256": "f608f5b04a778a0969759cdb99bdfbd693f7a1e71b6b91964c96d8eebeb59631"
+  },
+  "onisep_af_sup": {
+    "titre": "Idéo — Actions de formation initiale, univers enseignement supérieur",
+    "portail": "api.opendata.onisep.fr",
+    "dataset_id": "605344579a7d7",
+    "url_csv": "https://api.opendata.onisep.fr/downloads/605344579a7d7/605344579a7d7.csv",
+    "url_meta": "https://api.opendata.onisep.fr/api/1.0/dataset/605344579a7d7",
+    "collecte_utc": "2026-09-19T06:37:48+00:00",
+    "octets": 27026874,
+    "sha256": "bf0ff9a929fecfe1974dcc64639baec0496be306ce750ce9211f611329408104"
+  },
+  "georef_communes": {
+    "titre": "Référentiel géographique des communes de France",
+    "portail": "public.opendatasoft.com",
+    "dataset_id": "georef-france-commune",
+    "url_csv": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-france-commune/exports/csv?delimiter=%3B&with_bom=false&select=com_code,com_current_code,com_name,com_name_upper,dep_code,dep_name,reg_code,reg_name,epci_code,com_type,geo_point_2d,year",
+    "url_meta": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-france-commune",
+    "collecte_utc": "2026-09-19T06:38:00+00:00",
+    "octets": 4601929,
+    "sha256": "0743f9484787d4f214949fe10cb94f36f8c0b8b09c375bc10ff7f4f2fcf4d529"
+  }
+}

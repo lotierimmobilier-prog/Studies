@@ -1,0 +1,4 @@
+data/brut/*.csv
+data/brut/*.meta.json
+__pycache__/
+*.pyc
