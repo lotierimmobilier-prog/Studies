@@ -120,12 +120,41 @@ dig +short www.kitetudiant.fr    # -> kitetudiant.fr. puis 76.13.37.193
 DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr bash deploy/vps-setup.sh
 ```
 
-Le script refuse d'appeler certbot si le DNS n'est pas en ordre : nom qui ne
-résout pas, plusieurs A, ou A pointant sur une autre machine. Il le dit et
-s'arrête, plutôt que de brûler un essai du quota. `TLS_FORCER=1` passe outre
-si un CDN ou un reverse-proxy se trouve devant le serveur. Si `www` ne résout
-pas, le certificat est demandé pour le nom nu seulement, au lieu d'échouer en
-entier.
+Le script refuse d'appeler certbot si le DNS n'est pas en ordre, plutôt que de
+brûler un essai du quota. Il contrôle à deux niveaux, dans cet ordre de
+confiance :
+
+1. **À la source.** Il interroge un par un les serveurs de noms du domaine —
+   c'est ce que fait Let's Encrypt, qui résout lui-même depuis la racine. Il
+   exige qu'ils répondent **tous la même chose**, une seule adresse, celle de
+   la machine. Ce contrôle a le dernier mot.
+2. **Le résolveur local**, en repli seulement, quand `dig` manque ou que les
+   serveurs de noms sont introuvables. Sa vue peut être périmée de plusieurs
+   heures et ne dit rien de ce que verra Let's Encrypt.
+
+Pourquoi cet ordre, appris à nos dépens le 19/09/2026 : `kitetudiant.fr` était
+servi par deux serveurs de noms d'un même réseau anycast, dont **un seul avait
+la zone corrigée**. Le résolveur local, lui, était encore sur l'ancienne
+adresse. Interroger la source à un seul endroit donnait une réponse rassurante
+et fausse ; Let's Encrypt est tombé sur l'autre nœud, et l'essai a été perdu.
+
+`TLS_FORCER=1` passe outre n'importe lequel de ces refus : CDN ou reverse-proxy
+en amont, NAT, ou résolveur local en retard alors que la source est bonne.
+
+Si `www` ne résout pas, le certificat est demandé pour le nom nu seulement, au
+lieu d'échouer en entier.
+
+Pour regarder soi-même avant de lancer :
+
+```bash
+for ns in $(dig +short NS kitetudiant.fr); do
+  printf '%-28s ' "$ns"; dig +short kitetudiant.fr @"$ns"
+done
+```
+
+Tous doivent répondre la même unique adresse. **Cinq échecs par heure et par
+domaine suffisent à bloquer le domaine pour l'heure** : ne relance pas en
+boucle, attends que les serveurs de noms soient d'accord.
 
 Le script ajoute le domaine au `server_name` de nginx, installe certbot,
 obtient le certificat Let's Encrypt pour `kitetudiant.fr` et `www`, et met en

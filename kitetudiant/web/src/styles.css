@@ -310,33 +310,140 @@ input[type='range'] { width: 100%; min-height: 44px; }
 /* ------------------------------------------------------------- accueil */
 .accueil { padding-bottom: 3rem; }
 
-.hero { margin: 1.5rem 0 2.5rem; }
+/* En-tête : la marque à gauche, un rappel d'action à droite. Sur un écran de
+   téléphone, le bouton reste au-dessus de la ligne de flottaison. */
+.entete-accueil {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--trait);
+}
+.marque { margin: 0; font-size: 1.05rem; letter-spacing: 0.14em; font-weight: 700; }
+.entete-cta {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  /* 44px : la cible tactile minimale. Mesurée en navigateur, pas supposée. */
+  min-height: 44px;
+}
+.entete-cta:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ------------------------------------------------------------------ hero */
+.hero { margin: 2rem 0 2.5rem; }
+.hero-sur {
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
 .promesse {
-  margin: 0 0 0.9rem;
-  font-size: clamp(1.9rem, 8.5vw, 2.6rem);
-  line-height: 1.12;
-  letter-spacing: -0.025em;
+  margin: 0 0 1rem;
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
   font-weight: 800;
 }
-.hero-texte { margin: 0 0 1.5rem; color: var(--doux); font-size: 1rem; }
-.hero .principal { width: 100%; }
-.hero-mentions { margin: 0.6rem 0 0; color: var(--doux); font-size: 0.82rem; text-align: center; }
+.promesse em { font-style: italic; color: var(--accent); }
+.hero-texte { margin: 0 0 1.75rem; color: var(--doux); font-size: 1.02rem; max-width: 34rem; }
 
-.bloc { margin-bottom: 2.5rem; }
-.bloc h2 { margin: 0 0 0.4rem; font-size: 1.15rem; }
-.bloc-intro { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.85rem; }
-.bloc-chute { margin: 1rem 0 0; font-size: 0.95rem; }
+.cta-groupe { display: flex; flex-direction: column; gap: 0.75rem; align-items: stretch; }
+.cta-groupe .principal { width: 100%; font-size: 1.02rem; padding: 1rem; }
+.cta-groupe-bloc { margin-top: 1.5rem; }
+.cta-secondaire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border-radius: var(--rayon);
+  border: 1px solid var(--trait);
+  color: var(--encre);
+  text-decoration: none;
+  font-weight: 600;
+}
+.cta-secondaire:hover { border-color: var(--accent); color: var(--accent); }
+.hero-mentions { margin: 0.9rem 0 0; color: var(--doux); font-size: 0.82rem; text-align: center; }
 
+/* -------------------------------------------------------------- bandeau */
+.bandeau {
+  display: grid;
+  gap: 1px;
+  background: var(--trait);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+}
+.bandeau-item {
+  background: var(--carte);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.bandeau-chiffre {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.bandeau-libelle { color: var(--doux); font-size: 0.85rem; }
+
+/* ---------------------------------------------------------------- blocs */
+.bloc { margin-bottom: 2.75rem; }
+.bloc h2 { margin: 0 0 0.4rem; font-size: 1.3rem; letter-spacing: -0.01em; }
+.bloc-intro { margin: 0 0 1.1rem; color: var(--doux); font-size: 0.92rem; }
+.bloc-chute { margin: 1.25rem 0 0; font-size: 0.95rem; }
+
+/* ----------------------------------------------------------- trois piliers */
+.piliers-grille { display: grid; gap: 0.75rem; }
+.pilier {
+  position: relative;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 1.1rem 1.1rem 1.2rem;
+}
+.pilier-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--fond);
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+}
+.pilier-titre { margin: 0 0 0.15rem; font-size: 1.02rem; }
+.pilier-question { margin: 0 0 0.6rem; color: var(--accent); font-size: 0.9rem; font-weight: 600; }
+.pilier-texte { margin: 0; color: var(--doux); font-size: 0.9rem; }
+
+/* ---------------------------------------------------------- comparaison */
 .comparaison { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .comparaison li {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 0 0.75rem;
   align-items: baseline;
-  padding: 0.7rem 0.9rem;
+  gap: 0.35rem 0.75rem;
   background: var(--carte);
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
+  padding: 0.85rem 1rem;
 }
 .comparaison-ville { font-weight: 600; }
 .comparaison-montant { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -352,5 +459,30 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .promesses strong { color: var(--encre); }
 .sources li { font-size: 0.82rem; color: var(--doux); }
 
-.accueil-fin { margin-bottom: 2rem; }
-.accueil-fin .principal { width: 100%; }
+/* ------------------------------------------------------------ CTA final */
+.cta-final {
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.cta-final h2 { margin: 0 0 0.5rem; font-size: 1.35rem; letter-spacing: -0.01em; }
+.cta-final p { margin: 0 0 1.25rem; color: var(--doux); font-size: 0.95rem; }
+.cta-final .principal { width: 100%; font-size: 1.02rem; padding: 1rem; }
+.cta-final .hero-mentions { margin-top: 0.8rem; }
+
+/* Au-delà du téléphone : deux puis trois colonnes, et un titre qui respire. */
+@media (min-width: 40rem) {
+  .promesse { font-size: 2.6rem; }
+  .cta-groupe { flex-direction: row; align-items: center; }
+  .cta-groupe .principal { width: auto; flex: 0 1 auto; padding-inline: 2rem; }
+  .cta-groupe .cta-secondaire { flex: 0 0 auto; }
+  .hero-mentions { text-align: left; }
+  .bandeau { grid-template-columns: repeat(3, 1fr); }
+  .piliers-grille { grid-template-columns: repeat(3, 1fr); }
+  .cta-final { padding: 2.5rem 2rem; }
+  .cta-final .principal { width: auto; padding-inline: 2.5rem; }
+  .cta-final .hero-mentions { text-align: center; }
+}

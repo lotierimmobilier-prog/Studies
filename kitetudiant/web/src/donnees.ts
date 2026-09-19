@@ -30,6 +30,10 @@ async function avecUneRelance(url: string, recuperer: typeof fetch): Promise<Res
 export const SOURCE_LOYERS = communes.source
 export const MILLESIME_LOYERS = communes.millesimeLoyers
 export const TYPOLOGIE_LOYERS = communes.typologie
+/** Date de génération du jeu de communes, à afficher avec les chiffres qui en viennent. */
+export const GENERE_LE = communes.genereLe
+/** Communes pour lesquelles un loyer est disponible. Compté, jamais écrit en dur. */
+export const NOMBRE_COMMUNES_AVEC_LOYER = Object.keys(communes.communes).length
 
 export interface Formation {
   readonly id: string

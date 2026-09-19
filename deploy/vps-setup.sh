@@ -329,47 +329,118 @@ if [ "${TLS}" = "1" ]; then
   fi
   # --- pré-vol DNS -----------------------------------------------------------
   # Let's Encrypt valide par HTTP-01 : il appelle lui-même
-  # http://<domaine>/.well-known/acme-challenge/… sur l'IP publiée par le DNS.
-  # Si le domaine porte plusieurs A, ou pointe sur une AUTRE machine, la
-  # validation atterrit sur le mauvais serveur et le certificat échoue — en
-  # brûlant un essai du quota (5 échecs par heure et par domaine). On vérifie
-  # donc avant d'appeler certbot. TLS_FORCER=1 passe outre en connaissance de
-  # cause (CDN, reverse-proxy amont, NAT).
-  # « || true » : getant sort en erreur quand le nom ne résout pas, et le
-  # script tourne sous « set -e pipefail » — sans cela l'absence de DNS tuerait
-  # le script sans un mot d'explication.
+  # http://<domaine>/.well-known/acme-challenge/… sur l'adresse publiée par le
+  # DNS. Si cette adresse n'est pas celle de cette machine, la validation
+  # échoue — et chaque échec consomme le quota : 5 par heure et par domaine.
+  # On vérifie donc avant d'appeler certbot.
+  #
+  # Deux niveaux de contrôle, dans cet ordre de confiance :
+  #
+  #   1. LA SOURCE. On interroge un par un les serveurs de noms du domaine.
+  #      C'est ce que fait Let's Encrypt, qui résout lui-même depuis la racine.
+  #      Ce contrôle a le dernier mot quand il peut s'exécuter.
+  #   2. LE RÉSOLVEUR LOCAL, en repli seulement, quand dig manque ou que les
+  #      serveurs de noms sont introuvables. Sa vue peut être périmée de
+  #      plusieurs heures et ne dit rien de ce que verra Let's Encrypt.
+  #
+  # Pourquoi cet ordre : le 19/09/2026 sur kitetudiant.fr, le résolveur local
+  # servait encore l'ancienne adresse alors que la zone était corrigée, et un
+  # des serveurs de noms du réseau anycast servait encore les anciennes valeurs
+  # pendant qu'un autre servait les bonnes. Le contrôle local seul ne pouvait ni
+  # voir ce désaccord, ni s'en remettre à la source.
+  #
+  # TLS_FORCER=1 passe outre n'importe lequel de ces refus, en connaissance de
+  # cause : CDN ou reverse-proxy en amont, NAT, ou résolveur local en retard
+  # alors que la source est bonne.
+
+  # « || true » : getent sort en erreur quand le nom ne résout pas, et le script
+  # tourne sous « set -e pipefail » — sans cela l'absence de DNS tuerait le
+  # script sans un mot d'explication.
   adresses_de() { getent ahostsv4 "$1" 2>/dev/null | awk '{print $1}' | sort -u || true; }
   ADRESSES_LOCALES="$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -E '^[0-9]+(\.[0-9]+){3}$' | sort -u)"
 
-  IP_DOMAINE="$(adresses_de "${DOMAIN}")"
-  if [ -z "${IP_DOMAINE}" ]; then
-    echo "DNS : « ${DOMAIN} » ne résout sur aucune adresse IPv4." >&2
-    echo "  Crée un enregistrement A chez ton hébergeur DNS, puis attends la propagation." >&2
-    [ "${TLS_FORCER:-0}" = "1" ] || exit 1
-  fi
-
-  NB_A="$(printf '%s\n' "${IP_DOMAINE}" | grep -c . || true)"
-  if [ "${NB_A}" -gt 1 ]; then
-    echo "DNS : « ${DOMAIN} » porte ${NB_A} enregistrements A :" >&2
-    printf '  %s\n' ${IP_DOMAINE} >&2
-    echo "  Let's Encrypt en tirera un au hasard : le certificat échouera une fois sur deux." >&2
-    echo "  Ne garde qu'un seul A, celui de cette machine, puis relance." >&2
-    [ "${TLS_FORCER:-0}" = "1" ] || exit 1
-  fi
-
-  if [ -n "${ADRESSES_LOCALES}" ] && [ -n "${IP_DOMAINE}" ]; then
-    CONCORDE=0
-    for ip in ${IP_DOMAINE}; do
-      for locale in ${ADRESSES_LOCALES}; do
-        [ "${ip}" = "${locale}" ] && CONCORDE=1
-      done
+  est_une_adresse_locale() {
+    for locale in ${ADRESSES_LOCALES}; do
+      [ "$1" = "${locale}" ] && return 0
     done
-    if [ "${CONCORDE}" -eq 0 ]; then
-      echo "DNS : « ${DOMAIN} » pointe sur ${IP_DOMAINE//$'\n'/ }," >&2
-      echo "  or cette machine porte ${ADRESSES_LOCALES//$'\n'/ }." >&2
-      echo "  Corrige l'enregistrement A, ou relance avec TLS_FORCER=1 si un CDN" >&2
-      echo "  ou un reverse-proxy se trouve devant ce serveur." >&2
-      [ "${TLS_FORCER:-0}" = "1" ] || exit 1
+    return 1
+  }
+
+  refuser() {
+    echo "" >&2
+    while [ "$#" -gt 0 ]; do echo "$1" >&2; shift; done
+    echo "  (TLS_FORCER=1 passe outre si tu sais que la source est bonne.)" >&2
+    [ "${TLS_FORCER:-0}" = "1" ] || exit 1
+  }
+
+  # ---- niveau 1 : la source --------------------------------------------------
+  command -v dig >/dev/null 2>&1 || apt-get install -y dnsutils >/dev/null 2>&1 || true
+  VERDICT_SOURCE="inconnu"
+  if command -v dig >/dev/null 2>&1; then
+    SERVEURS_NOMS="$(dig +short +time=5 +tries=2 NS "${DOMAIN}" 2>/dev/null | sed 's/\.$//' | sort -u || true)"
+    if [ -n "${SERVEURS_NOMS}" ]; then
+      log "Contrôle du DNS à la source, serveur de noms par serveur de noms…"
+      REPONSE_COMMUNE=""
+      PREMIER=1
+      DESACCORD=0
+      for ns in ${SERVEURS_NOMS}; do
+        REPONSE="$(dig +short +time=5 +tries=2 A "${DOMAIN}" @"${ns}" 2>/dev/null \
+          | grep -E '^[0-9]+(\.[0-9]+){3}$' | sort -u | tr '\n' ' ' | sed 's/ *$//' || true)"
+        echo "    ${ns} → ${REPONSE:-rien}"
+        if [ "${PREMIER}" = "1" ]; then
+          REPONSE_COMMUNE="${REPONSE}"
+          PREMIER=0
+        elif [ "${REPONSE}" != "${REPONSE_COMMUNE}" ]; then
+          DESACCORD=1
+        fi
+      done
+
+      VERDICT_SOURCE="ko"
+      if [ "${DESACCORD}" = "1" ]; then
+        refuser "DNS : les serveurs de noms de « ${DOMAIN} » ne servent pas la même zone." \
+                "  Let's Encrypt en interrogera un au hasard : tant qu'ils divergent," \
+                "  la validation échoue une fois sur deux. Attends la fin de la" \
+                "  propagation — ne relance pas en boucle, 5 échecs par heure suffisent" \
+                "  à bloquer le domaine pour l'heure."
+      elif [ -z "${REPONSE_COMMUNE}" ]; then
+        refuser "DNS : aucun serveur de noms de « ${DOMAIN} » ne publie d'adresse IPv4." \
+                "  Crée un enregistrement A, puis attends la propagation."
+      elif [ "${REPONSE_COMMUNE}" != "${REPONSE_COMMUNE%% *}" ]; then
+        refuser "DNS : « ${DOMAIN} » publie plusieurs adresses : ${REPONSE_COMMUNE}" \
+                "  Let's Encrypt en tirera une au hasard. N'en garde qu'une, celle de" \
+                "  cette machine."
+      elif [ -n "${ADRESSES_LOCALES}" ] && ! est_une_adresse_locale "${REPONSE_COMMUNE}"; then
+        refuser "DNS : à la source, « ${DOMAIN} » pointe sur ${REPONSE_COMMUNE}," \
+                "  or cette machine porte $(echo ${ADRESSES_LOCALES} | tr '\n' ' ' | sed 's/ *$//')." \
+                "  Corrige l'enregistrement A chez ton hébergeur DNS."
+      else
+        VERDICT_SOURCE="ok"
+        log "Tous les serveurs de noms répondent ${REPONSE_COMMUNE} : le DNS est prêt."
+      fi
+    else
+      log "Serveurs de noms de ${DOMAIN} introuvables : repli sur le résolveur local."
+    fi
+  else
+    log "dig indisponible : repli sur le résolveur local."
+  fi
+
+  # ---- niveau 2 : le résolveur local, en repli seulement ---------------------
+  # Si la source a tranché, sa réponse fait foi : le résolveur de cette machine
+  # peut très bien être en retard de plusieurs heures sans que cela empêche
+  # Let's Encrypt de réussir.
+  if [ "${VERDICT_SOURCE}" = "inconnu" ]; then
+    IP_DOMAINE="$(adresses_de "${DOMAIN}")"
+    NB_A="$(printf '%s\n' "${IP_DOMAINE}" | grep -c . || true)"
+    if [ -z "${IP_DOMAINE}" ]; then
+      refuser "DNS : « ${DOMAIN} » ne résout sur aucune adresse IPv4." \
+              "  Crée un enregistrement A chez ton hébergeur DNS, puis attends la propagation."
+    elif [ "${NB_A}" -gt 1 ]; then
+      refuser "DNS : « ${DOMAIN} » porte ${NB_A} adresses : $(echo ${IP_DOMAINE} | tr '\n' ' ')" \
+              "  Let's Encrypt en tirera une au hasard : le certificat échouera une fois" \
+              "  sur deux. N'en garde qu'une, celle de cette machine."
+    elif [ -n "${ADRESSES_LOCALES}" ] && ! est_une_adresse_locale "${IP_DOMAINE}"; then
+      refuser "DNS : « ${DOMAIN} » pointe sur ${IP_DOMAINE}," \
+              "  or cette machine porte $(echo ${ADRESSES_LOCALES} | tr '\n' ' ')."
     fi
   fi
 
