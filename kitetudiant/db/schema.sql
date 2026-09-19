@@ -20,11 +20,14 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE SCHEMA IF NOT EXISTS reference;
 CREATE SCHEMA IF NOT EXISTS eleve;
+CREATE SCHEMA IF NOT EXISTS communaute;
 
 COMMENT ON SCHEMA reference IS
   'Données publiques millésimées. Jamais de personne physique ici.';
 COMMENT ON SCHEMA eleve IS
   'Données personnelles de mineurs. Chiffrement au repos, purge programmée.';
+COMMENT ON SCHEMA communaute IS
+  'Retours d''étudiants inscrits. Trois axes chiffrés, aucun texte libre, aucune note d''établissement.';
 
 -- ════════════════════════════════════════════════════ référence géographique
 
@@ -362,5 +365,62 @@ CREATE TABLE eleve.panier_voeu (
   FOREIGN KEY (cod_aff_form, session) REFERENCES reference.formation (cod_aff_form, session),
   CONSTRAINT panier_voeu_rang_parcoursup CHECK (rang BETWEEN 1 AND 10)
 );
+
+-- ═══════════════════════════════════════════════ retours d'étudiants (M10)
+
+-- Trois axes seulement, chiffrés : coût réel constaté, facilité à trouver un
+-- logement, ambiance. Aucune colonne de texte libre n'existe ici, et aucune
+-- note globale d'établissement n'est calculable à partir de cette table : les
+-- deux sont des choix de conception, pas des oublis.
+CREATE TABLE communaute.retour_etudiant (
+  id                    uuid         PRIMARY KEY,
+  cod_aff_form          text         NOT NULL,
+  session               smallint     NOT NULL,
+  -- Année universitaire du retour, au format 2026-2027. C'est le millésime.
+  millesime             text         NOT NULL,
+  cout_reel_mensuel     numeric(8,2) NOT NULL,
+  facilite_logement     smallint     NOT NULL,
+  ambiance              smallint     NOT NULL,
+  annee_etudes          smallint     NOT NULL,
+  -- Empreinte du jeton de contributeur : elle ne sert qu'à n'accepter qu'un
+  -- retour par formation et par an. Le jeton lui-même n'est jamais stocké.
+  empreinte_contributeur text        NOT NULL,
+  collecte_le           timestamptz  NOT NULL DEFAULT now(),
+  FOREIGN KEY (cod_aff_form, session) REFERENCES reference.formation (cod_aff_form, session),
+  UNIQUE (cod_aff_form, millesime, empreinte_contributeur),
+  CONSTRAINT retour_millesime_bien_forme CHECK (millesime ~ '^\d{4}-\d{4}$'),
+  CONSTRAINT retour_cout_borne CHECK (cout_reel_mensuel BETWEEN 0 AND 3000),
+  CONSTRAINT retour_facilite_borne CHECK (facilite_logement BETWEEN 1 AND 5),
+  CONSTRAINT retour_ambiance_borne CHECK (ambiance BETWEEN 1 AND 5),
+  CONSTRAINT retour_annee_etudes_borne CHECK (annee_etudes BETWEEN 1 AND 8)
+);
+CREATE INDEX retour_formation_millesime_idx
+  ON communaute.retour_etudiant (cod_aff_form, millesime);
+
+-- Un millésime clos ne se modifie plus. La règle « jamais de modification
+-- destructive d'un millésime existant » est ici tenue par la base elle-même,
+-- pas seulement par la discipline de l'application.
+CREATE TABLE communaute.millesime_clos (
+  millesime             text         PRIMARY KEY,
+  clos_le               timestamptz  NOT NULL DEFAULT now(),
+  CONSTRAINT millesime_clos_bien_forme CHECK (millesime ~ '^\d{4}-\d{4}$')
+);
+
+CREATE OR REPLACE FUNCTION communaute.refuser_millesime_clos()
+RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  cible text := coalesce(NEW.millesime, OLD.millesime);
+BEGIN
+  IF EXISTS (SELECT 1 FROM communaute.millesime_clos WHERE millesime = cible) THEN
+    RAISE EXCEPTION 'millésime % clos : aucune écriture n''y est plus possible', cible
+      USING ERRCODE = 'restrict_violation';
+  END IF;
+  RETURN coalesce(NEW, OLD);
+END;
+$$;
+
+CREATE TRIGGER retour_millesime_clos
+  BEFORE INSERT OR UPDATE OR DELETE ON communaute.retour_etudiant
+  FOR EACH ROW EXECUTE FUNCTION communaute.refuser_millesime_clos();
 
 COMMIT;

@@ -8,8 +8,9 @@ import {
   calculerResultats,
   jumeauxGeographiques,
   loyerMensuelBrut,
+  motsClesDe,
   refAide,
-  trierParRAV,
+  trierParPertinence,
   type Reponses,
   type ResultatFormation,
 } from '../calcul.ts'
@@ -21,6 +22,9 @@ const LE_JOUR = '2026-09-19'
 const REPONSES: Reponses = {
   ...REPONSES_PAR_DEFAUT,
   filiere: 'Licence',
+  notes: { mathematiques: 15, francais: 13, svt: 14 },
+  matierePreferee: 'mathematiques',
+  passions: ['sciences'],
   echelonBourse: '5',
   contributionFamiliale: 150,
   jobBas: 200,
@@ -51,6 +55,24 @@ function formation(id: string, ville: string, dep: string, filiere = 'Licence'):
     lien: null,
     session: '2025',
     codeInsee: codeInseeDe(ville, dep),
+    stats: {
+      session: '2025',
+      capacite: 100,
+      admisTotal: 80,
+      tauxAcces: 62,
+      admisBacGeneral: 60,
+      admisBacTechno: 15,
+      admisBacPro: 3,
+      admisAutres: 2,
+      admisBoursiers: 24,
+      admisMemeAcademie: 50,
+      admisSansMention: 8,
+      admisMentionAB: 24,
+      admisMentionB: 32,
+      admisMentionTB: 12,
+      admisMentionTBF: 4,
+      selective: false,
+    },
   }
 }
 
@@ -143,19 +165,51 @@ describe('résultats', () => {
     expect(resultat.raisonAide).toBe('OpenFisca injoignable')
   })
 
-  it('garde dans la liste les vœux non calculables, en dernier', () => {
+  it('garde dans la liste les vœux non calculables, en dernier à affinité égale', () => {
     const calculable = calculerResultats([f], REPONSES, aides, LE_JOUR)[0]
     const inconnu = calculerResultats(
-      [formation('11', 'Bruxelles', '99')],
+      [{ ...formation('11', 'Bruxelles', '99'), libelle: f.libelle, filiere: f.filiere }],
       REPONSES,
       new Map(),
       LE_JOUR,
     )[0]
     if (!calculable || !inconnu) throw new Error('résultats attendus')
-    const tries = trierParRAV([inconnu, calculable])
+    const tries = trierParPertinence([inconnu, calculable])
     expect(tries).toHaveLength(2)
     expect(tries[0]?.formation.id).toBe('10')
     expect(tries[1]?.formation.id).toBe('11')
+  })
+
+  it('calcule l’affinité et l’admissibilité de chaque formation', () => {
+    const [r] = calculerResultats(
+      [{ ...formation('20', 'Limoges', '87'), libelle: 'Licence - Sciences de la vie' }],
+      { ...REPONSES, passions: ['sciences'] },
+      aides,
+      LE_JOUR,
+    )
+    if (!r) throw new Error('résultat attendu')
+    expect(r.affinite.score).toBeGreaterThan(0)
+    expect(r.admissibilite.statut).toBe('fourchette')
+  })
+
+  it('n’additionne jamais l’affinité et le reste-à-vivre', () => {
+    // Une affinité plus haute passe devant, même avec un reste-à-vivre plus bas :
+    // les deux axes se lisent séparément (règle 5 de CLAUDE.md).
+    const scientifique = calculerResultats(
+      [{ ...formation('30', 'Paris 13e  Arrondissement', '75'), libelle: 'Licence - Sciences de la vie', filiere: 'Licence' }],
+      { ...REPONSES, passions: ['sciences'] },
+      new Map(),
+      LE_JOUR,
+    )[0]
+    const autre = calculerResultats(
+      [{ ...formation('31', 'Limoges', '87'), libelle: 'Licence - Lettres modernes', filiere: 'Licence' }],
+      { ...REPONSES, passions: ['sciences'] },
+      new Map(),
+      LE_JOUR,
+    )[0]
+    if (!scientifique || !autre) throw new Error('résultats attendus')
+    expect(scientifique.affinite.score).toBeGreaterThan(autre.affinite.score + 10)
+    expect(trierParPertinence([autre, scientifique])[0]?.formation.id).toBe('30')
   })
 })
 
@@ -169,6 +223,8 @@ describe('jumeaux géographiques', () => {
         prudent: { ravMensuel: rav, lignes: [], postesManquants: [], soutenabilite: 'soutenable', avertissements: [], scenario: 'prudent', dateDeCalcul: LE_JOUR },
       },
       raisonAide: null,
+      affinite: { score: 50, domaines: ['sciences'], raisons: [], domaineInconnu: false },
+      admissibilite: { statut: 'donnee_manquante', raison: 'non calculée dans ce test' },
     }
   }
 
@@ -189,5 +245,44 @@ describe('jumeaux géographiques', () => {
       formation: { ...autre.formation, filiere: 'BTS' },
     }
     expect(jumeauxGeographiques([cible, autreFiliere], cible)).toHaveLength(0)
+  })
+})
+
+describe('sélection des formations à interroger', () => {
+  it('traduit les domaines choisis en mots-clés d’intitulé', () => {
+    const mots = motsClesDe(['informatique', 'sciences'])
+    expect(mots).toContain('informatique')
+    expect(mots).toContain('mathématiques')
+  })
+
+  it('ne renvoie rien quand aucun domaine n’est choisi, pour ne rien filtrer', () => {
+    expect(motsClesDe([])).toEqual([])
+  })
+
+  it('ne répète pas un mot-clé partagé par deux domaines', () => {
+    const mots = motsClesDe(['sciences', 'ingenieur'])
+    expect(new Set(mots).size).toBe(mots.length)
+  })
+})
+
+describe('cloisonnement de la note publique du lieu', () => {
+  it('n’apparaît nulle part dans le résultat qui sert au tri', () => {
+    const [r] = calculerResultats(
+      [formation('50', 'Limoges', '87')],
+      REPONSES,
+      new Map(),
+      LE_JOUR,
+    )
+    if (!r) throw new Error('résultat attendu')
+    const cles = Object.keys(r).join(' ')
+    expect(cles).not.toMatch(/avis|google|note|etoile/i)
+    // Les deux seuls axes du tri, plus la formation et la raison d'absence.
+    expect(Object.keys(r).sort()).toEqual([
+      'admissibilite',
+      'affinite',
+      'formation',
+      'parScenario',
+      'raisonAide',
+    ])
   })
 })

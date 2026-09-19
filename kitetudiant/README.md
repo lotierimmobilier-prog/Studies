@@ -73,10 +73,30 @@ npm run dev:kitetudiant   # front sur http://localhost:5174
 npm run build:kitetudiant # build de production -> dist-kitetudiant/
 ```
 
-Sept questions, puis la liste de vœux. Mobile d'abord, sans compte, rien
-d'enregistré. Sur chaque carte, le reste-à-vivre est le plus gros caractère de
-la page ; le taux d'accès est affiché en petit, tel que le ministère le publie,
-avec la mention que ce n'est pas la probabilité du candidat.
+Une page d'accueil, puis sept questions — ton bac, tes notes, ce qui
+t'intéresse, ta motivation, où tu peux aller, ta bourse, ton budget — puis la
+liste de vœux.
+
+L'accueil ne contient aucun chiffre décoratif : la comparaison de trois villes
+est lue dans `web/donnees/communes.json` avec son millésime, ce qui la rend
+fausse impossible à laisser traîner — elle bouge quand les données bougent. Mobile d'abord, sans
+compte, rien d'enregistré. Sur chaque carte, le reste-à-vivre est le plus gros
+caractère de la page.
+
+**Deux axes, jamais additionnés** (règle 5 de `CLAUDE.md`) : ce qui te
+correspond d'un côté, ce qu'il te restera pour vivre de l'autre. Les formations
+sont classées d'abord par affinité, puis, à affinité proche, par reste-à-vivre.
+
+Les notes s'importent depuis un bulletin (PDF ou photo) ou se saisissent à la
+main. De l'analyse du bulletin, seuls des nombres ressortent : les moyennes par
+matière et trois signaux chiffrés. Le texte des appréciations ne quitte jamais
+le serveur (règle 3).
+
+L'estimation de chances lit les statistiques publiées — taux d'accès,
+répartition des admis par bac, par mention, par académie, part de boursiers —
+et rend **une fourchette, jamais un point**. Sous 30 admis connus, elle rend
+« effectif insuffisant » plutôt qu'un chiffre. Ce n'est pas le modèle calibré du
+lot L2 : le code et l'interface le disent.
 
 Les données sont réelles : formations et statistiques d'admission en direct de
 l'open data du ministère, loyers de l'indicateur communal, aide au logement
@@ -88,6 +108,54 @@ s'affichent comme manquants.
 `scripts/exploration/generer_communes.py` : c'est la correspondance ville +
 département → code INSEE, figée et versionnée, parce que Parcoursup ne porte
 pas de code commune et que le front ne doit rien deviner à l'exécution.
+
+## Retours des étudiants (M10)
+
+Trois axes chiffrés seulement — coût réel constaté, facilité à trouver un
+logement, ambiance — déposés par des étudiants déjà inscrits. **Aucun texte
+libre n'est collecté, et aucune note d'établissement n'est calculée** : le
+cahier des charges l'interdit pour éviter le procès en diffamation, et cela
+supprime du même coup tout besoin de modération.
+
+En dessous de **cinq retours** sur une année, rien n'est publié : trop peu
+d'observations, et un risque réel de réidentification sur une petite formation.
+
+**Archivage par année universitaire.** Un fichier par millésime, qui bascule le
+1er septembre. Écrire ne touche jamais qu'au fichier de l'année en cours : les
+années passées sont immuables par construction, pas par discipline. En base, un
+déclencheur refuse toute insertion, modification ou suppression dans un
+millésime déclaré clos.
+
+```
+POST /api/retours            dépose un retour
+GET  /api/retours?formation= archive année par année
+POST /api/retours/agregats   agrégats de l'année en cours, en lot
+```
+
+Le jeton qui limite à un retour par formation et par an n'identifie personne :
+il est tiré au hasard dans le navigateur et **haché avant d'être stocké**.
+
+## Note publique du lieu (avis Google)
+
+Affichée **dans le détail d'une fiche seulement**, jamais sur la carte, jamais
+dans le tri, jamais mêlée aux deux axes. C'est une garantie structurelle : le
+type `ResultatFormation`, sur lequel le tri opère, ne contient aucun champ
+d'avis, et un test le vérifie.
+
+La raison est dans le cahier des charges : le module M10 interdit toute note
+globale d'établissement dans les critères de décision, et la règle 5 interdit
+d'agréger les axes. Il y a aussi une raison de fond — une note Google agrège
+des visiteurs et des passants, et la même étoile couvre toutes les formations
+d'une adresse, alors que KITETUDIANT travaille formation par formation.
+
+Elle arrive donc avec son attribution à Google, son nombre d'avis, sa date de
+relevé et une mise en garde affichée à côté. Sans clé `GOOGLE_MAPS_API_KEY`,
+rien ne s'affiche et aucune valeur n'est inventée. Les résultats sont mis en
+cache 30 jours, la limite de conservation imposée par les conditions de Places.
+
+```
+POST /api/avis-lieu   note publique d'un lieu, au plus 20 par appel
+```
 
 ## Base de données
 

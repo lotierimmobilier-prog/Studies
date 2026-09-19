@@ -28,6 +28,15 @@ import {
   calculerAidesLogement,
   type DemandeAideLogement,
 } from './aideLogement'
+import { extraireBulletin } from './bulletinScolaire'
+import { chercherAvisLieux, type DemandeAvisLieu } from './avisLieu'
+import {
+  DepotRetours,
+  RetourEnDouble,
+  RetourInvalide,
+  millesimeCourant,
+  type RequeteRetour,
+} from './retours'
 import {
   analyserBulletin,
   BulletinNonConfigure,
@@ -48,6 +57,13 @@ import {
  *   GET/POST /api/temoignages/moderation → modération (jeton MODERATION_TOKEN)
  *   POST /api/aide-logement body: DemandeAideLogement[] → aide au logement
  *                                        calculée par OpenFisca (KITETUDIANT)
+ *   POST /api/bulletin-scolaire body: { fichier, mediaType }
+ *                                        → notes + signaux seuls (KITETUDIANT)
+ *   POST /api/retours body: RequeteRetour → dépose un retour d'étudiant
+ *   GET  /api/retours?formation=         → archive année par année
+ *   POST /api/retours/agregats body: string[] → agrégats de l'année en cours
+ *   POST /api/avis-lieu body: DemandeAvisLieu[] → note publique du LIEU
+ *                                        (jamais un critère de décision)
  *
  * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
  * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
@@ -66,6 +82,9 @@ const cacheAvis = new CacheDisque<AvisEcole>(
 const depotTemoignages = new DepotTemoignages(
   join(process.cwd(), '.data', 'temoignages.json'),
 )
+// KITETUDIANT — un fichier par année universitaire, les années passées ne sont
+// jamais réécrites.
+const depotRetours = new DepotRetours(join(process.cwd(), '.data', 'retours'))
 
 function cors(res: import('node:http').ServerResponse): void {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -276,6 +295,71 @@ async function demarrer(): Promise<void> {
           }
           throw e
         }
+      }
+
+      // KITETUDIANT — lecture de bulletin réduite aux notes et aux signaux.
+      // Le texte des appréciations ne ressort pas d'ici (règle 3 de CLAUDE.md).
+      if (url.pathname === '/api/bulletin-scolaire' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const { fichier, mediaType } = JSON.parse(corps) as {
+          fichier: string
+          mediaType: MediaType
+        }
+        if (!fichier || !mediaType)
+          return envoyerJson(res, 400, { erreur: 'fichier et mediaType requis' })
+        try {
+          return envoyerJson(res, 200, await extraireBulletin(fichier, mediaType))
+        } catch (e) {
+          if (e instanceof BulletinNonConfigure)
+            return envoyerJson(res, 503, { erreur: e.message })
+          throw e
+        }
+      }
+
+      // KITETUDIANT — retours d'étudiants, trois axes chiffrés, archivés par
+      // année universitaire. Aucun texte libre, aucune note d'établissement.
+      if (url.pathname === '/api/retours' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const requete = JSON.parse(corps) as RequeteRetour
+        try {
+          const retour = await depotRetours.ajouter(requete)
+          return envoyerJson(res, 201, retour)
+        } catch (e) {
+          if (e instanceof RetourInvalide) return envoyerJson(res, 400, { erreur: e.message })
+          if (e instanceof RetourEnDouble) return envoyerJson(res, 409, { erreur: e.message })
+          throw e
+        }
+      }
+
+      if (url.pathname === '/api/retours' && req.method === 'GET') {
+        const formation = url.searchParams.get('formation')
+        if (!formation) return envoyerJson(res, 400, { erreur: 'formation requise' })
+        return envoyerJson(res, 200, {
+          millesimeCourant: millesimeCourant(),
+          archives: await depotRetours.archiveDe(formation),
+        })
+      }
+
+      if (url.pathname === '/api/retours/agregats' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const formations = JSON.parse(corps) as string[]
+        if (!Array.isArray(formations))
+          return envoyerJson(res, 400, { erreur: 'un tableau de formations est attendu' })
+        if (formations.length > 200)
+          return envoyerJson(res, 400, { erreur: 'au plus 200 formations par appel' })
+        return envoyerJson(res, 200, await depotRetours.agregatsCourants(formations))
+      }
+
+      // KITETUDIANT — note publique du lieu. Affichée dans le détail d'une
+      // fiche, attribuée à Google, jamais dans un tri ni dans un score.
+      if (url.pathname === '/api/avis-lieu' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const demandes = JSON.parse(corps) as DemandeAvisLieu[]
+        if (!Array.isArray(demandes))
+          return envoyerJson(res, 400, { erreur: 'un tableau de demandes est attendu' })
+        if (demandes.length > 20)
+          return envoyerJson(res, 400, { erreur: 'au plus 20 lieux par appel' })
+        return envoyerJson(res, 200, await chercherAvisLieux(demandes))
       }
 
       envoyerJson(res, 404, { erreur: 'route inconnue' })

@@ -47,7 +47,11 @@ export interface Formation {
   readonly lien: string | null
   readonly session: string
   readonly codeInsee: string | null
+  /** Statistiques publiées, telles quelles : aucune n'est recalculée. */
+  readonly stats: StatsFormation
 }
+
+import type { StatsFormation } from '../../packages/admissibilite/src/types.ts'
 
 interface EnregistrementEsr {
   readonly cod_aff_form?: string
@@ -65,6 +69,21 @@ interface EnregistrementEsr {
   readonly pct_bours?: number
   readonly lien_form_psup?: string
   readonly session?: string
+  readonly acc_bg?: number
+  readonly acc_bt?: number
+  readonly acc_bp?: number
+  readonly acc_at?: number
+  readonly acc_brs?: number
+  readonly acc_aca_orig?: number
+  readonly acc_sansmention?: number
+  readonly acc_ab?: number
+  readonly acc_b?: number
+  readonly acc_tb?: number
+  readonly acc_tbf?: number
+}
+
+function nombreOuNul(v: number | undefined): number | null {
+  return typeof v === 'number' ? v : null
 }
 
 /** Normalisation identique à celle du script de génération. */
@@ -134,12 +153,35 @@ function convertir(e: EnregistrementEsr): Formation | null {
     lien: e.lien_form_psup ?? null,
     session: e.session ?? '',
     codeInsee: codeInseeDe(ville, dep),
+    stats: {
+      session: e.session ?? '',
+      capacite: nombreOuNul(e.capa_fin),
+      admisTotal: nombreOuNul(e.acc_tot),
+      tauxAcces: nombreOuNul(e.taux_acces_ens),
+      admisBacGeneral: nombreOuNul(e.acc_bg),
+      admisBacTechno: nombreOuNul(e.acc_bt),
+      admisBacPro: nombreOuNul(e.acc_bp),
+      admisAutres: nombreOuNul(e.acc_at),
+      admisBoursiers: nombreOuNul(e.acc_brs),
+      admisMemeAcademie: nombreOuNul(e.acc_aca_orig),
+      admisSansMention: nombreOuNul(e.acc_sansmention),
+      admisMentionAB: nombreOuNul(e.acc_ab),
+      admisMentionB: nombreOuNul(e.acc_b),
+      admisMentionTB: nombreOuNul(e.acc_tb),
+      admisMentionTBF: nombreOuNul(e.acc_tbf),
+      selective: e.select_form !== 'formation non sélective',
+    },
   }
 }
+
+export const SOURCE_PARCOURSUP =
+  'Parcoursup, open data du ministère de l’Enseignement supérieur (jeu fr-esr-parcoursup), Licence Ouverte'
 
 export interface FiltreFormations {
   readonly filiere?: string
   readonly academie?: string
+  /** Mots-clés cherchés dans l'intitulé de la formation, en OU. */
+  readonly motsCles?: readonly string[]
   readonly limite?: number
 }
 
@@ -158,6 +200,12 @@ export async function chercherFormations(
   const conditions: string[] = []
   if (filtre.filiere) conditions.push(`fili = "${filtre.filiere.replace(/"/g, '')}"`)
   if (filtre.academie) conditions.push(`acad_mies = "${filtre.academie.replace(/"/g, '')}"`)
+  if (filtre.motsCles && filtre.motsCles.length > 0) {
+    const recherche = filtre.motsCles
+      .map((mot) => `search(lib_for_voe_ins, "${mot.replace(/"/g, '')}")`)
+      .join(' OR ')
+    conditions.push(`(${recherche})`)
+  }
   if (conditions.length > 0) params.set('where', conditions.join(' AND '))
 
   const reponse = await avecUneRelance(`${ESR}?${params.toString()}`, recuperer)
@@ -241,4 +289,165 @@ export async function chercherAidesLogement(
           },
         },
   )
+}
+
+export interface BulletinExtrait {
+  readonly notes: Readonly<Record<string, number>>
+  readonly signaux: { readonly serieux: number; readonly participation: number; readonly progression: number }
+  readonly matieresLues: number
+  readonly source: string
+}
+
+/**
+ * Envoie un bulletin au serveur, qui n'en fait ressortir que des nombres.
+ * Le texte des appréciations ne revient jamais ici.
+ */
+export async function lireBulletin(
+  fichierBase64: string,
+  mediaType: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<BulletinExtrait> {
+  const reponse = await recuperer(`${base}/bulletin-scolaire`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fichier: fichierBase64, mediaType }),
+  })
+  if (!reponse.ok) {
+    const corps = (await reponse.json().catch(() => ({}))) as { erreur?: string }
+    throw new Error(corps.erreur ?? `Lecture du bulletin impossible (${reponse.status}).`)
+  }
+  return (await reponse.json()) as BulletinExtrait
+}
+
+// ------------------------------------------------------------------ retours
+
+export type { Agregat as AgregatRetours } from '../../packages/retours/src/index.ts'
+
+/**
+ * Jeton de contributeur, propre au navigateur. Il n'identifie personne : il
+ * sert seulement à n'accepter qu'un retour par formation et par an, et il est
+ * haché côté serveur avant d'être stocké. Le stockage local peut être refusé
+ * (navigation privée, cookies bloqués) : on retombe alors sur un jeton de
+ * session, quitte à autoriser un doublon plutôt que de bloquer la personne.
+ */
+export function jetonContributeur(): string {
+  const cle = 'kitetudiant.contributeur'
+  try {
+    const existant = localStorage.getItem(cle)
+    if (existant) return existant
+    const neuf = crypto.randomUUID()
+    localStorage.setItem(cle, neuf)
+    return neuf
+  } catch {
+    return crypto.randomUUID()
+  }
+}
+
+export interface DepotRetour {
+  readonly codFormation: string
+  readonly coutReelMensuel: number
+  readonly faciliteLogement: number
+  readonly ambiance: number
+  readonly anneeEtudes: number
+}
+
+export async function deposerRetour(
+  retour: DepotRetour,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<void> {
+  const reponse = await recuperer(`${base}/retours`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...retour, jetonContributeur: jetonContributeur() }),
+  })
+  if (!reponse.ok) {
+    const corps = (await reponse.json().catch(() => ({}))) as { erreur?: string }
+    throw new Error(corps.erreur ?? `Retour non enregistré (${reponse.status}).`)
+  }
+}
+
+/** Agrégats de l'année en cours, pour plusieurs formations d'un coup. */
+export async function chercherAgregatsRetours(
+  codFormations: readonly string[],
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<Map<string, import('../../packages/retours/src/index.ts').Agregat>> {
+  if (codFormations.length === 0) return new Map()
+  try {
+    const reponse = await recuperer(`${base}/retours/agregats`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(codFormations),
+    })
+    if (!reponse.ok) return new Map()
+    const liste = (await reponse.json()) as import('../../packages/retours/src/index.ts').Agregat[]
+    return new Map(liste.map((a) => [a.codFormation, a]))
+  } catch {
+    // Les retours enrichissent l'affichage ; leur absence ne doit rien casser.
+    return new Map()
+  }
+}
+
+export async function chercherArchiveRetours(
+  codFormation: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<import('../../packages/retours/src/index.ts').Agregat[]> {
+  try {
+    const reponse = await recuperer(`${base}/retours?formation=${encodeURIComponent(codFormation)}`)
+    if (!reponse.ok) return []
+    const corps = (await reponse.json()) as {
+      archives?: import('../../packages/retours/src/index.ts').Agregat[]
+    }
+    return corps.archives ?? []
+  } catch {
+    return []
+  }
+}
+
+// -------------------------------------------------------- note publique du lieu
+
+export interface AvisLieu {
+  readonly ref: string
+  readonly note: number
+  readonly nombreAvis: number
+  readonly urlMaps: string | null
+  readonly source: string
+  readonly collecteLe: string
+  readonly miseEnGarde: string
+}
+
+export interface AvisLieuIndisponible {
+  readonly ref: string
+  readonly raison: string
+}
+
+/**
+ * Note publique du LIEU, à n'afficher que dans le détail d'une fiche.
+ *
+ * Elle ne revient jamais dans `ResultatFormation` : le tri et les deux axes
+ * n'y ont structurellement pas accès, ce qui est la seule façon sûre de tenir
+ * la règle « aucune note globale d'établissement dans les critères ».
+ */
+export async function chercherAvisLieu(
+  etablissement: string,
+  ville: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<AvisLieu | AvisLieuIndisponible> {
+  const demande = { ref: 'lieu', etablissement, ville }
+  try {
+    const reponse = await recuperer(`${base}/avis-lieu`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify([demande]),
+    })
+    if (!reponse.ok) return { ref: 'lieu', raison: `Service indisponible (${reponse.status}).` }
+    const liste = (await reponse.json()) as (AvisLieu | AvisLieuIndisponible)[]
+    return liste[0] ?? { ref: 'lieu', raison: 'Aucune réponse du service.' }
+  } catch (e) {
+    return { ref: 'lieu', raison: `Service injoignable : ${(e as Error).message}` }
+  }
 }

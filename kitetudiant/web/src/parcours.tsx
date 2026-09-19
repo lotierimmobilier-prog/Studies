@@ -2,17 +2,33 @@
  * Le parcours en sept questions.
  *
  * Chaque question sert au calcul : on ne demande rien qu'on n'utilise pas,
- * parce que le premier résultat doit arriver en moins de 90 secondes et parce
- * que les données concernent des mineurs.
+ * parce que le premier résultat doit arriver vite et parce que les données
+ * concernent des mineurs.
  */
 
 import { useState } from 'react'
 
+import {
+  DOMAINES,
+  LIBELLES_DOMAINE,
+  LIBELLES_MATIERE,
+  MATIERES,
+  moyenneGenerale,
+  type Domaine,
+  type Matiere,
+} from '../../packages/profil-scolaire/src/index.ts'
 import type { EchelonBourse } from '../../packages/budget-engine/src/types.ts'
 import type { Reponses } from './calcul.ts'
+import { lireBulletin } from './donnees.ts'
 
 export const REPONSES_PAR_DEFAUT: Reponses = {
-  typeBac: 'Général',
+  typeBac: 'general',
+  notes: {},
+  notesImportees: false,
+  matierePreferee: null,
+  passions: [],
+  motivation: 7,
+  signaux: null,
   villeResidence: '',
   mobilite: 'france',
   filiere: '',
@@ -40,19 +56,18 @@ export interface Etape {
 }
 
 export const ETAPES: readonly Etape[] = [
-  { titre: 'Ton bac', aide: 'Pour situer les formations qui te correspondent.' },
-  { titre: 'Où tu habites', aide: 'Le coût de la vie change beaucoup d’une ville à l’autre.' },
-  { titre: 'Jusqu’où tu peux aller', aide: 'Tu peux changer d’avis à tout moment.' },
-  { titre: 'Ce que tu veux étudier', aide: 'Les filières viennent de l’open data Parcoursup.' },
+  { titre: 'Ton bac', aide: 'Il pèse sur tes chances : les formations ne recrutent pas partout pareil.' },
+  { titre: 'Tes notes', aide: 'Importe un bulletin, ou saisis seulement les matières que tu veux.' },
+  { titre: 'Ce qui t’intéresse', aide: 'C’est ce qui décide des formations qu’on te montre.' },
+  { titre: 'Ta motivation', aide: 'Pour toi, pas pour l’algorithme : elle n’entre dans aucun calcul.' },
+  { titre: 'Où tu peux aller', aide: 'Le coût de la vie change beaucoup d’une ville à l’autre.' },
   { titre: 'Ta bourse', aide: 'L’échelon change le reste-à-vivre de plusieurs centaines d’euros.' },
-  { titre: 'Ce sur quoi tu peux compter', aide: 'Une fourchette suffit, on affichera les trois scénarios.' },
-  { titre: 'Ton train de vie', aide: 'Des ordres de grandeur, ajustables après coup.' },
+  { titre: 'Ton budget', aide: 'Des ordres de grandeur suffisent, tu pourras les ajuster ensuite.' },
 ]
 
 interface Props {
   readonly etape: number
   readonly reponses: Reponses
-  readonly filieres: readonly { libelle: string; nombre: number }[]
   readonly academies: readonly string[]
   readonly onChange: (partiel: Partial<Reponses>) => void
 }
@@ -90,20 +105,87 @@ function Champ({
   )
 }
 
-export function Question({ etape, reponses, filieres, academies, onChange }: Props) {
-  const [rechercheFiliere, setRechercheFiliere] = useState('')
+function SaisieNotes({
+  reponses,
+  onChange,
+}: {
+  reponses: Reponses
+  onChange: (partiel: Partial<Reponses>) => void
+}) {
+  const majNote = (matiere: Matiere, valeur: string) => {
+    const notes = { ...reponses.notes }
+    if (valeur === '') delete notes[matiere]
+    else notes[matiere] = Math.min(20, Math.max(0, Number(valeur)))
+    onChange({ notes })
+  }
+  return (
+    <div className="notes">
+      {MATIERES.map((m) => (
+        <label className="note-ligne" key={m}>
+          <span>{LIBELLES_MATIERE[m]}</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            step="0.5"
+            min={0}
+            max={20}
+            placeholder="—"
+            value={reponses.notes[m] === undefined ? '' : String(reponses.notes[m])}
+            onChange={(e) => majNote(m, e.target.value)}
+          />
+        </label>
+      ))}
+    </div>
+  )
+}
+
+export function Question({ etape, reponses, academies, onChange }: Props) {
+  const [lecture, setLecture] = useState<'repos' | 'en_cours' | 'erreur'>('repos')
+  const [messageLecture, setMessageLecture] = useState<string | null>(null)
+
+  async function importerBulletin(fichier: File) {
+    setLecture('en_cours')
+    setMessageLecture(null)
+    try {
+      const tampon = await fichier.arrayBuffer()
+      let binaire = ''
+      const octets = new Uint8Array(tampon)
+      for (let i = 0; i < octets.length; i += 1) binaire += String.fromCharCode(octets[i] as number)
+      const extrait = await lireBulletin(btoa(binaire), fichier.type)
+      const notes: Partial<Record<Matiere, number>> = {}
+      for (const m of MATIERES) {
+        const v = extrait.notes[m]
+        if (typeof v === 'number') notes[m] = v
+      }
+      onChange({ notes, notesImportees: true, signaux: extrait.signaux })
+      setLecture('repos')
+      setMessageLecture(
+        `${extrait.matieresLues} matières lues. Vérifie-les : elles sont modifiables.`,
+      )
+    } catch (e) {
+      setLecture('erreur')
+      setMessageLecture(
+        `${(e as Error).message} Tu peux saisir tes moyennes à la main juste en dessous.`,
+      )
+    }
+  }
 
   if (etape === 0) {
+    const bacs: { cle: Reponses['typeBac']; texte: string }[] = [
+      { cle: 'general', texte: 'Bac général' },
+      { cle: 'technologique', texte: 'Bac technologique' },
+      { cle: 'professionnel', texte: 'Bac professionnel' },
+    ]
     return (
       <div className="choix">
-        {['Général', 'Technologique', 'Professionnel'].map((bac) => (
+        {bacs.map((b) => (
           <button
-            key={bac}
+            key={b.cle}
             type="button"
-            className={reponses.typeBac === bac ? 'choix-actif' : ''}
-            onClick={() => onChange({ typeBac: bac })}
+            className={reponses.typeBac === b.cle ? 'choix-actif' : ''}
+            onClick={() => onChange({ typeBac: b.cle })}
           >
-            Bac {bac.toLowerCase()}
+            {b.texte}
           </button>
         ))}
         <Champ
@@ -122,6 +204,131 @@ export function Question({ etape, reponses, filieres, academies, onChange }: Pro
   }
 
   if (etape === 1) {
+    const moyenne = moyenneGenerale(reponses.notes)
+    return (
+      <div className="choix">
+        <label className="depot">
+          <input
+            type="file"
+            accept="application/pdf,image/png,image/jpeg"
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) void importerBulletin(f)
+            }}
+          />
+          <span>
+            {lecture === 'en_cours' ? 'Lecture du bulletin…' : 'Importer un bulletin (PDF ou photo)'}
+          </span>
+        </label>
+        <p className="note">
+          Seules les moyennes et trois indicateurs chiffrés sont extraits. Le texte
+          des appréciations n’est jamais conservé.
+        </p>
+        {messageLecture ? (
+          <p className={lecture === 'erreur' ? 'erreur' : 'note'}>{messageLecture}</p>
+        ) : null}
+
+        <SaisieNotes reponses={reponses} onChange={onChange} />
+        {moyenne !== null ? (
+          <p className="note">
+            Moyenne des matières renseignées : <strong>{moyenne.toFixed(1)}/20</strong>.
+          </p>
+        ) : (
+          <p className="note">
+            Sans aucune note, on te montrera quand même les formations : ta chance
+            d’admission sera simplement moins bien estimée, et on te le dira.
+          </p>
+        )}
+      </div>
+    )
+  }
+
+  if (etape === 2) {
+    const basculer = (d: Domaine) => {
+      const passions = reponses.passions.includes(d)
+        ? reponses.passions.filter((x) => x !== d)
+        : [...reponses.passions, d]
+      onChange({ passions })
+    }
+    return (
+      <div className="choix">
+        <p className="champ-label">Les domaines qui t’intéressent</p>
+        <div className="domaines">
+          {DOMAINES.map((d) => (
+            <button
+              key={d}
+              type="button"
+              className={reponses.passions.includes(d) ? 'choix-actif' : ''}
+              onClick={() => basculer(d)}
+            >
+              {LIBELLES_DOMAINE[d]}
+            </button>
+          ))}
+        </div>
+        <label className="champ">
+          <span className="champ-label">Ta matière préférée</span>
+          <span className="champ-saisie">
+            <select
+              value={reponses.matierePreferee ?? ''}
+              onChange={(e) =>
+                onChange({ matierePreferee: (e.target.value || null) as Matiere | null })
+              }
+            >
+              <option value="">— aucune en particulier —</option>
+              {MATIERES.map((m) => (
+                <option key={m} value={m}>
+                  {LIBELLES_MATIERE[m]}
+                </option>
+              ))}
+            </select>
+          </span>
+        </label>
+        {reponses.passions.length === 0 ? (
+          <p className="note">
+            Sans domaine choisi, on cherchera dans toutes les formations.
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+
+  if (etape === 3) {
+    return (
+      <div className="choix">
+        <label className="champ">
+          <span className="champ-label">
+            À quel point es-tu sûr de ton projet ? {reponses.motivation}/10
+          </span>
+          <input
+            type="range"
+            min={0}
+            max={10}
+            value={reponses.motivation}
+            onChange={(e) => onChange({ motivation: Number(e.target.value) })}
+          />
+        </label>
+        <p className="note">
+          Cette réponse n’entre dans aucun calcul et ne change aucun classement.
+          Elle sert à te situer, et à ce qu’on t’en reparle si tu hésites.
+        </p>
+        {reponses.signaux ? (
+          <p className="note">
+            Ton bulletin indique un sérieux de {reponses.signaux.serieux}/10, une
+            participation de {reponses.signaux.participation}/10 et une progression
+            de {reponses.signaux.progression}/10. Ces chiffres ne sont pas non plus
+            utilisés pour classer les formations.
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+
+  if (etape === 4) {
+    const options = [
+      { cle: 'meme_ville', texte: 'Rester dans ma ville' },
+      { cle: 'meme_region', texte: 'Rester dans mon académie' },
+      { cle: 'france', texte: 'Partout en France' },
+    ] as const
     return (
       <div className="choix">
         <label className="champ">
@@ -135,102 +342,43 @@ export function Question({ etape, reponses, filieres, academies, onChange }: Pro
             />
           </span>
         </label>
-        <p className="note">
-          Sert à te montrer les écarts avec les villes où tu pourrais étudier.
-        </p>
-      </div>
-    )
-  }
-
-  if (etape === 2) {
-    const options = [
-      { cle: 'meme_ville', texte: 'Rester dans ma ville' },
-      { cle: 'meme_region', texte: 'Rester dans mon académie' },
-      { cle: 'france', texte: 'Partout en France' },
-    ] as const
-    return (
-      <div className="choix">
         {options.map((o) => (
           <button
             key={o.cle}
             type="button"
             className={reponses.mobilite === o.cle ? 'choix-actif' : ''}
-            onClick={() =>
-              onChange({
-                mobilite: o.cle,
-                academie: o.cle === 'france' ? null : reponses.academie,
-              })
-            }
+            onClick={() => onChange({ mobilite: o.cle })}
           >
             {o.texte}
           </button>
         ))}
-        {reponses.mobilite !== 'france' ? (
-          <label className="champ">
-            <span className="champ-label">Ton académie</span>
-            <span className="champ-saisie">
-              <select
-                value={reponses.academie ?? ''}
-                onChange={(e) => onChange({ academie: e.target.value || null })}
-              >
-                <option value="">— choisir —</option>
-                {academies.map((a) => (
-                  <option key={a} value={a}>
-                    {a}
-                  </option>
-                ))}
-              </select>
-            </span>
-          </label>
-        ) : null}
-      </div>
-    )
-  }
-
-  if (etape === 3) {
-    const visibles = filieres.filter((f) =>
-      f.libelle.toLowerCase().includes(rechercheFiliere.toLowerCase()),
-    )
-    return (
-      <div className="choix">
         <label className="champ">
-          <span className="champ-label">Chercher une filière</span>
+          <span className="champ-label">
+            Ton académie {reponses.mobilite === 'france' ? '(pour l’effet géographique)' : ''}
+          </span>
           <span className="champ-saisie">
-            <input
-              type="text"
-              value={rechercheFiliere}
-              placeholder="BTS, Licence, BUT…"
-              onChange={(e) => setRechercheFiliere(e.target.value)}
-            />
+            <select
+              value={reponses.academie ?? ''}
+              onChange={(e) => onChange({ academie: e.target.value || null })}
+            >
+              <option value="">— choisir —</option>
+              {academies.map((a) => (
+                <option key={a} value={a}>
+                  {a}
+                </option>
+              ))}
+            </select>
           </span>
         </label>
-        <div className="filieres">
-          {visibles.map((f) => (
-            <button
-              key={f.libelle}
-              type="button"
-              className={reponses.filiere === f.libelle ? 'choix-actif' : ''}
-              onClick={() => onChange({ filiere: f.libelle })}
-            >
-              {f.libelle}
-              <span className="filiere-nombre">{f.nombre.toLocaleString('fr-FR')} formations</span>
-            </button>
-          ))}
-          {visibles.length === 0 && filieres.length > 0 ? (
-            <p className="note">Aucune filière ne correspond.</p>
-          ) : null}
-        </div>
-        {filieres.length === 0 ? (
-          <p className="note">
-            La liste des filières n’a pas pu être chargée. Tu peux continuer sans
-            en choisir une : on cherchera dans toutes les formations.
-          </p>
-        ) : null}
+        <p className="note">
+          Les formations recrutent souvent davantage dans leur académie : le dire
+          rend l’estimation plus juste.
+        </p>
       </div>
     )
   }
 
-  if (etape === 4) {
+  if (etape === 5) {
     return (
       <div className="choix">
         <button
@@ -269,41 +417,31 @@ export function Question({ etape, reponses, filieres, academies, onChange }: Pro
     )
   }
 
-  if (etape === 5) {
-    return (
-      <div className="choix">
-        <Champ
-          label="Ce que ta famille peut donner"
-          suffixe="€ / mois"
-          valeur={reponses.contributionFamiliale}
-          min={0}
-          onChange={(contributionFamiliale) => onChange({ contributionFamiliale })}
-        />
-        <div className="duo">
-          <Champ
-            label="Job étudiant, au minimum"
-            suffixe="€ / mois"
-            valeur={reponses.jobBas}
-            min={0}
-            onChange={(jobBas) => onChange({ jobBas })}
-          />
-          <Champ
-            label="au maximum"
-            suffixe="€ / mois"
-            valeur={reponses.jobHaut}
-            min={0}
-            onChange={(jobHaut) => onChange({ jobHaut })}
-          />
-        </div>
-        <p className="note">
-          Si tu ne comptes pas travailler, laisse les deux à zéro.
-        </p>
-      </div>
-    )
-  }
-
   return (
     <div className="choix">
+      <Champ
+        label="Ce que ta famille peut donner"
+        suffixe="€ / mois"
+        valeur={reponses.contributionFamiliale}
+        min={0}
+        onChange={(contributionFamiliale) => onChange({ contributionFamiliale })}
+      />
+      <div className="duo">
+        <Champ
+          label="Job étudiant, au minimum"
+          suffixe="€ / mois"
+          valeur={reponses.jobBas}
+          min={0}
+          onChange={(jobBas) => onChange({ jobBas })}
+        />
+        <Champ
+          label="au maximum"
+          suffixe="€ / mois"
+          valeur={reponses.jobHaut}
+          min={0}
+          onChange={(jobHaut) => onChange({ jobHaut })}
+        />
+      </div>
       <div className="duo">
         <Champ
           label="Repas au resto U"

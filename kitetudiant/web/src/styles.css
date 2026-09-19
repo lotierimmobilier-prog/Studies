@@ -201,3 +201,156 @@ a { color: var(--accent); }
 @media (min-width: 40rem) {
   .echelons { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* ---------------------------------------------- notes, domaines, deux axes */
+.notes { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
+.note-ligne {
+  display: grid;
+  grid-template-columns: 1fr 5.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.note-ligne input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  text-align: right;
+  min-height: 44px;
+}
+
+.depot {
+  display: block;
+  padding: 1.1rem 1rem;
+  border: 1px dashed var(--accent);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+}
+.depot input { display: none; }
+
+.domaines { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.domaines button {
+  text-align: center;
+  padding: 0.7rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+input[type='range'] { width: 100%; min-height: 44px; }
+
+.axes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--trait);
+  border-bottom: 1px solid var(--trait);
+}
+.axe { display: flex; flex-direction: column; gap: 0.1rem; }
+.axe-titre { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--doux); }
+.axe-valeur { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.axe-absent { font-size: 0.95rem; color: var(--doux); }
+
+.raisons { margin-bottom: 1.2rem; }
+.raisons h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.raisons ul { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; color: var(--doux); }
+.detail h4 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+
+@media (min-width: 40rem) {
+  .notes { grid-template-columns: 1fr 1fr; }
+  .domaines { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ------------------------------------------------- retours des étudiants */
+.retours-resume { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
+.retours { margin-top: 1.4rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+.retours h4 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+
+.annees { list-style: none; margin: 0.6rem 0; padding: 0; display: flex; flex-direction: column; gap: 0.8rem; }
+.annee { font-size: 0.88rem; }
+.annee.vide { color: var(--doux); }
+.annee-detail { margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.annee-detail p { margin: 0; color: var(--doux); }
+
+.barre { display: grid; grid-template-columns: 1fr 5rem auto; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.barre-libelle { color: var(--doux); }
+.barre-piste { height: 6px; border-radius: 3px; background: var(--trait); overflow: hidden; }
+.barre-remplie { display: block; height: 100%; background: var(--accent); }
+.barre-valeur { font-variant-numeric: tabular-nums; }
+
+.formulaire-retour {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ------------------------------------------------- note publique du lieu */
+.note-lieu { margin-top: 1.4rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+.note-lieu h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.note-lieu-valeur { margin: 0 0 0.4rem; font-size: 0.95rem; }
+
+/* ------------------------------------------------------------- accueil */
+.accueil { padding-bottom: 3rem; }
+
+.hero { margin: 1.5rem 0 2.5rem; }
+.promesse {
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.9rem, 8.5vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+}
+.hero-texte { margin: 0 0 1.5rem; color: var(--doux); font-size: 1rem; }
+.hero .principal { width: 100%; }
+.hero-mentions { margin: 0.6rem 0 0; color: var(--doux); font-size: 0.82rem; text-align: center; }
+
+.bloc { margin-bottom: 2.5rem; }
+.bloc h2 { margin: 0 0 0.4rem; font-size: 1.15rem; }
+.bloc-intro { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.85rem; }
+.bloc-chute { margin: 1rem 0 0; font-size: 0.95rem; }
+
+.comparaison { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.comparaison li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 0.75rem;
+  align-items: baseline;
+  padding: 0.7rem 0.9rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.comparaison-ville { font-weight: 600; }
+.comparaison-montant { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.comparaison-m2 { grid-column: 1 / -1; color: var(--doux); font-size: 0.8rem; }
+
+.etapes-accueil { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
+.etapes-accueil li { font-size: 0.92rem; color: var(--doux); }
+.etapes-accueil strong { color: var(--encre); }
+
+.promesses, .sources { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.promesses li { font-size: 0.92rem; color: var(--doux); padding-left: 1.1rem; position: relative; }
+.promesses li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+.promesses strong { color: var(--encre); }
+.sources li { font-size: 0.82rem; color: var(--doux); }
+
+.accueil-fin { margin-bottom: 2rem; }
+.accueil-fin .principal { width: 100%; }

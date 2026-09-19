@@ -15,10 +15,33 @@ import type {
   VoeuBudget,
 } from '../../packages/budget-engine/src/types.ts'
 
-import { loyerDe, type AideLogement, type Formation } from './donnees.ts'
+import {
+  admissibilite,
+  type Admissibilite,
+  type ProfilAdmission,
+  type TypeBac,
+} from '../../packages/admissibilite/src/index.ts'
+import {
+  affiniteAvec,
+  moyenneGenerale,
+  type Affinite,
+  type Domaine,
+  type Matiere,
+  type ProfilScolaire,
+  type SignauxBulletin,
+} from '../../packages/profil-scolaire/src/index.ts'
+
+import { loyerDe, SOURCE_PARCOURSUP, type AideLogement, type Formation } from './donnees.ts'
 
 export interface Reponses {
-  readonly typeBac: string
+  readonly typeBac: TypeBac
+  /** Moyennes sur 20, importées d'un bulletin ou saisies à la main. */
+  readonly notes: Partial<Readonly<Record<Matiere, number>>>
+  readonly notesImportees: boolean
+  readonly matierePreferee: Matiere | null
+  readonly passions: readonly Domaine[]
+  readonly motivation: number
+  readonly signaux: SignauxBulletin | null
   readonly villeResidence: string
   readonly mobilite: 'meme_ville' | 'meme_region' | 'france'
   readonly filiere: string
@@ -111,6 +134,10 @@ export interface ResultatFormation {
   readonly parScenario: Readonly<Record<Scenario, ResultatRAV>>
   /** Raison de l'absence d'aide au logement, à afficher telle quelle. */
   readonly raisonAide: string | null
+  /** Sert à choisir et ordonner, jamais à être additionnée au reste. */
+  readonly affinite: Affinite
+  /** Score A du cahier des charges : une fourchette, jamais un point. */
+  readonly admissibilite: Admissibilite
 }
 
 export function calculerResultats(
@@ -120,10 +147,17 @@ export function calculerResultats(
   aLaDate: string,
 ): ResultatFormation[] {
   const profil = profilDepuisReponses(reponses)
+  const profilScolaire = profilScolaireDepuisReponses(reponses)
   return formations.map((formation) => {
     const aide = aides.get(refAide(formation.id, 'central'))
     return {
       formation,
+      affinite: affiniteAvec(profilScolaire, formation),
+      admissibilite: admissibilite(
+        profilAdmissionDepuisReponses(reponses, formation),
+        formation.stats,
+        SOURCE_PARCOURSUP,
+      ),
       parScenario: {
         optimiste: calculerFourchetteRAV(
           profil,
@@ -187,4 +221,65 @@ export function jumeauxGeographiques(
     .filter((j) => j.ecart > 0)
     .sort((a, b) => b.ecart - a.ecart)
     .slice(0, combien)
+}
+
+export function profilScolaireDepuisReponses(r: Reponses): ProfilScolaire {
+  return {
+    notes: r.notes,
+    matierePreferee: r.matierePreferee,
+    passions: r.passions,
+    motivation: r.motivation,
+    signaux: r.signaux,
+  }
+}
+
+export function profilAdmissionDepuisReponses(
+  r: Reponses,
+  formation: Formation,
+): ProfilAdmission {
+  return {
+    typeBac: r.typeBac,
+    moyenneGenerale: moyenneGenerale(r.notes),
+    boursier: r.echelonBourse !== null,
+    memeAcademie: r.academie !== null && r.academie === formation.academie,
+  }
+}
+
+/** Mots-clés d'intitulé correspondant aux domaines choisis par l'élève. */
+export const MOTS_CLES_PAR_DOMAINE: Readonly<Record<Domaine, readonly string[]>> = {
+  sante: ['santé', 'infirmier', 'médical', 'pharmacie'],
+  droit: ['droit', 'juridique'],
+  informatique: ['informatique', 'numérique', 'réseaux'],
+  ingenieur: ['ingénieur', 'génie', 'mécanique', 'électrotechnique'],
+  sciences: ['sciences', 'mathématiques', 'physique', 'chimie', 'biologie'],
+  commerce: ['commerce', 'vente', 'marketing'],
+  economie: ['économie', 'gestion', 'comptabilité'],
+  lettres: ['lettres', 'histoire', 'philosophie'],
+  langues: ['langues', 'anglais', 'LEA', 'LLCER'],
+  arts: ['art', 'design', 'audiovisuel', 'musique'],
+  social: ['social', 'éducateur', 'animation'],
+  staps: ['STAPS', 'sport'],
+  communication: ['communication', 'information', 'journalisme'],
+}
+
+export function motsClesDe(passions: readonly Domaine[]): string[] {
+  return [...new Set(passions.flatMap((d) => MOTS_CLES_PAR_DOMAINE[d]))]
+}
+
+/**
+ * Tri par pertinence : d'abord l'affinité avec ce que l'élève veut étudier,
+ * puis, à affinité proche, ce qu'il lui restera pour vivre. Les deux axes ne
+ * sont jamais additionnés — la règle 5 de CLAUDE.md l'interdit.
+ */
+export function trierParPertinence(resultats: readonly ResultatFormation[]): ResultatFormation[] {
+  return [...resultats].sort((a, b) => {
+    const parAffinite = b.affinite.score - a.affinite.score
+    if (Math.abs(parAffinite) >= 10) return parAffinite
+    const ra = a.parScenario.central.ravMensuel
+    const rb = b.parScenario.central.ravMensuel
+    if (ra === null && rb === null) return parAffinite
+    if (ra === null) return 1
+    if (rb === null) return -1
+    return rb - ra
+  })
 }

@@ -120,3 +120,57 @@ describe('calculerAidesLogement', () => {
     expect(r.millesime).toBe('2025-09')
   })
 })
+
+describe('économie d’appels', () => {
+  it('ne calcule qu’une fois deux situations identiques', async () => {
+    let envoyees = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        const situation = JSON.parse(String(init.body)) as { familles: Record<string, unknown> }
+        envoyees += Object.keys(situation.familles).length
+        return reponse({ familles: { f0: { aide_logement: { '2026-09': 199.88 } } } })
+      }),
+    )
+    const trois = await calculerAidesLogement(
+      [
+        { ref: 'a', codeInsee: '87085', loyerMensuel: 335, anneeNaissance: 2007 },
+        { ref: 'b', codeInsee: '87085', loyerMensuel: 335, anneeNaissance: 2007 },
+        { ref: 'c', codeInsee: '87085', loyerMensuel: 335, anneeNaissance: 2007 },
+      ],
+      LE_JOUR,
+    )
+    expect(envoyees).toBe(1)
+    expect(trois).toHaveLength(3)
+    expect(trois.map((r) => r.ref)).toEqual(['a', 'b', 'c'])
+    for (const r of trois) {
+      if (estIndisponible(r)) throw new Error('aide attendue')
+      expect(r.montant).toBe(199.88)
+    }
+  })
+
+  it('découpe en lots plutôt que d’envoyer une requête géante', async () => {
+    const tailles: number[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (_url: string, init: RequestInit) => {
+        const situation = JSON.parse(String(init.body)) as { familles: Record<string, unknown> }
+        const n = Object.keys(situation.familles).length
+        tailles.push(n)
+        const familles: Record<string, unknown> = {}
+        for (let i = 0; i < n; i += 1) familles[`f${i}`] = { aide_logement: { '2026-09': 100 + i } }
+        return reponse({ familles })
+      }),
+    )
+    const demandes = Array.from({ length: 60 }, (_, i) => ({
+      ref: `r${i}`,
+      codeInsee: '87085',
+      loyerMensuel: 300 + i, // loyers tous différents : aucun doublon
+      anneeNaissance: 2007,
+    }))
+    const resultats = await calculerAidesLogement(demandes, LE_JOUR)
+    expect(resultats).toHaveLength(60)
+    expect(tailles.length).toBeGreaterThan(1)
+    expect(Math.max(...tailles)).toBeLessThanOrEqual(25)
+  })
+})
