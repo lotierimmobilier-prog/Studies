@@ -1,0 +1,29 @@
+/* Console d'administration : sobre, dense, sans décor. */
+
+.admin .baseline { letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; }
+
+.secret {
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.secret h3 { margin: 0 0 0.2rem; font-size: 1rem; }
+.secret-actions { margin-top: 0.8rem; display: flex; flex-direction: column; gap: 0.6rem; }
+
+.etat-ok { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--vert); }
+.etat-absent { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--doux); }
+
+.baremes { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.baremes li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+.baremes li.perime { border-color: var(--orange); }
+.baremes li.vide { border-style: dashed; }

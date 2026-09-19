@@ -157,6 +157,39 @@ cache 30 jours, la limite de conservation imposée par les conditions de Places.
 POST /api/avis-lieu   note publique d'un lieu, au plus 20 par appel
 ```
 
+## Console d'administration
+
+`/<slug>/admin.html`. Elle pose les clés d'API, montre quels barèmes ont dépassé
+leur date de dernière vérification, et combien de retours chaque année
+universitaire a recueillis. Elle est **fermée par défaut**.
+
+```bash
+ADMIN_TOKEN=…          # ≥ 24 caractères, ouvre la console
+ADMIN_MASTER_KEY=…     # ≥ 16 caractères, chiffre le coffre de clés
+```
+
+Trois barrières, dans cet ordre :
+
+1. **HTTPS obligatoire**, sauf en local. Le site sert encore en HTTP simple sur
+   le VPS : y exposer une console enverrait le jeton et les clés en clair. Le
+   code refuse plutôt que de faire confiance à l'exploitant.
+2. **Le jeton vient de l'environnement, jamais du coffre.** Voler le fichier de
+   secrets ne doit pas donner le moyen d'entrer. Comparaison à temps constant.
+3. **Verrouillage** de quinze minutes après cinq échecs, compté par client.
+
+Les clés sont **chiffrées au repos** en AES-256-GCM, avec une clé dérivée par
+scrypt d'`ADMIN_MASTER_KEY` qui n'est jamais écrite. Le fichier est en `0600`.
+Une valeur enregistrée **ne ressort jamais** : la console n'en voit que les
+quatre derniers caractères. Une clé posée dans l'environnement du serveur
+l'emporte toujours sur celle du coffre et ne peut pas être modifiée depuis le
+web. Seules `ANTHROPIC_API_KEY` et `GOOGLE_MAPS_API_KEY` sont gérables ; la
+liste est fermée, pour qu'on ne puisse pas s'accorder d'autres pouvoirs.
+
+La console est une entrée de build séparée : son code ne part pas dans le
+paquet servi aux élèves. Si vous voulez une protection supplémentaire, une
+restriction par IP ou une authentification nginx sur `admin.html` s'ajoute sans
+toucher au code.
+
 ## Base de données
 
 ```bash

@@ -24,6 +24,11 @@
 #                                #   modération fine des avis étudiants)
 #   GOOGLE_MAPS_API_KEY=...      # active les avis Google (note ⭐ des écoles)
 #   MODERATION_TOKEN=...         # jeton pour l'endpoint de modération des avis
+#   ADMIN_TOKEN=...              # ouvre la console /admin.html (≥ 24 caractères)
+#   ADMIN_MASTER_KEY=...         # chiffre le coffre de clés (≥ 16 caractères)
+#
+# La console d'administration reste FERMÉE tant qu'ADMIN_TOKEN n'est pas
+# défini, et elle refuse de répondre hors HTTPS. Faire le certificat d'abord.
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
 #   DOMAIN=kitetudiant.fr        # nom de domaine à servir, en plus de l'IP
@@ -142,9 +147,24 @@ if [ -n "${MODERATION_TOKEN:-}" ]; then
   echo "MODERATION_TOKEN=${MODERATION_TOKEN}" >> "${APP_DIR}/.env"
   log "Jeton MODERATION_TOKEN enregistré (endpoint de modération protégé)."
 fi
+if [ -n "${ADMIN_TOKEN:-}" ] && [ -n "${ADMIN_MASTER_KEY:-}" ]; then
+  echo "ADMIN_TOKEN=${ADMIN_TOKEN}" >> "${APP_DIR}/.env"
+  echo "ADMIN_MASTER_KEY=${ADMIN_MASTER_KEY}" >> "${APP_DIR}/.env"
+  if [ "${TLS}" = "1" ]; then
+    log "Console d'administration ouverte sur https://${DOMAIN}/${SLUG}/admin.html"
+  else
+    log "ADMIN_TOKEN enregistré, mais la console refusera de répondre hors HTTPS."
+  fi
+elif [ -n "${ADMIN_TOKEN:-}" ] || [ -n "${ADMIN_MASTER_KEY:-}" ]; then
+  log "ADMIN_TOKEN et ADMIN_MASTER_KEY vont par deux : console laissée fermée."
+else
+  log "Pas de console d'administration (ADMIN_TOKEN absent)."
+fi
+# Le fichier .env contient des secrets : il ne doit être lisible que par root.
+chmod 600 "${APP_DIR}/.env"
 
 log "(Re)démarrage de l'API « ${PM2_NAME} » (port ${API_PORT}) via pm2…"
-ENV_VARS="PORT=${API_PORT} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-} GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-} MODERATION_TOKEN=${MODERATION_TOKEN:-}"
+ENV_VARS="PORT=${API_PORT} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-} GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-} MODERATION_TOKEN=${MODERATION_TOKEN:-} ADMIN_TOKEN=${ADMIN_TOKEN:-} ADMIN_MASTER_KEY=${ADMIN_MASTER_KEY:-}"
 if pm2 describe "${PM2_NAME}" >/dev/null 2>&1; then
   env ${ENV_VARS} pm2 restart "${PM2_NAME}" --update-env
 else
