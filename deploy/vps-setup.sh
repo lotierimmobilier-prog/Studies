@@ -17,6 +17,7 @@
 #   bash deploy/vps-setup.sh
 #
 # Options (variables d'environnement) :
+#   PROJET=simulateur            # « simulateur » (historique) ou « kitetudiant »
 #   SLUG=studies                 # sous-chemin + nom du projet (URL : /studies)
 #   API_PORT=8787                # port local de l'API Node (unique par projet !)
 #   ANTHROPIC_API_KEY=sk-ant-... # active l'IA (conseils + analyse de bulletin +
@@ -35,6 +36,11 @@
 #   2. DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr bash deploy/vps-setup.sh
 #   Le certificat se renouvelle tout seul (timer systemd installé par certbot).
 #
+# Exemple : KITETUDIANT servi à la racine de son domaine, en HTTPS.
+#   PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
+#     DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr \
+#     bash deploy/vps-setup.sh
+#
 # Exemple pour un 2e projet plus tard :
 #   SLUG=monsite API_PORT=8788 bash deploy/vps-setup.sh
 #
@@ -45,6 +51,7 @@ set -euo pipefail
 # ------------------------------------------------------------------ paramètres
 REPO_URL="${REPO_URL:-https://github.com/lotierimmobilier-prog/Studies.git}"
 BRANCH="${BRANCH:-main}"
+PROJET="${PROJET:-simulateur}"                # « simulateur » ou « kitetudiant »
 SLUG="${SLUG:-studies}"                       # sous-chemin d'URL et nom du projet
 SERVER_NAME="${SERVER_NAME:-76.13.37.163}"    # IP ou nom de domaine
 API_PORT="${API_PORT:-8787}"                  # port local de l'API (unique/projet)
@@ -89,14 +96,22 @@ else
 fi
 
 # ------------------------------------------------------------------- build du front
-log "Build du front (base « /${SLUG}/ »)…"
+# Deux applications cohabitent dans le dépôt : le simulateur historique et
+# KITETUDIANT. PROJET choisit laquelle est servie sous ce SLUG.
+case "${PROJET}" in
+  kitetudiant) COMMANDE_BUILD="build:kitetudiant"; DOSSIER_BUILD="dist-kitetudiant" ;;
+  simulateur)  COMMANDE_BUILD="build";             DOSSIER_BUILD="dist" ;;
+  *) echo "PROJET doit valoir « simulateur » ou « kitetudiant » (reçu : ${PROJET})." >&2; exit 1 ;;
+esac
+
+log "Build du front « ${PROJET} » (base « /${SLUG}/ »)…"
 cd "${SRC_DIR}"
 npm ci
-VITE_BASE="/${SLUG}/" npm run build     # les assets et l'API sont préfixés par /<SLUG>/
+VITE_BASE="/${SLUG}/" npm run "${COMMANDE_BUILD}"   # assets et API préfixés par /<SLUG>/
 
 log "Copie du front vers ${WEB_ROOT}…"
 mkdir -p "${WEB_ROOT}"
-rsync -a --delete "${SRC_DIR}/dist/" "${WEB_ROOT}/"
+rsync -a --delete "${SRC_DIR}/${DOSSIER_BUILD}/" "${WEB_ROOT}/"
 
 # ------------------------------------------------------------------- serveur Node (API)
 log "Installation du serveur Node (prix + IA) dans ${APP_DIR}…"

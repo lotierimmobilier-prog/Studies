@@ -26,6 +26,23 @@ curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/main/
   | ANTHROPIC_API_KEY="sk-ant-..." GOOGLE_MAPS_API_KEY="AIza..." bash
 ```
 
+### Deux applications dans le même dépôt
+
+Le dépôt sert deux fronts : le **simulateur** historique et **KITETUDIANT**. La
+variable `PROJET` choisit lequel est déployé sous un `SLUG` donné. Ils peuvent
+cohabiter sur le même VPS, chacun avec son port d'API.
+
+```bash
+# KITETUDIANT sur son domaine, en HTTPS
+PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
+  DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr \
+  bash deploy/vps-setup.sh
+```
+
+KITETUDIANT a besoin de l'API pour l'aide au logement : c'est elle qui
+interroge OpenFisca, jamais le navigateur de l'élève. Sans API, chaque vœu
+s'affiche « reste-à-vivre non calculable » plutôt qu'avec une aide approchée.
+
 ### Nom de domaine et HTTPS
 
 Le site sert aujourd'hui en **HTTP simple** sur l'IP. Pour un produit qui

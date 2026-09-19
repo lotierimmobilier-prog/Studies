@@ -16,3 +16,4 @@ tsconfig.tsbuildinfo
 
 # données persistées du serveur (témoignages étudiants)
 .data
+dist-kitetudiant
