@@ -54,6 +54,7 @@ PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
   SERVER_NAME=76.13.37.193 \
   DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=lotierimmobilier@gmail.com \
   ADMIN_TOKEN="…" ADMIN_MASTER_KEY="…" COMPTES_MASTER_KEY="…" \
+  ADMIN_EMAILS="vous@exemple.fr" \
   bash deploy/vps-setup.sh
 ```
 
@@ -64,6 +65,14 @@ deux se tirent au hasard une fois pour toutes :
 ```bash
 openssl rand -base64 32   # à faire deux fois, un secret par variable
 ```
+
+`ADMIN_EMAILS` (facultatif) liste les adresses autorisées à ouvrir la console
+avec **leur propre compte**, sans ressaisir le jeton — pratique quand on
+administre depuis le site où l'on est déjà connecté. C'est plus commode et
+**plus faible** : la console vaut alors un mot de passe de dix caractères là où
+le jeton en compte quarante. `ADMIN_TOKEN` continue de fonctionner en parallèle,
+ce qui reste la voie de secours si un compte administrateur est compromis.
+Laissée vide — le défaut — seul le jeton ouvre la porte.
 
 `COMPTES_MASTER_KEY` (≥ 16) chiffre les comptes élèves : c'est elle qui active
 l'inscription. **Sans elle, personne ne peut s'inscrire et le détail du résultat

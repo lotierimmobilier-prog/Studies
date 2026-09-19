@@ -358,6 +358,31 @@ export class DepotComptes {
     )
   }
 
+  /**
+   * Adresse du titulaire d'une session, ou null si la session n'est pas
+   * valide. Réservé à la reconnaissance des administrateurs : c'est le seul
+   * endroit où une adresse est déchiffrée, et elle ne ressort jamais vers le
+   * navigateur.
+   */
+  async emailDeSession(jeton: string, maintenant: Date = new Date()): Promise<string | null> {
+    if (!this.configure || jeton.length === 0) return null
+    const fichier = await this.charger(maintenant)
+    const empreinte = DepotComptes.empreinteJeton(jeton)
+    const session = fichier.sessions.find(
+      (s) => s.empreinteJeton === empreinte && s.expireLe > maintenant.toISOString(),
+    )
+    if (session === undefined) return null
+    const compte = fichier.comptes.find((c) => c.index === session.index)
+    if (compte === undefined) return null
+    try {
+      return await this.dechiffrerEmail(compte, fichier.sel)
+    } catch {
+      // Secret maître changé depuis l'inscription : l'adresse est illisible.
+      // Mieux vaut refuser l'accès que de deviner à qui appartient ce compte.
+      return null
+    }
+  }
+
   async deconnecter(jeton: string, maintenant: Date = new Date()): Promise<void> {
     if (!this.configure) return
     const fichier = await this.charger(maintenant)

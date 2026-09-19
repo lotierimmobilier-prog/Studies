@@ -458,7 +458,11 @@ async function demarrer(): Promise<void> {
 
       // ------------------------------------------------------ administration
       if (url.pathname.startsWith('/api/admin/')) {
-        const refus = gardeAdmin.verifier(req)
+        // La console accepte le jeton d'exploitation, ou la session d'un
+        // compte dont l'adresse figure dans ADMIN_EMAILS.
+        const refus = await gardeAdmin.verifier(req, (jeton) =>
+          depotComptes.emailDeSession(jeton),
+        )
         if (refus) return envoyerJson(res, refus.code, refus)
 
         if (url.pathname === '/api/admin/etat' && req.method === 'GET') {
