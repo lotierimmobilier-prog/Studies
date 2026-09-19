@@ -53,6 +53,19 @@ indisponibilité motivée, jamais un montant de repli.
 `packages/budget-engine` calcule le reste-à-vivre à partir de ces barèmes. Il
 rend `null` dès qu'un poste manque : un RAV partiel serait un montant inventé.
 
+## Voir le moteur tourner
+
+```bash
+python3 kitetudiant/scripts/exploration/telecharger.py --cle loyers_communes
+npx tsx kitetudiant/scripts/demo/rav.ts
+```
+
+Calcule le reste-à-vivre d'un même profil à Limoges, Toulouse et Paris 13e sur
+les loyers réels, affiche chaque ligne de budget avec sa source et son
+millésime, puis montre ce que le moteur refuse de calculer quand l'APL n'est
+pas simulée. Il n'y a pas encore d'interface : le parcours en sept questions
+est le lot L3, non commencé.
+
 ## Base de données
 
 ```bash
