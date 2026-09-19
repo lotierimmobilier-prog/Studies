@@ -35,6 +35,8 @@ export interface EtatSysteme {
   }
 }
 
+import { BASE_API } from '../donnees.ts'
+
 const CLE_JETON = 'kitetudiant.admin.jeton'
 /** Session d'élève ordinaire, posée par le site (voir donnees.ts). */
 const CLE_SESSION_SITE = 'kitetudiant.session'
@@ -81,7 +83,7 @@ export class ErreurAdmin extends Error {
 }
 
 async function appeler<T>(chemin: string, options: RequestInit = {}): Promise<T> {
-  const reponse = await fetch(`/api/admin${chemin}`, {
+  const reponse = await fetch(`${BASE_API}/admin${chemin}`, {
     ...options,
     headers: {
       ...(options.headers ?? {}),

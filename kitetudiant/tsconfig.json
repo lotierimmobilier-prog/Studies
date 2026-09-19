@@ -9,7 +9,8 @@
       "DOM.Iterable"
     ],
     "types": [
-      "node"
+      "node",
+      "vite/client"
     ],
     "strict": true,
     "noUnusedLocals": true,
