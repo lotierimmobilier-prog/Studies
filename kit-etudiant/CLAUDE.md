@@ -1,4 +1,4 @@
-# ORIENTEO — contexte projet permanent
+# Kit Etudiant — contexte projet permanent
 
 ## Ce que nous construisons
 Une plateforme web qui aide les lycéens à choisir leurs vœux Parcoursup en croisant

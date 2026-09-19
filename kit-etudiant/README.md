@@ -1,4 +1,4 @@
-# ORIENTEO
+# Kit Etudiant
 
 Plateforme d'aide au choix des vœux Parcoursup fondée sur le coût réel de la vie
 étudiante. Le différenciant est le **RAV** — reste-à-vivre mensuel projeté —
