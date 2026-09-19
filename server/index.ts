@@ -45,6 +45,15 @@ import {
   BulletinNonConfigure,
   type MediaType,
 } from './bulletin'
+import {
+  ComptesNonConfigures,
+  DepotComptes,
+  EmailDejaInscrit,
+  IdentifiantsRefuses,
+  InscriptionInvalide,
+  TropDEssais,
+  jetonDeLEnTete,
+} from './comptes.ts'
 
 /**
  * Serveur HTTP minimal (sans dépendance) exposant l'API de prix.
@@ -67,6 +76,10 @@ import {
  *   POST /api/retours/agregats body: string[] → agrégats de l'année en cours
  *   POST /api/avis-lieu body: DemandeAvisLieu[] → note publique du LIEU
  *                                        (jamais un critère de décision)
+ *   POST /api/comptes/inscription body: {email, motDePasse} → {jeton, expireLe}
+ *   POST /api/comptes/connexion   body: {email, motDePasse} → {jeton, expireLe}
+ *   POST /api/comptes/deconnexion (en-tête Bearer)          → ferme la session
+ *   GET  /api/comptes/moi         (en-tête Bearer)          → {connecte}
  *
  * Administration (HTTPS + jeton ADMIN_TOKEN, voir admin.ts) :
  *   GET    /api/admin/etat               → clés, barèmes, millésimes
@@ -94,6 +107,14 @@ const depotTemoignages = new DepotTemoignages(
 // jamais réécrites.
 const depotRetours = new DepotRetours(join(process.cwd(), '.data', 'retours'))
 const coffre = new Coffre(join(process.cwd(), '.data', 'secrets.json'))
+// KITETUDIANT — comptes élèves. Sans COMPTES_MASTER_KEY, le dépôt se déclare
+// non configuré : l'inscription est alors impossible ET le détail du résultat
+// reste ouvert, plutôt que de rendre le site inutilisable par omission. L'état
+// est visible dans la console d'administration.
+const depotComptes = new DepotComptes(
+  join(process.cwd(), '.data', 'comptes.json'),
+  process.env.COMPTES_MASTER_KEY,
+)
 const gardeAdmin = new GardeAdmin()
 
 
@@ -289,6 +310,23 @@ async function demarrer(): Promise<void> {
       // Le navigateur de l'élève ne parle pas à OpenFisca : seuls des
       // paramètres anonymes (commune, loyer, année de naissance) sortent d'ici.
       if (url.pathname === '/api/aide-logement' && req.method === 'POST') {
+        // Le verrou d'inscription est ICI, et pas dans l'affichage.
+        //
+        // Le reste-à-vivre se calcule dans le navigateur, mais à partir de
+        // l'aide au logement que seul ce serveur sait obtenir d'OpenFisca.
+        // Fermer la porte à cet endroit rend le détail réellement inaccessible
+        // sans compte : masquer un chiffre déjà envoyé au navigateur n'aurait
+        // protégé personne. L'aperçu — formation, établissement, ville, taux
+        // d'accès publié — reste libre : il ne passe pas par ici.
+        if (depotComptes.configure) {
+          const jeton = jetonDeLEnTete(req.headers.authorization)
+          if (!(await depotComptes.sessionValide(jeton))) {
+            return envoyerJson(res, 401, {
+              erreur: 'Crée ton compte pour voir ce qu’il te restera pour vivre.',
+              inscriptionRequise: true,
+            })
+          }
+        }
         const corps = await lireCorps(req)
         const demandes = JSON.parse(corps) as DemandeAideLogement[]
         if (!Array.isArray(demandes))
@@ -364,6 +402,50 @@ async function demarrer(): Promise<void> {
 
       // KITETUDIANT — note publique du lieu. Affichée dans le détail d'une
       // fiche, attribuée à Google, jamais dans un tri ni dans un score.
+      // KITETUDIANT — comptes élèves. Aucune donnée scolaire ne transite ici :
+      // seulement une adresse et un mot de passe (voir comptes.ts).
+      if (url.pathname.startsWith('/api/comptes/')) {
+        if (!depotComptes.configure && url.pathname !== '/api/comptes/moi') {
+          return envoyerJson(res, 503, { erreur: new ComptesNonConfigures().message })
+        }
+        try {
+          if (url.pathname === '/api/comptes/inscription' && req.method === 'POST') {
+            const { email, motDePasse } = JSON.parse(await lireCorps(req)) as {
+              email?: string
+              motDePasse?: string
+            }
+            const session = await depotComptes.inscrire(email ?? '', motDePasse ?? '')
+            return envoyerJson(res, 201, session)
+          }
+          if (url.pathname === '/api/comptes/connexion' && req.method === 'POST') {
+            const { email, motDePasse } = JSON.parse(await lireCorps(req)) as {
+              email?: string
+              motDePasse?: string
+            }
+            const session = await depotComptes.connecter(email ?? '', motDePasse ?? '')
+            return envoyerJson(res, 200, session)
+          }
+          if (url.pathname === '/api/comptes/deconnexion' && req.method === 'POST') {
+            await depotComptes.deconnecter(jetonDeLEnTete(req.headers.authorization))
+            return envoyerJson(res, 200, { deconnecte: true })
+          }
+          if (url.pathname === '/api/comptes/moi' && req.method === 'GET') {
+            const connecte = await depotComptes.sessionValide(
+              jetonDeLEnTete(req.headers.authorization),
+            )
+            return envoyerJson(res, 200, { connecte, comptesActifs: depotComptes.configure })
+          }
+        } catch (e) {
+          if (e instanceof InscriptionInvalide) return envoyerJson(res, 400, { erreur: e.message })
+          if (e instanceof EmailDejaInscrit) return envoyerJson(res, 409, { erreur: e.message })
+          if (e instanceof IdentifiantsRefuses) return envoyerJson(res, 401, { erreur: e.message })
+          if (e instanceof TropDEssais) return envoyerJson(res, 429, { erreur: e.message })
+          if (e instanceof ComptesNonConfigures) return envoyerJson(res, 503, { erreur: e.message })
+          throw e
+        }
+        return envoyerJson(res, 404, { erreur: 'route inconnue' })
+      }
+
       if (url.pathname === '/api/avis-lieu' && req.method === 'POST') {
         const corps = await lireCorps(req)
         const demandes = JSON.parse(corps) as DemandeAvisLieu[]
@@ -380,7 +462,7 @@ async function demarrer(): Promise<void> {
         if (refus) return envoyerJson(res, refus.code, refus)
 
         if (url.pathname === '/api/admin/etat' && req.method === 'GET') {
-          return envoyerJson(res, 200, await etatSysteme(coffre, depotRetours))
+          return envoyerJson(res, 200, await etatSysteme(coffre, depotRetours, depotComptes))
         }
 
         if (url.pathname === '/api/admin/cles' && req.method === 'PUT') {

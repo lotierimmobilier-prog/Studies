@@ -263,6 +263,28 @@ export function Console() {
             )}
           </section>
 
+          <section className="bloc">
+            <h2>Comptes élèves</h2>
+            {etat.comptes.configure ? (
+              <ul className="baremes">
+                <li>
+                  <span>Comptes</span>
+                  <span className="note">{etat.comptes.comptes}</span>
+                </li>
+                <li>
+                  <span>Sessions ouvertes</span>
+                  <span className="note">{etat.comptes.sessionsActives}</span>
+                </li>
+              </ul>
+            ) : (
+              <p className="alerte">
+                COMPTES_MASTER_KEY n’est pas définie : l’inscription est impossible, et le
+                détail du résultat est ouvert à tous. Pose la variable dans l’environnement
+                du serveur, puis redémarre.
+              </p>
+            )}
+          </section>
+
           <div className="navigation">
             <button type="button" className="secondaire" onClick={() => void rafraichir()}>
               Rafraîchir

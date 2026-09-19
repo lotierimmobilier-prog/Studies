@@ -28,6 +28,11 @@ export interface EtatSysteme {
   readonly secrets: readonly EtatSecret[]
   readonly baremes: readonly EtatBareme[]
   readonly millesimes: readonly { readonly millesime: string; readonly retours: number }[]
+  readonly comptes: {
+    readonly configure: boolean
+    readonly comptes: number
+    readonly sessionsActives: number
+  }
 }
 
 const CLE_JETON = 'kitetudiant.admin.jeton'

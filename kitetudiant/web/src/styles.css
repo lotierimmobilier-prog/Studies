@@ -486,3 +486,56 @@ input[type='range'] { width: 100%; min-height: 44px; }
   .cta-final .principal { width: auto; padding-inline: 2.5rem; }
   .cta-final .hero-mentions { text-align: center; }
 }
+
+/* ------------------------------------------------------- compte et verrou */
+/* Noms préfixés « compte- » et « verrou- » : la feuille est partagée par
+   toutes les vues, et un nom déjà pris ferait hériter cette vue d'une autre
+   mise en page sans rien casser visiblement (cf. styles.test.ts). */
+
+.entete-resultats {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.verrou {
+  background: var(--carte);
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon);
+  padding: 1.25rem 1.1rem 1.4rem;
+  margin-bottom: 1.75rem;
+}
+.verrou h2 { margin: 0 0 0.5rem; font-size: 1.15rem; }
+.verrou p { margin: 0 0 0.75rem; font-size: 0.95rem; }
+.verrou-detail { color: var(--doux); font-size: 0.9rem !important; }
+.verrou .principal { width: 100%; }
+.verrou .note { text-align: center; margin-top: 0.7rem; }
+
+.compte { max-width: 26rem; margin: 1.5rem auto 0; }
+.compte h2 { margin: 0 0 0.4rem; font-size: 1.5rem; letter-spacing: -0.01em; }
+.compte-pourquoi { margin: 0 0 1.5rem; color: var(--doux); }
+.compte-form { display: flex; flex-direction: column; gap: 1rem; }
+.compte-form .principal { width: 100%; margin-top: 0.3rem; }
+.compte-bascule { margin: 1.2rem 0 0; font-size: 0.9rem; color: var(--doux); text-align: center; }
+
+.compte-confiance {
+  margin-top: 2rem;
+  padding: 1rem 1.1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.compte-confiance h3 { margin: 0 0 0.6rem; font-size: 0.95rem; }
+.compte-confiance ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.compte-confiance li { font-size: 0.86rem; color: var(--doux); }
+.compte-confiance strong { color: var(--encre); }
+
+.compte-retour { display: block; margin: 1.2rem auto 0; }
