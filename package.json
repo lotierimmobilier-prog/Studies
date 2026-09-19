@@ -12,7 +12,9 @@
     "preview": "vite preview",
     "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
     "test": "vitest run",
-    "typecheck:kitetudiant": "tsc -p kitetudiant/tsconfig.json --noEmit"
+    "typecheck:kitetudiant": "tsc -p kitetudiant/tsconfig.json --noEmit",
+    "dev:kitetudiant": "vite --config vite.kitetudiant.config.ts",
+    "build:kitetudiant": "tsc -p kitetudiant/tsconfig.json --noEmit && vite build --config vite.kitetudiant.config.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",

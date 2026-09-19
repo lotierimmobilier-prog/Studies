@@ -24,6 +24,11 @@ import {
 } from './conseiller'
 import { obtenirQuestions } from './questions'
 import {
+  AideLogementIndisponibleErreur,
+  calculerAidesLogement,
+  type DemandeAideLogement,
+} from './aideLogement'
+import {
   analyserBulletin,
   BulletinNonConfigure,
   type MediaType,
@@ -41,6 +46,8 @@ import {
  *   GET  /api/temoignages?etablissement= → SyntheseTemoignages (avis étudiants)
  *   POST /api/temoignages body: RequeteTemoignage → soumission modérée
  *   GET/POST /api/temoignages/moderation → modération (jeton MODERATION_TOKEN)
+ *   POST /api/aide-logement body: DemandeAideLogement[] → aide au logement
+ *                                        calculée par OpenFisca (KITETUDIANT)
  *
  * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
  * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
@@ -245,6 +252,30 @@ async function demarrer(): Promise<void> {
           return envoyerJson(res, 400, { erreur: 'profil et formations requis' })
         const questions = await obtenirQuestions(profil, formations.slice(0, 12))
         return envoyerJson(res, 200, questions)
+      }
+
+      // KITETUDIANT — aide au logement calculée par OpenFisca, côté serveur.
+      // Le navigateur de l'élève ne parle pas à OpenFisca : seuls des
+      // paramètres anonymes (commune, loyer, année de naissance) sortent d'ici.
+      if (url.pathname === '/api/aide-logement' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const demandes = JSON.parse(corps) as DemandeAideLogement[]
+        if (!Array.isArray(demandes))
+          return envoyerJson(res, 400, { erreur: 'un tableau de demandes est attendu' })
+        if (demandes.length > 120)
+          return envoyerJson(res, 400, { erreur: 'au plus 120 demandes par appel' })
+        try {
+          const aides = await calculerAidesLogement(demandes)
+          return envoyerJson(res, 200, aides)
+        } catch (e) {
+          if (e instanceof AideLogementIndisponibleErreur) {
+            // 503 et non 500 : le service est indisponible, la demande est
+            // valide. Le front doit afficher « donnée manquante », pas une
+            // aide approchée.
+            return envoyerJson(res, 503, { erreur: e.message })
+          }
+          throw e
+        }
       }
 
       envoyerJson(res, 404, { erreur: 'route inconnue' })

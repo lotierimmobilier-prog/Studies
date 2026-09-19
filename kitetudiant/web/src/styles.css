@@ -1,0 +1,203 @@
+/* Mobile d'abord. Le reste-à-vivre est le plus gros caractère de la page. */
+
+:root {
+  --fond: #fbfaf8;
+  --encre: #17191c;
+  --doux: #5b6169;
+  --trait: #e2e0db;
+  --carte: #ffffff;
+  --vert: #1f6b46;
+  --orange: #8a5a10;
+  --rouge: #9a2b2b;
+  --gris: #5b6169;
+  --accent: #1d3f78;
+  --rayon: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --fond: #14161a;
+    --encre: #f2f1ee;
+    --doux: #a6adb6;
+    --trait: #2b3038;
+    --carte: #1b1e24;
+    --vert: #6fd3a0;
+    --orange: #e0ad5a;
+    --rouge: #f09a9a;
+    --gris: #a6adb6;
+    --accent: #9cc0ff;
+  }
+}
+
+:root[data-theme='dark'] {
+  --fond: #14161a;
+  --encre: #f2f1ee;
+  --doux: #a6adb6;
+  --trait: #2b3038;
+  --carte: #1b1e24;
+  --vert: #6fd3a0;
+  --orange: #e0ad5a;
+  --rouge: #f09a9a;
+  --gris: #a6adb6;
+  --accent: #9cc0ff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app { max-width: 46rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+
+.entete h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+}
+.baseline { margin: 0.15rem 0 1.5rem; color: var(--doux); font-size: 0.95rem; }
+
+/* ------------------------------------------------------------ progression */
+.progression { display: flex; gap: 5px; margin-bottom: 1.75rem; }
+.pas { flex: 1; height: 3px; border-radius: 2px; background: var(--trait); }
+.pas.fait { background: var(--accent); }
+
+.compteur { margin: 0; color: var(--doux); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.etape h2 { margin: 0.35rem 0 0.25rem; font-size: 1.6rem; line-height: 1.2; }
+.aide { margin: 0 0 1.5rem; color: var(--doux); }
+.note { color: var(--doux); font-size: 0.85rem; margin: 0.5rem 0 0; }
+
+/* ----------------------------------------------------------------- champs */
+.choix { display: flex; flex-direction: column; gap: 0.6rem; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.echelons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.filieres { display: flex; flex-direction: column; gap: 0.4rem; max-height: 22rem; overflow-y: auto; }
+
+.choix button, .filieres button {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  cursor: pointer;
+  min-height: 44px;
+}
+.choix button:hover { border-color: var(--accent); }
+.choix-actif { border-color: var(--accent) !important; box-shadow: inset 0 0 0 1px var(--accent); }
+.filiere-nombre { display: block; color: var(--doux); font-size: 0.8rem; }
+
+.champ { display: flex; flex-direction: column; gap: 0.3rem; }
+.champ-label { font-size: 0.85rem; color: var(--doux); }
+.champ-saisie { display: flex; align-items: center; gap: 0.5rem; }
+.champ input, .champ select {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  min-height: 44px;
+}
+.champ-suffixe { color: var(--doux); font-size: 0.85rem; white-space: nowrap; }
+
+/* ------------------------------------------------------------- navigation */
+.navigation { display: flex; gap: 0.6rem; margin-top: 1.75rem; }
+.principal, .secondaire {
+  flex: 1;
+  padding: 0.9rem 1rem;
+  border-radius: var(--rayon);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 48px;
+}
+.principal { background: var(--accent); color: var(--fond); border: 1px solid var(--accent); }
+.principal[disabled] { opacity: 0.6; cursor: progress; }
+.secondaire { background: transparent; color: var(--encre); border: 1px solid var(--trait); }
+.sans-compte { margin-top: 1rem; color: var(--doux); font-size: 0.8rem; text-align: center; }
+
+/* ---------------------------------------------------------------- cartes */
+.resume { color: var(--doux); font-size: 0.9rem; margin-bottom: 1.25rem; }
+.cartes { display: flex; flex-direction: column; gap: 1rem; }
+
+.carte {
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-left: 4px solid var(--gris);
+  border-radius: var(--rayon);
+  padding: 1.1rem;
+}
+.carte.vert { border-left-color: var(--vert); }
+.carte.orange { border-left-color: var(--orange); }
+.carte.rouge { border-left-color: var(--rouge); }
+
+.carte-rav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
+.rav {
+  font-size: clamp(2.6rem, 12vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.rav-absent { font-size: 1.5rem; font-weight: 700; color: var(--doux); }
+.rav-unite { color: var(--doux); font-size: 0.95rem; }
+.verdict { margin-left: auto; font-size: 0.8rem; font-weight: 600; }
+.verdict.vert { color: var(--vert); }
+.verdict.orange { color: var(--orange); }
+.verdict.rouge { color: var(--rouge); }
+.verdict.gris { color: var(--gris); }
+
+.carte h3 { margin: 0.9rem 0 0.15rem; font-size: 1.05rem; line-height: 1.3; }
+.etab { margin: 0; color: var(--doux); font-size: 0.9rem; }
+.fourchette, .admission { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
+.avertissement { margin: 0.5rem 0 0; font-size: 0.82rem; color: var(--orange); }
+
+.lien {
+  margin-top: 0.9rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  min-height: 44px;
+}
+
+/* ---------------------------------------------------------------- détail */
+.detail { margin-top: 1rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+.lignes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+.ligne { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.75rem; font-size: 0.9rem; }
+.ligne-poste { text-transform: capitalize; }
+.ligne-montant { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.ligne-source { grid-column: 1 / -1; color: var(--doux); font-size: 0.78rem; overflow-wrap: anywhere; }
+.ligne.ressource .ligne-montant { color: var(--vert); }
+.ligne.manquante .ligne-montant { color: var(--rouge); font-weight: 600; }
+.ligne.sans-objet .ligne-montant { color: var(--doux); font-weight: 400; }
+
+.jumeaux { margin-top: 1.2rem; }
+.jumeaux h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+.jumeaux ul { margin: 0.5rem 0 0; padding-left: 1.1rem; font-size: 0.9rem; }
+
+.erreur { color: var(--rouge); font-size: 0.9rem; }
+
+.pieds { margin-top: 2.5rem; border-top: 1px solid var(--trait); padding-top: 1rem; color: var(--doux); font-size: 0.78rem; }
+.pieds p { margin: 0 0 0.5rem; }
+.non-affiliation { font-weight: 600; }
+
+a { color: var(--accent); }
+
+@media (min-width: 40rem) {
+  .echelons { grid-template-columns: repeat(4, 1fr); }
+}

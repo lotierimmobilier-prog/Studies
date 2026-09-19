@@ -63,8 +63,31 @@ npx tsx kitetudiant/scripts/demo/rav.ts
 Calcule le reste-à-vivre d'un même profil à Limoges, Toulouse et Paris 13e sur
 les loyers réels, affiche chaque ligne de budget avec sa source et son
 millésime, puis montre ce que le moteur refuse de calculer quand l'APL n'est
-pas simulée. Il n'y a pas encore d'interface : le parcours en sept questions
-est le lot L3, non commencé.
+pas simulée.
+
+## L'interface (lot L3)
+
+```bash
+npm run start:server      # API : aide au logement via OpenFisca, port 8787
+npm run dev:kitetudiant   # front sur http://localhost:5174
+npm run build:kitetudiant # build de production -> dist-kitetudiant/
+```
+
+Sept questions, puis la liste de vœux. Mobile d'abord, sans compte, rien
+d'enregistré. Sur chaque carte, le reste-à-vivre est le plus gros caractère de
+la page ; le taux d'accès est affiché en petit, tel que le ministère le publie,
+avec la mention que ce n'est pas la probabilité du candidat.
+
+Les données sont réelles : formations et statistiques d'admission en direct de
+l'open data du ministère, loyers de l'indicateur communal, aide au logement
+calculée par OpenFisca, barèmes officiels datés. Le budget se déplie poste par
+poste, chaque ligne portant sa source et son millésime, et les postes manquants
+s'affichent comme manquants.
+
+`web/donnees/communes.json` est généré par
+`scripts/exploration/generer_communes.py` : c'est la correspondance ville +
+département → code INSEE, figée et versionnée, parce que Parcoursup ne porte
+pas de code commune et que le front ne doit rien deviner à l'exécution.
 
 ## Base de données
 

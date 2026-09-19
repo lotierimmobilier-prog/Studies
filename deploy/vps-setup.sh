@@ -11,12 +11,13 @@
 # À lancer EN ROOT sur le VPS. Deux façons :
 #
 #   # 1) En une commande :
-#   curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/main/deploy/vps-setup.sh | bash
 #
 #   # 2) Depuis un clone du dépôt :
 #   bash deploy/vps-setup.sh
 #
 # Options (variables d'environnement) :
+#   PROJET=simulateur            # « simulateur » (historique) ou « kitetudiant »
 #   SLUG=studies                 # sous-chemin + nom du projet (URL : /studies)
 #   API_PORT=8787                # port local de l'API Node (unique par projet !)
 #   ANTHROPIC_API_KEY=sk-ant-... # active l'IA (conseils + analyse de bulletin +
@@ -25,6 +26,20 @@
 #   MODERATION_TOKEN=...         # jeton pour l'endpoint de modération des avis
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
+#   DOMAIN=kitetudiant.fr        # nom de domaine à servir, en plus de l'IP
+#   TLS=1                        # obtient un certificat Let's Encrypt pour DOMAIN
+#   TLS_EMAIL=vous@exemple.fr    # adresse de contact exigée par Let's Encrypt
+#
+# HTTPS (à faire une fois le DNS en place) :
+#   1. Chez le registrar : un enregistrement A « kitetudiant.fr » -> l'IP du VPS,
+#      et le même pour « www ». Attendre la propagation (dig kitetudiant.fr).
+#   2. DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr bash deploy/vps-setup.sh
+#   Le certificat se renouvelle tout seul (timer systemd installé par certbot).
+#
+# Exemple : KITETUDIANT servi à la racine de son domaine, en HTTPS.
+#   PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
+#     DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr \
+#     bash deploy/vps-setup.sh
 #
 # Exemple pour un 2e projet plus tard :
 #   SLUG=monsite API_PORT=8788 bash deploy/vps-setup.sh
@@ -35,11 +50,15 @@ set -euo pipefail
 
 # ------------------------------------------------------------------ paramètres
 REPO_URL="${REPO_URL:-https://github.com/lotierimmobilier-prog/Studies.git}"
-BRANCH="${BRANCH:-claude/parcoursup-admission-simulator-2jy76p}"
+BRANCH="${BRANCH:-main}"
+PROJET="${PROJET:-simulateur}"                # « simulateur » ou « kitetudiant »
 SLUG="${SLUG:-studies}"                       # sous-chemin d'URL et nom du projet
 SERVER_NAME="${SERVER_NAME:-76.13.37.163}"    # IP ou nom de domaine
 API_PORT="${API_PORT:-8787}"                  # port local de l'API (unique/projet)
 REDIRECT_ROOT="${REDIRECT_ROOT:-1}"           # « / » -> « /<SLUG>/ »
+DOMAIN="${DOMAIN:-}"                          # nom de domaine (vide = IP seule)
+TLS="${TLS:-0}"                               # 1 = certificat Let's Encrypt
+TLS_EMAIL="${TLS_EMAIL:-}"                    # contact exigé par Let's Encrypt
 
 SRC_DIR="/opt/${SLUG}-src"                    # copie de travail du dépôt
 WEB_ROOT="/var/www/${SLUG}"                   # front statique servi par nginx
@@ -77,14 +96,22 @@ else
 fi
 
 # ------------------------------------------------------------------- build du front
-log "Build du front (base « /${SLUG}/ »)…"
+# Deux applications cohabitent dans le dépôt : le simulateur historique et
+# KITETUDIANT. PROJET choisit laquelle est servie sous ce SLUG.
+case "${PROJET}" in
+  kitetudiant) COMMANDE_BUILD="build:kitetudiant"; DOSSIER_BUILD="dist-kitetudiant" ;;
+  simulateur)  COMMANDE_BUILD="build";             DOSSIER_BUILD="dist" ;;
+  *) echo "PROJET doit valoir « simulateur » ou « kitetudiant » (reçu : ${PROJET})." >&2; exit 1 ;;
+esac
+
+log "Build du front « ${PROJET} » (base « /${SLUG}/ »)…"
 cd "${SRC_DIR}"
 npm ci
-VITE_BASE="/${SLUG}/" npm run build     # les assets et l'API sont préfixés par /<SLUG>/
+VITE_BASE="/${SLUG}/" npm run "${COMMANDE_BUILD}"   # assets et API préfixés par /<SLUG>/
 
 log "Copie du front vers ${WEB_ROOT}…"
 mkdir -p "${WEB_ROOT}"
-rsync -a --delete "${SRC_DIR}/dist/" "${WEB_ROOT}/"
+rsync -a --delete "${SRC_DIR}/${DOSSIER_BUILD}/" "${WEB_ROOT}/"
 
 # ------------------------------------------------------------------- serveur Node (API)
 log "Installation du serveur Node (prix + IA) dans ${APP_DIR}…"
@@ -132,13 +159,20 @@ log "Configuration de nginx (multi-projets sous /etc/nginx/projets.d)…"
 mkdir -p "${INCLUDE_DIR}"
 
 MAIN_CONF="/etc/nginx/sites-available/vps-multi"
-if [ ! -f "${MAIN_CONF}" ]; then
+# Le domaine, s'il est fourni, est servi en plus de l'IP. La config principale
+# est réécrite à chaque passage pour que l'ajout d'un domaine soit pris en
+# compte sans édition manuelle ; les snippets par projet, eux, sont préservés.
+NOMS="${SERVER_NAME}"
+if [ -n "${DOMAIN}" ]; then
+  NOMS="${DOMAIN} www.${DOMAIN} ${SERVER_NAME}"
+fi
+if [ ! -f "${MAIN_CONF}" ] || [ -n "${DOMAIN}" ]; then
   cat > "${MAIN_CONF}" <<NGINX
 # Serveur nginx partagé — chaque projet ajoute sa config dans ${INCLUDE_DIR}/*.conf
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name ${SERVER_NAME};
+    server_name ${NOMS};
 
     # Chaque projet (studies, …) dépose ici ses « location » (sous-chemin + API).
     include ${INCLUDE_DIR}/*.conf;
@@ -184,10 +218,35 @@ NGINX
 nginx -t
 systemctl reload nginx
 
-log "Terminé ! Le site est en ligne : http://${SERVER_NAME}/${SLUG}/"
+# --------------------------------------------------------------------- HTTPS
+# Le site collectera des données d'élèves mineurs : le chiffrement du transport
+# n'est pas une option. certbot réécrit la config nginx pour ajouter le bloc 443
+# et la redirection depuis le port 80, puis installe son timer de renouvellement.
+URL_FINALE="http://${SERVER_NAME}/${SLUG}/"
+if [ "${TLS}" = "1" ]; then
+  if [ -z "${DOMAIN}" ]; then
+    echo "TLS=1 exige DOMAIN=<votre-domaine> : un certificat ne s'obtient pas pour une IP." >&2
+    exit 1
+  fi
+  log "Obtention du certificat Let's Encrypt pour ${DOMAIN}…"
+  command -v certbot >/dev/null 2>&1 || apt-get install -y certbot python3-certbot-nginx
+  COURRIEL_ARGS="--register-unsafely-without-email"
+  if [ -n "${TLS_EMAIL}" ]; then
+    COURRIEL_ARGS="--email ${TLS_EMAIL}"
+  fi
+  certbot --nginx --non-interactive --agree-tos --redirect \
+    ${COURRIEL_ARGS} -d "${DOMAIN}" -d "www.${DOMAIN}"
+  systemctl reload nginx
+  URL_FINALE="https://${DOMAIN}/${SLUG}/"
+elif [ -n "${DOMAIN}" ]; then
+  URL_FINALE="http://${DOMAIN}/${SLUG}/"
+  log "Domaine servi en HTTP simple. Ajoute TLS=1 TLS_EMAIL=… pour passer en HTTPS."
+fi
+
+log "Terminé ! Le site est en ligne : ${URL_FINALE}"
 echo "   Vérifs utiles :"
 echo "     pm2 status"
 echo "     curl localhost:${API_PORT}/api/sante"
-echo "     curl http://${SERVER_NAME}/${SLUG}/api/sante"
+echo "     curl ${URL_FINALE}api/sante"
 echo "   Mettre à jour ce projet : relance ce script."
 echo "   Ajouter un 2e projet : SLUG=monsite API_PORT=8788 bash deploy/vps-setup.sh"

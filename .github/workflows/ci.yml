@@ -36,6 +36,8 @@ jobs:
         run: npm run typecheck:server
       - name: Typage des paquets kitetudiant
         run: npm run typecheck:kitetudiant
+      - name: Build du front KITETUDIANT
+        run: npm run build:kitetudiant
 
   scripts-python:
     name: Scripts d'exploration Python
