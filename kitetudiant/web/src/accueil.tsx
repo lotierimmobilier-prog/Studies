@@ -88,7 +88,7 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
         </a>
       </div>
       <p className="hero-mentions">
-        Sept questions · sans compte · rien d’enregistré
+        Sept questions · aperçu sans compte · aucune note enregistrée
       </p>
     </section>
   )
@@ -255,6 +255,12 @@ export function Accueil({ onCommencer }: { onCommencer: () => void }) {
             <strong>Tu compares et tu décides.</strong> Rien n’est masqué, rien n’est
             classé à ta place.
           </li>
+          <li>
+            <strong>Un compte pour le détail.</strong> La liste des formations, leur
+            ville et leur taux d’accès s’affichent sans rien donner. Le reste-à-vivre
+            chiffré et le budget poste par poste demandent une adresse e-mail et un mot
+            de passe — rien d’autre, et jamais tes notes.
+          </li>
         </ol>
         <div className="cta-groupe cta-groupe-bloc">
           <button type="button" className="principal" onClick={onCommencer}>
@@ -281,6 +287,12 @@ export function Accueil({ onCommencer }: { onCommencer: () => void }) {
           <li>
             <strong>Il n’invente aucun montant.</strong> Pas de valeur de repli, pas
             d’estimation déguisée : une donnée absente s’affiche comme absente.
+          </li>
+          <li>
+            <strong>Il n’enregistre aucune donnée scolaire.</strong> Même inscrit, tes
+            notes, tes bulletins et tes vœux restent dans ton navigateur. Le compte ne
+            connaît que ton adresse, chiffrée, et il est effacé après trois ans sans
+            usage.
           </li>
         </ul>
       </section>
@@ -310,7 +322,9 @@ export function Accueil({ onCommencer }: { onCommencer: () => void }) {
         <button type="button" className="principal" onClick={onCommencer}>
           Trouver mes formations
         </button>
-        <p className="hero-mentions">Sans compte · rien d’enregistré · gratuit</p>
+        <p className="hero-mentions">
+          Gratuit · un compte pour le détail · aucune note enregistrée
+        </p>
       </section>
 
       <footer className="pieds">

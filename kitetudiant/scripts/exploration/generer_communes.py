@@ -29,6 +29,40 @@ SORTIE = RACINE / "web" / "donnees" / "communes.json"
 TYPOLOGIE = "appartement 1 ou 2 pièces"
 
 
+# Le référentiel georef ne contient que des communes : Paris, Lyon et Marseille
+# y figurent d'un seul tenant, sans leurs arrondissements. Or Parcoursup situe
+# les formations à l'arrondissement. On rattache donc chaque arrondissement au
+# centre de sa commune mère : une approximation de quelques kilomètres, sans
+# effet sur la question posée — quelle ville est la plus proche de l'élève —
+# et bien plus honnête qu'un arrondissement sans position du tout, qui
+# disparaîtrait purement et simplement du classement par distance.
+COMMUNE_MERE = {"751": "75056", "6938": "69123", "132": "13055"}
+
+
+def commune_mere(code: str) -> str | None:
+    """Code de la commune portant la position, pour un arrondissement."""
+    for prefixe, mere in COMMUNE_MERE.items():
+        if code.startswith(prefixe) and code != mere:
+            return mere
+    return None
+
+
+def coordonnees(brut: str | float | None) -> tuple[float, float] | None:
+    """« 47.8083, -3.4376 » → (latitude, longitude), arrondi au centième.
+
+    Deux décimales suffisent largement ici : elles situent à environ un
+    kilomètre près, ce qui est plus fin que la commune elle-même. En garder
+    davantage alourdirait le fichier embarqué sans rien apporter.
+    """
+    if not isinstance(brut, str) or "," not in brut:
+        return None
+    lat, _, lon = brut.partition(",")
+    try:
+        return round(float(lat), 2), round(float(lon), 2)
+    except ValueError:
+        return None
+
+
 def main() -> int:
     communes = pd.read_csv(BRUT / "georef_communes.csv", sep=";", dtype=str)
     communes["nom_norm"] = communes["com_name"].map(normaliser)
@@ -36,6 +70,14 @@ def main() -> int:
     par_dep_nom = (communes.sort_values("prio", ascending=False)
                    .drop_duplicates(["dep_code", "nom_norm"])
                    .set_index(["dep_code", "nom_norm"])["com_code"].to_dict())
+    # Coordonnées du chef-lieu, pour que le front trouve la commune la plus
+    # proche SANS envoyer la position de l'élève où que ce soit.
+    par_code_geo = {}
+    for code, geo in zip(communes["com_code"], communes["geo_point_2d"]):
+        if code not in par_code_geo:
+            pos = coordonnees(geo)
+            if pos is not None:
+                par_code_geo[code] = pos
 
     ps = pd.read_csv(BRUT / "parcoursup_2025.csv", sep=";", dtype=str, low_memory=False)
     ps["nom_norm"] = ps["ville_etab"].map(normaliser)
@@ -66,14 +108,27 @@ def main() -> int:
     loyers = loyers[loyers["insee_c"].isin(utiles)]
 
     table = {}
+    sans_position = 0
     for ligne in loyers.itertuples(index=False):
-        table[ligne.insee_c] = {
+        entree = {
             "nom": ligne.libgeo,
             "bas": round(float(ligne.lwr_ipm2), 3),
             "central": round(float(ligne.loypredm2), 3),
             "haut": round(float(ligne.upr_ipm2), 3),
             "maille": ligne.typpred,
         }
+        pos = par_code_geo.get(ligne.insee_c)
+        if pos is None:
+            mere = commune_mere(ligne.insee_c)
+            if mere is not None:
+                pos = par_code_geo.get(mere)
+        if pos is None:
+            # Pas de repli inventé : une commune sans position ne participera
+            # simplement pas au classement par distance.
+            sans_position += 1
+        else:
+            entree["lat"], entree["lon"] = pos
+        table[ligne.insee_c] = entree
 
     millesime = sorted(set(loyers["year"]))
     sortie = {
@@ -92,6 +147,8 @@ def main() -> int:
     SORTIE.parent.mkdir(parents=True, exist_ok=True)
     SORTIE.write_text(json.dumps(sortie, ensure_ascii=False, separators=(",", ":")) + "\n")
 
+    if sans_position:
+        print(f"  {sans_position} commune(s) sans position : exclues du classement par distance")
     couvertes = sum(1 for c in villes.values() if c in table)
     print(f"\n{len(villes)} villes résolues, {len(non_resolues)} non résolues")
     print(f"{len(table)} communes avec un loyer, soit {100 * couvertes / len(villes):.2f} % des villes")

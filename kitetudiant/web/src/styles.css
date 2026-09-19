@@ -486,3 +486,157 @@ input[type='range'] { width: 100%; min-height: 44px; }
   .cta-final .principal { width: auto; padding-inline: 2.5rem; }
   .cta-final .hero-mentions { text-align: center; }
 }
+
+/* ------------------------------------------------------- compte et verrou */
+/* Noms préfixés « compte- » et « verrou- » : la feuille est partagée par
+   toutes les vues, et un nom déjà pris ferait hériter cette vue d'une autre
+   mise en page sans rien casser visiblement (cf. styles.test.ts). */
+
+.entete-resultats {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.verrou {
+  background: var(--carte);
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon);
+  padding: 1.25rem 1.1rem 1.4rem;
+  margin-bottom: 1.75rem;
+}
+.verrou h2 { margin: 0 0 0.5rem; font-size: 1.15rem; }
+.verrou p { margin: 0 0 0.75rem; font-size: 0.95rem; }
+.verrou-detail { color: var(--doux); font-size: 0.9rem !important; }
+.verrou .principal { width: 100%; }
+.verrou .note { text-align: center; margin-top: 0.7rem; }
+
+.compte { max-width: 26rem; margin: 1.5rem auto 0; }
+.compte h2 { margin: 0 0 0.4rem; font-size: 1.5rem; letter-spacing: -0.01em; }
+.compte-pourquoi { margin: 0 0 1.5rem; color: var(--doux); }
+.compte-form { display: flex; flex-direction: column; gap: 1rem; }
+.compte-form .principal { width: 100%; margin-top: 0.3rem; }
+.compte-bascule { margin: 1.2rem 0 0; font-size: 0.9rem; color: var(--doux); text-align: center; }
+
+.compte-confiance {
+  margin-top: 2rem;
+  padding: 1rem 1.1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.compte-confiance h3 { margin: 0 0 0.6rem; font-size: 0.95rem; }
+.compte-confiance ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.compte-confiance li { font-size: 0.86rem; color: var(--doux); }
+.compte-confiance strong { color: var(--encre); }
+
+.compte-retour { display: block; margin: 1.2rem auto 0; }
+
+/* ------------------------------------------------- les trois choix de tête */
+/* Préfixe « choix- » : la feuille est partagée par toutes les vues, et un nom
+   déjà pris ferait hériter cette section d'une autre mise en page en silence
+   (cf. styles.test.ts). */
+
+.choix-tete { margin: 0 0 2.25rem; }
+.choix-tete-titre { margin: 0 0 0.3rem; font-size: 1.2rem; letter-spacing: -0.01em; }
+.choix-tete-intro { margin: 0 0 1rem; color: var(--doux); font-size: 0.88rem; }
+
+.choix-grille { display: grid; gap: 0.75rem; }
+
+.choix-carte {
+  position: relative;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 1rem 1.1rem 1.1rem;
+}
+/* Une teinte par critère, pour qu'on les distingue d'un coup d'œil sans
+   jamais suggérer un classement entre eux. */
+.choix-geographique { border-left: 3px solid var(--accent); }
+.choix-strategique { border-left: 3px solid var(--vert); }
+.choix-economique { border-left: 3px solid var(--orange); }
+
+.choix-rang {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.55rem;
+}
+.choix-titre { margin: 0 0 0.1rem; font-size: 1rem; }
+.choix-sous { margin: 0 0 0.8rem; color: var(--doux); font-size: 0.84rem; }
+.choix-valeur {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.choix-formation { margin: 0 0 0.15rem; font-weight: 600; font-size: 0.95rem; }
+.choix-etab { margin: 0 0 0.7rem; color: var(--doux); font-size: 0.85rem; }
+.choix-pourquoi { margin: 0; color: var(--doux); font-size: 0.8rem; }
+.choix-absent { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.88rem; }
+.choix-action { width: 100%; }
+.choix-message { margin: -1.5rem 0 1.75rem; }
+
+.choix-confidentialite {
+  margin: 1rem 0 0;
+  color: var(--doux);
+  font-size: 0.78rem;
+}
+.choix-confidentialite strong { color: var(--encre); }
+
+@media (min-width: 40rem) {
+  .choix-grille { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ------------------------------------------------------ étape « budget » */
+/* Préfixe « budget- » : un nom déjà pris ferait hériter cette étape d'une
+   autre mise en page en silence (cf. styles.test.ts). */
+
+.budget { display: flex; flex-direction: column; gap: 1.75rem; }
+.budget-question .champ-label { display: block; margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--encre); font-weight: 600; }
+/* Le montant appliqué par chaque réponse est affiché sous son libellé : c'est
+   ce qui distingue une hypothèse annoncée d'une valeur de repli silencieuse. */
+.budget-montant { display: block; margin-top: 0.25rem; color: var(--doux); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.budget-resume { display: block; margin-top: 0.15rem; color: var(--doux); font-size: 0.84rem; }
+
+.budget-total {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  font-size: 0.9rem;
+}
+
+.budget-detail { border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+/* Sans « display » : le <summary> garde son marqueur natif, et la hauteur de
+   cible tactile vient du rembourrage. (Note pour qui mesurerait ce repli :
+   getBoundingClientRect et offsetParent voient encore le contenu d'un
+   <details> fermé — seul checkVisibility() dit la vérité.) */
+.budget-detail summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.7rem 0;
+}
+.budget-champs { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.6rem; }
+
+/* La liste des échelons n'apparaît qu'une fois « boursier » choisi. */
+.sous-question { margin-top: 0.4rem; }
+.sous-question .champ-label { display: block; margin-bottom: 0.5rem; }

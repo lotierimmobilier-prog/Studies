@@ -15,6 +15,10 @@ import {
 import {
   chercherAgregatsRetours,
   chercherAidesLogement,
+  deconnecter,
+  InscriptionRequise,
+  jetonSession,
+  positionDe,
   chercherFormations,
   MILLESIME_LOYERS,
   SOURCE_LOYERS,
@@ -26,6 +30,10 @@ import {
 } from './donnees.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 import { Accueil } from './accueil.tsx'
+import { Compte } from './compte.tsx'
+import { TroisChoix } from './choix.tsx'
+import { troisChoix, type PositionEleve } from './recommandations.ts'
+import { localiser } from './geo.ts'
 import { NoteDuLieu } from './avisLieu.tsx'
 import { PanneauRetours, ResumeRetours } from './retours.tsx'
 
@@ -109,21 +117,41 @@ function Carte({
   onOuvrir,
   ouvert,
   retours,
+  verrouille,
+  onInscrire,
 }: {
   resultat: ResultatFormation
   tous: readonly ResultatFormation[]
   onOuvrir: () => void
   ouvert: boolean
   retours: AgregatRetours | undefined
+  /** Ouvre le formulaire d'inscription depuis la carte elle-même. */
+  onInscrire: () => void
+  /**
+   * Vrai quand le montant existe mais demande un compte. À ne pas confondre
+   * avec « non calculable », qui veut dire qu'une donnée manque réellement :
+   * annoncer une donnée absente alors qu'elle est seulement retenue serait
+   * faux, et c'est le genre de flou que ce projet s'interdit.
+   */
+  verrouille: boolean
 }) {
   const central = resultat.parScenario.central
-  const verdict = VERDICTS[central.soutenabilite]
+  // Quand le montant est seulement verrouillé, le verdict « non calculable »
+  // serait faux : le chiffre existe, il n'est pas encore montré. Le dire
+  // autrement n'est pas une nuance de style, c'est la différence entre une
+  // donnée absente et une donnée retenue.
+  const verdict =
+    verrouille && central.ravMensuel === null
+      ? { texte: 'Visible après inscription', classe: 'gris' }
+      : VERDICTS[central.soutenabilite]
   const jumeaux = ouvert ? jumeauxGeographiques(tous, resultat) : []
   return (
     <article className={`carte ${verdict.classe}`}>
       <div className="carte-rav">
         {central.ravMensuel === null ? (
-          <span className="rav-absent">Non calculable</span>
+          <span className="rav-absent">
+            {verrouille ? 'Réservé aux inscrits' : 'Non calculable'}
+          </span>
         ) : (
           <>
             <span className="rav">{euros(central.ravMensuel)}</span>
@@ -158,7 +186,11 @@ function Carte({
         <div className="axe">
           <span className="axe-titre">Ce qu’il te reste</span>
           <span className="axe-valeur">
-            {central.ravMensuel === null ? 'non calculable' : euros(central.ravMensuel)}
+            {central.ravMensuel === null
+              ? verrouille
+                ? 'après inscription'
+                : 'non calculable'
+              : euros(central.ravMensuel)}
           </span>
         </div>
       </div>
@@ -173,9 +205,15 @@ function Carte({
       ))}
       {resultat.raisonAide ? <p className="avertissement">{resultat.raisonAide}</p> : null}
 
-      <button type="button" className="lien" onClick={onOuvrir}>
-        {ouvert ? 'Replier le budget' : 'Voir le budget, poste par poste'}
-      </button>
+      {verrouille ? (
+        <button type="button" className="lien" onClick={onInscrire}>
+          Créer mon compte pour voir le budget
+        </button>
+      ) : (
+        <button type="button" className="lien" onClick={onOuvrir}>
+          {ouvert ? 'Replier le budget' : 'Voir le budget, poste par poste'}
+        </button>
+      )}
 
       {ouvert ? (
         <div className="detail">
@@ -256,6 +294,41 @@ export default function App() {
   const [erreur, setErreur] = useState<string | null>(null)
   const [ouvert, setOuvert] = useState<string | null>(null)
   const [retours, setRetours] = useState<Map<string, AgregatRetours>>(new Map())
+  /** Message du serveur quand le détail réclame un compte. null = pas de verrou. */
+  const [verrou, setVerrou] = useState<string | null>(null)
+  /** Vrai quand l'élève a demandé à s'inscrire : le formulaire prend l'écran. */
+  const [formulaireCompte, setFormulaireCompte] = useState(false)
+  const [connecte, setConnecte] = useState(() => jetonSession() !== '')
+  /**
+   * Position de l'élève, établie par son navigateur avec son accord, et gardée
+   * UNIQUEMENT en mémoire : elle n'est ni stockée ni transmise (voir geo.ts).
+   */
+  const [position, setPosition] = useState<PositionEleve | null>(null)
+  const [positionEnCours, setPositionEnCours] = useState(false)
+  const [messagePosition, setMessagePosition] = useState<string | null>(null)
+
+  const demanderPosition = useCallback(async () => {
+    setPositionEnCours(true)
+    setMessagePosition(null)
+    try {
+      const r = await localiser()
+      if (r.etat === 'trouvee') {
+        const commune = positionDe(r.codeInsee)
+        if (commune !== null) setPosition(commune)
+        setMessagePosition(`Position retenue : ${r.nom}.`)
+      } else if (r.etat === 'refusee') {
+        // Dire non n'est pas une panne : on le formule comme un choix, pas
+        // comme un échec, et le reste du site continue sans.
+        setMessagePosition(
+          'Tu as refusé le partage de position — le reste de la liste fonctionne quand même.',
+        )
+      } else {
+        setMessagePosition(r.raison)
+      }
+    } finally {
+      setPositionEnCours(false)
+    }
+  }, [])
 
   const majReponses = useCallback((partiel: Partial<Reponses>) => {
     setReponses((r) => ({ ...r, ...partiel }))
@@ -286,8 +359,20 @@ export default function App() {
           ]
         }),
       )
-      const aides = await chercherAidesLogement(demandes)
-      const parRef = new Map<string, AideLogement>(aides.map((a) => [a.ref, a]))
+      // Sans compte, le serveur refuse l'aide au logement — donc le
+      // reste-à-vivre n'est pas calculable. On affiche quand même l'aperçu :
+      // formations, établissements, villes et taux d'accès publiés. L'élève
+      // voit ce qu'il obtiendra avant de donner son adresse.
+      let parRef = new Map<string, AideLogement>()
+      try {
+        const aides = await chercherAidesLogement(demandes)
+        parRef = new Map<string, AideLogement>(aides.map((a) => [a.ref, a]))
+        setVerrou(null)
+      } catch (e) {
+        if (!(e instanceof InscriptionRequise)) throw e
+        setVerrou(e.message)
+        setConnecte(false)
+      }
       const aujourdHui = new Date().toISOString().slice(0, 10)
       setRetours(await chercherAgregatsRetours(formations.map((f) => f.id)))
       setResultats(trierParPertinence(calculerResultats(formations, reponses, parRef, aujourdHui)))
@@ -309,13 +394,74 @@ export default function App() {
     return <Accueil onCommencer={() => setVue('parcours')} />
   }
 
-  if (resultats !== null) {
+  if (formulaireCompte) {
     return (
       <main className="app">
         <header className="entete">
           <h1>KITETUDIANT</h1>
-          <p className="baseline">Ce qu’il te restera pour vivre, vœu par vœu.</p>
         </header>
+        <Compte
+          message={verrou ?? 'Ton compte te donne accès au détail de chaque budget.'}
+          onOuvert={() => {
+            setFormulaireCompte(false)
+            setConnecte(true)
+            void lancer()
+          }}
+          onAbandon={() => setFormulaireCompte(false)}
+        />
+      </main>
+    )
+  }
+
+  if (resultats !== null) {
+    return (
+      <main className="app">
+        <header className="entete entete-resultats">
+          <div>
+            <h1>KITETUDIANT</h1>
+            <p className="baseline">Ce qu’il te restera pour vivre, vœu par vœu.</p>
+          </div>
+          {connecte ? (
+            <button
+              type="button"
+              className="lien"
+              onClick={() => {
+                void deconnecter()
+                setConnecte(false)
+                void lancer()
+              }}
+            >
+              Se déconnecter
+            </button>
+          ) : null}
+        </header>
+
+        {verrou ? (
+          <section className="verrou">
+            <h2>Le reste-à-vivre est derrière ton compte</h2>
+            <p>{verrou}</p>
+            <p className="verrou-detail">
+              La liste ci-dessous est complète : chaque formation, son établissement, sa
+              ville et son taux d’accès publié. Ce qui demande un compte, c’est le montant
+              qu’il te restera chaque mois et le budget poste par poste.
+            </p>
+            <button type="button" className="principal" onClick={() => setFormulaireCompte(true)}>
+              Créer mon compte — une adresse, un mot de passe
+            </button>
+            <p className="note">
+              Aucune note, aucun vœu, aucun bulletin n’est enregistré. Seulement ton adresse,
+              chiffrée.
+            </p>
+          </section>
+        ) : null}
+
+        <TroisChoix
+          propositions={troisChoix(resultats, position, verrou !== null)}
+          localisationEnCours={positionEnCours}
+          onLocaliser={() => void demanderPosition()}
+          onInscrire={() => setFormulaireCompte(true)}
+        />
+        {messagePosition ? <p className="note choix-message">{messagePosition}</p> : null}
 
         <p className="resume">
           {resultats.length} formations trouvées, {complets} avec un reste-à-vivre calculé.
@@ -331,6 +477,8 @@ export default function App() {
               tous={resultats}
               retours={retours.get(r.formation.id)}
               ouvert={ouvert === r.formation.id}
+              verrouille={verrou !== null}
+              onInscrire={() => setFormulaireCompte(true)}
               onOuvrir={() => setOuvert(ouvert === r.formation.id ? null : r.formation.id)}
             />
           ))}

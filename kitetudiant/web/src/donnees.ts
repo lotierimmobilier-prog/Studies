@@ -35,6 +35,43 @@ export const GENERE_LE = communes.genereLe
 /** Communes pour lesquelles un loyer est disponible. Compté, jamais écrit en dur. */
 export const NOMBRE_COMMUNES_AVEC_LOYER = Object.keys(communes.communes).length
 
+/**
+ * Position du chef-lieu d'une commune, ou null si elle est inconnue.
+ * Fonction à part plutôt qu'un champ de `loyerDe` : les loyers et les
+ * positions répondent à deux questions différentes, et `LoyerCommune` ne doit
+ * pas se mettre à transporter de la géographie.
+ */
+export function positionDe(codeInsee: string | null): { lat: number; lon: number } | null {
+  if (codeInsee === null) return null
+  const brut = (communes.communes as Record<string, { lat?: number; lon?: number }>)[codeInsee]
+  if (brut === undefined) return null
+  if (typeof brut.lat !== 'number' || typeof brut.lon !== 'number') return null
+  return { lat: brut.lat, lon: brut.lon }
+}
+
+export interface CommunePositionnee {
+  readonly codeInsee: string
+  readonly nom: string
+  readonly lat: number
+  readonly lon: number
+}
+
+/**
+ * Communes dont on connaît la position, pour trouver la plus proche d'un élève
+ * sans envoyer sa position à quiconque. Une commune sans coordonnées est
+ * simplement absente : on n'invente pas de position de repli.
+ */
+export function communesPositionnees(): CommunePositionnee[] {
+  const liste: CommunePositionnee[] = []
+  for (const [codeInsee, c] of Object.entries(communes.communes)) {
+    const brut = c as { nom: string; lat?: number; lon?: number }
+    if (typeof brut.lat === 'number' && typeof brut.lon === 'number') {
+      liste.push({ codeInsee, nom: brut.nom, lat: brut.lat, lon: brut.lon })
+    }
+  }
+  return liste
+}
+
 export interface Formation {
   readonly id: string
   readonly libelle: string
@@ -238,6 +275,107 @@ export async function listerFilieres(
     .map((r) => ({ libelle: r.fili, nombre: r.nombre ?? 0 }))
 }
 
+/* ------------------------------------------------------------------ comptes */
+
+/**
+ * Jeton de session. Il vit dans le navigateur de l'élève, jamais ailleurs.
+ * localStorage peut lever (navigation privée, stockage bloqué) : chaque accès
+ * est donc gardé, et l'absence de jeton se traite comme une déconnexion.
+ */
+const CLE_SESSION = 'kitetudiant.session'
+
+export function jetonSession(): string {
+  try {
+    return window.localStorage.getItem(CLE_SESSION) ?? ''
+  } catch {
+    return ''
+  }
+}
+
+function poserJeton(jeton: string): void {
+  try {
+    window.localStorage.setItem(CLE_SESSION, jeton)
+  } catch {
+    // Stockage refusé : la session ne survivra pas au rechargement. Ce n'est
+    // pas une erreur à remonter à l'élève, il est connecté pour cette visite.
+  }
+}
+
+function oublierJeton(): void {
+  try {
+    window.localStorage.removeItem(CLE_SESSION)
+  } catch {
+    /* rien à faire */
+  }
+}
+
+/** Levée quand le serveur réclame un compte pour aller plus loin. */
+export class InscriptionRequise extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'InscriptionRequise'
+  }
+}
+
+/** Erreur d'inscription ou de connexion, telle que le serveur la formule. */
+export class CompteRefuse extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'CompteRefuse'
+  }
+}
+
+async function appelCompte(
+  chemin: string,
+  corps: { email: string; motDePasse: string },
+  base: string,
+  recuperer: typeof fetch,
+): Promise<void> {
+  const reponse = await recuperer(`${base}/comptes/${chemin}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(corps),
+  })
+  const donnees = (await reponse.json().catch(() => ({}))) as {
+    jeton?: string
+    erreur?: string
+  }
+  if (!reponse.ok || typeof donnees.jeton !== 'string') {
+    throw new CompteRefuse(donnees.erreur ?? `le service a répondu ${reponse.status}`)
+  }
+  poserJeton(donnees.jeton)
+}
+
+export function inscrire(
+  email: string,
+  motDePasse: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<void> {
+  return appelCompte('inscription', { email, motDePasse }, base, recuperer)
+}
+
+export function connecter(
+  email: string,
+  motDePasse: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<void> {
+  return appelCompte('connexion', { email, motDePasse }, base, recuperer)
+}
+
+export async function deconnecter(base = '/api', recuperer: typeof fetch = fetch): Promise<void> {
+  const jeton = jetonSession()
+  oublierJeton()
+  if (jeton === '') return
+  // La session est fermée côté serveur aussi : oublier le jeton localement
+  // laisserait une session ouverte jusqu'à son expiration.
+  await recuperer(`${base}/comptes/deconnexion`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${jeton}` },
+  }).catch(() => undefined)
+}
+
 export interface DemandeAide {
   readonly ref: string
   readonly codeInsee: string
@@ -262,9 +400,13 @@ export async function chercherAidesLogement(
   if (demandes.length === 0) return []
   let reponse: Response
   try {
+    const jeton = jetonSession()
     reponse = await recuperer(`${base}/aide-logement`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(jeton === '' ? {} : { Authorization: `Bearer ${jeton}` }),
+      },
       body: JSON.stringify(demandes),
     })
   } catch (e) {
@@ -272,8 +414,17 @@ export async function chercherAidesLogement(
     return demandes.map((d) => ({ ref: d.ref, raison: `Service d'aide au logement injoignable : ${detail}` }))
   }
   if (!reponse.ok) {
-    const corps = (await reponse.json().catch(() => ({}))) as { erreur?: string }
+    const corps = (await reponse.json().catch(() => ({}))) as {
+      erreur?: string
+      inscriptionRequise?: boolean
+    }
     const raison = corps.erreur ?? `le service a répondu ${reponse.status}`
+    // Un compte manquant n'est pas une donnée manquante : on le distingue pour
+    // que l'affichage propose l'inscription au lieu d'annoncer une panne.
+    if (reponse.status === 401 && corps.inscriptionRequise === true) {
+      oublierJeton()
+      throw new InscriptionRequise(raison)
+    }
     return demandes.map((d) => ({ ref: d.ref, raison: `Aide au logement non calculée : ${raison}` }))
   }
   const corps = (await reponse.json()) as (

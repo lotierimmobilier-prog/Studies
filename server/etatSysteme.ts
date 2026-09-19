@@ -14,6 +14,7 @@
 import { BAREMES, estIndisponible, valeurApplicable } from '../kitetudiant/packages/baremes/src/index.ts'
 import type { DepotRetours } from './retours'
 import type { Coffre, EtatSecret } from './secrets'
+import type { DepotComptes, EtatComptes } from './comptes.ts'
 
 export interface EtatBareme {
   readonly cle: string
@@ -34,6 +35,13 @@ export interface EtatSysteme {
   readonly secrets: readonly EtatSecret[]
   readonly baremes: readonly EtatBareme[]
   readonly millesimes: readonly EtatMillesime[]
+  /**
+   * État des comptes élèves. « configure: false » signifie que
+   * COMPTES_MASTER_KEY manque : l'inscription est alors impossible et le
+   * détail du résultat reste ouvert à tous. Il faut que l'administrateur le
+   * voie, sinon le verrou peut être absent sans que personne le sache.
+   */
+  readonly comptes: EtatComptes
 }
 
 export function etatDesBaremes(aLaDate: string): EtatBareme[] {
@@ -63,6 +71,7 @@ export function etatDesBaremes(aLaDate: string): EtatBareme[] {
 export async function etatSysteme(
   coffre: Coffre,
   depotRetours: DepotRetours,
+  depotComptes: DepotComptes,
   maintenant = new Date(),
 ): Promise<EtatSysteme> {
   const aLaDate = maintenant.toISOString().slice(0, 10)
@@ -75,5 +84,6 @@ export async function etatSysteme(
     secrets: await coffre.etat(),
     baremes: etatDesBaremes(aLaDate),
     millesimes: comptes,
+    comptes: await depotComptes.etat(maintenant),
   }
 }

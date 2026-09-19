@@ -53,7 +53,7 @@ ordre (voir plus bas), avec vos propres secrets à la place des points :
 PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
   SERVER_NAME=76.13.37.193 \
   DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=lotierimmobilier@gmail.com \
-  ADMIN_TOKEN="…" ADMIN_MASTER_KEY="…" \
+  ADMIN_TOKEN="…" ADMIN_MASTER_KEY="…" COMPTES_MASTER_KEY="…" \
   bash deploy/vps-setup.sh
 ```
 
@@ -65,9 +65,16 @@ deux se tirent au hasard une fois pour toutes :
 openssl rand -base64 32   # à faire deux fois, un secret par variable
 ```
 
+`COMPTES_MASTER_KEY` (≥ 16) chiffre les comptes élèves : c'est elle qui active
+l'inscription. **Sans elle, personne ne peut s'inscrire et le détail du résultat
+reste ouvert à tous** — la console d'administration l'affiche en clair, section
+« Comptes élèves ».
+
 Ils atterrissent dans `/opt/kitetudiant/.env`, en mode 600. **Changer
-`ADMIN_MASTER_KEY` rend illisibles les clés déjà rangées dans le coffre** : il
-faudra les reposer depuis la console.
+`ADMIN_MASTER_KEY` rend illisibles les clés déjà rangées dans le coffre**, et
+**changer `COMPTES_MASTER_KEY` rend tous les comptes inaccessibles** : les
+adresses chiffrées ne se déchiffrent plus et les élèves ne peuvent plus se
+connecter. Ces deux secrets se tirent une fois et ne se changent plus.
 
 Les clés API (`ANTHROPIC_API_KEY`, `GOOGLE_MAPS_API_KEY`) n'ont pas besoin de
 figurer ici : une fois le HTTPS en place, elles se posent depuis la console
