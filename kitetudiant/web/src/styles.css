@@ -201,3 +201,76 @@ a { color: var(--accent); }
 @media (min-width: 40rem) {
   .echelons { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* ---------------------------------------------- notes, domaines, deux axes */
+.notes { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
+.note-ligne {
+  display: grid;
+  grid-template-columns: 1fr 5.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.note-ligne input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  text-align: right;
+  min-height: 44px;
+}
+
+.depot {
+  display: block;
+  padding: 1.1rem 1rem;
+  border: 1px dashed var(--accent);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+}
+.depot input { display: none; }
+
+.domaines { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.domaines button {
+  text-align: center;
+  padding: 0.7rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+input[type='range'] { width: 100%; min-height: 44px; }
+
+.axes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 0.9rem 0 0;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--trait);
+  border-bottom: 1px solid var(--trait);
+}
+.axe { display: flex; flex-direction: column; gap: 0.1rem; }
+.axe-titre { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--doux); }
+.axe-valeur { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.axe-absent { font-size: 0.95rem; color: var(--doux); }
+
+.raisons { margin-bottom: 1.2rem; }
+.raisons h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.raisons ul { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; color: var(--doux); }
+.detail h4 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+
+@media (min-width: 40rem) {
+  .notes { grid-template-columns: 1fr 1fr; }
+  .domaines { grid-template-columns: repeat(3, 1fr); }
+}

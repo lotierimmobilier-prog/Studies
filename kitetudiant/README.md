@@ -73,10 +73,25 @@ npm run dev:kitetudiant   # front sur http://localhost:5174
 npm run build:kitetudiant # build de production -> dist-kitetudiant/
 ```
 
-Sept questions, puis la liste de vœux. Mobile d'abord, sans compte, rien
-d'enregistré. Sur chaque carte, le reste-à-vivre est le plus gros caractère de
-la page ; le taux d'accès est affiché en petit, tel que le ministère le publie,
-avec la mention que ce n'est pas la probabilité du candidat.
+Sept questions — ton bac, tes notes, ce qui t'intéresse, ta motivation, où tu
+peux aller, ta bourse, ton budget — puis la liste de vœux. Mobile d'abord, sans
+compte, rien d'enregistré. Sur chaque carte, le reste-à-vivre est le plus gros
+caractère de la page.
+
+**Deux axes, jamais additionnés** (règle 5 de `CLAUDE.md`) : ce qui te
+correspond d'un côté, ce qu'il te restera pour vivre de l'autre. Les formations
+sont classées d'abord par affinité, puis, à affinité proche, par reste-à-vivre.
+
+Les notes s'importent depuis un bulletin (PDF ou photo) ou se saisissent à la
+main. De l'analyse du bulletin, seuls des nombres ressortent : les moyennes par
+matière et trois signaux chiffrés. Le texte des appréciations ne quitte jamais
+le serveur (règle 3).
+
+L'estimation de chances lit les statistiques publiées — taux d'accès,
+répartition des admis par bac, par mention, par académie, part de boursiers —
+et rend **une fourchette, jamais un point**. Sous 30 admis connus, elle rend
+« effectif insuffisant » plutôt qu'un chiffre. Ce n'est pas le modèle calibré du
+lot L2 : le code et l'interface le disent.
 
 Les données sont réelles : formations et statistiques d'admission en direct de
 l'open data du ministère, loyers de l'indicateur communal, aide au logement

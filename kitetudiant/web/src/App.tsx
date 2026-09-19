@@ -1,26 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import type { LigneBudget, Soutenabilite } from '../../packages/budget-engine/src/types.ts'
 import {
   calculerResultats,
   jumeauxGeographiques,
   loyerMensuelBrut,
+  motsClesDe,
   refAide,
   SCENARIOS,
-  trierParRAV,
+  trierParPertinence,
   type Reponses,
   type ResultatFormation,
 } from './calcul.ts'
 import {
   chercherAidesLogement,
   chercherFormations,
-  listerFilieres,
   MILLESIME_LOYERS,
   SOURCE_LOYERS,
+  SOURCE_PARCOURSUP,
   TYPOLOGIE_LOYERS,
   type AideLogement,
   type FiltreFormations,
-  type Formation,
 } from './donnees.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 
@@ -50,19 +50,24 @@ const VERDICTS: Record<Soutenabilite, { texte: string; classe: string }> = {
   indeterminable: { texte: 'Reste-à-vivre non calculable', classe: 'gris' },
 }
 
-function Admission({ formation }: { formation: Formation }) {
-  if (formation.tauxAcces === null) {
-    return <p className="admission">Taux d’accès non publié pour cette formation.</p>
+function Admission({ resultat }: { resultat: ResultatFormation }) {
+  const a = resultat.admissibilite
+  if (a.statut === 'donnee_manquante') {
+    return <p className="admission">{a.raison}</p>
   }
-  // Le taux d'accès publié est un fait sur la promotion passée, pas une
-  // probabilité pour ce candidat-ci. On l'affiche tel quel : inventer une
-  // fourchette autour reviendrait à fabriquer une statistique. La probabilité
-  // personnalisée viendra du modèle calibré du lot L2, qui n'existe pas encore.
+  if (a.statut === 'effectif_insuffisant') {
+    return <p className="admission">{a.raison}</p>
+  }
+  // Une borne basse à zéro ne dit rien : mieux vaut annoncer un plafond.
+  const enonce =
+    a.bas === 0
+      ? `Moins de ${a.haut} % de chances d’avoir une proposition`
+      : `Entre ${a.bas} et ${a.haut} % de chances d’avoir une proposition`
   return (
     <p className="admission">
-      {formation.tauxAcces} % des candidats ont reçu une proposition
-      {formation.session ? ` en ${formation.session}` : ''} (taux d’accès publié par le
-      ministère). Ce n’est pas ta probabilité : elle dépend de ton dossier.
+      <strong>{enonce}</strong> — estimation à partir du taux d’accès publié (
+      {a.tauxAccesPublie} %) et de {a.effectifAdmis} admis en {a.millesime}. Ce n’est
+      pas un modèle calibré.
     </p>
   )
 }
@@ -134,7 +139,24 @@ function Carte({
         </p>
       ) : null}
 
-      <Admission formation={resultat.formation} />
+      <div className="axes">
+        <div className="axe">
+          <span className="axe-titre">Ce qui te correspond</span>
+          {resultat.affinite.domaineInconnu ? (
+            <span className="axe-absent">Domaine non reconnu</span>
+          ) : (
+            <span className="axe-valeur">{resultat.affinite.score}/100</span>
+          )}
+        </div>
+        <div className="axe">
+          <span className="axe-titre">Ce qu’il te reste</span>
+          <span className="axe-valeur">
+            {central.ravMensuel === null ? 'non calculable' : euros(central.ravMensuel)}
+          </span>
+        </div>
+      </div>
+
+      <Admission resultat={resultat} />
 
       {central.avertissements.map((a) => (
         <p className="avertissement" key={a}>
@@ -149,6 +171,30 @@ function Carte({
 
       {ouvert ? (
         <div className="detail">
+          {resultat.affinite.raisons.length > 0 ? (
+            <div className="raisons">
+              <h4>Pourquoi cette formation te correspond, ou pas</h4>
+              <ul>
+                {resultat.affinite.raisons.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {resultat.admissibilite.statut === 'fourchette' &&
+          resultat.admissibilite.facteurs.length > 0 ? (
+            <div className="raisons">
+              <h4>Ce qui joue sur tes chances</h4>
+              <ul>
+                {resultat.admissibilite.facteurs.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          <h4>Ton budget mensuel</h4>
           <ul className="lignes">
             {central.lignes.map((l) => (
               <Ligne key={l.poste} ligne={l} />
@@ -189,17 +235,10 @@ function Carte({
 export default function App() {
   const [etape, setEtape] = useState(0)
   const [reponses, setReponses] = useState<Reponses>(REPONSES_PAR_DEFAUT)
-  const [filieres, setFilieres] = useState<{ libelle: string; nombre: number }[]>([])
   const [resultats, setResultats] = useState<ResultatFormation[] | null>(null)
   const [enCours, setEnCours] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
   const [ouvert, setOuvert] = useState<string | null>(null)
-
-  useEffect(() => {
-    listerFilieres()
-      .then(setFilieres)
-      .catch((e: Error) => setErreur(`Filières indisponibles : ${e.message}`))
-  }, [])
 
   const majReponses = useCallback((partiel: Partial<Reponses>) => {
     setReponses((r) => ({ ...r, ...partiel }))
@@ -210,8 +249,11 @@ export default function App() {
     setErreur(null)
     try {
       const filtre: FiltreFormations = { limite: 40 }
-      if (reponses.filiere) Object.assign(filtre, { filiere: reponses.filiere })
-      if (reponses.academie) Object.assign(filtre, { academie: reponses.academie })
+      const motsCles = motsClesDe(reponses.passions)
+      if (motsCles.length > 0) Object.assign(filtre, { motsCles })
+      if (reponses.mobilite !== 'france' && reponses.academie) {
+        Object.assign(filtre, { academie: reponses.academie })
+      }
       const formations = await chercherFormations(filtre)
       const demandes = formations.flatMap((f) =>
         SCENARIOS.flatMap((s) => {
@@ -230,7 +272,7 @@ export default function App() {
       const aides = await chercherAidesLogement(demandes)
       const parRef = new Map<string, AideLogement>(aides.map((a) => [a.ref, a]))
       const aujourdHui = new Date().toISOString().slice(0, 10)
-      setResultats(trierParRAV(calculerResultats(formations, reponses, parRef, aujourdHui)))
+      setResultats(trierParPertinence(calculerResultats(formations, reponses, parRef, aujourdHui)))
     } catch (e) {
       setErreur((e as Error).message)
     } finally {
@@ -255,7 +297,8 @@ export default function App() {
 
         <p className="resume">
           {resultats.length} formations trouvées, {complets} avec un reste-à-vivre calculé.
-          Trié du plus vivable au moins vivable. Aucun vœu n’est retiré de la liste.
+          Classées d’abord par ce qui te correspond, puis par ce qu’il te restera pour
+          vivre. Les deux ne sont jamais additionnés, et aucun vœu n’est retiré de la liste.
         </p>
 
         <div className="cartes">
@@ -279,9 +322,11 @@ export default function App() {
             Loyers : {SOURCE_LOYERS}, millésime {MILLESIME_LOYERS}, typologie «{' '}
             {TYPOLOGIE_LOYERS} ».
           </p>
+          <p>Formations et statistiques d’admission : {SOURCE_PARCOURSUP}.</p>
           <p>
-            Formations et statistiques d’admission : open data du ministère de
-            l’Enseignement supérieur, jeu <code>fr-esr-parcoursup</code>, Licence Ouverte.
+            L’estimation de chances lit les statistiques publiées ; ce n’est pas un
+            modèle calibré et elle n’a pas été rétro-testée. En dessous de 30 admis
+            connus, aucune estimation n’est donnée.
           </p>
           <p>
             Aide au logement calculée par OpenFisca France. Bourses, aide au mérite,
@@ -316,13 +361,7 @@ export default function App() {
         <h2>{etapeCourante?.titre}</h2>
         <p className="aide">{etapeCourante?.aide}</p>
 
-        <Question
-          etape={etape}
-          reponses={reponses}
-          filieres={filieres}
-          academies={ACADEMIES}
-          onChange={majReponses}
-        />
+        <Question etape={etape} reponses={reponses} academies={ACADEMIES} onChange={majReponses} />
       </section>
 
       {erreur ? <p className="erreur">{erreur}</p> : null}

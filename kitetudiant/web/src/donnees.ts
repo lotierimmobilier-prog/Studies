@@ -47,7 +47,11 @@ export interface Formation {
   readonly lien: string | null
   readonly session: string
   readonly codeInsee: string | null
+  /** Statistiques publiées, telles quelles : aucune n'est recalculée. */
+  readonly stats: StatsFormation
 }
+
+import type { StatsFormation } from '../../packages/admissibilite/src/types.ts'
 
 interface EnregistrementEsr {
   readonly cod_aff_form?: string
@@ -65,6 +69,21 @@ interface EnregistrementEsr {
   readonly pct_bours?: number
   readonly lien_form_psup?: string
   readonly session?: string
+  readonly acc_bg?: number
+  readonly acc_bt?: number
+  readonly acc_bp?: number
+  readonly acc_at?: number
+  readonly acc_brs?: number
+  readonly acc_aca_orig?: number
+  readonly acc_sansmention?: number
+  readonly acc_ab?: number
+  readonly acc_b?: number
+  readonly acc_tb?: number
+  readonly acc_tbf?: number
+}
+
+function nombreOuNul(v: number | undefined): number | null {
+  return typeof v === 'number' ? v : null
 }
 
 /** Normalisation identique à celle du script de génération. */
@@ -134,12 +153,35 @@ function convertir(e: EnregistrementEsr): Formation | null {
     lien: e.lien_form_psup ?? null,
     session: e.session ?? '',
     codeInsee: codeInseeDe(ville, dep),
+    stats: {
+      session: e.session ?? '',
+      capacite: nombreOuNul(e.capa_fin),
+      admisTotal: nombreOuNul(e.acc_tot),
+      tauxAcces: nombreOuNul(e.taux_acces_ens),
+      admisBacGeneral: nombreOuNul(e.acc_bg),
+      admisBacTechno: nombreOuNul(e.acc_bt),
+      admisBacPro: nombreOuNul(e.acc_bp),
+      admisAutres: nombreOuNul(e.acc_at),
+      admisBoursiers: nombreOuNul(e.acc_brs),
+      admisMemeAcademie: nombreOuNul(e.acc_aca_orig),
+      admisSansMention: nombreOuNul(e.acc_sansmention),
+      admisMentionAB: nombreOuNul(e.acc_ab),
+      admisMentionB: nombreOuNul(e.acc_b),
+      admisMentionTB: nombreOuNul(e.acc_tb),
+      admisMentionTBF: nombreOuNul(e.acc_tbf),
+      selective: e.select_form !== 'formation non sélective',
+    },
   }
 }
+
+export const SOURCE_PARCOURSUP =
+  'Parcoursup, open data du ministère de l’Enseignement supérieur (jeu fr-esr-parcoursup), Licence Ouverte'
 
 export interface FiltreFormations {
   readonly filiere?: string
   readonly academie?: string
+  /** Mots-clés cherchés dans l'intitulé de la formation, en OU. */
+  readonly motsCles?: readonly string[]
   readonly limite?: number
 }
 
@@ -158,6 +200,12 @@ export async function chercherFormations(
   const conditions: string[] = []
   if (filtre.filiere) conditions.push(`fili = "${filtre.filiere.replace(/"/g, '')}"`)
   if (filtre.academie) conditions.push(`acad_mies = "${filtre.academie.replace(/"/g, '')}"`)
+  if (filtre.motsCles && filtre.motsCles.length > 0) {
+    const recherche = filtre.motsCles
+      .map((mot) => `search(lib_for_voe_ins, "${mot.replace(/"/g, '')}")`)
+      .join(' OR ')
+    conditions.push(`(${recherche})`)
+  }
   if (conditions.length > 0) params.set('where', conditions.join(' AND '))
 
   const reponse = await avecUneRelance(`${ESR}?${params.toString()}`, recuperer)
@@ -241,4 +289,33 @@ export async function chercherAidesLogement(
           },
         },
   )
+}
+
+export interface BulletinExtrait {
+  readonly notes: Readonly<Record<string, number>>
+  readonly signaux: { readonly serieux: number; readonly participation: number; readonly progression: number }
+  readonly matieresLues: number
+  readonly source: string
+}
+
+/**
+ * Envoie un bulletin au serveur, qui n'en fait ressortir que des nombres.
+ * Le texte des appréciations ne revient jamais ici.
+ */
+export async function lireBulletin(
+  fichierBase64: string,
+  mediaType: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<BulletinExtrait> {
+  const reponse = await recuperer(`${base}/bulletin-scolaire`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fichier: fichierBase64, mediaType }),
+  })
+  if (!reponse.ok) {
+    const corps = (await reponse.json().catch(() => ({}))) as { erreur?: string }
+    throw new Error(corps.erreur ?? `Lecture du bulletin impossible (${reponse.status}).`)
+  }
+  return (await reponse.json()) as BulletinExtrait
 }

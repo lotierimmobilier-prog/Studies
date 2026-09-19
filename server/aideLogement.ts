@@ -15,6 +15,8 @@
 
 const OPENFISCA_URL = process.env.OPENFISCA_URL ?? 'https://api.fr.openfisca.org/latest'
 const DELAI_MS = Number(process.env.OPENFISCA_TIMEOUT_MS ?? 25_000)
+/** Situations envoyées par requête. Au-delà, OpenFisca dépasse le délai. */
+const TAILLE_LOT = Number(process.env.OPENFISCA_TAILLE_LOT ?? 25)
 
 export interface DemandeAideLogement {
   /** Référence libre renvoyée telle quelle, pour réapparier côté appelant. */
@@ -93,7 +95,19 @@ function construireSituation(
 }
 
 /**
- * Calcule l'aide au logement de plusieurs situations en un seul appel.
+ * Deux situations identiques donnent la même aide : inutile de les calculer
+ * deux fois. Beaucoup de formations partagent la même commune et le même loyer.
+ */
+function cleDeSituation(d: DemandeAideLogement): string {
+  return [d.codeInsee, d.loyerMensuel, d.chargesMensuelles ?? 0, d.anneeNaissance, d.revenuAnnuel ?? 0].join('|')
+}
+
+/**
+ * Calcule l'aide au logement de plusieurs situations.
+ *
+ * Les doublons sont calculés une seule fois, et les situations restantes sont
+ * envoyées par lots : une requête unique de cent situations dépasse le délai
+ * d'OpenFisca, et un dépassement ferait perdre tout le lot.
  *
  * Une situation sans résultat n'est jamais remplacée par une estimation : elle
  * revient en indisponibilité motivée, et le reste-à-vivre ne sera pas calculé.
@@ -103,6 +117,37 @@ export async function calculerAidesLogement(
   aujourdHui: Date = new Date(),
 ): Promise<ResultatAideLogement[]> {
   if (demandes.length === 0) return []
+
+  const representants = new Map<string, DemandeAideLogement>()
+  for (const d of demandes) {
+    const cle = cleDeSituation(d)
+    if (!representants.has(cle)) representants.set(cle, d)
+  }
+  const uniques = [...representants.values()]
+
+  const calculs = new Map<string, ResultatAideLogement>()
+  for (let debut = 0; debut < uniques.length; debut += TAILLE_LOT) {
+    const lot = uniques.slice(debut, debut + TAILLE_LOT)
+    const resultats = await calculerUnLot(lot, aujourdHui)
+    lot.forEach((d, i) => {
+      const r = resultats[i]
+      if (r) calculs.set(cleDeSituation(d), r)
+    })
+  }
+
+  return demandes.map((d) => {
+    const calcul = calculs.get(cleDeSituation(d))
+    if (!calcul) {
+      return { ref: d.ref, raison: `Aucun calcul rendu pour la commune ${d.codeInsee}.` }
+    }
+    return { ...calcul, ref: d.ref }
+  })
+}
+
+async function calculerUnLot(
+  demandes: readonly DemandeAideLogement[],
+  aujourdHui: Date,
+): Promise<ResultatAideLogement[]> {
   const mois = moisDeReference(aujourdHui)
   const situation = construireSituation(demandes, mois)
 

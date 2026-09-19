@@ -28,6 +28,7 @@ import {
   calculerAidesLogement,
   type DemandeAideLogement,
 } from './aideLogement'
+import { extraireBulletin } from './bulletinScolaire'
 import {
   analyserBulletin,
   BulletinNonConfigure,
@@ -48,6 +49,8 @@ import {
  *   GET/POST /api/temoignages/moderation → modération (jeton MODERATION_TOKEN)
  *   POST /api/aide-logement body: DemandeAideLogement[] → aide au logement
  *                                        calculée par OpenFisca (KITETUDIANT)
+ *   POST /api/bulletin-scolaire body: { fichier, mediaType }
+ *                                        → notes + signaux seuls (KITETUDIANT)
  *
  * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
  * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
@@ -274,6 +277,25 @@ async function demarrer(): Promise<void> {
             // aide approchée.
             return envoyerJson(res, 503, { erreur: e.message })
           }
+          throw e
+        }
+      }
+
+      // KITETUDIANT — lecture de bulletin réduite aux notes et aux signaux.
+      // Le texte des appréciations ne ressort pas d'ici (règle 3 de CLAUDE.md).
+      if (url.pathname === '/api/bulletin-scolaire' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const { fichier, mediaType } = JSON.parse(corps) as {
+          fichier: string
+          mediaType: MediaType
+        }
+        if (!fichier || !mediaType)
+          return envoyerJson(res, 400, { erreur: 'fichier et mediaType requis' })
+        try {
+          return envoyerJson(res, 200, await extraireBulletin(fichier, mediaType))
+        } catch (e) {
+          if (e instanceof BulletinNonConfigure)
+            return envoyerJson(res, 503, { erreur: e.message })
           throw e
         }
       }
