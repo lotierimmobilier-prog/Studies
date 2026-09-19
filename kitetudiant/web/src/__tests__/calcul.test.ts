@@ -264,3 +264,25 @@ describe('sélection des formations à interroger', () => {
     expect(new Set(mots).size).toBe(mots.length)
   })
 })
+
+describe('cloisonnement de la note publique du lieu', () => {
+  it('n’apparaît nulle part dans le résultat qui sert au tri', () => {
+    const [r] = calculerResultats(
+      [formation('50', 'Limoges', '87')],
+      REPONSES,
+      new Map(),
+      LE_JOUR,
+    )
+    if (!r) throw new Error('résultat attendu')
+    const cles = Object.keys(r).join(' ')
+    expect(cles).not.toMatch(/avis|google|note|etoile/i)
+    // Les deux seuls axes du tri, plus la formation et la raison d'absence.
+    expect(Object.keys(r).sort()).toEqual([
+      'admissibilite',
+      'affinite',
+      'formation',
+      'parScenario',
+      'raisonAide',
+    ])
+  })
+})

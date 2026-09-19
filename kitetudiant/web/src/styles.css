@@ -301,3 +301,8 @@ input[type='range'] { width: 100%; min-height: 44px; }
   flex-direction: column;
   gap: 0.6rem;
 }
+
+/* ------------------------------------------------- note publique du lieu */
+.note-lieu { margin-top: 1.4rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+.note-lieu h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.note-lieu-valeur { margin: 0 0 0.4rem; font-size: 0.95rem; }

@@ -29,6 +29,7 @@ import {
   type DemandeAideLogement,
 } from './aideLogement'
 import { extraireBulletin } from './bulletinScolaire'
+import { chercherAvisLieux, type DemandeAvisLieu } from './avisLieu'
 import {
   DepotRetours,
   RetourEnDouble,
@@ -61,6 +62,8 @@ import {
  *   POST /api/retours body: RequeteRetour → dépose un retour d'étudiant
  *   GET  /api/retours?formation=         → archive année par année
  *   POST /api/retours/agregats body: string[] → agrégats de l'année en cours
+ *   POST /api/avis-lieu body: DemandeAvisLieu[] → note publique du LIEU
+ *                                        (jamais un critère de décision)
  *
  * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
  * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
@@ -345,6 +348,18 @@ async function demarrer(): Promise<void> {
         if (formations.length > 200)
           return envoyerJson(res, 400, { erreur: 'au plus 200 formations par appel' })
         return envoyerJson(res, 200, await depotRetours.agregatsCourants(formations))
+      }
+
+      // KITETUDIANT — note publique du lieu. Affichée dans le détail d'une
+      // fiche, attribuée à Google, jamais dans un tri ni dans un score.
+      if (url.pathname === '/api/avis-lieu' && req.method === 'POST') {
+        const corps = await lireCorps(req)
+        const demandes = JSON.parse(corps) as DemandeAvisLieu[]
+        if (!Array.isArray(demandes))
+          return envoyerJson(res, 400, { erreur: 'un tableau de demandes est attendu' })
+        if (demandes.length > 20)
+          return envoyerJson(res, 400, { erreur: 'au plus 20 lieux par appel' })
+        return envoyerJson(res, 200, await chercherAvisLieux(demandes))
       }
 
       envoyerJson(res, 404, { erreur: 'route inconnue' })

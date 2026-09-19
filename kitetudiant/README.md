@@ -130,6 +130,28 @@ POST /api/retours/agregats   agrégats de l'année en cours, en lot
 Le jeton qui limite à un retour par formation et par an n'identifie personne :
 il est tiré au hasard dans le navigateur et **haché avant d'être stocké**.
 
+## Note publique du lieu (avis Google)
+
+Affichée **dans le détail d'une fiche seulement**, jamais sur la carte, jamais
+dans le tri, jamais mêlée aux deux axes. C'est une garantie structurelle : le
+type `ResultatFormation`, sur lequel le tri opère, ne contient aucun champ
+d'avis, et un test le vérifie.
+
+La raison est dans le cahier des charges : le module M10 interdit toute note
+globale d'établissement dans les critères de décision, et la règle 5 interdit
+d'agréger les axes. Il y a aussi une raison de fond — une note Google agrège
+des visiteurs et des passants, et la même étoile couvre toutes les formations
+d'une adresse, alors que KITETUDIANT travaille formation par formation.
+
+Elle arrive donc avec son attribution à Google, son nombre d'avis, sa date de
+relevé et une mise en garde affichée à côté. Sans clé `GOOGLE_MAPS_API_KEY`,
+rien ne s'affiche et aucune valeur n'est inventée. Les résultats sont mis en
+cache 30 jours, la limite de conservation imposée par les conditions de Places.
+
+```
+POST /api/avis-lieu   note publique d'un lieu, au plus 20 par appel
+```
+
 ## Base de données
 
 ```bash

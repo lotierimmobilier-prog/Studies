@@ -406,3 +406,48 @@ export async function chercherArchiveRetours(
     return []
   }
 }
+
+// -------------------------------------------------------- note publique du lieu
+
+export interface AvisLieu {
+  readonly ref: string
+  readonly note: number
+  readonly nombreAvis: number
+  readonly urlMaps: string | null
+  readonly source: string
+  readonly collecteLe: string
+  readonly miseEnGarde: string
+}
+
+export interface AvisLieuIndisponible {
+  readonly ref: string
+  readonly raison: string
+}
+
+/**
+ * Note publique du LIEU, à n'afficher que dans le détail d'une fiche.
+ *
+ * Elle ne revient jamais dans `ResultatFormation` : le tri et les deux axes
+ * n'y ont structurellement pas accès, ce qui est la seule façon sûre de tenir
+ * la règle « aucune note globale d'établissement dans les critères ».
+ */
+export async function chercherAvisLieu(
+  etablissement: string,
+  ville: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<AvisLieu | AvisLieuIndisponible> {
+  const demande = { ref: 'lieu', etablissement, ville }
+  try {
+    const reponse = await recuperer(`${base}/avis-lieu`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify([demande]),
+    })
+    if (!reponse.ok) return { ref: 'lieu', raison: `Service indisponible (${reponse.status}).` }
+    const liste = (await reponse.json()) as (AvisLieu | AvisLieuIndisponible)[]
+    return liste[0] ?? { ref: 'lieu', raison: 'Aucune réponse du service.' }
+  } catch (e) {
+    return { ref: 'lieu', raison: `Service injoignable : ${(e as Error).message}` }
+  }
+}

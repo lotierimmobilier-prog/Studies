@@ -25,6 +25,7 @@ import {
   type FiltreFormations,
 } from './donnees.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
+import { NoteDuLieu } from './avisLieu.tsx'
 import { PanneauRetours, ResumeRetours } from './retours.tsx'
 
 const ACADEMIES = [
@@ -226,6 +227,11 @@ function Carte({
           ) : null}
 
           <PanneauRetours codFormation={resultat.formation.id} />
+
+          <NoteDuLieu
+            etablissement={resultat.formation.etablissement}
+            ville={resultat.formation.ville}
+          />
 
           {resultat.formation.lien ? (
             <p>
