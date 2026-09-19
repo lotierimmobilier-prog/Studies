@@ -18,6 +18,7 @@ import {
   deconnecter,
   InscriptionRequise,
   jetonSession,
+  positionDe,
   chercherFormations,
   MILLESIME_LOYERS,
   SOURCE_LOYERS,
@@ -30,6 +31,9 @@ import {
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 import { Accueil } from './accueil.tsx'
 import { Compte } from './compte.tsx'
+import { TroisChoix } from './choix.tsx'
+import { troisChoix, type PositionEleve } from './recommandations.ts'
+import { localiser } from './geo.ts'
 import { NoteDuLieu } from './avisLieu.tsx'
 import { PanneauRetours, ResumeRetours } from './retours.tsx'
 
@@ -295,6 +299,36 @@ export default function App() {
   /** Vrai quand l'élève a demandé à s'inscrire : le formulaire prend l'écran. */
   const [formulaireCompte, setFormulaireCompte] = useState(false)
   const [connecte, setConnecte] = useState(() => jetonSession() !== '')
+  /**
+   * Position de l'élève, établie par son navigateur avec son accord, et gardée
+   * UNIQUEMENT en mémoire : elle n'est ni stockée ni transmise (voir geo.ts).
+   */
+  const [position, setPosition] = useState<PositionEleve | null>(null)
+  const [positionEnCours, setPositionEnCours] = useState(false)
+  const [messagePosition, setMessagePosition] = useState<string | null>(null)
+
+  const demanderPosition = useCallback(async () => {
+    setPositionEnCours(true)
+    setMessagePosition(null)
+    try {
+      const r = await localiser()
+      if (r.etat === 'trouvee') {
+        const commune = positionDe(r.codeInsee)
+        if (commune !== null) setPosition(commune)
+        setMessagePosition(`Position retenue : ${r.nom}.`)
+      } else if (r.etat === 'refusee') {
+        // Dire non n'est pas une panne : on le formule comme un choix, pas
+        // comme un échec, et le reste du site continue sans.
+        setMessagePosition(
+          'Tu as refusé le partage de position — le reste de la liste fonctionne quand même.',
+        )
+      } else {
+        setMessagePosition(r.raison)
+      }
+    } finally {
+      setPositionEnCours(false)
+    }
+  }, [])
 
   const majReponses = useCallback((partiel: Partial<Reponses>) => {
     setReponses((r) => ({ ...r, ...partiel }))
@@ -420,6 +454,14 @@ export default function App() {
             </p>
           </section>
         ) : null}
+
+        <TroisChoix
+          propositions={troisChoix(resultats, position, verrou !== null)}
+          localisationEnCours={positionEnCours}
+          onLocaliser={() => void demanderPosition()}
+          onInscrire={() => setFormulaireCompte(true)}
+        />
+        {messagePosition ? <p className="note choix-message">{messagePosition}</p> : null}
 
         <p className="resume">
           {resultats.length} formations trouvées, {complets} avec un reste-à-vivre calculé.

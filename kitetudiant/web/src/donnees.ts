@@ -35,6 +35,43 @@ export const GENERE_LE = communes.genereLe
 /** Communes pour lesquelles un loyer est disponible. Compté, jamais écrit en dur. */
 export const NOMBRE_COMMUNES_AVEC_LOYER = Object.keys(communes.communes).length
 
+/**
+ * Position du chef-lieu d'une commune, ou null si elle est inconnue.
+ * Fonction à part plutôt qu'un champ de `loyerDe` : les loyers et les
+ * positions répondent à deux questions différentes, et `LoyerCommune` ne doit
+ * pas se mettre à transporter de la géographie.
+ */
+export function positionDe(codeInsee: string | null): { lat: number; lon: number } | null {
+  if (codeInsee === null) return null
+  const brut = (communes.communes as Record<string, { lat?: number; lon?: number }>)[codeInsee]
+  if (brut === undefined) return null
+  if (typeof brut.lat !== 'number' || typeof brut.lon !== 'number') return null
+  return { lat: brut.lat, lon: brut.lon }
+}
+
+export interface CommunePositionnee {
+  readonly codeInsee: string
+  readonly nom: string
+  readonly lat: number
+  readonly lon: number
+}
+
+/**
+ * Communes dont on connaît la position, pour trouver la plus proche d'un élève
+ * sans envoyer sa position à quiconque. Une commune sans coordonnées est
+ * simplement absente : on n'invente pas de position de repli.
+ */
+export function communesPositionnees(): CommunePositionnee[] {
+  const liste: CommunePositionnee[] = []
+  for (const [codeInsee, c] of Object.entries(communes.communes)) {
+    const brut = c as { nom: string; lat?: number; lon?: number }
+    if (typeof brut.lat === 'number' && typeof brut.lon === 'number') {
+      liste.push({ codeInsee, nom: brut.nom, lat: brut.lat, lon: brut.lon })
+    }
+  }
+  return liste
+}
+
 export interface Formation {
   readonly id: string
   readonly libelle: string

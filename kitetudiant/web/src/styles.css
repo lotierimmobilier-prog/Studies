@@ -539,3 +539,66 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .compte-confiance strong { color: var(--encre); }
 
 .compte-retour { display: block; margin: 1.2rem auto 0; }
+
+/* ------------------------------------------------- les trois choix de tête */
+/* Préfixe « choix- » : la feuille est partagée par toutes les vues, et un nom
+   déjà pris ferait hériter cette section d'une autre mise en page en silence
+   (cf. styles.test.ts). */
+
+.choix-tete { margin: 0 0 2.25rem; }
+.choix-tete-titre { margin: 0 0 0.3rem; font-size: 1.2rem; letter-spacing: -0.01em; }
+.choix-tete-intro { margin: 0 0 1rem; color: var(--doux); font-size: 0.88rem; }
+
+.choix-grille { display: grid; gap: 0.75rem; }
+
+.choix-carte {
+  position: relative;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 1rem 1.1rem 1.1rem;
+}
+/* Une teinte par critère, pour qu'on les distingue d'un coup d'œil sans
+   jamais suggérer un classement entre eux. */
+.choix-geographique { border-left: 3px solid var(--accent); }
+.choix-strategique { border-left: 3px solid var(--vert); }
+.choix-economique { border-left: 3px solid var(--orange); }
+
+.choix-rang {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.55rem;
+}
+.choix-titre { margin: 0 0 0.1rem; font-size: 1rem; }
+.choix-sous { margin: 0 0 0.8rem; color: var(--doux); font-size: 0.84rem; }
+.choix-valeur {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.choix-formation { margin: 0 0 0.15rem; font-weight: 600; font-size: 0.95rem; }
+.choix-etab { margin: 0 0 0.7rem; color: var(--doux); font-size: 0.85rem; }
+.choix-pourquoi { margin: 0; color: var(--doux); font-size: 0.8rem; }
+.choix-absent { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.88rem; }
+.choix-action { width: 100%; }
+.choix-message { margin: -1.5rem 0 1.75rem; }
+
+.choix-confidentialite {
+  margin: 1rem 0 0;
+  color: var(--doux);
+  font-size: 0.78rem;
+}
+.choix-confidentialite strong { color: var(--encre); }
+
+@media (min-width: 40rem) {
+  .choix-grille { grid-template-columns: repeat(3, 1fr); }
+}
