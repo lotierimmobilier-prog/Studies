@@ -15,16 +15,38 @@ mettre à jour.
 Connecté en **root** sur le VPS (`ssh root@76.13.37.163`), une seule commande :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/main/deploy/vps-setup.sh | bash
 ```
 
 Pour activer l'IA (conseils + analyse de bulletin) et les **avis Google** (note
 ⭐ des écoles), passe les clés API :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/claude/parcoursup-admission-simulator-2jy76p/deploy/vps-setup.sh \
+curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/main/deploy/vps-setup.sh \
   | ANTHROPIC_API_KEY="sk-ant-..." GOOGLE_MAPS_API_KEY="AIza..." bash
 ```
+
+### Nom de domaine et HTTPS
+
+Le site sert aujourd'hui en **HTTP simple** sur l'IP. Pour un produit qui
+recueillera des données d'élèves mineurs, le chiffrement du transport n'est pas
+une option : il faut un domaine et un certificat.
+
+1. Chez le registrar du domaine, créer deux enregistrements **A** pointant sur
+   l'IP du VPS : `kitetudiant.fr` et `www.kitetudiant.fr`. Vérifier la
+   propagation avec `dig +short kitetudiant.fr`.
+2. Sur le VPS, relancer le script avec le domaine :
+
+```bash
+DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr bash deploy/vps-setup.sh
+```
+
+Le script ajoute le domaine au `server_name` de nginx, installe certbot,
+obtient le certificat Let's Encrypt pour `kitetudiant.fr` et `www`, et met en
+place la redirection HTTP vers HTTPS. Le renouvellement est automatique.
+
+Sans `TLS=1`, le domaine est servi en HTTP : utile pour vérifier le DNS avant
+de demander un certificat, à ne pas laisser en l'état.
 
 > **Clé Google** : dans [Google Cloud Console](https://console.cloud.google.com/),
 > active l'API **Places API**, crée une clé API et restreins-la à cette API. Un
@@ -161,3 +183,27 @@ sudo tail -f /var/log/nginx/error.log
 > Sans clé `ANTHROPIC_API_KEY`, le site fonctionne : les prix passent en
 > estimation et le conseil en mode règles. Avec la clé, l'IA (conseils +
 > analyse de bulletin) est active en ligne.
+
+---
+
+## GitHub Pages : pourquoi ça ne marche pas, et pourquoi je ne le réparerais pas
+
+Les quatre exécutions du workflow `deploy-pages` ont échoué, toujours à la même
+étape et avec le même message :
+
+```
+Error: Failed to create deployment (status: 404).
+Ensure GitHub Pages has been enabled:
+https://github.com/lotierimmobilier-prog/Studies/settings/pages
+```
+
+Le build passe ; c'est la publication qui échoue, parce que Pages n'est pas
+activé sur le dépôt. Un seul réglage manque, et il n'est accessible qu'au
+propriétaire : **Settings → Pages → Source = GitHub Actions**. Aucun changement
+de code ne peut le remplacer.
+
+Cela dit, Pages n'apporte pas grand-chose ici : il sert du **statique**, donc
+sans l'API Node (prix réels, conseil, avis), et sous une URL en
+`github.io/Studies/`. Le VPS sert déjà le front **et** l'API, sous un vrai
+domaine. Mon conseil : laisser Pages désactivé, et retirer le workflow le jour
+où il est clair que personne ne s'en servira.
