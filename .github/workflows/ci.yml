@@ -34,6 +34,8 @@ jobs:
         run: npm run build
       - name: Typage du serveur
         run: npm run typecheck:server
+      - name: Typage des paquets kitetudiant
+        run: npm run typecheck:kitetudiant
 
   scripts-python:
     name: Scripts d'exploration Python
@@ -44,4 +46,32 @@ jobs:
         with:
           python-version: '3.12'
       - name: Contrôle de syntaxe
-        run: python -m compileall -q kitetudiant/scripts
+        run: python -m compileall -q kitetudiant/scripts kitetudiant/packages
+
+  schema-sql:
+    name: Schéma PostgreSQL + PostGIS
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Appliquer le schéma sur une base neuve
+        env:
+          PGURL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: kitetudiant/db/valider_schema.sh
+      - name: Vérifier que les contraintes rejettent ce qu'elles doivent rejeter
+        env:
+          PGURL: postgresql://postgres:postgres@localhost:5432/postgres
+          LC_ALL: C
+        run: |
+          rejets=$(psql "$PGURL" -f kitetudiant/db/tests_contraintes.sql 2>&1 \
+            | grep -c 'violates check constraint' || true)
+          echo "$rejets contraintes ont rejeté l'insertion interdite"
+          test "$rejets" -eq 9

@@ -1,0 +1,23 @@
+{
+  "cle": "aide_merite",
+  "libelle": "Aide au mérite",
+  "unite": "euros_par_an",
+  "description_source": "Montant annuel de l'aide au mérite pour un étudiant de l'enseignement supérieur",
+  "valeurs_par_date": {
+    "2020-07-31": 900
+  },
+  "references_par_date": {
+    "2020-07-31": [
+      {
+        "title": "Arrêté du 20/07/2020, art. 4",
+        "href": "https://www.legifrance.gouv.fr/loda/article_lc/LEGIARTI000042541955"
+      }
+    ]
+  },
+  "derniere_valeur_encore_valide_le": null,
+  "provenance": {
+    "origine": "openfisca-france",
+    "parametre": "prestations_sociales/education/bourses/enseignement_superieur/aide_merite/montant_annuel.yaml",
+    "extrait_le": "2026-09-19"
+  }
+}
