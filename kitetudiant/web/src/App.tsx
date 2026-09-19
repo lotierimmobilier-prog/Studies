@@ -25,6 +25,7 @@ import {
   type FiltreFormations,
 } from './donnees.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
+import { Accueil } from './accueil.tsx'
 import { NoteDuLieu } from './avisLieu.tsx'
 import { PanneauRetours, ResumeRetours } from './retours.tsx'
 
@@ -247,6 +248,7 @@ function Carte({
 }
 
 export default function App() {
+  const [vue, setVue] = useState<'accueil' | 'parcours'>('accueil')
   const [etape, setEtape] = useState(0)
   const [reponses, setReponses] = useState<Reponses>(REPONSES_PAR_DEFAUT)
   const [resultats, setResultats] = useState<ResultatFormation[] | null>(null)
@@ -303,6 +305,10 @@ export default function App() {
     [resultats],
   )
 
+  if (vue === 'accueil' && resultats === null) {
+    return <Accueil onCommencer={() => setVue('parcours')} />
+  }
+
   if (resultats !== null) {
     return (
       <main className="app">
@@ -330,9 +336,19 @@ export default function App() {
           ))}
         </div>
 
-        <button type="button" className="secondaire" onClick={() => setResultats(null)}>
-          Changer mes réponses
-        </button>
+        <div className="navigation">
+          <button
+            type="button"
+            className="secondaire"
+            onClick={() => {
+              setResultats(null)
+              setEtape(0)
+              setVue('parcours')
+            }}
+          >
+            Changer mes réponses
+          </button>
+        </div>
 
         <footer className="pieds">
           <p>
@@ -389,11 +405,13 @@ export default function App() {
       {erreur ? <p className="erreur">{erreur}</p> : null}
 
       <div className="navigation">
-        {etape > 0 ? (
-          <button type="button" className="secondaire" onClick={() => setEtape(etape - 1)}>
-            Retour
-          </button>
-        ) : null}
+        <button
+          type="button"
+          className="secondaire"
+          onClick={() => (etape > 0 ? setEtape(etape - 1) : setVue('accueil'))}
+        >
+          Retour
+        </button>
         {derniere ? (
           <button type="button" className="principal" onClick={lancer} disabled={enCours}>
             {enCours ? 'Calcul en cours…' : 'Voir ce qu’il me restera'}

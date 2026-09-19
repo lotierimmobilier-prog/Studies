@@ -73,8 +73,13 @@ npm run dev:kitetudiant   # front sur http://localhost:5174
 npm run build:kitetudiant # build de production -> dist-kitetudiant/
 ```
 
-Sept questions — ton bac, tes notes, ce qui t'intéresse, ta motivation, où tu
-peux aller, ta bourse, ton budget — puis la liste de vœux. Mobile d'abord, sans
+Une page d'accueil, puis sept questions — ton bac, tes notes, ce qui
+t'intéresse, ta motivation, où tu peux aller, ta bourse, ton budget — puis la
+liste de vœux.
+
+L'accueil ne contient aucun chiffre décoratif : la comparaison de trois villes
+est lue dans `web/donnees/communes.json` avec son millésime, ce qui la rend
+fausse impossible à laisser traîner — elle bouge quand les données bougent. Mobile d'abord, sans
 compte, rien d'enregistré. Sur chaque carte, le reste-à-vivre est le plus gros
 caractère de la page.
 
