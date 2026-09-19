@@ -18,6 +18,16 @@ import {
   type Matiere,
 } from '../../packages/profil-scolaire/src/index.ts'
 import type { EchelonBourse } from '../../packages/budget-engine/src/types.ts'
+import {
+  AIDES_FAMILLE,
+  JOBS_ETUDIANTS,
+  TRAINS_DE_VIE,
+  aideFamilleCourante,
+  depensesDeclarees,
+  jobCourant,
+  trainDeVieCourant,
+  valeursDe,
+} from './budgetSimple.ts'
 import type { Reponses } from './calcul.ts'
 import { lireBulletin } from './donnees.ts'
 
@@ -36,9 +46,13 @@ export const REPONSES_PAR_DEFAUT: Reponses = {
   echelonBourse: null,
   echelonInconnu: false,
   anneeNaissance: new Date().getFullYear() - 18,
-  contributionFamiliale: 150,
+  // Ces valeurs correspondent exactement à « Un petit coup de main »,
+  // « Pendant les vacances seulement » et « Comme la plupart » : le parcours
+  // s'ouvre donc sur trois choix mis en évidence, jamais sur un état
+  // « ajusté à la main » que personne n'a demandé.
+  contributionFamiliale: 100,
   jobBas: 0,
-  jobHaut: 200,
+  jobHaut: 150,
   repasCrousParMois: 15,
   coursesMensuelles: 150,
   fraisDiversMensuels: 90,
@@ -61,8 +75,8 @@ export const ETAPES: readonly Etape[] = [
   { titre: 'Ce qui t’intéresse', aide: 'C’est ce qui décide des formations qu’on te montre.' },
   { titre: 'Ta motivation', aide: 'Pour toi, pas pour l’algorithme : elle n’entre dans aucun calcul.' },
   { titre: 'Où tu peux aller', aide: 'Le coût de la vie change beaucoup d’une ville à l’autre.' },
-  { titre: 'Ta bourse', aide: 'L’échelon change le reste-à-vivre de plusieurs centaines d’euros.' },
-  { titre: 'Ton budget', aide: 'Des ordres de grandeur suffisent, tu pourras les ajuster ensuite.' },
+  { titre: 'Ta bourse', aide: 'Si tu es boursier, ça change ton budget de plusieurs centaines d’euros.' },
+  { titre: 'Ton budget', aide: 'Trois questions simples. Les montants de chaque réponse sont écrits, et tu peux les corriger.' },
 ]
 
 interface Props {
@@ -379,27 +393,30 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
   }
 
   if (etape === 5) {
+    // Les huit échelons ne s'affichent que si l'élève dit être boursier :
+    // les dérouler d'emblée demandait à tout le monde de trancher une question
+    // technique qui ne concerne qu'une partie des élèves.
+    const boursier = reponses.echelonBourse !== null
     return (
       <div className="choix">
         <button
           type="button"
-          className={reponses.echelonBourse === null && !reponses.echelonInconnu ? 'choix-actif' : ''}
+          className={
+            reponses.echelonBourse === null && !reponses.echelonInconnu ? 'choix-actif' : ''
+          }
           onClick={() => onChange({ echelonBourse: null, echelonInconnu: false })}
         >
-          Je ne suis pas boursier
+          Non, je ne suis pas boursier
         </button>
-        <div className="echelons">
-          {ECHELONS.map((e) => (
-            <button
-              key={e}
-              type="button"
-              className={reponses.echelonBourse === e ? 'choix-actif' : ''}
-              onClick={() => onChange({ echelonBourse: e, echelonInconnu: false })}
-            >
-              Échelon {e === '0bis' ? '0 bis' : e}
-            </button>
-          ))}
-        </div>
+        <button
+          type="button"
+          className={boursier ? 'choix-actif' : ''}
+          onClick={() =>
+            onChange({ echelonBourse: reponses.echelonBourse ?? '3', echelonInconnu: false })
+          }
+        >
+          Oui, je suis boursier
+        </button>
         <button
           type="button"
           className={reponses.echelonInconnu ? 'choix-actif' : ''}
@@ -407,6 +424,27 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
         >
           Je ne sais pas encore
         </button>
+
+        {boursier ? (
+          <div className="sous-question">
+            <p className="champ-label">
+              Ton échelon, s’il te plaît — il est écrit sur ta notification de bourse.
+            </p>
+            <div className="echelons">
+              {ECHELONS.map((e) => (
+                <button
+                  key={e}
+                  type="button"
+                  className={reponses.echelonBourse === e ? 'choix-actif' : ''}
+                  onClick={() => onChange({ echelonBourse: e, echelonInconnu: false })}
+                >
+                  Échelon {e === '0bis' ? '0 bis' : e}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {reponses.echelonInconnu ? (
           <p className="note">
             On calculera sans bourse. Le reste-à-vivre sera donc plus bas que la
@@ -417,92 +455,186 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
     )
   }
 
+  // --- étape « Ton budget » --------------------------------------------------
+  // Elle demandait dix montants mensuels. Un élève de terminale ne les connaît
+  // pas, et les inventer sous la contrainte donne un reste-à-vivre faux. Trois
+  // questions en langage courant les remplacent — chacune AFFICHANT les
+  // montants qu'elle applique, pour que rien ne soit décidé en silence — et le
+  // détail reste accessible pour qui veut corriger poste par poste.
+  const trainCourant = trainDeVieCourant(reponses)
+  const aideCourante = aideFamilleCourante(reponses.contributionFamiliale)
+  const jobRetenu = jobCourant(reponses.jobBas, reponses.jobHaut)
+
   return (
-    <div className="choix">
-      <Champ
-        label="Ce que ta famille peut donner"
-        suffixe="€ / mois"
-        valeur={reponses.contributionFamiliale}
-        min={0}
-        onChange={(contributionFamiliale) => onChange({ contributionFamiliale })}
-      />
-      <div className="duo">
-        <Champ
-          label="Job étudiant, au minimum"
-          suffixe="€ / mois"
-          valeur={reponses.jobBas}
-          min={0}
-          onChange={(jobBas) => onChange({ jobBas })}
-        />
-        <Champ
-          label="au maximum"
-          suffixe="€ / mois"
-          valeur={reponses.jobHaut}
-          min={0}
-          onChange={(jobHaut) => onChange({ jobHaut })}
-        />
+    <div className="budget">
+      <div className="budget-question">
+        <p className="champ-label">Tes parents peuvent-ils t’aider financièrement ?</p>
+        <div className="choix">
+          {AIDES_FAMILLE.map((a) => (
+            <button
+              key={a.cle}
+              type="button"
+              className={aideCourante?.cle === a.cle ? 'choix-actif' : ''}
+              onClick={() => onChange({ contributionFamiliale: a.montant })}
+            >
+              {a.titre}
+              <span className="budget-montant">
+                {a.montant === 0 ? '0 € par mois' : `environ ${a.montant} € par mois`}
+              </span>
+            </button>
+          ))}
+        </div>
+        {aideCourante === null ? (
+          <p className="note">
+            Montant saisi à la main : {reponses.contributionFamiliale} € par mois.
+          </p>
+        ) : null}
       </div>
-      <div className="duo">
-        <Champ
-          label="Repas au resto U"
-          suffixe="/ mois"
-          valeur={reponses.repasCrousParMois}
-          min={0}
-          max={60}
-          onChange={(repasCrousParMois) => onChange({ repasCrousParMois })}
-        />
-        <Champ
-          label="Courses"
-          suffixe="€ / mois"
-          valeur={reponses.coursesMensuelles}
-          min={0}
-          onChange={(coursesMensuelles) => onChange({ coursesMensuelles })}
-        />
+
+      <div className="budget-question">
+        <p className="champ-label">Comptes-tu travailler à côté de tes études ?</p>
+        <div className="choix">
+          {JOBS_ETUDIANTS.map((j) => (
+            <button
+              key={j.cle}
+              type="button"
+              className={jobRetenu?.cle === j.cle ? 'choix-actif' : ''}
+              onClick={() => onChange({ jobBas: j.bas, jobHaut: j.haut })}
+            >
+              {j.titre}
+              <span className="budget-montant">
+                {j.haut === 0 ? 'aucun revenu' : `entre ${j.bas} et ${j.haut} € par mois`}
+              </span>
+            </button>
+          ))}
+        </div>
+        {jobRetenu === null ? (
+          <p className="note">
+            Fourchette saisie à la main : {reponses.jobBas} à {reponses.jobHaut} € par mois.
+          </p>
+        ) : null}
       </div>
-      <div className="duo">
-        <Champ
-          label="Téléphone, mutuelle, loisirs"
-          suffixe="€ / mois"
-          valeur={reponses.fraisDiversMensuels}
-          min={0}
-          onChange={(fraisDiversMensuels) => onChange({ fraisDiversMensuels })}
-        />
-        <Champ
-          label="Transport"
-          suffixe="€ / mois"
-          valeur={reponses.transportMensuel}
-          min={0}
-          onChange={(transportMensuel) => onChange({ transportMensuel })}
-        />
+
+      <div className="budget-question">
+        <p className="champ-label">Comment vis-tu au quotidien ?</p>
+        <div className="choix">
+          {TRAINS_DE_VIE.map((t) => (
+            <button
+              key={t.cle}
+              type="button"
+              className={trainCourant?.cle === t.cle ? 'choix-actif' : ''}
+              onClick={() => onChange(valeursDe(t))}
+            >
+              {t.titre}
+              <span className="budget-resume">{t.resume}</span>
+              <span className="budget-montant">
+                {t.coursesMensuelles} € de courses · {t.fraisDiversMensuels} € divers ·{' '}
+                {t.transportMensuel} € transport · {t.repasCrousParMois} repas au resto U
+              </span>
+            </button>
+          ))}
+        </div>
+        {trainCourant === null ? (
+          <p className="note">Montants ajustés à la main dans le détail ci-dessous.</p>
+        ) : null}
       </div>
-      <div className="duo">
-        <Champ
-          label="Surface du logement"
-          suffixe="m²"
-          valeur={reponses.surfaceM2}
-          min={9}
-          max={60}
-          onChange={(surfaceM2) => onChange({ surfaceM2 })}
-        />
-        <Champ
-          label="Droits d’inscription"
-          suffixe="€ / an"
-          valeur={reponses.fraisScolariteAnnuels}
-          min={0}
-          onChange={(fraisScolariteAnnuels) => onChange({ fraisScolariteAnnuels })}
-        />
-      </div>
-      <Champ
-        label="Frais d’installation la première année"
-        suffixe="€"
-        valeur={reponses.fraisInstallation}
-        min={0}
-        onChange={(fraisInstallation) => onChange({ fraisInstallation })}
-      />
-      <p className="note">
-        Les droits d’inscription sont déclaratifs : aucune source ouverte ne les
-        donne formation par formation de façon fiable.
+
+      <p className="budget-total">
+        Tu déclares <strong>{depensesDeclarees(reponses)} € de dépenses par mois</strong>,
+        hors logement et hors frais de scolarité — ceux-là dépendent de la formation et de
+        la ville, on les calcule pour toi.
       </p>
+
+      <details className="budget-detail">
+        <summary>Ajuster poste par poste</summary>
+        <div className="budget-champs">
+        <Champ
+          label="Ce que ta famille peut donner"
+          suffixe="€ / mois"
+          valeur={reponses.contributionFamiliale}
+          min={0}
+          onChange={(contributionFamiliale) => onChange({ contributionFamiliale })}
+        />
+        <div className="duo">
+          <Champ
+            label="Job étudiant, au minimum"
+            suffixe="€ / mois"
+            valeur={reponses.jobBas}
+            min={0}
+            onChange={(jobBas) => onChange({ jobBas })}
+          />
+          <Champ
+            label="au maximum"
+            suffixe="€ / mois"
+            valeur={reponses.jobHaut}
+            min={0}
+            onChange={(jobHaut) => onChange({ jobHaut })}
+          />
+        </div>
+        <div className="duo">
+          <Champ
+            label="Repas au resto U"
+            suffixe="/ mois"
+            valeur={reponses.repasCrousParMois}
+            min={0}
+            max={60}
+            onChange={(repasCrousParMois) => onChange({ repasCrousParMois })}
+          />
+          <Champ
+            label="Courses"
+            suffixe="€ / mois"
+            valeur={reponses.coursesMensuelles}
+            min={0}
+            onChange={(coursesMensuelles) => onChange({ coursesMensuelles })}
+          />
+        </div>
+        <div className="duo">
+          <Champ
+            label="Téléphone, mutuelle, loisirs"
+            suffixe="€ / mois"
+            valeur={reponses.fraisDiversMensuels}
+            min={0}
+            onChange={(fraisDiversMensuels) => onChange({ fraisDiversMensuels })}
+          />
+          <Champ
+            label="Transport"
+            suffixe="€ / mois"
+            valeur={reponses.transportMensuel}
+            min={0}
+            onChange={(transportMensuel) => onChange({ transportMensuel })}
+          />
+        </div>
+        <div className="duo">
+          <Champ
+            label="Surface du logement"
+            suffixe="m²"
+            valeur={reponses.surfaceM2}
+            min={9}
+            max={60}
+            onChange={(surfaceM2) => onChange({ surfaceM2 })}
+          />
+          <Champ
+            label="Droits d’inscription"
+            suffixe="€ / an"
+            valeur={reponses.fraisScolariteAnnuels}
+            min={0}
+            onChange={(fraisScolariteAnnuels) => onChange({ fraisScolariteAnnuels })}
+          />
+        </div>
+        <Champ
+          label="Frais d’installation la première année"
+          suffixe="€"
+          valeur={reponses.fraisInstallation}
+          min={0}
+          onChange={(fraisInstallation) => onChange({ fraisInstallation })}
+        />
+        <p className="note">
+          Logement : 25 m² par défaut, ajustable ici. Les droits d’inscription sont
+          déclaratifs — aucune source ouverte ne les donne formation par formation de
+          façon fiable.
+        </p>
+        </div>
+      </details>
     </div>
   )
 }

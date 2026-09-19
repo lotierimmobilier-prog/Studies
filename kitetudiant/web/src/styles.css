@@ -602,3 +602,41 @@ input[type='range'] { width: 100%; min-height: 44px; }
 @media (min-width: 40rem) {
   .choix-grille { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ------------------------------------------------------ étape « budget » */
+/* Préfixe « budget- » : un nom déjà pris ferait hériter cette étape d'une
+   autre mise en page en silence (cf. styles.test.ts). */
+
+.budget { display: flex; flex-direction: column; gap: 1.75rem; }
+.budget-question .champ-label { display: block; margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--encre); font-weight: 600; }
+/* Le montant appliqué par chaque réponse est affiché sous son libellé : c'est
+   ce qui distingue une hypothèse annoncée d'une valeur de repli silencieuse. */
+.budget-montant { display: block; margin-top: 0.25rem; color: var(--doux); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.budget-resume { display: block; margin-top: 0.15rem; color: var(--doux); font-size: 0.84rem; }
+
+.budget-total {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  font-size: 0.9rem;
+}
+
+.budget-detail { border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+/* Sans « display » : le <summary> garde son marqueur natif, et la hauteur de
+   cible tactile vient du rembourrage. (Note pour qui mesurerait ce repli :
+   getBoundingClientRect et offsetParent voient encore le contenu d'un
+   <details> fermé — seul checkVisibility() dit la vérité.) */
+.budget-detail summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.7rem 0;
+}
+.budget-champs { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.6rem; }
+
+/* La liste des échelons n'apparaît qu'une fois « boursier » choisi. */
+.sous-question { margin-top: 0.4rem; }
+.sous-question .champ-label { display: block; margin-bottom: 0.5rem; }
