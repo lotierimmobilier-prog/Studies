@@ -1,6 +1,7 @@
-# Kit Etudiant — contexte projet permanent
+# KITETUDIANT — contexte projet permanent
 
 ## Ce que nous construisons
+KITETUDIANT, à paraître sur kitetudiant.fr.
 Une plateforme web qui aide les lycéens à choisir leurs vœux Parcoursup en croisant
 trois dimensions : probabilité d'admission, coût réel de la vie sur place, et
 compatibilité avec leurs contraintes de vie. Le différenciant est le RAV

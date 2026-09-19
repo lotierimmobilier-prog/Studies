@@ -1,8 +1,10 @@
-# Kit Etudiant
+# KITETUDIANT
 
 Plateforme d'aide au choix des vœux Parcoursup fondée sur le coût réel de la vie
 étudiante. Le différenciant est le **RAV** — reste-à-vivre mensuel projeté —
 affiché sur chaque vœu.
+
+Nom de domaine prévu : **kitetudiant.fr**.
 
 Les règles permanentes du projet sont dans [`CLAUDE.md`](CLAUDE.md). La première
 d'entre elles : aucun montant affiché ne provient d'un LLM ; tout euro remonte à

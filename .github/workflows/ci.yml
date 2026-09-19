@@ -44,4 +44,4 @@ jobs:
         with:
           python-version: '3.12'
       - name: Contrôle de syntaxe
-        run: python -m compileall -q kit-etudiant/scripts
+        run: python -m compileall -q kitetudiant/scripts
