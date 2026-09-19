@@ -126,6 +126,14 @@ rsync -a --delete "${SRC_DIR}/${DOSSIER_BUILD}/" "${WEB_ROOT}/"
 log "Installation du serveur Node (prix + IA) dans ${APP_DIR}…"
 mkdir -p "${APP_DIR}"
 rsync -a --delete "${SRC_DIR}/server/" "${APP_DIR}/server/"
+# L'API n'est pas autonome : elle importe des modules de kitetudiant/packages
+# (barèmes, agrégation des retours), qui chargent eux-mêmes leurs fichiers de
+# données JSON. Sans eux, « npx tsx server/index.ts » meurt au démarrage sur un
+# import introuvable, pm2 le relance en boucle, et nginx répond 502 — front
+# affiché, API muette. Le test server/__tests__/deploiement.test.ts vérifie que
+# cette copie couvre bien tout ce que le serveur importe.
+mkdir -p "${APP_DIR}/kitetudiant"
+rsync -a --delete "${SRC_DIR}/kitetudiant/packages/" "${APP_DIR}/kitetudiant/packages/"
 for f in package.json package-lock.json tsconfig.server.json; do
   [ -f "${SRC_DIR}/${f}" ] && cp "${SRC_DIR}/${f}" "${APP_DIR}/"
 done
