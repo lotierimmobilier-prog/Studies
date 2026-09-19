@@ -183,6 +183,44 @@ log "Configuration de nginx (multi-projets sous /etc/nginx/projets.d)…"
 mkdir -p "${INCLUDE_DIR}"
 
 MAIN_CONF="/etc/nginx/sites-available/vps-multi"
+
+# --- cohabitation avec un site déjà installé --------------------------------
+# Cette machine héberge peut-être déjà autre chose (FamilyIA, un site vitrine…).
+# Deux réflexes de ce script étaient dangereux dans ce cas : réclamer
+# « default_server », qui fait échouer « nginx -t » si quelqu'un l'occupe déjà,
+# et supprimer sites-enabled/default, qui peut être le site de l'autre projet.
+# On ne prend donc le rôle par défaut que s'il est libre, et on ne retire
+# jamais une config qu'on n'a pas posée soi-même.
+# La page « Welcome to nginx » livrée avec le paquet porte elle aussi
+# « default_server » : elle ne compte pas comme un site à préserver. On la
+# reconnaît à sa racine /var/www/html et à l'absence de proxy ou de certificat.
+DEFAUT_ORIGINE=""
+if [ -e /etc/nginx/sites-enabled/default ] \
+   && grep -qE '^[[:space:]]*root[[:space:]]+/var/www/html;' /etc/nginx/sites-enabled/default 2>/dev/null \
+   && ! grep -qE 'proxy_pass|ssl_certificate' /etc/nginx/sites-enabled/default 2>/dev/null; then
+  DEFAUT_ORIGINE="1"
+fi
+
+# Qui tient « default_server » ? On s'ignore soi-même et on ignore la page
+# d'origine ; ce qui reste est un vrai site, qu'on ne dérange pas.
+AUTRE_DEFAUT=""
+for conf in $(grep -rlE 'listen[^;]*default_server' \
+  /etc/nginx/sites-enabled/ /etc/nginx/conf.d/ 2>/dev/null || true); do
+  case "${conf}" in
+    */vps-multi) continue ;;
+    */default) [ -n "${DEFAUT_ORIGINE}" ] && continue ;;
+  esac
+  AUTRE_DEFAUT="${conf}"
+  break
+done
+
+if [ -n "${AUTRE_DEFAUT}" ]; then
+  DIRECTIVE_DEFAUT=""
+  log "« default_server » est déjà tenu par ${AUTRE_DEFAUT} : on ne le lui prend pas."
+else
+  DIRECTIVE_DEFAUT=" default_server"
+fi
+
 # Le domaine, s'il est fourni, est servi en plus de l'IP. La config principale
 # est réécrite à chaque passage pour que l'ajout d'un domaine soit pris en
 # compte sans édition manuelle ; les snippets par projet, eux, sont préservés.
@@ -191,11 +229,16 @@ if [ -n "${DOMAIN}" ]; then
   NOMS="${DOMAIN} www.${DOMAIN} ${SERVER_NAME}"
 fi
 if [ ! -f "${MAIN_CONF}" ] || [ -n "${DOMAIN}" ]; then
+  # Sauvegarde : si nginx refuse la nouvelle config, on remet l'ancienne plutôt
+  # que de laisser la machine dans un état où le prochain redémarrage échoue.
+  SAUVEGARDE="$(mktemp -d)"
+  [ -f "${MAIN_CONF}" ] && cp "${MAIN_CONF}" "${SAUVEGARDE}/vps-multi"
+
   cat > "${MAIN_CONF}" <<NGINX
 # Serveur nginx partagé — chaque projet ajoute sa config dans ${INCLUDE_DIR}/*.conf
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    listen 80${DIRECTIVE_DEFAUT};
+    listen [::]:80${DIRECTIVE_DEFAUT};
     server_name ${NOMS};
 
     # Chaque projet (studies, …) dépose ici ses « location » (sous-chemin + API).
@@ -203,7 +246,14 @@ server {
 }
 NGINX
   ln -sf "${MAIN_CONF}" /etc/nginx/sites-enabled/vps-multi
-  rm -f /etc/nginx/sites-enabled/default
+
+  # sites-enabled/default n'est retiré que s'il s'agit bien de la page d'accueil
+  # nginx d'origine — jamais s'il sert un vrai site (nom de domaine, proxy).
+  if [ -n "${DEFAUT_ORIGINE}" ]; then
+    rm -f /etc/nginx/sites-enabled/default      # la page « Welcome to nginx »
+  elif [ -e /etc/nginx/sites-enabled/default ]; then
+    log "sites-enabled/default sert un vrai site : laissé en place."
+  fi
 fi
 
 # Redirection facultative de « / » vers ce projet (déposée à part, modifiable).
@@ -239,7 +289,24 @@ location /${SLUG}/assets/ {
 }
 NGINX
 
-nginx -t
+# On teste AVANT de recharger. Si nginx refuse la config, on retire ce qu'on
+# vient de poser et on remet l'ancienne version : sur une machine qui héberge
+# d'autres sites, une config invalide laissée en place les emporterait au
+# prochain redémarrage de nginx.
+if ! nginx -t; then
+  echo "" >&2
+  echo "nginx a refusé la configuration : retour à l'état précédent." >&2
+  rm -f "${INCLUDE_DIR}/${SLUG}.conf"
+  [ "${REDIRECT_ROOT}" = "1" ] && rm -f "${INCLUDE_DIR}/000-root-redirect.conf"
+  if [ -n "${SAUVEGARDE:-}" ] && [ -f "${SAUVEGARDE}/vps-multi" ]; then
+    cp "${SAUVEGARDE}/vps-multi" "${MAIN_CONF}"
+  else
+    rm -f /etc/nginx/sites-enabled/vps-multi "${MAIN_CONF}"
+  fi
+  nginx -t && systemctl reload nginx
+  echo "Les autres sites de cette machine sont intacts. Rien n'a été déployé." >&2
+  exit 1
+fi
 systemctl reload nginx
 
 # --------------------------------------------------------------------- HTTPS

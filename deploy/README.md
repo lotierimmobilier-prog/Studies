@@ -91,20 +91,27 @@ n'est le VPS KITETUDIANT. Il faut donc corriger le DNS avant tout.
 1. Dans le hPanel Hostinger, section **DNS / Name servers**, pour
    `kitetudiant.fr` :
    - **supprimer** les enregistrements A `2.57.91.91` et `76.13.37.163` ;
-   - **créer** un A `@` → `76.13.37.193` ;
-   - **créer** un A `www` → `76.13.37.193`.
+   - **créer un seul** A, nommé `@`, vers `76.13.37.193` ;
+   - **ne rien créer pour `www`** : la zone porte déjà un CNAME
+     `www` → `kitetudiant.fr`, qui suivra l'apex tout seul.
 
-   Deux A sur le même nom ne sont pas un doublon inoffensif : Let's Encrypt en
-   tire un au hasard pour sa validation HTTP-01, et le certificat échoue une
-   fois sur deux — en consommant le quota d'essais (5 échecs par heure et par
-   domaine).
+   Deux pièges du panneau Hostinger :
+
+   - `@` et `kitetudiant.fr` désignent **le même nom**. En saisir un de chaque
+     crée un doublon. Deux A sur le même nom ne sont pas inoffensifs :
+     Let's Encrypt en tire un au hasard pour sa validation HTTP-01, et le
+     certificat échoue une fois sur deux — en consommant le quota d'essais
+     (5 échecs par heure et par domaine).
+   - Un nom qui porte un **CNAME ne peut porter aucun autre enregistrement**.
+     Ajouter un A sur `www` est donc refusé, à juste titre, tant que le CNAME
+     est là. Le CNAME suffit : Let's Encrypt le suit sans difficulté.
 
 2. Attendre la propagation, puis vérifier — la réponse doit tenir sur une
    seule ligne :
 
 ```bash
 dig +short kitetudiant.fr        # -> 76.13.37.193, et rien d'autre
-dig +short www.kitetudiant.fr    # -> 76.13.37.193
+dig +short www.kitetudiant.fr    # -> kitetudiant.fr. puis 76.13.37.193
 ```
 
 3. Sur le VPS, lancer le script avec le domaine :
@@ -152,6 +159,34 @@ de demander un certificat, à ne pas laisser en l'état.
 > ```
 
 Le site est alors en ligne sur **http://76.13.37.163/studies/**.
+
+### Cohabiter avec un site déjà installé sur la machine
+
+`76.13.37.193` héberge déjà **FamilyIA**. Le script est fait pour cohabiter, et
+il ne touche à rien de ce qu'il n'a pas posé lui-même :
+
+- il ne réclame `default_server` que si **personne ne le tient**. Si un autre
+  site l'occupe, il s'en passe : son propre bloc est atteint par `server_name`,
+  ce qui suffit pour un domaine ;
+- il ne supprime `sites-enabled/default` que s'il s'agit bien de la page
+  « Welcome to nginx » d'origine (racine `/var/www/html`, ni proxy ni
+  certificat). Un vrai site rangé sous ce nom est laissé en place ;
+- il **teste la configuration avant de recharger**. Si nginx la refuse, il
+  retire ce qu'il vient d'écrire et remet l'état précédent, plutôt que de
+  laisser une config invalide qui emporterait les autres sites au prochain
+  redémarrage.
+
+Les deux sites vivent alors dans des blocs `server` distincts, séparés par leur
+`server_name` : FamilyIA sur son domaine, KITETUDIANT sur `kitetudiant.fr`.
+Rien à déplacer.
+
+Avant de lancer quoi que ce soit sur une machine occupée, un état des lieux :
+
+```bash
+nginx -T | grep -E 'server_name|listen|root ' | head -40
+ls -l /etc/nginx/sites-enabled/
+certbot certificates          # quels domaines ont déjà un certificat
+```
 
 ### Héberger plusieurs projets sur le même VPS
 
