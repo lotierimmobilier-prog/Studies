@@ -3,6 +3,19 @@
 Deux méthodes. **La méthode A (directe) est la plus simple** et n'a besoin
 d'aucune clé SSH ni secret GitHub — c'est celle à privilégier.
 
+## Les machines
+
+Deux serveurs, à ne pas confondre — les commandes ci-dessous ne s'appliquent
+pas à la même :
+
+| Adresse | Rôle | Ce qu'elle sert aujourd'hui |
+| --- | --- | --- |
+| `76.13.37.193` | **VPS KITETUDIANT** | nginx neuf, rien de ce dépôt encore |
+| `76.13.37.163` | VPS historique | le simulateur et `/maisoncapendu/` |
+
+Les deux sont chez Hostinger, en France. `SERVER_NAME` vaut `76.13.37.163` par
+défaut dans le script : **pour KITETUDIANT, passer `SERVER_NAME=76.13.37.193`.**
+
 ---
 
 ## Méthode A — déploiement direct sur le VPS (recommandée, sans clé SSH)
@@ -12,7 +25,8 @@ dépôt (public), installe Node/nginx/pm2 au besoin, build le front, le sert sou
 un **sous-chemin** (`/studies`) et démarre l'API. Idempotent : relance-le pour
 mettre à jour.
 
-Connecté en **root** sur le VPS (`ssh root@76.13.37.163`), une seule commande :
+Connecté en **root** sur le VPS visé — `ssh root@76.13.37.163` pour le
+simulateur, `ssh root@76.13.37.193` pour KITETUDIANT — une seule commande :
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/lotierimmobilier-prog/Studies/main/deploy/vps-setup.sh | bash
@@ -32,12 +46,32 @@ Le dépôt sert deux fronts : le **simulateur** historique et **KITETUDIANT**. L
 variable `PROJET` choisit lequel est déployé sous un `SLUG` donné. Ils peuvent
 cohabiter sur le même VPS, chacun avec son port d'API.
 
+La commande réelle, à lancer en root sur `76.13.37.193` une fois le DNS en
+ordre (voir plus bas), avec vos propres secrets à la place des points :
+
 ```bash
-# KITETUDIANT sur son domaine, en HTTPS
 PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
-  DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr \
+  SERVER_NAME=76.13.37.193 \
+  DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=lotierimmobilier@gmail.com \
+  ADMIN_TOKEN="…" ADMIN_MASTER_KEY="…" \
   bash deploy/vps-setup.sh
 ```
+
+`ADMIN_TOKEN` (≥ 24 caractères) ouvre la console `/kitetudiant/admin.html` ;
+`ADMIN_MASTER_KEY` (≥ 16) chiffre le coffre où les clés API sont rangées. Les
+deux se tirent au hasard une fois pour toutes :
+
+```bash
+openssl rand -base64 32   # à faire deux fois, un secret par variable
+```
+
+Ils atterrissent dans `/opt/kitetudiant/.env`, en mode 600. **Changer
+`ADMIN_MASTER_KEY` rend illisibles les clés déjà rangées dans le coffre** : il
+faudra les reposer depuis la console.
+
+Les clés API (`ANTHROPIC_API_KEY`, `GOOGLE_MAPS_API_KEY`) n'ont pas besoin de
+figurer ici : une fois le HTTPS en place, elles se posent depuis la console
+d'administration, chiffrées au repos et jamais réaffichées en clair.
 
 KITETUDIANT a besoin de l'API pour l'aide au logement : c'est elle qui
 interroge OpenFisca, jamais le navigateur de l'élève. Sans API, chaque vœu
@@ -49,14 +83,42 @@ Le site sert aujourd'hui en **HTTP simple** sur l'IP. Pour un produit qui
 recueillera des données d'élèves mineurs, le chiffrement du transport n'est pas
 une option : il faut un domaine et un certificat.
 
-1. Chez le registrar du domaine, créer deux enregistrements **A** pointant sur
-   l'IP du VPS : `kitetudiant.fr` et `www.kitetudiant.fr`. Vérifier la
-   propagation avec `dig +short kitetudiant.fr`.
-2. Sur le VPS, relancer le script avec le domaine :
+**État du DNS de `kitetudiant.fr`** (relevé le 19/09/2026) : le domaine est
+géré chez Hostinger (`atlas.dns-parking.com`, `hyperion.dns-parking.com`) et
+porte **deux** enregistrements A — `2.57.91.91` et `76.13.37.163` — dont aucun
+n'est le VPS KITETUDIANT. Il faut donc corriger le DNS avant tout.
+
+1. Dans le hPanel Hostinger, section **DNS / Name servers**, pour
+   `kitetudiant.fr` :
+   - **supprimer** les enregistrements A `2.57.91.91` et `76.13.37.163` ;
+   - **créer** un A `@` → `76.13.37.193` ;
+   - **créer** un A `www` → `76.13.37.193`.
+
+   Deux A sur le même nom ne sont pas un doublon inoffensif : Let's Encrypt en
+   tire un au hasard pour sa validation HTTP-01, et le certificat échoue une
+   fois sur deux — en consommant le quota d'essais (5 échecs par heure et par
+   domaine).
+
+2. Attendre la propagation, puis vérifier — la réponse doit tenir sur une
+   seule ligne :
+
+```bash
+dig +short kitetudiant.fr        # -> 76.13.37.193, et rien d'autre
+dig +short www.kitetudiant.fr    # -> 76.13.37.193
+```
+
+3. Sur le VPS, lancer le script avec le domaine :
 
 ```bash
 DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr bash deploy/vps-setup.sh
 ```
+
+Le script refuse d'appeler certbot si le DNS n'est pas en ordre : nom qui ne
+résout pas, plusieurs A, ou A pointant sur une autre machine. Il le dit et
+s'arrête, plutôt que de brûler un essai du quota. `TLS_FORCER=1` passe outre
+si un CDN ou un reverse-proxy se trouve devant le serveur. Si `www` ne résout
+pas, le certificat est demandé pour le nom nu seulement, au lieu d'échouer en
+entier.
 
 Le script ajoute le domaine au `server_name` de nginx, installe certbot,
 obtient le certificat Let's Encrypt pour `kitetudiant.fr` et `www`, et met en

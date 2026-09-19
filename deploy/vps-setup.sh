@@ -30,14 +30,18 @@
 # La console d'administration reste FERMÉE tant qu'ADMIN_TOKEN n'est pas
 # défini, et elle refuse de répondre hors HTTPS. Faire le certificat d'abord.
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
+#                                #   (VPS KITETUDIANT : 76.13.37.193)
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
 #   DOMAIN=kitetudiant.fr        # nom de domaine à servir, en plus de l'IP
 #   TLS=1                        # obtient un certificat Let's Encrypt pour DOMAIN
 #   TLS_EMAIL=vous@exemple.fr    # adresse de contact exigée par Let's Encrypt
+#   TLS_FORCER=1                 # passe outre le pré-vol DNS (CDN, proxy amont)
 #
 # HTTPS (à faire une fois le DNS en place) :
-#   1. Chez le registrar : un enregistrement A « kitetudiant.fr » -> l'IP du VPS,
-#      et le même pour « www ». Attendre la propagation (dig kitetudiant.fr).
+#   1. Chez le registrar : UN SEUL enregistrement A « kitetudiant.fr » -> l'IP
+#      du VPS, et le même pour « www ». Plusieurs A sur le même nom font
+#      échouer la validation une fois sur deux. Attendre la propagation
+#      (dig +short kitetudiant.fr).
 #   2. DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=vous@exemple.fr bash deploy/vps-setup.sh
 #   Le certificat se renouvelle tout seul (timer systemd installé par certbot).
 #
@@ -248,6 +252,62 @@ if [ "${TLS}" = "1" ]; then
     echo "TLS=1 exige DOMAIN=<votre-domaine> : un certificat ne s'obtient pas pour une IP." >&2
     exit 1
   fi
+  # --- pré-vol DNS -----------------------------------------------------------
+  # Let's Encrypt valide par HTTP-01 : il appelle lui-même
+  # http://<domaine>/.well-known/acme-challenge/… sur l'IP publiée par le DNS.
+  # Si le domaine porte plusieurs A, ou pointe sur une AUTRE machine, la
+  # validation atterrit sur le mauvais serveur et le certificat échoue — en
+  # brûlant un essai du quota (5 échecs par heure et par domaine). On vérifie
+  # donc avant d'appeler certbot. TLS_FORCER=1 passe outre en connaissance de
+  # cause (CDN, reverse-proxy amont, NAT).
+  # « || true » : getant sort en erreur quand le nom ne résout pas, et le
+  # script tourne sous « set -e pipefail » — sans cela l'absence de DNS tuerait
+  # le script sans un mot d'explication.
+  adresses_de() { getent ahostsv4 "$1" 2>/dev/null | awk '{print $1}' | sort -u || true; }
+  ADRESSES_LOCALES="$(hostname -I 2>/dev/null | tr ' ' '\n' | grep -E '^[0-9]+(\.[0-9]+){3}$' | sort -u)"
+
+  IP_DOMAINE="$(adresses_de "${DOMAIN}")"
+  if [ -z "${IP_DOMAINE}" ]; then
+    echo "DNS : « ${DOMAIN} » ne résout sur aucune adresse IPv4." >&2
+    echo "  Crée un enregistrement A chez ton hébergeur DNS, puis attends la propagation." >&2
+    [ "${TLS_FORCER:-0}" = "1" ] || exit 1
+  fi
+
+  NB_A="$(printf '%s\n' "${IP_DOMAINE}" | grep -c . || true)"
+  if [ "${NB_A}" -gt 1 ]; then
+    echo "DNS : « ${DOMAIN} » porte ${NB_A} enregistrements A :" >&2
+    printf '  %s\n' ${IP_DOMAINE} >&2
+    echo "  Let's Encrypt en tirera un au hasard : le certificat échouera une fois sur deux." >&2
+    echo "  Ne garde qu'un seul A, celui de cette machine, puis relance." >&2
+    [ "${TLS_FORCER:-0}" = "1" ] || exit 1
+  fi
+
+  if [ -n "${ADRESSES_LOCALES}" ] && [ -n "${IP_DOMAINE}" ]; then
+    CONCORDE=0
+    for ip in ${IP_DOMAINE}; do
+      for locale in ${ADRESSES_LOCALES}; do
+        [ "${ip}" = "${locale}" ] && CONCORDE=1
+      done
+    done
+    if [ "${CONCORDE}" -eq 0 ]; then
+      echo "DNS : « ${DOMAIN} » pointe sur ${IP_DOMAINE//$'\n'/ }," >&2
+      echo "  or cette machine porte ${ADRESSES_LOCALES//$'\n'/ }." >&2
+      echo "  Corrige l'enregistrement A, ou relance avec TLS_FORCER=1 si un CDN" >&2
+      echo "  ou un reverse-proxy se trouve devant ce serveur." >&2
+      [ "${TLS_FORCER:-0}" = "1" ] || exit 1
+    fi
+  fi
+
+  # « www » n'est demandé que s'il résout : certbot échoue en entier si l'un des
+  # noms demandés ne pointe nulle part.
+  NOMS_CERT="-d ${DOMAIN}"
+  if [ -n "$(adresses_de "www.${DOMAIN}")" ]; then
+    NOMS_CERT="${NOMS_CERT} -d www.${DOMAIN}"
+  else
+    log "« www.${DOMAIN} » ne résout pas : certificat demandé pour ${DOMAIN} seul."
+  fi
+  # --- fin du pré-vol --------------------------------------------------------
+
   log "Obtention du certificat Let's Encrypt pour ${DOMAIN}…"
   command -v certbot >/dev/null 2>&1 || apt-get install -y certbot python3-certbot-nginx
   COURRIEL_ARGS="--register-unsafely-without-email"
@@ -255,7 +315,7 @@ if [ "${TLS}" = "1" ]; then
     COURRIEL_ARGS="--email ${TLS_EMAIL}"
   fi
   certbot --nginx --non-interactive --agree-tos --redirect \
-    ${COURRIEL_ARGS} -d "${DOMAIN}" -d "www.${DOMAIN}"
+    ${COURRIEL_ARGS} ${NOMS_CERT}
   systemctl reload nginx
   URL_FINALE="https://${DOMAIN}/${SLUG}/"
 elif [ -n "${DOMAIN}" ]; then
