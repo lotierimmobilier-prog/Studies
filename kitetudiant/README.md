@@ -104,6 +104,32 @@ s'affichent comme manquants.
 département → code INSEE, figée et versionnée, parce que Parcoursup ne porte
 pas de code commune et que le front ne doit rien deviner à l'exécution.
 
+## Retours des étudiants (M10)
+
+Trois axes chiffrés seulement — coût réel constaté, facilité à trouver un
+logement, ambiance — déposés par des étudiants déjà inscrits. **Aucun texte
+libre n'est collecté, et aucune note d'établissement n'est calculée** : le
+cahier des charges l'interdit pour éviter le procès en diffamation, et cela
+supprime du même coup tout besoin de modération.
+
+En dessous de **cinq retours** sur une année, rien n'est publié : trop peu
+d'observations, et un risque réel de réidentification sur une petite formation.
+
+**Archivage par année universitaire.** Un fichier par millésime, qui bascule le
+1er septembre. Écrire ne touche jamais qu'au fichier de l'année en cours : les
+années passées sont immuables par construction, pas par discipline. En base, un
+déclencheur refuse toute insertion, modification ou suppression dans un
+millésime déclaré clos.
+
+```
+POST /api/retours            dépose un retour
+GET  /api/retours?formation= archive année par année
+POST /api/retours/agregats   agrégats de l'année en cours, en lot
+```
+
+Le jeton qui limite à un retour par formation et par an n'identifie personne :
+il est tiré au hasard dans le navigateur et **haché avant d'être stocké**.
+
 ## Base de données
 
 ```bash

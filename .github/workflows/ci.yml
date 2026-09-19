@@ -71,9 +71,13 @@ jobs:
       - name: Vérifier que les contraintes rejettent ce qu'elles doivent rejeter
         env:
           PGURL: postgresql://postgres:postgres@localhost:5432/postgres
-          LC_ALL: C
         run: |
-          rejets=$(psql "$PGURL" -f kitetudiant/db/tests_contraintes.sql 2>&1 \
-            | grep -c 'violates check constraint' || true)
-          echo "$rejets contraintes ont rejeté l'insertion interdite"
-          test "$rejets" -eq 9
+          # Trois familles de refus : contraintes CHECK, unicité, et le
+          # déclencheur qui ferme un millésime clos. Le message du déclencheur
+          # est en français : on ne force pas la locale, on cherche les trois.
+          sortie=$(psql "$PGURL" -f kitetudiant/db/tests_contraintes.sql 2>&1 || true)
+          rejets=$(printf '%s' "$sortie" \
+            | grep -cE 'violates check constraint|violates unique constraint|clos : aucune' || true)
+          echo "$rejets écritures interdites ont bien été rejetées"
+          printf '%s' "$sortie" | grep -E '^ERROR|ERROR:' | sed 's/^/  /'
+          test "$rejets" -eq 15

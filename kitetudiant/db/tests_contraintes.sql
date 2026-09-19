@@ -71,3 +71,43 @@ INSERT INTO eleve.panier_voeu (panier_id, rang, cod_aff_form, session, classe_ri
 VALUES ('66666666-6666-6666-6666-666666666666', 1, '2519', 2025, 'sur',
         'Reste-à-vivre négatif dans le scénario prudent');
 SELECT count(*) AS voeux_dans_le_panier FROM eleve.panier_voeu;
+
+\echo '--- 10. un retour hors des bornes doit être refusé'
+INSERT INTO communaute.retour_etudiant
+  (id, cod_aff_form, session, millesime, cout_reel_mensuel, facilite_logement, ambiance,
+   annee_etudes, empreinte_contributeur)
+VALUES ('88888888-8888-8888-8888-888888888888', '2519', 2025, '2026-2027', 500, 9, 4, 1, 'abc');
+
+\echo '--- 11. un millésime mal formé doit être refusé'
+INSERT INTO communaute.retour_etudiant
+  (id, cod_aff_form, session, millesime, cout_reel_mensuel, facilite_logement, ambiance,
+   annee_etudes, empreinte_contributeur)
+VALUES ('99999999-9999-9999-9999-999999999999', '2519', 2025, '2026', 500, 3, 4, 1, 'abc');
+
+\echo '--- ce qui DOIT passer : deux retours de contributeurs différents'
+INSERT INTO communaute.retour_etudiant
+  (id, cod_aff_form, session, millesime, cout_reel_mensuel, facilite_logement, ambiance,
+   annee_etudes, empreinte_contributeur)
+VALUES ('aaaaaaaa-0000-0000-0000-000000000001', '2519', 2025, '2026-2027', 520, 3, 4, 1, 'empreinte-a'),
+       ('aaaaaaaa-0000-0000-0000-000000000002', '2519', 2025, '2026-2027', 610, 2, 5, 2, 'empreinte-b');
+
+\echo '--- 12. le même contributeur deux fois sur la même formation et la même année'
+INSERT INTO communaute.retour_etudiant
+  (id, cod_aff_form, session, millesime, cout_reel_mensuel, facilite_logement, ambiance,
+   annee_etudes, empreinte_contributeur)
+VALUES ('aaaaaaaa-0000-0000-0000-000000000003', '2519', 2025, '2026-2027', 700, 3, 4, 1, 'empreinte-a');
+
+\echo '--- 13. écrire dans un millésime clos doit être refusé'
+INSERT INTO communaute.millesime_clos (millesime) VALUES ('2026-2027');
+INSERT INTO communaute.retour_etudiant
+  (id, cod_aff_form, session, millesime, cout_reel_mensuel, facilite_logement, ambiance,
+   annee_etudes, empreinte_contributeur)
+VALUES ('aaaaaaaa-0000-0000-0000-000000000004', '2519', 2025, '2026-2027', 530, 3, 4, 1, 'empreinte-c');
+
+\echo '--- 14. modifier un retour d’un millésime clos doit être refusé'
+UPDATE communaute.retour_etudiant SET cout_reel_mensuel = 1 WHERE millesime = '2026-2027';
+
+\echo '--- 15. supprimer un retour d’un millésime clos doit être refusé'
+DELETE FROM communaute.retour_etudiant WHERE millesime = '2026-2027';
+
+SELECT count(*) AS retours_conserves FROM communaute.retour_etudiant;

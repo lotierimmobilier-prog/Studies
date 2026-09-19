@@ -274,3 +274,30 @@ input[type='range'] { width: 100%; min-height: 44px; }
   .notes { grid-template-columns: 1fr 1fr; }
   .domaines { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* ------------------------------------------------- retours des étudiants */
+.retours-resume { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
+.retours { margin-top: 1.4rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+.retours h4 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+
+.annees { list-style: none; margin: 0.6rem 0; padding: 0; display: flex; flex-direction: column; gap: 0.8rem; }
+.annee { font-size: 0.88rem; }
+.annee.vide { color: var(--doux); }
+.annee-detail { margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.annee-detail p { margin: 0; color: var(--doux); }
+
+.barre { display: grid; grid-template-columns: 1fr 5rem auto; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.barre-libelle { color: var(--doux); }
+.barre-piste { height: 6px; border-radius: 3px; background: var(--trait); overflow: hidden; }
+.barre-remplie { display: block; height: 100%; background: var(--accent); }
+.barre-valeur { font-variant-numeric: tabular-nums; }
+
+.formulaire-retour {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}

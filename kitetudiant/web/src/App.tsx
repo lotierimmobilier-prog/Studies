@@ -13,16 +13,19 @@ import {
   type ResultatFormation,
 } from './calcul.ts'
 import {
+  chercherAgregatsRetours,
   chercherAidesLogement,
   chercherFormations,
   MILLESIME_LOYERS,
   SOURCE_LOYERS,
   SOURCE_PARCOURSUP,
   TYPOLOGIE_LOYERS,
+  type AgregatRetours,
   type AideLogement,
   type FiltreFormations,
 } from './donnees.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
+import { PanneauRetours, ResumeRetours } from './retours.tsx'
 
 const ACADEMIES = [
   'Aix-Marseille', 'Amiens', 'Besançon', 'Bordeaux', 'Clermont-Ferrand', 'Corse',
@@ -103,11 +106,13 @@ function Carte({
   tous,
   onOuvrir,
   ouvert,
+  retours,
 }: {
   resultat: ResultatFormation
   tous: readonly ResultatFormation[]
   onOuvrir: () => void
   ouvert: boolean
+  retours: AgregatRetours | undefined
 }) {
   const central = resultat.parScenario.central
   const verdict = VERDICTS[central.soutenabilite]
@@ -157,6 +162,7 @@ function Carte({
       </div>
 
       <Admission resultat={resultat} />
+      <ResumeRetours agregat={retours} />
 
       {central.avertissements.map((a) => (
         <p className="avertissement" key={a}>
@@ -219,6 +225,8 @@ function Carte({
             </div>
           ) : null}
 
+          <PanneauRetours codFormation={resultat.formation.id} />
+
           {resultat.formation.lien ? (
             <p>
               <a href={resultat.formation.lien} target="_blank" rel="noreferrer">
@@ -239,6 +247,7 @@ export default function App() {
   const [enCours, setEnCours] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
   const [ouvert, setOuvert] = useState<string | null>(null)
+  const [retours, setRetours] = useState<Map<string, AgregatRetours>>(new Map())
 
   const majReponses = useCallback((partiel: Partial<Reponses>) => {
     setReponses((r) => ({ ...r, ...partiel }))
@@ -272,6 +281,7 @@ export default function App() {
       const aides = await chercherAidesLogement(demandes)
       const parRef = new Map<string, AideLogement>(aides.map((a) => [a.ref, a]))
       const aujourdHui = new Date().toISOString().slice(0, 10)
+      setRetours(await chercherAgregatsRetours(formations.map((f) => f.id)))
       setResultats(trierParPertinence(calculerResultats(formations, reponses, parRef, aujourdHui)))
     } catch (e) {
       setErreur((e as Error).message)
@@ -307,6 +317,7 @@ export default function App() {
               key={r.formation.id}
               resultat={r}
               tous={resultats}
+              retours={retours.get(r.formation.id)}
               ouvert={ouvert === r.formation.id}
               onOuvrir={() => setOuvert(ouvert === r.formation.id ? null : r.formation.id)}
             />
@@ -331,6 +342,11 @@ export default function App() {
           <p>
             Aide au logement calculée par OpenFisca France. Bourses, aide au mérite,
             CVEC et tarif du restaurant universitaire : barèmes officiels datés.
+          </p>
+          <p>
+            Retours d’étudiants : trois axes chiffrés, archivés par année universitaire.
+            Aucun commentaire libre n’est collecté, et aucune note d’établissement n’est
+            calculée. En dessous de cinq retours sur une année, rien n’est publié.
           </p>
           <p className="non-affiliation">
             KITETUDIANT n’est pas affilié à Parcoursup, au ministère ni aux CROUS.

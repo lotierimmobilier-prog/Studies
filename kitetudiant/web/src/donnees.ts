@@ -319,3 +319,90 @@ export async function lireBulletin(
   }
   return (await reponse.json()) as BulletinExtrait
 }
+
+// ------------------------------------------------------------------ retours
+
+export type { Agregat as AgregatRetours } from '../../packages/retours/src/index.ts'
+
+/**
+ * Jeton de contributeur, propre au navigateur. Il n'identifie personne : il
+ * sert seulement à n'accepter qu'un retour par formation et par an, et il est
+ * haché côté serveur avant d'être stocké. Le stockage local peut être refusé
+ * (navigation privée, cookies bloqués) : on retombe alors sur un jeton de
+ * session, quitte à autoriser un doublon plutôt que de bloquer la personne.
+ */
+export function jetonContributeur(): string {
+  const cle = 'kitetudiant.contributeur'
+  try {
+    const existant = localStorage.getItem(cle)
+    if (existant) return existant
+    const neuf = crypto.randomUUID()
+    localStorage.setItem(cle, neuf)
+    return neuf
+  } catch {
+    return crypto.randomUUID()
+  }
+}
+
+export interface DepotRetour {
+  readonly codFormation: string
+  readonly coutReelMensuel: number
+  readonly faciliteLogement: number
+  readonly ambiance: number
+  readonly anneeEtudes: number
+}
+
+export async function deposerRetour(
+  retour: DepotRetour,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<void> {
+  const reponse = await recuperer(`${base}/retours`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...retour, jetonContributeur: jetonContributeur() }),
+  })
+  if (!reponse.ok) {
+    const corps = (await reponse.json().catch(() => ({}))) as { erreur?: string }
+    throw new Error(corps.erreur ?? `Retour non enregistré (${reponse.status}).`)
+  }
+}
+
+/** Agrégats de l'année en cours, pour plusieurs formations d'un coup. */
+export async function chercherAgregatsRetours(
+  codFormations: readonly string[],
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<Map<string, import('../../packages/retours/src/index.ts').Agregat>> {
+  if (codFormations.length === 0) return new Map()
+  try {
+    const reponse = await recuperer(`${base}/retours/agregats`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(codFormations),
+    })
+    if (!reponse.ok) return new Map()
+    const liste = (await reponse.json()) as import('../../packages/retours/src/index.ts').Agregat[]
+    return new Map(liste.map((a) => [a.codFormation, a]))
+  } catch {
+    // Les retours enrichissent l'affichage ; leur absence ne doit rien casser.
+    return new Map()
+  }
+}
+
+export async function chercherArchiveRetours(
+  codFormation: string,
+  base = '/api',
+  recuperer: typeof fetch = fetch,
+): Promise<import('../../packages/retours/src/index.ts').Agregat[]> {
+  try {
+    const reponse = await recuperer(`${base}/retours?formation=${encodeURIComponent(codFormation)}`)
+    if (!reponse.ok) return []
+    const corps = (await reponse.json()) as {
+      archives?: import('../../packages/retours/src/index.ts').Agregat[]
+    }
+    return corps.archives ?? []
+  } catch {
+    return []
+  }
+}
