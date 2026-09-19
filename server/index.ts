@@ -30,6 +30,9 @@ import {
 } from './aideLogement'
 import { extraireBulletin } from './bulletinScolaire'
 import { chercherAvisLieux, type DemandeAvisLieu } from './avisLieu'
+import { GardeAdmin } from './admin'
+import { etatSysteme } from './etatSysteme'
+import { Coffre, CoffreNonConfigure, estSecretGere } from './secrets'
 import {
   DepotRetours,
   RetourEnDouble,
@@ -65,6 +68,11 @@ import {
  *   POST /api/avis-lieu body: DemandeAvisLieu[] → note publique du LIEU
  *                                        (jamais un critère de décision)
  *
+ * Administration (HTTPS + jeton ADMIN_TOKEN, voir admin.ts) :
+ *   GET    /api/admin/etat               → clés, barèmes, millésimes
+ *   PUT    /api/admin/cles  body {nom, valeur} → enregistre une clé
+ *   DELETE /api/admin/cles?nom=          → oublie une clé
+ *
  * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
  * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
  */
@@ -85,6 +93,10 @@ const depotTemoignages = new DepotTemoignages(
 // KITETUDIANT — un fichier par année universitaire, les années passées ne sont
 // jamais réécrites.
 const depotRetours = new DepotRetours(join(process.cwd(), '.data', 'retours'))
+const coffre = new Coffre(join(process.cwd(), '.data', 'secrets.json'))
+const gardeAdmin = new GardeAdmin()
+
+
 
 function cors(res: import('node:http').ServerResponse): void {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -362,12 +374,51 @@ async function demarrer(): Promise<void> {
         return envoyerJson(res, 200, await chercherAvisLieux(demandes))
       }
 
+      // ------------------------------------------------------ administration
+      if (url.pathname.startsWith('/api/admin/')) {
+        const refus = gardeAdmin.verifier(req)
+        if (refus) return envoyerJson(res, refus.code, refus)
+
+        if (url.pathname === '/api/admin/etat' && req.method === 'GET') {
+          return envoyerJson(res, 200, await etatSysteme(coffre, depotRetours))
+        }
+
+        if (url.pathname === '/api/admin/cles' && req.method === 'PUT') {
+          const corps = await lireCorps(req)
+          const { nom, valeur } = JSON.parse(corps) as { nom: string; valeur: string }
+          if (!estSecretGere(nom))
+            return envoyerJson(res, 400, { erreur: `Clé « ${nom} » non gérée par la console.` })
+          try {
+            const etat = await coffre.enregistrer(nom, valeur)
+            await coffre.hydraterEnvironnement()
+            return envoyerJson(res, 200, etat)
+          } catch (e) {
+            if (e instanceof CoffreNonConfigure)
+              return envoyerJson(res, 503, { erreur: e.message })
+            return envoyerJson(res, 400, { erreur: (e as Error).message })
+          }
+        }
+
+        if (url.pathname === '/api/admin/cles' && req.method === 'DELETE') {
+          const nom = url.searchParams.get('nom') ?? ''
+          if (!estSecretGere(nom))
+            return envoyerJson(res, 400, { erreur: `Clé « ${nom} » non gérée par la console.` })
+          await coffre.oublier(nom)
+          // La valeur recopiée dans l'environnement doit partir aussi.
+          coffre.deshydrater(nom)
+          return envoyerJson(res, 200, { ok: true })
+        }
+
+        return envoyerJson(res, 404, { erreur: 'route d’administration inconnue' })
+      }
+
       envoyerJson(res, 404, { erreur: 'route inconnue' })
     } catch (e) {
       envoyerJson(res, 500, { erreur: (e as Error).message })
     }
   })
 
+  void coffre.hydraterEnvironnement()
   serveur.listen(PORT, () => {
     console.log(`API prix démarrée sur http://localhost:${PORT}`)
   })
