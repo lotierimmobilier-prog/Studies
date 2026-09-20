@@ -433,6 +433,43 @@ async function demarrer(): Promise<void> {
             await depotComptes.deconnecter(jetonDeLEnTete(req.headers.authorization))
             return envoyerJson(res, 200, { deconnecte: true })
           }
+
+          // ------------------------------------------- espace personnel
+          // Ce que le site sait de l'élève, et rien de plus : une adresse et
+          // trois dates. Pas de nom, pas d'adresse postale, pas de téléphone
+          // — la règle 3 de CLAUDE.md impose la minimisation parce que les
+          // titulaires sont mineurs (voir ProfilCompte dans comptes.ts).
+          if (url.pathname === '/api/comptes/profil' && req.method === 'GET') {
+            const profil = await depotComptes.profil(jetonDeLEnTete(req.headers.authorization))
+            if (profil === null) {
+              return envoyerJson(res, 401, { erreur: 'Session expirée ou invalide.' })
+            }
+            return envoyerJson(res, 200, profil)
+          }
+
+          if (url.pathname === '/api/comptes/mot-de-passe' && req.method === 'POST') {
+            const { ancien, nouveau } = JSON.parse(await lireCorps(req)) as {
+              ancien?: string
+              nouveau?: string
+            }
+            await depotComptes.changerMotDePasse(
+              jetonDeLEnTete(req.headers.authorization),
+              ancien ?? '',
+              nouveau ?? '',
+            )
+            return envoyerJson(res, 200, { change: true })
+          }
+
+          // DELETE et non POST : l'effacement d'un compte est exactement ce
+          // que ce verbe désigne, et le choisir empêche qu'un lien ou un
+          // formulaire tiers le déclenche par une simple navigation.
+          if (url.pathname === '/api/comptes/moi' && req.method === 'DELETE') {
+            const supprime = await depotComptes.supprimerCompte(
+              jetonDeLEnTete(req.headers.authorization),
+            )
+            if (!supprime) return envoyerJson(res, 401, { erreur: 'Session expirée ou invalide.' })
+            return envoyerJson(res, 200, { supprime: true })
+          }
           // ------------------------------------------------- Google
           // Aucun script de Google n'est servi au navigateur : le bouton du
           // site est un simple lien vers « /debut ». Google n'apprend donc

@@ -40,6 +40,7 @@ import {
   type Obtention,
 } from './collection.ts'
 import { Collection } from './collection.tsx'
+import { MonCompte } from './monCompte.tsx'
 import { Epingle } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
 import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
@@ -357,7 +358,14 @@ function Carte({
 
 export default function App() {
   const [vue, setVue] = useState<
-    'accueil' | 'parcours' | 'collection' | 'blog' | 'article' | 'connexion' | 'inscription'
+    | 'accueil'
+    | 'parcours'
+    | 'collection'
+    | 'blog'
+    | 'article'
+    | 'connexion'
+    | 'inscription'
+    | 'compte'
   >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
@@ -620,6 +628,21 @@ export default function App() {
     [resultats, filtres],
   )
   const affiches = useMemo(() => classer(retenus, classement), [retenus, classement])
+
+  if (vue === 'compte') {
+    return (
+      <MonCompte
+        /* `reponses` vaut REPONSES_PAR_DEFAUT tant que rien n'a été rempli.
+           Les afficher telles quelles donnerait à l'élève un récapitulatif
+           de réponses qu'il n'a jamais données — une valeur de repli
+           silencieuse, ce que CLAUDE.md interdit. On ne les passe donc que
+           si le parcours a réellement été entamé ici. */
+        reponses={resultats === null && etape === 0 ? null : reponses}
+        onNaviguer={naviguer}
+        onDeconnexion={() => setConnecte(false)}
+      />
+    )
+  }
 
   if (vue === 'blog') {
     return (

@@ -9,10 +9,15 @@
  * ── Ce que le menu montre, et quand ──────────────────────────────────────
  *
  * Déconnecté : le blog, se connecter, créer un compte.
- * Connecté : le blog, et se déconnecter. Pas de « mon profil » — il n'y a
- * rien à y mettre. Le compte ne connaît qu'une adresse chiffrée (règle 3 de
- * CLAUDE.md), et une page qui afficherait fièrement cette unique donnée
- * n'apprendrait rien à personne.
+ * Connecté : le blog, mon compte, se déconnecter.
+ *
+ * « Mon compte » a longtemps été jugé inutile ici, au motif que le site ne
+ * connaît qu'une adresse chiffrée et qu'une page affichant cette seule donnée
+ * n'apprendrait rien. C'était se tromper de question. L'élève, lui, ne SAIT
+ * pas ce que le site garde de lui — et il n'a aucun moyen de le vérifier, ni
+ * de changer son mot de passe, ni d'effacer son compte. Cette page existe
+ * pour répondre « voici tout ce que nous savons », et cette réponse est
+ * d'autant plus utile qu'elle est courte.
  *
  * La collection de cartes n'apparaît qu'une fois la première gagnée : pour un
  * visiteur qui découvre le site, ce serait du bruit.
@@ -156,16 +161,26 @@ export function Menu({
         ) : null}
 
         {connecte ? (
-          <button
-            type="button"
-            className="entete-lien"
-            onClick={() => {
-              onDeconnexion()
-              fermer()
-            }}
-          >
-            Se déconnecter
-          </button>
+          <>
+            <LienMenu
+              route={{ vue: 'compte' }}
+              onNaviguer={onNaviguer}
+              onApres={fermer}
+              className="entete-lien"
+            >
+              Mon compte
+            </LienMenu>
+            <button
+              type="button"
+              className="entete-lien"
+              onClick={() => {
+                onDeconnexion()
+                fermer()
+              }}
+            >
+              Se déconnecter
+            </button>
+          </>
         ) : (
           <>
             <LienMenu
