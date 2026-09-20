@@ -699,3 +699,48 @@ input[type='range'] { width: 100%; min-height: 44px; }
   from { opacity: 0; }
   to { opacity: 0.9; }
 }
+
+/* ------------------------------------------- les quatre grandes illustrations */
+/* Fichiers WebP embarqués dans le paquet, jamais appelés chez un tiers : aucune
+   adresse IP d'élève n'est communiquée pour les afficher (cf. illustrations.tsx).
+   Elles sont décoratives — `alt` vide, `aria-hidden` — et ne portent aucun
+   chiffre : le sens reste dans le texte qu'elles accompagnent. */
+
+.illu-photo {
+  display: block;
+  width: 100%;
+  /* Indispensable : l'attribut `height` de la balise — celui qui réserve la
+     place pendant le chargement — vaut sinon hauteur imposée, et l'image
+     s'affiche étirée sur 941 px de haut quelle que soit la largeur.
+     Constaté au navigateur le 20/09/2026, invisible aux tests unitaires. */
+  height: auto;
+  margin: 1.5rem 0;
+  border-radius: var(--rayon);
+  /* Le ton du fond des fichiers : le cadre ne clignote pas en blanc pendant
+     que l'image arrive, et sa place est déjà réservée par width/height. */
+  background: var(--ciel-haut);
+  /* Sur téléphone, le format natif (~16/9) réduirait les personnages à presque
+     rien. On resserre, et on coupe le côté laissé vide par l'illustration. */
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.illu-photo-gauche { object-position: 15% center; }
+.illu-photo-droite { object-position: 85% center; }
+
+/* La silhouette dessinée ferme la page, au-dessus du dernier appel à l'action.
+   Volontairement plus petite que les quatre illustrations : c'est un ornement,
+   pas une cinquième image. */
+.cta-final .illu-ville { margin: 0 auto 1.5rem; max-width: 21rem; }
+
+@media (min-width: 40rem) {
+  /* Assez large pour montrer l'illustration entière : plus de recadrage. */
+  .illu-photo { aspect-ratio: 1672 / 941; object-position: center; }
+}
+
+/* En thème sombre, ces illustrations très claires éblouissent à côté d'un fond
+   presque noir. On les assombrit légèrement plutôt que d'en fabriquer une
+   seconde version. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .illu-photo { filter: brightness(0.82) saturate(0.9); }
+}
+:root[data-theme='dark'] .illu-photo { filter: brightness(0.82) saturate(0.9); }

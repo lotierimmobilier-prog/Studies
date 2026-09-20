@@ -1,21 +1,81 @@
 /**
  * Illustrations de la page d'accueil.
  *
- * Elles sont dessinées ici, en SVG, plutôt que chargées depuis une banque
- * d'images. Trois raisons, dans cet ordre :
+ * Deux familles, pour deux usages.
  *
- *   1. Le site s'adresse à des mineurs et promet « aucun traceur ». Charger une
- *      photo depuis un service tiers enverrait l'adresse IP de chaque élève à
- *      ce service à chaque visite. Une promesse qu'on tient à moitié n'est pas
- *      une promesse.
- *   2. Ces dessins sont notre travail : aucune licence à vérifier, aucune
- *      attribution à afficher, aucun risque de retrait.
- *   3. Ils pèsent quelques kilo-octets, s'adaptent au thème clair comme au
- *      thème sombre, et restent nets sur n'importe quel écran.
+ * Les pictogrammes et la silhouette de ville sont dessinés ici, en SVG : ils
+ * pèsent quelques kilo-octets, prennent leurs couleurs dans les variables de
+ * thème — donc ils suivent le mode clair comme le mode sombre sans seconde
+ * version —, et restent nets sur n'importe quel écran.
  *
- * Elles sont purement décoratives — le sens est porté par le texte —, donc
- * `aria-hidden` : un lecteur d'écran les saute au lieu de les annoncer.
+ * Les quatre grandes illustrations sont des fichiers WebP fournis par le
+ * porteur du projet, importés depuis `./images/`. Deux points valent d'être
+ * écrits noir sur blanc :
+ *
+ *   1. Elles sont EMBARQUÉES dans le paquet, jamais chargées depuis une banque
+ *      d'images. Le site s'adresse à des mineurs et promet « aucun traceur » :
+ *      une image appelée chez un tiers enverrait l'adresse IP de chaque élève à
+ *      ce tiers à chaque visite. Une promesse qu'on tient à moitié n'est pas une
+ *      promesse. L'import passe par Vite, qui préfixe l'URL avec la base de
+ *      déploiement — le site est servi sous « /kitetudiant/ », un chemin écrit
+ *      en dur reviendrait en 404.
+ *   2. Elles illustrent, elles n'affirment rien. Aucune ne montre de chiffre,
+ *      et le texte qu'elles accompagnent reste seul porteur de sens.
+ *
+ * Toutes sont purement décoratives, d'où `aria-hidden` et un `alt` vide : un
+ * lecteur d'écran les saute au lieu de les annoncer.
  */
+
+import avenir from './images/avenir.webp'
+import campus from './images/campus.webp'
+import dossier from './images/dossier.webp'
+import logement from './images/logement.webp'
+
+/**
+ * Dimensions natives des quatre fichiers — identiques pour les quatre.
+ * Portées sur la balise, elles réservent la place avant le chargement : sans
+ * elles, le texte saute au moment où l'image arrive.
+ */
+const LARGEUR = 1672
+const HAUTEUR = 941
+
+/**
+ * `cote` dit où se trouvent les personnages dans l'image. Sur un téléphone, le
+ * cadrage est resserré et coupe forcément un côté : on garde celui-là.
+ */
+const PHOTOS = {
+  campus: { fichier: campus, cote: 'gauche' },
+  avenir: { fichier: avenir, cote: 'gauche' },
+  logement: { fichier: logement, cote: 'droite' },
+  dossier: { fichier: dossier, cote: 'gauche' },
+} as const satisfies Record<string, { readonly fichier: string; readonly cote: 'gauche' | 'droite' }>
+
+export type NomPhoto = keyof typeof PHOTOS
+
+/**
+ * Une grande illustration en bandeau.
+ *
+ * `prioritaire` est réservé à celle du haut de page, la seule visible d'emblée :
+ * elle se charge tout de suite, les autres attendent qu'on descende jusqu'à
+ * elles. Mettre tout le monde en priorité haute revient à n'avoir aucune
+ * priorité.
+ */
+export function Photo({ nom, prioritaire = false }: { nom: NomPhoto; prioritaire?: boolean }) {
+  const { fichier, cote } = PHOTOS[nom]
+  return (
+    <img
+      className={`illu-photo illu-photo-${cote}`}
+      src={fichier}
+      alt=""
+      aria-hidden="true"
+      width={LARGEUR}
+      height={HAUTEUR}
+      decoding="async"
+      loading={prioritaire ? 'eager' : 'lazy'}
+      fetchPriority={prioritaire ? 'high' : 'auto'}
+    />
+  )
+}
 
 /** Silhouette de ville : la promesse du site tient à la ville autant qu'à l'école. */
 export function Ville() {
