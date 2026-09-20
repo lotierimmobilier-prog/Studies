@@ -256,7 +256,7 @@ export function Accueil({
               pour un visiteur qui découvre le site, ce serait du bruit. */}
           {cartes > 0 ? (
             <button type="button" className="pastille" onClick={onCollection}>
-              <span aria-hidden="true">◆</span> {cartes}
+              {cartes}
               <span className="pastille-libelle"> cartes</span>
             </button>
           ) : null}

@@ -529,7 +529,7 @@ export default function App() {
           </div>
           {nombreCartes > 0 ? (
             <button type="button" className="pastille" onClick={() => setVue('collection')}>
-              <span aria-hidden="true">◆</span> {nombreCartes}
+              {nombreCartes}
               <span className="pastille-libelle"> cartes</span>
             </button>
           ) : null}

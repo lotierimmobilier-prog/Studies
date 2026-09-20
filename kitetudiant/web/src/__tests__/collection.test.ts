@@ -17,6 +17,7 @@ import {
   importer,
   exporter,
   rareteDuDecile,
+  situationDuLoyer,
   villesDe,
   type Activite,
   type Obtention,
@@ -94,6 +95,46 @@ describe('rareté', () => {
     expect(rareteDuDecile(2)).toBe('peu-frequente')
     expect(rareteDuDecile(9)).toBe('peu-frequente')
     expect(rareteDuDecile(5)).toBe('courante')
+  })
+})
+
+describe('ce qui est écrit au-dessus du titre', () => {
+  it('situe le loyer parmi les autres, plutôt que de dire « rare »', () => {
+    // Le vocabulaire de collection disait au fond quelque chose de
+    // vérifiable — la place du loyer parmi les communes couvertes. On l'écrit,
+    // ce qui informe au lieu de décorer.
+    expect(situationDuLoyer(1)).toBe('parmi les 10 % de communes les moins chères')
+    expect(situationDuLoyer(2)).toBe('moins chère que sept communes sur dix')
+    expect(situationDuLoyer(5)).toBe('loyer proche de la médiane des communes couvertes')
+    expect(situationDuLoyer(9)).toBe('plus chère que sept communes sur dix')
+    expect(situationDuLoyer(10)).toBe('parmi les 10 % de communes les plus chères')
+  })
+
+  it('distingue les deux extrêmes, que la rareté confondait', () => {
+    // Décile 1 et décile 10 sont tous deux « rares », mais pour des raisons
+    // opposées : l'un est bon marché, l'autre hors de prix.
+    expect(rareteDuDecile(1)).toBe(rareteDuDecile(10))
+    expect(situationDuLoyer(1)).not.toBe(situationDuLoyer(10))
+  })
+
+  it('accompagne une ville et un écart, jamais une étape', () => {
+    expect(carteVille(LIMOGES)!.mention).not.toBeNull()
+    expect(carteEcart([LIMOGES, PARIS13])!.mention).not.toBeNull()
+    // Une étape franchie ne porte aucun chiffre : rien à situer.
+    expect(carteEtape('detail').mention).toBeNull()
+  })
+
+  it('n’emploie plus le vocabulaire de collection', () => {
+    const vues = [
+      carteVille(LIMOGES)!,
+      carteVille(PARIS13)!,
+      carteEcart([LIMOGES, PARIS13])!,
+      carteEtape('detail'),
+    ]
+    for (const c of vues) {
+      const texte = [c.mention, c.titre, c.detail].filter(Boolean).join(' ')
+      expect(texte, `« ${texte} »`).not.toMatch(/\brare\b|peu fréquente|courante/i)
+    }
   })
 })
 

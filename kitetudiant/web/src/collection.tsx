@@ -22,7 +22,6 @@ import {
   cartesPossibles,
   exporter,
   importer,
-  LIBELLE_RARETE,
   type Carte,
   type Obtention,
 } from './collection.ts'
@@ -34,7 +33,9 @@ import { Marque } from './marque.tsx'
 export function VignetteCarte({ carte }: { carte: Carte }) {
   return (
     <article className={`carte-collec carte-collec-${carte.rarete}`}>
-      <p className="carte-collec-rarete">{LIBELLE_RARETE[carte.rarete]}</p>
+      {carte.mention !== null ? (
+        <p className="carte-collec-mention">{carte.mention}</p>
+      ) : null}
       <h3 className="carte-collec-titre">{carte.titre}</h3>
       {carte.valeur !== null ? <p className="carte-collec-valeur">{carte.valeur}</p> : null}
       <p className="carte-collec-detail">{carte.detail}</p>
@@ -107,11 +108,16 @@ export function dessinerCarte(canvas: HTMLCanvasElement, carte: Carte): void {
   let y = marge + 130
   const x = marge + 70
 
-  ctx.fillStyle = teinte
-  ctx.font = `600 30px ${POLICE}`
-  ctx.fillText(LIBELLE_RARETE[carte.rarete].toUpperCase(), x, y)
+  if (carte.mention !== null) {
+    ctx.fillStyle = teinte
+    ctx.font = `600 26px ${POLICE}`
+    for (const ligne of enLignes(ctx, carte.mention, large - 140)) {
+      ctx.fillText(ligne, x, y)
+      y += 34
+    }
+  }
 
-  y += 90
+  y += 70
   ctx.fillStyle = '#0e1e2b'
   ctx.font = `700 76px ${POLICE}`
   for (const ligne of enLignes(ctx, carte.titre, large - 140)) {
@@ -242,8 +248,9 @@ export function Collection({
         <h2>Ta collection</h2>
         <p className="bloc-intro">
           {cartes.length} carte{cartes.length > 1 ? 's' : ''} sur {total.toLocaleString('fr-FR')}.
-          Chaque carte se gagne en te servant du site — jamais en invitant
-          quelqu’un. Elles restent dans ton navigateur : rien n’est envoyé.
+          Chacune retient une ville que tu as regardée, avec son loyer et sa place
+          parmi les autres. Elles se gagnent en te servant du site — jamais en
+          invitant quelqu’un — et restent dans ton navigateur.
         </p>
 
         {cartes.length === 0 ? (
