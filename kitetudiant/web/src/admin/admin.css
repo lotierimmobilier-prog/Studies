@@ -171,3 +171,19 @@
 }
 .stat-barre span { display: block; height: 100%; background: var(--accent); }
 .stat-nombre { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 2.5rem; text-align: right; }
+
+/* L'essai de connexion, sous la liste des clés.
+   « Configurée » ne dit que « une valeur est posée ». Une clé recopiée de
+   travers ou révoquée s'affiche pareil : ce bouton est le seul endroit où la
+   différence se voit. */
+.essai {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--trait);
+}
+.essai .secondaire {
+  width: auto;
+}
+.essai p {
+  margin: 0.6rem 0 0;
+}

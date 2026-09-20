@@ -122,3 +122,40 @@ export const THEMES: readonly Theme[] = [
 export function motsDuTheme(cle: string): readonly string[] {
   return THEMES.find((t) => t.cle === cle)?.mots ?? []
 }
+
+/**
+ * Les thèmes qu'évoque l'intitulé d'une formation.
+ *
+ * C'est l'inverse de la recherche : au lieu de chercher les formations d'un
+ * thème, on demande de quels thèmes relève une formation donnée. Sert à
+ * proposer des métiers sur sa fiche.
+ *
+ * ── En mots ENTIERS, et c'est tout le sujet ─────────────────────────────
+ *
+ * Une comparaison par sous-chaîne rangerait « transport » dans le thème
+ * « sport », et « informatique » dans « mathématiques » dès qu'un mot en
+ * contiendrait un autre. Constaté en construisant la table des métiers, sur
+ * ce mot-là exactement.
+ *
+ * Les accents et la casse sont neutralisés d'abord : les intitulés du
+ * ministère mêlent « Génie Électrique » et « genie electrique ».
+ *
+ * Rend une liste, jamais un seul thème : « Licence - Droit et économie »
+ * relève des deux, et n'en garder qu'un appauvrirait la fiche sans raison.
+ */
+export function themesDuLibelle(libelle: string): string[] {
+  const texte = ` ${normaliserMots(libelle)} `
+  return THEMES.filter((t) =>
+    t.mots.some((mot) => texte.includes(` ${normaliserMots(mot)} `)),
+  ).map((t) => t.cle)
+}
+
+/** Minuscules, sans accent, ponctuation réduite à des espaces. */
+function normaliserMots(valeur: string): string {
+  return valeur
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}

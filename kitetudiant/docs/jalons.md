@@ -171,9 +171,18 @@ Des suggestions à partir du profil déclaratif et des vœux déjà là. Elles
 **ajoutent**, elles ne retirent rien (règle 4), et elles disent sur quoi elles
 reposent.
 
-### MVP3-C · Débouchés
+### MVP3-C · Débouchés — **fait**
 
-**Bloqué par Q2** — licence ODbL de l'Onisep.
+**Q2 tranchée** (D13) : l'Onisep est lié, jamais intégré.
+
+L'onglet « Après » porte le nombre d'offres d'emploi du domaine, France et
+région côte à côte, plus un échantillon de métiers avec leur compteur et un
+lien vers France Travail. Le rapprochement formation → métiers vient de notre
+table thème → domaines ROME (D14), et l'écran le dit.
+
+Reste (Q7) : classer les métiers par nombre d'offres plutôt que les
+échantillonner. Suppose un relevé quotidien des 1 911 métiers en tâche de
+fond — quatre minutes au quota de dix requêtes par seconde.
 
 ### MVP3-D · Espaces partenaires
 

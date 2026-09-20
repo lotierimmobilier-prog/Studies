@@ -43,7 +43,7 @@ import { nombre } from './nombres.ts'
 import { chargerCollection, villesDe } from './collection.ts'
 import { LIBELLES_MATIERE } from '../../packages/profil-scolaire/src/index.ts'
 import type { Reponses } from './calcul.ts'
-import type { Route } from './routes.ts'
+import { CHEMIN_CONSOLE_ADMIN, type Route } from './routes.ts'
 
 /**
  * Le bac, tel qu'on le dit. La clé technique — « general » — est ce que le
@@ -304,6 +304,40 @@ function Recapitulatif({ reponses }: { readonly reponses: Reponses | null }) {
   )
 }
 
+/* ---------------------------------------------------- administration */
+
+/**
+ * Le lien vers la console, montré aux seuls administrateurs.
+ *
+ * Le serveur répond `administrateur` sur le profil, à partir de ADMIN_EMAILS.
+ * Ce booléen ne PROTÈGE rien : l'adresse de la console est publique, et un
+ * navigateur qui le forcerait à `true` n'obtiendrait qu'un lien — `GardeAdmin`
+ * refait la vérification à chaque appel de l'API. Il sert à ne pas montrer à
+ * un lycéen une porte qui n'est pas la sienne.
+ *
+ * Une vraie navigation, et non `onNaviguer` : la console est une autre page.
+ */
+function Administration() {
+  return (
+    <section className="bloc-compte">
+      <h2>Administration</h2>
+      <p className="bloc-intro">
+        Ton adresse est reconnue comme celle d’un administrateur. La console sert à
+        poser les clés d’API, à surveiller les barèmes périmés et à lire les
+        statistiques.
+      </p>
+      <p className="note">
+        Ta connexion suffit : le jeton d’administration n’est demandé que si elle
+        n’est plus valable. La console exige HTTPS et se verrouille après cinq
+        tentatives manquées.
+      </p>
+      <a className="principal" href={CHEMIN_CONSOLE_ADMIN}>
+        Ouvrir la console
+      </a>
+    </section>
+  )
+}
+
 /* -------------------------------------------------------- effacement */
 
 function Effacer({ onEfface }: { readonly onEfface: () => void }) {
@@ -426,6 +460,7 @@ export function MonCompte({
         <>
           <Coordonnees profil={profil} />
           <Recapitulatif reponses={reponses} />
+          {profil.administrateur ? <Administration /> : null}
           <MotDePasse />
           <Effacer
             onEfface={() => {

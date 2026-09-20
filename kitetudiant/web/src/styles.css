@@ -203,6 +203,19 @@ body {
 }
 .principal { background: var(--accent); color: var(--fond); border: 1px solid var(--accent); }
 .principal[disabled] { opacity: 0.6; cursor: progress; }
+/* Un lien qui doit avoir l'air d'un bouton. La console d'administration est
+   une autre page HTML : on l'ouvre par une vraie navigation, pas par le
+   routeur. Sans ces lignes, l'ancre reste « inline » — « padding » et
+   « min-height » n'ont aucun effet, le texte n'est pas centré, et le
+   soulignement du lien traverse le bouton. */
+a.principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding-inline: 1.5rem;
+  text-decoration: none;
+}
 .secondaire { background: transparent; color: var(--encre); border: 1px solid var(--trait); }
 .sans-compte { margin-top: 1rem; color: var(--doux); font-size: 0.8rem; text-align: center; }
 
@@ -2934,4 +2947,20 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 .voeu-ajout .secondaire {
   flex: 0 0 auto;
   width: auto;
+}
+
+/* Les métiers d'un domaine, sur l'onglet « Après ». Une liste sobre : ces
+   chiffres situent un ordre de grandeur, ils ne classent rien, et une mise
+   en forme qui les hiérarchiserait leur ferait dire plus qu'ils ne disent. */
+.metiers {
+  margin: 0.75rem 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+.metier {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--trait);
 }

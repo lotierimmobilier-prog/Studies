@@ -25,8 +25,20 @@ import {
 import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 
-/** Clés que l'administration a le droit de gérer. Liste fermée. */
-export const SECRETS_GERES = ['ANTHROPIC_API_KEY', 'GOOGLE_MAPS_API_KEY'] as const
+/**
+ * Clés que l'administration a le droit de gérer. Liste fermée.
+ *
+ * France Travail en demande DEUX : un identifiant client et une clé secrète.
+ * L'identifiant n'est pas un secret en soi, mais il est inutile sans la clé
+ * et ne sert à rien d'autre ; le ranger ailleurs ne ferait que séparer deux
+ * moitiés d'une même chose.
+ */
+export const SECRETS_GERES = [
+  'ANTHROPIC_API_KEY',
+  'GOOGLE_MAPS_API_KEY',
+  'FRANCE_TRAVAIL_ID',
+  'FRANCE_TRAVAIL_SECRET',
+] as const
 export type NomSecret = (typeof SECRETS_GERES)[number]
 
 export function estSecretGere(nom: string): nom is NomSecret {

@@ -363,6 +363,125 @@ qu'il ne tient pas.
 
 ---
 
+## D14 — Le lien formation → métier est le nôtre, et c'est écrit
+
+**Tranché le 20/09/2026.**
+
+Parcoursup ne publie aucun lien entre une formation et un métier. L'Onisep le
+publie, sous ODbL — que D13 nous interdit d'intégrer.
+
+Nous relions donc nos seize thèmes aux **domaines professionnels du ROME**, le
+référentiel de France Travail : `M18` pour les systèmes d'information, `J11` à
+`J15` pour la santé. La table vit dans `packages/metiers`, et l'écran dit que
+le rapprochement vient de nous.
+
+### Comment elle a été construite
+
+Les mots-clés déjà vérifiés de chaque thème, cherchés **en mots entiers** dans
+les 1 911 libellés de métiers du référentiel ; les domaines qui ressortaient
+ont été relus un par un avant d'entrer dans la table.
+
+La recherche par sous-chaîne, essayée d'abord, rangeait le thème « sport »
+dans les métiers du **trans**port. Les mots-clés avaient été écrits pour
+l'opérateur de recherche du ministère, qui travaille par mots.
+
+### Ce que ça ne prétend pas
+
+Qu'une formation mène à ces métiers-là et pas à d'autres. Un domaine
+rassemble des dizaines de métiers, et un diplômé en exerce souvent un qui n'y
+figure pas. C'est une piste, pas un destin.
+
+### Deux thèmes sans métier propre, et c'est la réponse
+
+Aucun métier ne s'appelle « angliciste » ni « historien de formation ». Les
+thèmes **langues** et **humanités** pointent donc vers l'enseignement (`K21`)
+et la recherche (`K24`). Ce n'est pas un trou dans la table : c'est ce que
+deviennent la plupart de ces diplômés.
+
+---
+
+## D15 — Le compteur, pas les annonces
+
+**Tranché le 20/09/2026.**
+
+On affiche le **nombre** d'offres et un lien vers la recherche France Travail.
+Pas les annonces elles-mêmes : une offre est pourvue en quelques jours, et une
+annonce périmée sur un site d'orientation trompe plus qu'elle n'informe. Le
+compteur, lui, vieillit lentement et porte sa date.
+
+### Ce que le chiffre est, et ce qu'il n'est pas
+
+Le nombre d'annonces ouvertes un jour donné. **Pas « le marché de l'emploi »** :
+beaucoup de recrutements ne passent jamais par une annonce, et un secteur peut
+embaucher sans publier. L'écran le dit avant la liste, pas après — un lecteur
+qui fait défiler jusqu'en bas a déjà lu les chiffres comme un verdict.
+
+### Le secret ne quitte pas le serveur
+
+L'identifiant et la clé France Travail vivent dans le coffre chiffré, aux
+côtés des autres clés d'API. Le navigateur n'appelle jamais France Travail : il
+appelle notre serveur, qui appelle France Travail. Un test au navigateur
+vérifie qu'aucune requête ne part directement.
+
+### Dix requêtes par seconde
+
+C'est la limite annoncée pour notre client, mesurée le 20/09/2026. D'où trois
+choix : un cache de six heures, des appels en **série** et non en parallèle,
+et surtout le total par **domaine** — `domaine=M18` rend 9 600 offres en un
+appel, là où compter les quatre-vingt-seize métiers du domaine en coûterait
+quatre-vingt-seize.
+
+---
+
+## D16 — La France et la région, jamais le département
+
+**Tranché le 20/09/2026.**
+
+Les deux échelles côte à côte. Ni l'une ni l'autre seule : « 358 offres en
+France » ne dit rien du lieu où l'élève envisage d'étudier, et c'est toute la
+question de ce site.
+
+Le département n'est **jamais** affiché. Il donne souvent zéro ou un — mesuré :
+une seule offre de développeur web en Haute-Vienne le 20/09/2026 — et un tel
+chiffre se lit comme un verdict sur un métier alors que c'est la photo d'un
+bassin d'emploi un jour donné. `CLAUDE.md` interdit le texte anxiogène ; un
+chiffre exact peut l'être tout autant qu'une phrase.
+
+---
+
+## D17 — Le lien vers la console vit dans l'espace personnel
+
+**Tranché le 20/09/2026.**
+
+`ADMIN_EMAILS` ouvrait déjà la console à un compte listé, mais sans le lui
+dire : il fallait connaître l'adresse `…/admin.html` et la taper. Le profil
+renvoyé par le serveur porte désormais un booléen `administrateur`, et « Mon
+espace » affiche une section « Administration » quand il vaut vrai.
+
+Trois points, parce que le raccourci est facile à mal lire :
+
+- **Ce booléen n'est pas un contrôle d'accès.** `GardeAdmin.verifier` refait la
+  vérification côté serveur à chaque appel de `/api/admin/*`. Un navigateur qui
+  forcerait `administrateur` à vrai n'obtiendrait qu'un lien. Cacher un lien ne
+  protège rien : l'adresse de la console est publiée dans `robots.txt`, en
+  « Disallow » — ce qui la nomme autant que l'inverse. Un test vérifie que les
+  deux lectures d'`ADMIN_EMAILS` — celle du lien et celle de la porte —
+  accordent exactement les mêmes adresses ; si elles divergeaient, on montrerait
+  un lien menant à un refus.
+- **Pas dans la barre de navigation.** Elle est commune à tous les visiteurs et
+  compte déjà six entrées sur mobile. Une septième, visible d'un seul compte,
+  déplacerait les six autres pour lui seul.
+- **Une vraie navigation, pas une route.** La console est une seconde entrée
+  Vite : son code ne part pas dans le paquet que les élèves téléchargent. En
+  faire une vue de l'application annulerait cette séparation.
+
+La session du site sert de jeton : `lireJeton` retombe dessus quand aucun jeton
+d'exploitation n'a été saisi, et le serveur l'accepte si l'adresse est listée.
+Le jeton de quarante caractères reste la voie de secours si un compte est
+compromis.
+
+---
+
 ## Questions encore ouvertes
 
 | # | Question | Ce qui bloque | Échéance |
@@ -373,3 +492,5 @@ qu'il ne tient pas.
 | Q4 | Données CROUS de 2017 : millésime très ancien. Les garde-t-on affichées ? | Elles portent leur millésime, donc la règle 6 est tenue. Reste qu'un chiffre de 2017 en 2026 informe mal. | Avant MVP2. |
 | Q5 | Disponibilité réelle des logements : aucune source publique ne la publie. | Les « bons plans logement » ne peuvent pas promettre une disponibilité. | Avant MVP2. |
 | Q6 | leboncoin répond 403 à nos requêtes, y compris depuis un vrai navigateur. Les paramètres de filtre n'ont pas pu être vérifiés. | Le lien est construit au mieux, et n'est pas garanti. | Avant MVP2. |
+| Q7 | Classer les métiers par nombre d'offres plutôt que de les échantillonner. | Suppose de compter les 96 métiers d'un domaine, donc un relevé quotidien en tâche de fond. En attendant, l'échantillon traverse la liste et l'écran dit que ce n'est pas un classement. | Quand la base sera en production. |
+| Q8 | Les identifiants France Travail ont transité par une conversation. | À renouveler sur leur portail avant la mise en production. | Avant d'activer la fonctionnalité en ligne. |
