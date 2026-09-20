@@ -77,6 +77,33 @@ function donneesStructurees(article: Article): string {
   return JSON.stringify(objet).replaceAll('</', '<\\/')
 }
 
+/**
+ * Les en-têtes de partage.
+ *
+ * Sans « og:image », coller un lien du site dans un message ou sur un réseau
+ * affiche un aperçu nu — un titre gris sur fond blanc, que personne n'ouvre.
+ * Les cartes sont fabriquées à part (kitetudiant/scripts/visuels-partage.ts)
+ * et versionnées, parce que leur rendu demande un navigateur sans interface
+ * que le serveur de déploiement n'a pas.
+ *
+ * L'adresse doit être ABSOLUE : un aperçu est fabriqué par un serveur tiers,
+ * qui n'a aucun moyen de résoudre « /partage/x.png » contre l'adresse de la
+ * page. C'est aussi pourquoi elle est construite à partir de l'origine et de
+ * la base de déploiement, jamais écrite en dur.
+ */
+function enTetesDePartage(nom: string, titreAlternatif: string): string[] {
+  const image = `${ORIGINE}${BASE}partage/${nom}.png`
+  return [
+    `<meta property="og:image" content="${echapper(image)}" />`,
+    `<meta property="og:image:width" content="1200" />`,
+    `<meta property="og:image:height" content="630" />`,
+    `<meta property="og:image:alt" content="${echapper(titreAlternatif)}" />`,
+    // Sans cette ligne, l'aperçu se réduit à une vignette carrée : la carte
+    // est composée pour le grand format, pas pour un timbre-poste.
+    `<meta name="twitter:card" content="summary_large_image" />`,
+  ]
+}
+
 /** Remplace le titre, la description et le canonique de la coquille. */
 function coquilleAvec(
   coquille: string,
@@ -144,7 +171,10 @@ for (const article of ARTICLES) {
       article.chapeau,
       canonique,
       contenu,
-      `<script type="application/ld+json">${donneesStructurees(article)}</script>`,
+      [
+        ...enTetesDePartage(article.slug, `${article.titre} — KitEtudiant.fr`),
+        `<script type="application/ld+json">${donneesStructurees(article)}</script>`,
+      ].join('\n    '),
     ),
   )
 }
@@ -169,7 +199,40 @@ ecrire(
       'des articles courts et vérifiables pour les lycéens et leurs familles.',
     `${ORIGINE}${BASE}blog`,
     listeHtml,
+    enTetesDePartage('blog', 'Bien gérer sa scolarité — le blog de KitEtudiant.fr').join('\n    '),
   ),
+)
+
+// ------------------------------------------------------------------ accueil
+// La coquille sortie de Vite ne porte aucun en-tête de partage. L'accueil est
+// pourtant le lien le plus souvent envoyé — à un ami, à ses parents. On le
+// complète ici plutôt que d'écrire une adresse absolue en dur dans index.html,
+// qui deviendrait fausse le jour où la base de déploiement change.
+const accueilCanonique = `${ORIGINE}${BASE}`
+const accueilTitre = 'KitEtudiant.fr — ce qu’il te restera pour vivre, vœu par vœu'
+const accueilDescription =
+  'Chaque formation sous trois angles tenus séparés : tes chances d’y entrer, ce ' +
+  'qu’elle vaut pour toi, et ton reste-à-vivre une fois sur place.'
+ecrire(
+  join(SORTIE, 'index.html'),
+  coquille
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${echapper(accueilTitre)}</title>`)
+    .replace(
+      /<meta\s+name="description"\s+content="[\s\S]*?"\s*\/?>/,
+      `<meta name="description" content="${echapper(accueilDescription)}" />`,
+    )
+    .replace(
+      '</head>',
+      `  ${[
+        `<link rel="canonical" href="${echapper(accueilCanonique)}" />`,
+        `<meta property="og:type" content="website" />`,
+        `<meta property="og:title" content="${echapper(accueilTitre)}" />`,
+        `<meta property="og:description" content="${echapper(accueilDescription)}" />`,
+        `<meta property="og:url" content="${echapper(accueilCanonique)}" />`,
+        `<meta property="og:locale" content="fr_FR" />`,
+        ...enTetesDePartage('accueil', accueilTitre),
+      ].join('\n    ')}\n  </head>`,
+    ),
 )
 
 // ------------------------------------------------------------- plan du site
