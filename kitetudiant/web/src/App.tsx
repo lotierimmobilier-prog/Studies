@@ -40,9 +40,10 @@ import {
   type Obtention,
 } from './collection.ts'
 import { Collection } from './collection.tsx'
+import { Chargement, type EtapeCalcul } from './chargement.tsx'
 import { MonCompte } from './monCompte.tsx'
 import { Epingle } from './illustrations.tsx'
-import { Marque } from './marque.tsx'
+import { MarqueLien } from './marque.tsx'
 import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
 import { ListeArticles, PageArticle } from './blog.tsx'
 import { cheminDe, routeDuChemin, type Route } from './routes.ts'
@@ -382,6 +383,12 @@ export default function App() {
   const [reponses, setReponses] = useState<Reponses>(REPONSES_PAR_DEFAUT)
   const [resultats, setResultats] = useState<ResultatFormation[] | null>(null)
   const [enCours, setEnCours] = useState(false)
+  /**
+   * L'étape du calcul en cours, pour l'écran d'attente. Elle est posée au
+   * moment où le travail commence RÉELLEMENT : une étape affichée avant
+   * qu'elle démarre serait un avancement inventé.
+   */
+  const [etapeCalcul, setEtapeCalcul] = useState<EtapeCalcul | null>(null)
   const [erreur, setErreur] = useState<string | null>(null)
   const [ouvert, setOuvert] = useState<string | null>(null)
   const [retours, setRetours] = useState<Map<string, AgregatRetours>>(new Map())
@@ -545,6 +552,7 @@ export default function App() {
   const lancer = useCallback(async () => {
     setEnCours(true)
     setErreur(null)
+    setEtapeCalcul('formations')
     try {
       const filtre: FiltreFormations = { limite: 40 }
       const motsCles = motsClesDe(reponses.passions)
@@ -572,6 +580,7 @@ export default function App() {
       // formations, établissements, villes et taux d'accès publiés. L'élève
       // voit ce qu'il obtiendra avant de donner son adresse.
       let parRef = new Map<string, AideLogement>()
+      setEtapeCalcul('aides')
       try {
         const aides = await chercherAidesLogement(demandes)
         parRef = new Map<string, AideLogement>(aides.map((a) => [a.ref, a]))
@@ -582,7 +591,9 @@ export default function App() {
         setConnecte(false)
       }
       const aujourdHui = new Date().toISOString().slice(0, 10)
+      setEtapeCalcul('retours')
       setRetours(await chercherAgregatsRetours(formations.map((f) => f.id)))
+      setEtapeCalcul('budget')
       const calcules = trierParPertinence(
         calculerResultats(formations, reponses, parRef, aujourdHui),
       )
@@ -606,6 +617,7 @@ export default function App() {
       setErreur((e as Error).message)
     } finally {
       setEnCours(false)
+      setEtapeCalcul(null)
     }
   }, [reponses, gagner])
 
@@ -628,6 +640,10 @@ export default function App() {
     [resultats, filtres],
   )
   const affiches = useMemo(() => classer(retenus, classement), [retenus, classement])
+
+  /* Posé avant toute vue : l'attente couvre l'écran, quelle que soit la page
+     d'où l'on est parti — la dernière question du parcours, ou l'accueil. */
+  if (enCours) return <Chargement etape={etapeCalcul} />
 
   if (vue === 'compte') {
     return (
@@ -725,7 +741,7 @@ export default function App() {
       <main className="app">
         <header className="entete entete-accueil">
           <h1 className="marque">
-            <Marque />
+            <MarqueLien onNaviguer={naviguer} />
           </h1>
           <button
             type="button"
@@ -757,7 +773,7 @@ export default function App() {
       <main className="app">
         <header className="entete">
           <h1 className="marque">
-            <Marque />
+            <MarqueLien onNaviguer={naviguer} />
           </h1>
         </header>
         <Compte
@@ -779,7 +795,7 @@ export default function App() {
         <header className="entete entete-resultats">
           <div>
             <h1 className="marque">
-            <Marque />
+            <MarqueLien onNaviguer={naviguer} />
           </h1>
             <p className="baseline">La meilleure solution pour l’année prochaine.</p>
           </div>
@@ -914,7 +930,7 @@ export default function App() {
     <main className="app">
       <header className="entete">
         <h1 className="marque">
-            <Marque />
+            <MarqueLien onNaviguer={naviguer} />
           </h1>
         <p className="baseline">La meilleure solution pour l’année prochaine.</p>
       </header>
