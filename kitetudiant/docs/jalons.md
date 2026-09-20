@@ -52,12 +52,25 @@ Chaque chiffre porte son millésime. Un chiffre absent s'affiche absent.
 
 **Dépend de :** MVP1-B.
 
-### MVP1-D · La base de données
+### MVP1-D · La base de données — **socle fait**
 
 Étapes A à C du plan de migration : instance, rôles, `001-socle.sql`, import,
 bascule de lecture avec repli sur l'API du ministère.
 
-**Bloqué par Q1** — le pilote PostgreSQL est une dépendance à valider.
+**Q1 tranchée** (D11) : le pilote est `postgres` (porsager), zéro dépendance
+transitive.
+
+Fait : `server/bd.ts`, l'état de la base dans la console d'administration,
+`DATABASE_URL` transmise par le script de déploiement, et la chaîne vérifiée
+en intégration continue — migrations appliquées sur une base neuve puis
+rejouées sans effet, et le pilote exercé contre un vrai PostgreSQL.
+
+**La propriété qui tient tout** : sans `DATABASE_URL`, rien ne change. Le site
+tourne sur le fichier chiffré et l'open data, exactement comme avant. C'est ce
+qui permet de poser la base en production sans rien casser.
+
+Reste : les rôles `kitetudiant_app` et `kitetudiant_import`, l'import réel, et
+la bascule de lecture des écrans de recherche.
 
 ### MVP1-E · L'explorateur
 

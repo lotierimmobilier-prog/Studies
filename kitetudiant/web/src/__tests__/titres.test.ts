@@ -1,0 +1,111 @@
+/**
+ * Un titre de niveau un par écran, ni zéro ni deux.
+ *
+ * ── Pourquoi ce garde existe ─────────────────────────────────────────────
+ *
+ * Il est né d'une faute réelle. En déplaçant la marque vers la barre de
+ * navigation, chaque écran a perdu le `<h1 className="marque">` qui le
+ * coiffait. Trois d'entre eux — la collection, l'espace personnel, le
+ * formulaire de compte — se sont retrouvés SANS aucun titre de niveau un,
+ * et rien ne l'a signalé : la page s'affichait normalement.
+ *
+ * Ce qui casse, dans ce cas, ne se voit pas à l'écran :
+ *
+ *   - un lecteur d'écran propose de sauter « au titre principal » et ne
+ *     trouve rien à proposer ;
+ *   - un moteur de recherche n'a plus de titre de page à indexer, et prend
+ *     ce qu'il trouve — souvent le premier bout de texte venu ;
+ *   - à l'inverse, deux `h1` (c'était le cas de l'accueil, qui portait la
+ *     promesse ET la marque) donnent deux titres concurrents.
+ *
+ * ── Comment il s'y prend ─────────────────────────────────────────────────
+ *
+ * Il compte les `<h1` dans chaque fichier d'écran, sans exécuter React : le
+ * projet n'a pas d'environnement DOM en test, et en installer un pour
+ * compter des balises coûterait plus cher que ce qu'il rapporte.
+ *
+ * La limite est assumée et vaut d'être écrite : un fichier qui rendrait deux
+ * écrans différents, chacun avec son `h1`, serait compté deux fois et
+ * refusé à tort. Le jour où cela arrive, c'est la LISTE ci-dessous qu'il
+ * faut corriger, jamais le seuil.
+ */
+
+import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+
+const SRC = resolve(import.meta.dirname, '..')
+
+/**
+ * Les fichiers qui rendent un écran entier, et le nom qu'on leur donne.
+ *
+ * `App.tsx` n'y figure pas : il rend plusieurs écrans — les résultats et le
+ * parcours — et porte donc légitimement plusieurs `h1`. `blog.tsx` non plus,
+ * pour la même raison : la liste des articles et un article sont deux écrans.
+ * Les deux sont vérifiés à part, par leur nombre attendu.
+ */
+const ECRANS: readonly { readonly fichier: string; readonly attendus: number }[] = [
+  { fichier: 'accueil.tsx', attendus: 1 },
+  { fichier: 'collection.tsx', attendus: 1 },
+  { fichier: 'compte.tsx', attendus: 1 },
+  { fichier: 'monCompte.tsx', attendus: 1 },
+  { fichier: 'pageEtablissement.tsx', attendus: 1 },
+  { fichier: 'pageFormation.tsx', attendus: 1 },
+  { fichier: 'rechercheEcoles.tsx', attendus: 1 },
+  // La liste des articles, et un article.
+  { fichier: 'blog.tsx', attendus: 2 },
+  // Les résultats, et le parcours de questions.
+  { fichier: 'App.tsx', attendus: 2 },
+]
+
+function compterH1(fichier: string): number {
+  const source = readFileSync(resolve(SRC, fichier), 'utf8')
+  return [...source.matchAll(/<h1[\s>]/g)].length
+}
+
+describe('chaque écran porte un titre de niveau un', () => {
+  it.each(ECRANS.map((e) => [e.fichier, e.attendus] as const))(
+    '%s en compte %i',
+    (fichier, attendus) => {
+      expect(
+        compterH1(fichier),
+        `${fichier} doit contenir exactement ${attendus} balise(s) <h1>. ` +
+          'Zéro : l’écran n’a plus de titre principal — un lecteur d’écran n’a ' +
+          'rien à proposer quand on demande à sauter au titre, et un moteur de ' +
+          'recherche prend le premier texte venu. Plusieurs de trop : deux titres ' +
+          'principaux se font concurrence. C’est arrivé en déplaçant la marque ' +
+          'vers la barre de navigation.',
+      ).toBe(attendus)
+    },
+  )
+
+  it('la marque n’est plus un titre de niveau un', () => {
+    // Elle l'était sur chaque écran, ce qui donnait deux h1 à l'accueil : la
+    // promesse et le logo. La marque vit maintenant dans la barre de
+    // navigation, où elle est un lien, pas un titre.
+    for (const { fichier } of ECRANS) {
+      const source = readFileSync(resolve(SRC, fichier), 'utf8')
+      expect(source, `${fichier} : la marque ne doit plus servir de <h1>`).not.toMatch(
+        /<h1[^>]*className="marque"/,
+      )
+    }
+  })
+
+  it('la liste des écrans est à jour', () => {
+    // Un écran ajouté sans être inscrit ici ne serait jamais vérifié. On
+    // compare donc à ce que le dossier contient réellement.
+    const attendus = new Set(ECRANS.map((e) => e.fichier))
+    const suspects = [
+      'accueil.tsx',
+      'blog.tsx',
+      'collection.tsx',
+      'compte.tsx',
+      'monCompte.tsx',
+      'pageEtablissement.tsx',
+      'pageFormation.tsx',
+      'rechercheEcoles.tsx',
+      'App.tsx',
+    ].filter((f) => !attendus.has(f))
+    expect(suspects, 'écrans non vérifiés').toEqual([])
+  })
+})

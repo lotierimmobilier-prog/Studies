@@ -82,9 +82,13 @@ export function Compte({
 
   return (
     <section className="compte" aria-labelledby="compte-titre">
-      <h2 id="compte-titre">
+      {/* h1 et non h2 : dans les vues « connexion » et « inscription », ce
+          formulaire EST la page, et son titre est le titre de la page.
+          Depuis que la marque a rejoint la barre de navigation, plus aucun
+          h1 ne le précède. */}
+      <h1 id="compte-titre">
         {mode === 'inscription' ? 'Crée ton compte' : 'Connecte-toi'}
-      </h2>
+      </h1>
       <p className="compte-pourquoi">{message}</p>
 
       {google ? (

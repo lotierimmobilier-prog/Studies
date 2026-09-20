@@ -223,6 +223,48 @@ export function Console() {
           </section>
 
           <section className="bloc">
+            <h2>Base de données</h2>
+            {!etat.base.configuree ? (
+              <p className="note">
+                Pas de <code>DATABASE_URL</code> : le site tourne sur le fichier chiffré
+                et l’open data du ministère, comme avant. <strong>Ce n’est pas une
+                panne</strong> — c’est le mode normal tant que la bascule n’est pas
+                faite.
+              </p>
+            ) : etat.base.repond ? (
+              <>
+                <p className="etat-ok">
+                  {etat.base.version ?? 'PostgreSQL'} répond sur{' '}
+                  <strong>{etat.base.ou}</strong>.
+                </p>
+                <ul className="baremes">
+                  {etat.base.migrations.length === 0 ? (
+                    <li>
+                      <span>Aucune migration appliquée</span>
+                      <span className="note">
+                        lance <code>PGURL=… bash kitetudiant/db/migrations/appliquer.sh</code>
+                      </span>
+                    </li>
+                  ) : (
+                    etat.base.migrations.map((m) => (
+                      <li key={m}>
+                        <span>{m}</span>
+                        <span className="note">appliquée</span>
+                      </li>
+                    ))
+                  )}
+                </ul>
+              </>
+            ) : (
+              <p className="alerte">
+                Une adresse est configurée ({etat.base.ou}) mais la base ne répond pas :{' '}
+                {etat.base.erreur ?? 'raison inconnue'}. Le site continue de fonctionner
+                sans elle.
+              </p>
+            )}
+          </section>
+
+          <section className="bloc">
             <h2>Barèmes</h2>
             {peuPerimes.length === 0 && vides.length === 0 ? (
               <p className="note">Tous les barèmes sont à jour.</p>

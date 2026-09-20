@@ -265,12 +265,99 @@ nominatif.
 
 ---
 
+## D11 — Le pilote PostgreSQL est `postgres` (porsager)
+
+**Tranché le 20/09/2026.** Clôt Q1. Première dépendance serveur ajoutée depuis
+`@anthropic-ai/sdk`.
+
+### Pourquoi celui-là
+
+- **Aucune dépendance transitive.** Une de plus dans un projet qui en compte
+  trois, et pas une arborescence.
+- **Requêtes préparées par défaut.** Les valeurs interpolées dans un gabarit
+  `sql\`…\`` deviennent des paramètres, jamais du texte concaténé. Écrire une
+  injection SQL par accident y demande un effort ; avec une API qui prend une
+  chaîne, c'est l'inverse. Sur un service qui stocke les vœux de mineurs, ce
+  n'est pas un détail de confort.
+
+### Écarté
+
+`pg` (node-postgres) : le plus répandu et le mieux documenté, mais il tire des
+dépendances transitives, et sa mise en forme des requêtes laisse plus de place
+à une faute.
+
+### Ce que ça n'autorise pas
+
+Une dépendance validée pour la base ne vaut pas blanc-seing pour les
+suivantes. La règle de `CLAUDE.md` reste entière.
+
+---
+
+## D12 — La collection a une adresse, et son entrée reste visible
+
+**Tranché le 20/09/2026.**
+
+### Deux défauts, dont un que je n'avais pas vu
+
+**L'entrée « Mes cartes » n'apparaissait qu'une fois la première carte
+gagnée.** Le raisonnement d'origine — « une entrée vide serait du bruit pour
+un visiteur qui découvre le site » — a un défaut qui n'apparaît qu'à l'usage :
+une entrée cachée derrière la chose qu'elle sert à découvrir ne se découvre
+jamais. On ne tombait sur la collection que par accident.
+
+**La collection n'avait aucune adresse.** Elle n'était qu'un état en mémoire :
+impossible à partager, à mettre en favori, ou à retrouver avec le bouton
+« précédent ». Exactement le défaut que les fiches de formation venaient de
+perdre, et qui survivait ici sans que personne le remarque.
+
+### Ce qui est décidé
+
+`/mes-cartes`, et une entrée toujours présente dans la barre — avec le compte
+entre parenthèses quand il y a quelque chose à compter. La page, elle,
+montrait déjà toutes les récompenses possibles avec leur état : un visiteur
+qui arrive à zéro carte voit donc ce qu'il y a à gagner et comment.
+
+### Effet de bord
+
+Toutes les entrées de la barre ont désormais une adresse. La branche qui
+gérait les entrées sans adresse — un bouton plutôt qu'un lien — est supprimée :
+du code mort qui aurait fini par resservir.
+
+---
+
+## D13 — L'Onisep est lié, jamais intégré
+
+**Tranché le 20/09/2026.** Clôt Q2.
+
+L'Onisep publie de vraies fiches de débouchés, ce que Parcoursup ne fait pas.
+Son jeu est sous **ODbL**, qui impose le partage à l'identique : l'intégrer
+engagerait tout ce qu'on en dérive, pour toujours, et pas seulement l'écran
+qui l'affiche.
+
+L'onglet « Après » propose donc une **recherche sur leur site**. Aucune de
+leurs données n'est utilisée, aucune obligation n'est déclenchée, et l'élève a
+l'information.
+
+`reference.formation_onisep` reste dans le document de conception et n'est
+créée par aucune migration.
+
+### Ce qui n'a pas pu être vérifié
+
+`onisep.fr` répond **403** à notre environnement de développement, comme
+leboncoin. Le format des paramètres de recherche n'est donc pas confirmé sur
+pièce. Le libellé du lien dit « **chercher** cette formation sur l'Onisep » et
+non « la fiche de cette formation » : si le paramètre est ignoré, l'élève
+arrive quand même là où l'information se trouve, et le lien n'aura rien promis
+qu'il ne tient pas.
+
+---
+
 ## Questions encore ouvertes
 
 | # | Question | Ce qui bloque | Échéance |
 | --- | --- | --- | --- |
-| Q1 | Pilote PostgreSQL : `pg` ou `postgres` ? | `CLAUDE.md` interdit d'ajouter une dépendance sans accord. | Avant le lot MVP1-D (base de données). |
-| Q2 | Licence ODbL de l'Onisep : accepte-t-on le partage à l'identique ? | Tant que non tranché, aucune vue exportée ne joint `reference.formation_onisep`. | Avant MVP3 (débouchés). |
+| ~~Q1~~ | ~~Pilote PostgreSQL~~ | **Tranchée le 20/09/2026** — voir D11. | |
+| ~~Q2~~ | ~~Licence ODbL de l'Onisep~~ | **Tranchée le 20/09/2026** — voir D13. | |
 | Q3 | Communes sans loyer publié : Faaa, Mamoudzou, Papeete, Pirae, Dembeni… 98 formations en outre-mer. Que montre-t-on ? | Aujourd'hui : « donnée manquante », conformément à `CLAUDE.md`. Faut-il chercher une autre source ? | Avant MVP2 (logement). |
 | Q4 | Données CROUS de 2017 : millésime très ancien. Les garde-t-on affichées ? | Elles portent leur millésime, donc la règle 6 est tenue. Reste qu'un chiffre de 2017 en 2026 informe mal. | Avant MVP2. |
 | Q5 | Disponibilité réelle des logements : aucune source publique ne la publie. | Les « bons plans logement » ne peuvent pas promettre une disponibilité. | Avant MVP2. |

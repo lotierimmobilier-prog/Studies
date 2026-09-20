@@ -267,6 +267,31 @@ function VivreIci({
 }
 
 /**
+ * La recherche de cette formation sur le site de l'Onisep.
+ *
+ * ── Pourquoi un lien et pas le contenu ───────────────────────────────────
+ *
+ * L'Onisep publie de vraies fiches de débouchés, ce que Parcoursup ne fait
+ * pas. Mais son jeu est sous licence ODbL, qui impose le partage à
+ * l'identique : l'intégrer engagerait tout ce qu'on en dérive, pour toujours.
+ * Un lien vers leur recherche n'utilise aucune de leurs données et ne
+ * déclenche aucune obligation (décision D13).
+ *
+ * ── Ce qui n'a pas pu être vérifié ───────────────────────────────────────
+ *
+ * onisep.fr répond 403 à notre environnement de développement, comme
+ * leboncoin. Le format des paramètres de recherche n'a donc PAS été
+ * confirmé sur pièce. Le libellé du lien dit « chercher » et non « la fiche
+ * de cette formation » : si le paramètre est ignoré, l'élève arrive quand
+ * même sur le site où l'information se trouve, et le lien n'aura rien promis
+ * qu'il ne tient pas.
+ */
+function rechercheOnisep(libelle: string): string {
+  const requete = libelle.replace(/\s*-\s*/g, ' ').trim()
+  return `https://www.onisep.fr/recherche?context=formation&text=${encodeURIComponent(requete)}`
+}
+
+/**
  * L'onglet « Après ».
  *
  * Il dit surtout ce que l'open data NE publie PAS. C'est volontaire : un
@@ -295,10 +320,21 @@ function Apres({ formation }: { readonly formation: Formation }) {
             : 'Elle n’est pas sélective : les candidats du secteur sont prioritaires, et le rang d’appel joue moins.'}
         </li>
       </ul>
-      <p className="note">
-        Pour les débouchés d’un diplôme, l’Onisep publie des fiches par formation. Nous ne
-        les reprenons pas ici : leur licence impose un partage à l’identique que nous
-        n’avons pas encore arbitré.
+      <h4 className="fiche-sous-titre">Où trouver les débouchés</h4>
+      <p>
+        L’Onisep publie des fiches de débouchés par diplôme. Nous ne reprenons pas leur
+        contenu ici : leur licence impose un partage à l’identique, qui engagerait tout ce
+        qu’on en dérive. On t’y emmène plutôt directement.
+      </p>
+      <p className="liens-externes">
+        <a
+          href={rechercheOnisep(formation.libelle)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Chercher cette formation sur l’Onisep
+          <span aria-hidden="true"> ↗</span>
+        </a>
       </p>
     </>
   )

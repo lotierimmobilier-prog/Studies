@@ -23,6 +23,16 @@ export interface EtatBareme {
   readonly vide: boolean
 }
 
+export interface EtatBd {
+  readonly configuree: boolean
+  readonly repond: boolean
+  /** Hôte et nom de la base. Jamais l'identifiant ni le mot de passe. */
+  readonly ou: string | null
+  readonly version: string | null
+  readonly migrations: readonly string[]
+  readonly erreur: string | null
+}
+
 export interface EtatSysteme {
   readonly le: string
   readonly secrets: readonly EtatSecret[]
@@ -33,6 +43,7 @@ export interface EtatSysteme {
     readonly comptes: number
     readonly sessionsActives: number
   }
+  readonly base: EtatBd
 }
 
 import { BASE_API } from '../donnees.ts'

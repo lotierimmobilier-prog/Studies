@@ -15,6 +15,7 @@ import { BAREMES, estIndisponible, valeurApplicable } from '../kitetudiant/packa
 import type { DepotRetours } from './retours'
 import type { Coffre, EtatSecret } from './secrets'
 import type { DepotComptes, EtatComptes } from './comptes.ts'
+import { etat as etatBaseDeDonnees, type EtatBd } from './bd.ts'
 
 export interface EtatBareme {
   readonly cle: string
@@ -42,6 +43,18 @@ export interface EtatSysteme {
    * voie, sinon le verrou peut être absent sans que personne le sache.
    */
   readonly comptes: EtatComptes
+  /**
+   * État de la base PostgreSQL.
+   *
+   * « configuree: false » n'est PAS une panne : tant que la bascule n'est pas
+   * faite, le site tourne sur le fichier chiffré et l'open data du ministère,
+   * exactement comme avant. C'est le mode normal, et la console doit le dire
+   * comme tel — sinon l'exploitant cherche une panne qui n'existe pas.
+   *
+   * « configuree: true » avec « repond: false », en revanche, est une panne :
+   * quelqu'un a posé une adresse et la base ne répond pas.
+   */
+  readonly base: EtatBd
 }
 
 export function etatDesBaremes(aLaDate: string): EtatBareme[] {
@@ -85,5 +98,8 @@ export async function etatSysteme(
     baremes: etatDesBaremes(aLaDate),
     millesimes: comptes,
     comptes: await depotComptes.etat(maintenant),
+    // `etat()` ne lève jamais : une base injoignable est un état à montrer,
+    // pas une erreur qui ferait échouer la page qui doit justement le dire.
+    base: await etatBaseDeDonnees(),
   }
 }
