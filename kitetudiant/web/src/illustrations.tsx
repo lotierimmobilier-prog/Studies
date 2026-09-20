@@ -72,7 +72,13 @@ export function Photo({ nom, prioritaire = false }: { nom: NomPhoto; prioritaire
       height={HAUTEUR}
       decoding="async"
       loading={prioritaire ? 'eager' : 'lazy'}
-      fetchPriority={prioritaire ? 'high' : 'auto'}
+      // React 18 ne connaît pas la propriété « fetchPriority » : il la refuse
+      // avec un avertissement et ne la pose jamais sur la balise — les types
+      // de @types/react 18.3 l'annoncent pourtant, ce qui rend l'erreur
+      // invisible au compilateur. Les attributs en minuscules, eux, passent
+      // tels quels. Constaté au navigateur le 20/09/2026 ; le build de
+      // production masquait l'avertissement.
+      {...{ fetchpriority: prioritaire ? 'high' : 'auto' }}
     />
   )
 }
