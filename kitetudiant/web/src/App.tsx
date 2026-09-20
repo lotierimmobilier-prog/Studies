@@ -699,7 +699,7 @@ export default function App() {
 
   if (resultats !== null) {
     return (
-      <main className="app">
+      <main className="app app-large">
         <header className="entete entete-resultats">
           <div>
             <h1 className="marque">

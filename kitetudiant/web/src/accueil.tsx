@@ -362,24 +362,31 @@ export function Accueil({
         />
       </header>
 
-      <Hero onCommencer={onCommencer} />
+      {/* L'accroche et sa photographie forment UNE zone, pas deux blocs
+          empilés. Sur un grand écran elles se posent côte à côte : sans cela,
+          la moitié droite de l'écran restait vide à hauteur du titre, ce qui
+          donne à une page l'air d'être inachevée. En dessous de 64rem, rien
+          ne change — la grille n'existe pas et les deux s'empilent. */}
+      <div className="hero-zone">
+        <Hero onCommencer={onCommencer} />
 
-      <div className="illu-bande illu-bande-large">
-        <img
-          src={photoArrivee}
-          alt=""
-          aria-hidden="true"
-          width={1200}
-          height={462}
-          decoding="async"
-        />
+        <div className="illu-bande illu-bande-large">
+          <img
+            src={photoArrivee}
+            alt=""
+            aria-hidden="true"
+            width={1200}
+            height={462}
+            decoding="async"
+          />
+        </div>
       </div>
 
       <Bandeau />
       <Piliers />
       <Comparaison />
 
-      <section className="bloc" id="methode">
+      <section className="bloc etapes-illustrees" id="methode">
         <div className="illu-bande">
           <img
             src={photoInstallation}

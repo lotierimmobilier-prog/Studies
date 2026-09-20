@@ -38,6 +38,26 @@ describe('les choix affichent ce qu’ils appliquent', () => {
     expect(couts).toEqual([...couts].sort((a, b) => a - b))
   })
 
+  it('offre le cas où la famille prend le quotidien en charge', () => {
+    // Un élève dont les parents font les courses n'a pas ces dépenses. Sans
+    // ce choix, il déclarait des montants qu'il ne paie pas, et son
+    // reste-à-vivre sortait plus bas que la réalité.
+    const pris = TRAINS_DE_VIE.find((t) => t.cle === 'pris-en-charge')
+    expect(pris, 'le choix « mes parents s’occupent de tout » a disparu').toBeDefined()
+    expect(depensesDeclarees(pris!)).toBe(0)
+    // Il vient en premier parce que la liste suit le coût, et que zéro est le
+    // moins cher. Ce n'est pas un jugement sur la situation de l'élève.
+    expect(TRAINS_DE_VIE[0]!.cle).toBe('pris-en-charge')
+  })
+
+  it('n’applique zéro que si l’élève l’a choisi', () => {
+    // La différence entre une hypothèse annoncée et une valeur de repli
+    // silencieuse (interdite par CLAUDE.md) tient à cela : le parcours ne
+    // s'ouvre PAS sur le choix à zéro.
+    expect(trainDeVieCourant(REPONSES_PAR_DEFAUT)?.cle).not.toBe('pris-en-charge')
+    expect(depensesDeclarees(REPONSES_PAR_DEFAUT)).toBeGreaterThan(0)
+  })
+
   it('les fourchettes de job sont cohérentes et croissantes', () => {
     for (const j of JOBS_ETUDIANTS) expect(j.bas).toBeLessThanOrEqual(j.haut)
     const hauts = JOBS_ETUDIANTS.map((j) => j.haut)

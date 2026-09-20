@@ -661,13 +661,32 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
         {trainCourant === null ? (
           <p className="note">Montants ajustés à la main dans le détail ci-dessous.</p>
         ) : null}
+        {trainCourant?.cle === 'pris-en-charge' ? (
+          /* Dire ce que ce choix fait, et ce qu'il ne fait pas. Un élève dont
+             la famille remplit le frigo n'a pas ces dépenses — mais le loyer
+             et la scolarité, eux, restent dus et restent calculés. */
+          <p className="note">
+            Tes dépenses du quotidien sont donc à zéro. Le logement et les frais de
+            scolarité restent comptés : ils dépendent de la formation et de la ville.
+            Tu peux remettre un montant sur n’importe quelle ligne dans le détail
+            ci-dessous.
+          </p>
+        ) : null}
       </div>
 
-      <p className="budget-total">
-        Tu déclares <strong>{depensesDeclarees(reponses)} € de dépenses par mois</strong>,
-        hors logement et hors frais de scolarité — ceux-là dépendent de la formation et de
-        la ville, on les calcule pour toi.
-      </p>
+      {depensesDeclarees(reponses) === 0 ? (
+        <p className="budget-total">
+          Tu ne déclares <strong>aucune dépense du quotidien</strong>. Restent le
+          logement et les frais de scolarité — ceux-là dépendent de la formation et de
+          la ville, on les calcule pour toi.
+        </p>
+      ) : (
+        <p className="budget-total">
+          Tu déclares <strong>{depensesDeclarees(reponses)} € de dépenses par mois</strong>,
+          hors logement et hors frais de scolarité — ceux-là dépendent de la formation et
+          de la ville, on les calcule pour toi.
+        </p>
+      )}
 
       <details className="budget-detail">
         <summary>Ajuster poste par poste</summary>

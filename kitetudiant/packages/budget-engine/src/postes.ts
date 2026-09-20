@@ -15,6 +15,8 @@ import {
   type ValeurApplicable,
 } from '../../baremes/src/index.ts'
 
+import { eurosAuCentime } from './nombres.ts'
+
 import type {
   LigneBudget,
   MontantSource,
@@ -117,9 +119,10 @@ export function ligneLoyerNet(voeu: VoeuBudget, scenario: Scenario): LigneBudget
     source: `${voeu.loyer.source} ; APL : ${voeu.aplMensuelle.source}`,
     millesime: `${voeu.loyer.millesime} / ${voeu.aplMensuelle.millesime}`,
     hypothese:
-      `${euroParM2} €/m² (${borne} de l’intervalle de prédiction, estimation « ${voeu.loyer.qualite} ») ` +
+      `${eurosAuCentime(euroParM2)}/m² (${borne} de l’intervalle de prédiction, ` +
+      `estimation « ${voeu.loyer.qualite} ») ` +
       `× ${voeu.surfaceHypotheseM2} m², loyer d’annonce charges comprises pour un bien loué vide, ` +
-      `moins ${voeu.aplMensuelle.montant} € d’APL` +
+      `moins ${eurosAuCentime(voeu.aplMensuelle.montant)} d’APL` +
       (net < 0 ? ' ; APL supérieure au loyer, le poste est ramené à 0 €' : ''),
   })
 }
@@ -159,9 +162,9 @@ export function ligneAlimentation(profil: ProfilEleve, aLaDate: string): LigneBu
     source: `${repas.source} ; courses : ${SAISIE}`,
     millesime: repas.millesime,
     hypothese:
-      `${profil.repasCrousParMois} repas × ${repas.montant} € au tarif ` +
-      `${profil.echelonBourse === null ? 'non boursier' : 'boursier'} = ${round2(coutRepas)} €, ` +
-      `plus ${profil.coursesMensuelles} € de courses déclarées`,
+      `${profil.repasCrousParMois} repas × ${eurosAuCentime(repas.montant)} au tarif ` +
+      `${profil.echelonBourse === null ? 'non boursier' : 'boursier'} = ${eurosAuCentime(coutRepas)}, ` +
+      `plus ${eurosAuCentime(profil.coursesMensuelles)} de courses déclarées`,
   })
 }
 
@@ -213,7 +216,7 @@ export function ligneFraisScolarite(
     montant: voeu.fraisScolariteAnnuels.montant + cvec.montant,
     source: `${voeu.fraisScolariteAnnuels.source} ; CVEC : ${cvec.source}`,
     millesime: `${voeu.fraisScolariteAnnuels.millesime} / ${cvec.millesime}`,
-    hypothese: `${voeu.fraisScolariteAnnuels.hypothese} ; plus ${cvec.montant} € de CVEC`,
+    hypothese: `${voeu.fraisScolariteAnnuels.hypothese} ; plus ${eurosAuCentime(cvec.montant)} de CVEC`,
   }, mensualites)
 }
 
@@ -263,7 +266,9 @@ export function ligneJobEtudiant(profil: ProfilEleve, scenario: Scenario): Ligne
     montant,
     source: SAISIE,
     millesime: 'déclaratif',
-    hypothese: `Fourchette déclarée ${bas} à ${haut} € par mois, ${borne} retenue pour le scénario ${scenario}`,
+    hypothese:
+      `Fourchette déclarée ${eurosAuCentime(bas)} à ${eurosAuCentime(haut)} par mois, ` +
+      `${borne} retenue pour le scénario ${scenario}`,
   })
 }
 

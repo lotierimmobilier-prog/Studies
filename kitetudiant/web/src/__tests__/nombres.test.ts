@@ -5,6 +5,9 @@ import { join, resolve } from 'node:path'
 import { euros, eurosPrecis, FINE_INSECABLE, INSECABLE, lisible, nombre } from '../nombres.ts'
 
 const SRC = resolve(import.meta.dirname, '..')
+/* Le moteur écrit lui aussi du texte lu par l'élève — le champ `hypothese`
+   de chaque ligne de budget. Il est donc balayé par le même garde-fou. */
+const MOTEUR = resolve(import.meta.dirname, '..', '..', '..', 'packages')
 
 describe('mise en forme des nombres', () => {
   it('sépare les milliers par une espace que toute police sait rendre', () => {
@@ -63,7 +66,7 @@ describe('personne ne met en forme un nombre dans son coin', () => {
 
   it('aucun toLocaleString de nombre hors de nombres.ts', () => {
     const fautifs: string[] = []
-    for (const fichier of sources(SRC)) {
+    for (const fichier of [...sources(SRC), ...sources(MOTEUR)]) {
       if (fichier.endsWith('/nombres.ts')) continue
       const source = readFileSync(fichier, 'utf8')
       for (const m of source.matchAll(/\.toLocaleString\(/g)) {
@@ -73,7 +76,8 @@ describe('personne ne met en forme un nombre dans son coin', () => {
         const debut = avant.lastIndexOf('\n') + 1
         const texte = source.slice(debut, source.indexOf('\n', m.index!))
         if (/toLocaleDateString|new Date\(/.test(texte)) continue
-        fautifs.push(`${fichier.replace(`${SRC}/`, '')}:${ligne} → ${texte.trim()}`)
+        const court = fichier.replace(`${SRC}/`, '').replace(`${MOTEUR}/`, '')
+        fautifs.push(`${court}:${ligne} → ${texte.trim()}`)
       }
     }
     expect(
