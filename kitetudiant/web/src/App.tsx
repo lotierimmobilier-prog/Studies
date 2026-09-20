@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { LigneBudget, Soutenabilite } from '../../packages/budget-engine/src/types.ts'
 import {
@@ -19,6 +19,7 @@ import {
   InscriptionRequise,
   jetonSession,
   positionDe,
+  chercherArticles,
   chercherFormations,
   MILLESIME_LOYERS,
   SOURCE_LOYERS,
@@ -40,6 +41,9 @@ import {
 import { Collection } from './collection.tsx'
 import { Epingle } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
+import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
+import { ListeArticles, PageArticle } from './blog.tsx'
+import { cheminDe, routeDuChemin, type Route } from './routes.ts'
 import { euros, eurosPrecis } from './nombres.ts'
 import { affiniteCourte, affiniteNote, chancesCourtes } from './libelles.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
@@ -318,7 +322,18 @@ function Carte({
 }
 
 export default function App() {
-  const [vue, setVue] = useState<'accueil' | 'parcours' | 'collection'>('accueil')
+  const [vue, setVue] = useState<'accueil' | 'parcours' | 'collection' | 'blog' | 'article'>(
+    () => {
+      // L'adresse fait foi au chargement : ouvrir directement un article doit
+      // afficher cet article, pas l'accueil.
+      const route = routeDuChemin(window.location.pathname)
+      return route === null || route.vue === 'accueil' ? 'accueil' : route.vue
+    },
+  )
+  const [slug, setSlug] = useState<string | null>(() => {
+    const route = routeDuChemin(window.location.pathname)
+    return route !== null && route.vue === 'article' ? route.slug : null
+  })
   const [etape, setEtape] = useState(0)
   const [reponses, setReponses] = useState<Reponses>(REPONSES_PAR_DEFAUT)
   const [resultats, setResultats] = useState<ResultatFormation[] | null>(null)
@@ -343,6 +358,50 @@ export default function App() {
    * au serveur, et aucune carte ne s'obtient en invitant quelqu'un (collection.ts).
    */
   const [collection, setCollection] = useState<Obtention[]>(() => chargerCollection())
+
+  /**
+   * Les articles écrits depuis la console viennent s'ajouter à ceux du dépôt,
+   * et l'emportent à identifiant égal : corriger un texte publié ne demande
+   * alors pas de redéployer.
+   */
+  const [ajoutes, setAjoutes] = useState<readonly Article[]>([])
+  useEffect(() => {
+    let vivant = true
+    void chercherArticles().then((a) => {
+      if (vivant) setAjoutes(a)
+    })
+    return () => {
+      vivant = false
+    }
+  }, [])
+  const articles = useMemo<readonly Article[]>(() => {
+    const parSlug = new Map(ARTICLES.map((a) => [a.slug, a]))
+    for (const a of ajoutes) parSlug.set(a.slug, a)
+    return [...parSlug.values()].sort((a, b) => b.publieLe.localeCompare(a.publieLe))
+  }, [ajoutes])
+
+  /**
+   * Change de vue ET d'adresse. Seules les vues publiques ont une adresse :
+   * le parcours de questions n'en a pas, il n'aurait aucun sens partagé.
+   */
+  const naviguer = useCallback((route: Route) => {
+    window.history.pushState({}, '', cheminDe(route))
+    setVue(route.vue)
+    setSlug(route.vue === 'article' ? route.slug : null)
+    window.scrollTo(0, 0)
+  }, [])
+
+  // Le bouton « précédent » du navigateur doit fonctionner comme partout.
+  useEffect(() => {
+    const surRetour = (): void => {
+      const route = routeDuChemin(window.location.pathname)
+      if (route === null) return
+      setVue(route.vue)
+      setSlug(route.vue === 'article' ? route.slug : null)
+    }
+    window.addEventListener('popstate', surRetour)
+    return () => window.removeEventListener('popstate', surRetour)
+  }, [])
 
   const gagner = useCallback((ids: readonly string[]) => {
     if (ids.length === 0) return
@@ -456,6 +515,41 @@ export default function App() {
     [resultats],
   )
 
+  if (vue === 'blog') {
+    return (
+      <ListeArticles
+        articles={articles}
+        onArticle={(s) => naviguer({ vue: 'article', slug: s })}
+        onRetour={() => naviguer({ vue: 'accueil' })}
+      />
+    )
+  }
+
+  if (vue === 'article') {
+    const article = articles.find((a) => a.slug === slug)
+    // Adresse inconnue : on montre la liste plutôt qu'une page vide, et on
+    // remet l'adresse d'aplomb pour ne pas laisser une URL morte dans la barre.
+    if (article === undefined) {
+      return (
+        <ListeArticles
+          articles={articles}
+          onArticle={(s) => naviguer({ vue: 'article', slug: s })}
+          onRetour={() => naviguer({ vue: 'accueil' })}
+        />
+      )
+    }
+    return (
+      <PageArticle
+        article={article}
+        onBlog={() => naviguer({ vue: 'blog' })}
+        onCommencer={() => {
+          naviguer({ vue: 'accueil' })
+          setVue('parcours')
+        }}
+      />
+    )
+  }
+
   if (vue === 'collection') {
     return (
       <Collection
@@ -481,6 +575,8 @@ export default function App() {
       <Accueil
         onCommencer={() => setVue('parcours')}
         onCollection={() => setVue('collection')}
+        onBlog={() => naviguer({ vue: 'blog' })}
+        onArticle={(s) => naviguer({ vue: 'article', slug: s })}
         cartes={nombreCartes}
       />
     )

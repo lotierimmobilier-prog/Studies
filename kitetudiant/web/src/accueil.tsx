@@ -27,6 +27,8 @@ import {
 } from './donnees.ts'
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
+import { ARTICLES } from '../../packages/articles/src/index.ts'
+import { cheminDe } from './routes.ts'
 import {
   AVERTISSEMENT,
   enToutesLettres,
@@ -289,10 +291,14 @@ function Chronologie() {
 export function Accueil({
   onCommencer,
   onCollection,
+  onBlog,
+  onArticle,
   cartes,
 }: {
   onCommencer: () => void
   onCollection: () => void
+  onBlog: () => void
+  onArticle: (slug: string) => void
   /** Nombre de cartes déjà gagnées. Zéro : la pastille ne s'affiche pas. */
   cartes: number
 }) {
@@ -303,6 +309,9 @@ export function Accueil({
           <Marque signature />
         </h1>
         <div className="entete-actions">
+          <button type="button" className="entete-lien" onClick={onBlog}>
+            Le blog
+          </button>
           {/* La collection n'apparaît qu'une fois la première carte gagnée :
               pour un visiteur qui découvre le site, ce serait du bruit. */}
           {cartes > 0 ? (
@@ -401,6 +410,37 @@ export function Accueil({
           </li>
           <li>Jeu de communes assemblé le {dateLisible(GENERE_LE)}.</li>
         </ul>
+      </section>
+
+      <section className="bloc" id="blog">
+        <h2>Bien gérer sa scolarité</h2>
+        <p className="bloc-intro">
+          Ce qu’il faut comprendre de la procédure, comment monter un dossier qui tient,
+          et comment choisir une ville où l’on pourra rester jusqu’au diplôme.
+        </p>
+        <ul className="articles articles-apercu">
+          {ARTICLES.slice(0, 3).map((a) => (
+            <li key={a.slug}>
+              <a
+                className="article-vignette"
+                href={cheminDe({ vue: 'article', slug: a.slug })}
+                onClick={(ev) => {
+                  if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return
+                  ev.preventDefault()
+                  onArticle(a.slug)
+                }}
+              >
+                <h3 className="article-vignette-titre">{a.titre}</h3>
+                <p className="article-vignette-chapeau">{a.chapeau}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="cta-groupe cta-groupe-bloc">
+          <button type="button" className="secondaire" onClick={onBlog}>
+            Tous les articles
+          </button>
+        </div>
       </section>
 
       <section className="cta-final">
