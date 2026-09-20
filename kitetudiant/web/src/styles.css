@@ -2788,3 +2788,41 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   font-size: 1.2rem;
   line-height: 1.3;
 }
+
+/* La carte des résultats de recherche. Ses repères sont cliquables : ce sont
+   de vrais boutons, donc atteignables au clavier, avec le nom de la formation
+   pour nom accessible. */
+.ecoles-carte {
+  margin: 1rem 0 1.5rem;
+}
+.plan-repere-actif {
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.plan-repere-actif:hover,
+.plan-repere-actif:focus-visible {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+/* Un repère qui en regroupe plusieurs porte leur nombre. Il s'élargit pour
+   que le chiffre tienne, reste rond, et passe AU-DESSUS des repères simples :
+   un groupe recouvert par un voisin ne se clique pas. */
+.plan-repere-groupe {
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  background: var(--accent);
+}
+.plan-repere-compte {
+  color: #fff;
+  font-family: var(--titres);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}

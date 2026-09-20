@@ -248,9 +248,14 @@ function VivreIci({
 
       {formation.coordonnees !== null ? (
         <CarteALaDemande
-          lat={formation.coordonnees.lat}
-          lon={formation.coordonnees.lon}
-          libelle={`${formation.etablissement} — ${formation.ville}`}
+          points={[
+            {
+              cle: formation.id,
+              lat: formation.coordonnees.lat,
+              lon: formation.coordonnees.lon,
+              libelle: `${formation.etablissement} — ${formation.ville}`,
+            },
+          ]}
         />
       ) : (
         <p className="note">
