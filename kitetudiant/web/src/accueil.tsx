@@ -9,8 +9,11 @@
  *
  * - règle 5, les trois scores restent séparés, jamais de note globale unique.
  *   On ne promet donc nulle part « la meilleure école » dans l'absolu, ce qui
- *   supposerait un classement. On promet l'école qui te va, ce qui est une
- *   autre affirmation, et une affirmation que nos données savent tenir ;
+ *   supposerait un classement entre établissements. Le titre parle de « la
+ *   meilleure SOLUTION pour l'année prochaine » — une décision propre à
+ *   quelqu'un, pas un palmarès — et le sous-titre en borne aussitôt le
+ *   périmètre : études, logement, budget, aides. Promettre plus large que ce
+ *   que les données couvrent serait une promesse qu'on ne tient pas ;
  * - règle 6, toute donnée affichée porte son millésime. Aucun chiffre de cette
  *   page n'est décoratif : ils viennent tous du jeu de communes versionné.
  *
@@ -96,14 +99,13 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
   return (
     <section className="hero">
       <p className="hero-sur">Orientation post-bac · Parcoursup</p>
-      <h1 className="promesse">
-        L’école supérieure qui te va, <em>et</em> dans laquelle tu pourras tenir.
-      </h1>
+      <h1 className="promesse">Trouve la meilleure solution pour l’année prochaine.</h1>
       <p className="hero-texte">
-        Fac, BUT, BTS, école d’ingénieurs, prépa : KitEtudiant.fr regarde chaque formation
-        sous trois angles — tes chances d’y entrer, ce qu’elle vaut pour toi, et ce qu’il
-        te restera pour vivre une fois sur place. Trois réponses, jamais fondues en une
-        note.
+        Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet,
+        au même endroit, avec des chiffres datés et leur source. Chaque formation est
+        regardée sous trois angles — tes chances d’y entrer, ce qu’elle vaut pour toi, et
+        ce qu’il te restera pour vivre une fois sur place. Trois réponses, jamais fondues
+        en une note.
       </p>
       <div className="cta-groupe">
         <button type="button" className="principal" onClick={onCommencer}>

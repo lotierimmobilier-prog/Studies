@@ -209,10 +209,10 @@ ecrire(
 // complète ici plutôt que d'écrire une adresse absolue en dur dans index.html,
 // qui deviendrait fausse le jour où la base de déploiement change.
 const accueilCanonique = `${ORIGINE}${BASE}`
-const accueilTitre = 'KitEtudiant.fr — ce qu’il te restera pour vivre, vœu par vœu'
+const accueilTitre = 'KitEtudiant.fr — trouve la meilleure solution pour l’année prochaine'
 const accueilDescription =
-  'Chaque formation sous trois angles tenus séparés : tes chances d’y entrer, ce ' +
-  'qu’elle vaut pour toi, et ton reste-à-vivre une fois sur place.'
+  'Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet, ' +
+  'au même endroit, avec des chiffres datés et leur source.'
 ecrire(
   join(SORTIE, 'index.html'),
   coquille

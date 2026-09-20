@@ -1419,3 +1419,50 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   .recompense { flex-wrap: wrap; }
   .recompense-mention { margin-left: 1.8rem; align-self: flex-start; }
 }
+
+/* --------------------------------------------- bulletins et avis lu */
+.bulletins { margin: 1rem 0 0; }
+.bulletins-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.bulletin-depose {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+.bulletin-nom { font-weight: 600; }
+.bulletin-progression { margin: 0.8rem 0 0; font-size: 0.9rem; line-height: 1.5; }
+
+/* L'avis de l'assistant. Encadré, donc visiblement à part du reste : c'est
+   une lecture, pas une donnée du dossier. Aucun chiffre ne s'y trouve. */
+.avis-jp {
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--trait);
+  border-left: 3px solid var(--vif);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.avis-jp-titre { margin: 0 0 0.45rem; font-size: 0.95rem; }
+.avis-jp-texte { margin: 0; font-size: 0.9rem; line-height: 1.55; }
+.avis-jp-sous {
+  margin: 0.8rem 0 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.avis-jp-liste { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--doux); }
+/* La mention d'auteur n'est pas une note de bas de page décorative : elle dit
+   que c'est une machine qui a écrit, et que rien de ceci ne compte dans un
+   calcul. Elle reste lisible, pas réduite à du gris minuscule. */
+.avis-jp-auteur {
+  margin: 0.8rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--trait);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--doux);
+}

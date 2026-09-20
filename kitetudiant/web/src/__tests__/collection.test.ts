@@ -201,7 +201,7 @@ describe('ce qu’une visite débloque', () => {
   const vide: Activite = {
     communesChiffrees: [],
     detailOuvert: false,
-    bulletinLu: false,
+    bulletinsLus: 0,
     academieEleve: null,
     academiesRegardees: [],
   }
@@ -355,5 +355,54 @@ describe('les cartes ne se gagnent jamais par parrainage', () => {
       'Une carte doit se gagner en se servant du site, jamais en invitant ' +
         'quelqu’un : un parrainage supposerait de relier des élèves entre eux.',
     ).toEqual([])
+  })
+})
+
+/** Vingt communes réellement couvertes : cartesGagnees écarte les autres. */
+const COMMUNES_REELLES = Object.keys(
+  (JSON.parse(
+    readFileSync(resolve(import.meta.dirname, '..', '..', 'donnees', 'communes.json'), 'utf8'),
+  ) as { communes: Record<string, unknown> }).communes,
+).slice(0, 20)
+
+/* ------------------------------------------- récompenses au compteur */
+
+describe('les paliers comptés', () => {
+  const VIDE = {
+    communesChiffrees: [] as string[],
+    detailOuvert: false,
+    bulletinsLus: 0,
+    academieEleve: null,
+    academiesRegardees: [] as string[],
+  }
+
+  it('récompense chaque palier de bulletins, pas seulement le premier', () => {
+    // Un booléen ne disait que « au moins un » : impossible de distinguer
+    // l'élève qui dépose un trimestre de celui qui dépose l'année entière.
+    expect(cartesGagnees({ ...VIDE, bulletinsLus: 0 })).not.toContain(idEtape('bulletin'))
+    expect(cartesGagnees({ ...VIDE, bulletinsLus: 1 })).toContain(idEtape('bulletin'))
+    expect(cartesGagnees({ ...VIDE, bulletinsLus: 1 })).not.toContain(idEtape('trois-bulletins'))
+    expect(cartesGagnees({ ...VIDE, bulletinsLus: 3 })).toContain(idEtape('trois-bulletins'))
+    // Un palier atteint ne se reperd pas au palier suivant.
+    expect(cartesGagnees({ ...VIDE, bulletinsLus: 5 })).toContain(idEtape('bulletin'))
+  })
+
+  it('récompense chaque palier de villes', () => {
+    const villes = (n: number) =>
+      cartesGagnees({ ...VIDE, communesChiffrees: COMMUNES_REELLES.slice(0, n) })
+    expect(villes(1)).toContain(idEtape('premier-budget'))
+    expect(villes(1)).not.toContain(idEtape('trois-villes'))
+    expect(villes(3)).toContain(idEtape('trois-villes'))
+    expect(villes(10)).toContain(idEtape('dix-villes'))
+    expect(villes(10)).not.toContain(idEtape('vingt-villes'))
+    expect(villes(20)).toContain(idEtape('vingt-villes'))
+  })
+
+  it('compte les communes DISTINCTES, pas les passages', () => {
+    // Regarder dix fois la même ville n'est pas regarder dix villes.
+    const dixFois = Array.from({ length: 10 }, () => COMMUNES_REELLES[0]!)
+    expect(cartesGagnees({ ...VIDE, communesChiffrees: dixFois })).not.toContain(
+      idEtape('dix-villes'),
+    )
   })
 })

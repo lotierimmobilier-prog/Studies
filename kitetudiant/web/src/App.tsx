@@ -549,7 +549,7 @@ export default function App() {
               : [],
           ),
           detailOuvert: false,
-          bulletinLu: reponses.notesImportees,
+          bulletinsLus: reponses.bulletins.length,
           academieEleve: reponses.academie,
           academiesRegardees: calcules.map((r) => r.formation.academie),
         }),
@@ -705,7 +705,7 @@ export default function App() {
             <h1 className="marque">
             <Marque />
           </h1>
-            <p className="baseline">Ce qu’il te restera pour vivre, vœu par vœu.</p>
+            <p className="baseline">La meilleure solution pour l’année prochaine.</p>
           </div>
           {nombreCartes > 0 ? (
             <button type="button" className="pastille" onClick={() => setVue('collection')}>
@@ -831,7 +831,7 @@ export default function App() {
         <h1 className="marque">
             <Marque />
           </h1>
-        <p className="baseline">Ce qu’il te restera pour vivre, vœu par vœu.</p>
+        <p className="baseline">La meilleure solution pour l’année prochaine.</p>
       </header>
 
       <div className="progression" aria-label={`Étape ${etape + 1} sur ${ETAPES.length}`}>

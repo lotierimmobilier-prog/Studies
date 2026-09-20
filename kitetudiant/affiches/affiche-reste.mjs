@@ -197,10 +197,10 @@ function page() {
     ${marques.map((m) => `<b style="left:${m.x.toFixed(3)}mm;top:${m.y.toFixed(3)}mm"></b>`).join('')}
   </div>
 
-  <div class="titre">Ce qu’il te restera pour vivre, vœu par vœu.</div>
+  <div class="titre">Trouve la meilleure solution pour l’année prochaine.</div>
   <div class="sous">
-    Chaque formation sous trois angles : tes chances d’y entrer, ce qu’elle vaut
-    pour toi, et ton reste-à-vivre une fois sur place.
+    Études, logement, budget, aides : tout ce qui se décide entre janvier et
+    juillet, au même endroit, avec des chiffres datés et leur source.
   </div>
 
   <div class="legende">

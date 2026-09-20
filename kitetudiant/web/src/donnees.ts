@@ -492,12 +492,23 @@ export interface BulletinExtrait {
   readonly notes: Readonly<Record<string, number>>
   readonly signaux: { readonly serieux: number; readonly participation: number; readonly progression: number }
   readonly matieresLues: number
+  /**
+   * La lecture rédigée des appréciations, ou `null` si rien d'exploitable.
+   * C'est une SYNTHÈSE, jamais le texte brut des professeurs — celui-ci ne
+   * quitte pas l'appel d'analyse (règle 3 de CLAUDE.md).
+   */
+  readonly avis: {
+    readonly texte: string
+    readonly pointsForts: readonly string[]
+    readonly aTravailler: readonly string[]
+    readonly auteur: string
+  } | null
   readonly source: string
 }
 
 /**
- * Envoie un bulletin au serveur, qui n'en fait ressortir que des nombres.
- * Le texte des appréciations ne revient jamais ici.
+ * Envoie un bulletin au serveur, qui n'en fait ressortir que des nombres et
+ * une synthèse. Le texte brut des appréciations ne revient jamais ici.
  */
 export async function lireBulletin(
   fichierBase64: string,

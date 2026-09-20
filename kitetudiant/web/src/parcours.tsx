@@ -30,11 +30,13 @@ import {
 } from './budgetSimple.ts'
 import type { Reponses } from './calcul.ts'
 import { lireBulletin } from './donnees.ts'
+import { moyennesCumulees, progressionConstatee, type BulletinDepose } from './calcul.ts'
 
 export const REPONSES_PAR_DEFAUT: Reponses = {
   typeBac: 'general',
   notes: {},
   notesImportees: false,
+  bulletins: [],
   matierePreferee: null,
   passions: [],
   motivation: 7,
@@ -153,6 +155,95 @@ function SaisieNotes({
   )
 }
 
+/**
+ * Les bulletins déposés, et ce que l'assistant en a lu.
+ *
+ * ── Deux choses que cet affichage ne doit jamais laisser croire ──────────
+ *
+ * 1. Que Jean-Paul est quelqu'un. Son nom est suivi de ce qu'il est, à
+ *    chaque fois : une machine. Ce site parle à des mineurs, et laisser
+ *    penser qu'un adulte a lu leur bulletin donnerait à ces phrases un poids
+ *    qu'elles n'ont pas.
+ * 2. Que cet avis est une note. Il n'est pas chiffré, il n'entre dans aucun
+ *    calcul, il ne trie aucune formation — et c'est écrit.
+ *
+ * La progression affichée, elle, est une SOUSTRACTION entre le premier et le
+ * dernier bulletin. Elle ne vient d'aucun modèle.
+ */
+function BulletinsDeposes({ bulletins }: { bulletins: readonly BulletinDepose[] }) {
+  const progression = progressionConstatee(bulletins)
+  return (
+    <section className="bulletins" aria-label="Bulletins déposés">
+      <ul className="bulletins-liste">
+        {bulletins.map((b) => (
+          <li className="bulletin-depose" key={b.libelle}>
+            <span className="bulletin-nom">{b.libelle}</span>
+            <span className="note">
+              {b.matieresLues} matière{b.matieresLues > 1 ? 's' : ''} lue
+              {b.matieresLues > 1 ? 's' : ''}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {progression !== null ? (
+        <p className="bulletin-progression">
+          Entre ton premier et ton dernier bulletin, ta moyenne générale{' '}
+          {progression > 0.05 ? (
+            <>
+              a gagné <strong>{progression.toFixed(1)} point{progression >= 2 ? 's' : ''}</strong>.
+              Une remontée est l’un des rares éléments qu’un dossier peut encore construire.
+            </>
+          ) : progression < -0.05 ? (
+            <>
+              a baissé de <strong>{Math.abs(progression).toFixed(1)} point
+              {Math.abs(progression) >= 2 ? 's' : ''}</strong>. Les commissions lisent des
+              trajectoires : les prochains trimestres comptent plus que celui-ci.
+            </>
+          ) : (
+            <>est restée <strong>stable</strong>.</>
+          )}
+        </p>
+      ) : null}
+
+      {/* L'avis du dernier bulletin déposé : c'est le plus récent qui décrit
+          où l'élève en est. Les précédents restent dans la liste ci-dessus. */}
+      {(() => {
+        const dernier = [...bulletins].reverse().find((b) => b.avis !== null)
+        if (dernier?.avis == null) return null
+        const avis = dernier.avis
+        return (
+          <article className="avis-jp">
+            <h4 className="avis-jp-titre">Ce que Jean-Paul a lu dans les appréciations</h4>
+            <p className="avis-jp-texte">{avis.texte}</p>
+            {avis.pointsForts.length > 0 ? (
+              <>
+                <p className="avis-jp-sous">Ce qui ressort</p>
+                <ul className="avis-jp-liste">
+                  {avis.pointsForts.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+            {avis.aTravailler.length > 0 ? (
+              <>
+                <p className="avis-jp-sous">Ce qui peut encore bouger</p>
+                <ul className="avis-jp-liste">
+                  {avis.aTravailler.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
+            <p className="avis-jp-auteur">{avis.auteur}. Cet avis n’entre dans aucun calcul et ne trie aucune formation.</p>
+          </article>
+        )
+      })()}
+    </section>
+  )
+}
+
 export function Question({ etape, reponses, academies, onChange }: Props) {
   const [lecture, setLecture] = useState<'repos' | 'en_cours' | 'erreur'>('repos')
   const [messageLecture, setMessageLecture] = useState<string | null>(null)
@@ -171,10 +262,34 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
         const v = extrait.notes[m]
         if (typeof v === 'number') notes[m] = v
       }
-      onChange({ notes, notesImportees: true, signaux: extrait.signaux })
+
+      // Le bulletin S'AJOUTE aux précédents, il ne les remplace pas : c'est
+      // ce qui permet de moyenner sur plusieurs trimestres et de constater
+      // une progression au lieu de la supposer.
+      const bulletins = [
+        ...reponses.bulletins,
+        {
+          libelle: `Bulletin ${reponses.bulletins.length + 1}`,
+          notes,
+          signaux: extrait.signaux,
+          matieresLues: extrait.matieresLues,
+          avis: extrait.avis ?? null,
+        },
+      ]
+      onChange({
+        bulletins,
+        // Les moyennes affichées sont celles de TOUS les bulletins, calculées
+        // ici — jamais demandées au modèle (règle 1).
+        notes: moyennesCumulees(bulletins),
+        notesImportees: true,
+        signaux: extrait.signaux,
+      })
       setLecture('repos')
       setMessageLecture(
-        `${extrait.matieresLues} matières lues. Vérifie-les : elles sont modifiables.`,
+        bulletins.length === 1
+          ? `${extrait.matieresLues} matières lues. Vérifie-les : elles sont modifiables.`
+          : `${extrait.matieresLues} matières lues. Les moyennes affichées portent ` +
+            `maintenant sur ${bulletins.length} bulletins.`,
       )
     } catch (e) {
       setLecture('erreur')
@@ -231,15 +346,24 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
             }}
           />
           <span>
-            {lecture === 'en_cours' ? 'Lecture du bulletin…' : 'Importer un bulletin (PDF ou photo)'}
+            {lecture === 'en_cours'
+              ? 'Lecture du bulletin…'
+              : reponses.bulletins.length === 0
+                ? 'Importer un bulletin (PDF ou photo)'
+                : 'Ajouter un autre bulletin'}
           </span>
         </label>
         <p className="note">
-          Seules les moyennes et trois indicateurs chiffrés sont extraits. Le texte
-          des appréciations n’est jamais conservé.
+          Tu peux en déposer plusieurs — un par trimestre. Les moyennes se cumulent,
+          et ta progression devient visible. Seules les moyennes et trois indicateurs
+          chiffrés sont extraits ; le texte des appréciations n’est jamais conservé.
         </p>
         {messageLecture ? (
           <p className={lecture === 'erreur' ? 'erreur' : 'note'}>{messageLecture}</p>
+        ) : null}
+
+        {reponses.bulletins.length > 0 ? (
+          <BulletinsDeposes bulletins={reponses.bulletins} />
         ) : null}
 
         <SaisieNotes reponses={reponses} onChange={onChange} />
