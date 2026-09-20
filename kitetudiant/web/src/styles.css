@@ -151,23 +151,12 @@ body {
 .carte.orange { border-left-color: var(--orange); }
 .carte.rouge { border-left-color: var(--rouge); }
 
-.carte-rav { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem; }
-.rav {
-  font-size: clamp(2.6rem, 12vw, 3.4rem);
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.03em;
-  font-variant-numeric: tabular-nums;
-}
-.rav-absent { font-size: 1.5rem; font-weight: 700; color: var(--doux); }
-.rav-unite { color: var(--doux); font-size: 0.95rem; }
-.verdict { margin-left: auto; font-size: 0.8rem; font-weight: 600; }
+.verdict { flex: 0 0 auto; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
 .verdict.vert { color: var(--vert); }
 .verdict.orange { color: var(--orange); }
 .verdict.rouge { color: var(--rouge); }
 .verdict.gris { color: var(--gris); }
 
-.carte h3 { margin: 0.9rem 0 0.15rem; font-size: 1.05rem; line-height: 1.3; }
 .etab { margin: 0; color: var(--doux); font-size: 0.9rem; }
 .fourchette, .admission { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
 .avertissement { margin: 0.5rem 0 0; font-size: 0.82rem; color: var(--orange); }
@@ -260,20 +249,6 @@ a { color: var(--accent); }
 }
 
 input[type='range'] { width: 100%; min-height: 44px; }
-
-.axes {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-  margin: 0.9rem 0 0;
-  padding: 0.7rem 0;
-  border-top: 1px solid var(--trait);
-  border-bottom: 1px solid var(--trait);
-}
-.axe { display: flex; flex-direction: column; gap: 0.1rem; }
-.axe-titre { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--doux); }
-.axe-valeur { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.axe-absent { font-size: 0.95rem; color: var(--doux); }
 
 .raisons { margin-bottom: 1.2rem; }
 .raisons h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
@@ -830,4 +805,116 @@ input[type='range'] { width: 100%; min-height: 44px; }
 @media (min-width: 40rem) {
   .pastille-libelle { display: inline; }
   .collec-grille { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ------------------------------------------------ la fiche d'une formation */
+/* Toute cette mise en page sert la règle 5 : trois réponses côte à côte, de
+   même poids, jamais fondues en une note. D'où l'absence de médaille, de score
+   global et de hiérarchie visuelle entre deux fiches. */
+
+.carte-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  /* Le verdict ne se coupe pas — « Pas finançable en l'état » fait 166 px — et
+     un titre flex ne descend pas sous la largeur de son mot le plus long tant
+     qu'on ne lui donne pas « min-width: 0 ». Sans ces deux règles, la fiche
+     dépassait de 4 px à 390 px de large. Constaté au navigateur le 20/09/2026. */
+  flex-wrap: wrap;
+}
+.carte-titre {
+  margin: 0;
+  flex: 1 1 11rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.carte-lieu {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+  color: var(--doux);
+  font-size: 0.88rem;
+}
+.carte-lieu .illu-picto { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--chaud); }
+
+/* La note de l'adresse : discrète, et jamais présentée comme un quatrième
+   critère. Le libellé dit « sur l'adresse », jamais « l'école ». */
+.pastille-note {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--doux);
+}
+.pastille-note-valeur { font-weight: 700; color: var(--encre); font-variant-numeric: tabular-nums; }
+.etoiles { color: var(--chaud); letter-spacing: 0.05em; }
+.etoiles-vides { opacity: 0.28; }
+
+/* Les trois cases. Même largeur, même graisse : aucune ne domine. */
+.trio {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin: 0.9rem 0 0;
+}
+.trio-case {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.65rem;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--fond);
+}
+.trio-titre {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--doux);
+}
+.trio-valeur {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.trio-note { font-size: 0.7rem; color: var(--doux); line-height: 1.3; }
+
+/* Seule la case du reste-à-vivre porte la couleur du verdict : c'est le seul
+   des trois axes sur lequel le site se prononce. */
+.trio-reste.vert { border-color: var(--vert); }
+.trio-reste.orange { border-color: var(--orange); }
+.trio-reste.rouge { border-color: var(--rouge); }
+.trio-reste.vert .trio-valeur { color: var(--vert); }
+.trio-reste.orange .trio-valeur { color: var(--orange); }
+.trio-reste.rouge .trio-valeur { color: var(--rouge); }
+.trio-reste.gris .trio-valeur { color: var(--doux); font-size: 0.95rem; }
+
+.carte-actions { margin-top: 1rem; }
+.carte-deplier { width: 100%; }
+
+.carte-liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.83rem;
+}
+.carte-liens a { color: var(--accent); }
+
+/* Sur un téléphone étroit, trois colonnes écraseraient les montants : on passe
+   à une seule, et chaque case garde son chiffre lisible. */
+@media (max-width: 26rem) {
+  .trio { grid-template-columns: 1fr; }
+  .trio-case { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+  .trio-note { display: none; }
 }

@@ -38,13 +38,15 @@ import {
   type Obtention,
 } from './collection.ts'
 import { Collection } from './collection.tsx'
+import { Epingle } from './illustrations.tsx'
+import { affiniteCourte, affiniteNote, chancesCourtes } from './libelles.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 import { Accueil } from './accueil.tsx'
 import { Compte } from './compte.tsx'
 import { TroisChoix } from './choix.tsx'
 import { troisChoix, type PositionEleve } from './recommandations.ts'
 import { localiser } from './geo.ts'
-import { NoteDuLieu } from './avisLieu.tsx'
+import { NoteDuLieu, PastilleNote, useAvisLieu, useVisible } from './avisLieu.tsx'
 import { PanneauRetours, ResumeRetours } from './retours.tsx'
 
 const ACADEMIES = [
@@ -75,13 +77,9 @@ const VERDICTS: Record<Soutenabilite, { texte: string; classe: string }> = {
 
 function Admission({ resultat }: { resultat: ResultatFormation }) {
   const a = resultat.admissibilite
-  if (a.statut === 'donnee_manquante') {
+  if (a.statut === 'donnee_manquante' || a.statut === 'effectif_insuffisant') {
     return <p className="admission">{a.raison}</p>
   }
-  if (a.statut === 'effectif_insuffisant') {
-    return <p className="admission">{a.raison}</p>
-  }
-  // Une borne basse à zéro ne dit rien : mieux vaut annoncer un plafond.
   const enonce =
     a.bas === 0
       ? `Moins de ${a.haut} % de chances d’avoir une proposition`
@@ -121,6 +119,18 @@ function Ligne({ ligne }: { ligne: LigneBudget }) {
   )
 }
 
+/**
+ * Une fiche de formation.
+ *
+ * Toute la mise en page tient la règle 5 de CLAUDE.md : les trois réponses
+ * restent trois cases côte à côte, de même poids, jamais fondues en une note.
+ * C'est la raison pour laquelle il n'y a ni médaille, ni score global, ni
+ * classement visuel d'une fiche par rapport à une autre.
+ *
+ * La note publique de l'adresse figure sur la fiche, mais elle n'est PAS une
+ * quatrième case : elle est en petit sous le lieu, dit « sur l'adresse », et
+ * n'entre dans aucun tri (voir avisLieu.tsx).
+ */
 function Carte({
   resultat,
   tous,
@@ -135,7 +145,7 @@ function Carte({
   onOuvrir: () => void
   ouvert: boolean
   retours: AgregatRetours | undefined
-  /** Ouvre le formulaire d'inscription depuis la carte elle-même. */
+  /** Ouvre le formulaire d'inscription depuis la fiche elle-même. */
   onInscrire: () => void
   /**
    * Vrai quand le montant existe mais demande un compte. À ne pas confondre
@@ -145,67 +155,72 @@ function Carte({
    */
   verrouille: boolean
 }) {
+  const { formation } = resultat
   const central = resultat.parScenario.central
   // Quand le montant est seulement verrouillé, le verdict « non calculable »
-  // serait faux : le chiffre existe, il n'est pas encore montré. Le dire
-  // autrement n'est pas une nuance de style, c'est la différence entre une
-  // donnée absente et une donnée retenue.
+  // serait faux : le chiffre existe, il n'est pas encore montré.
   const verdict =
     verrouille && central.ravMensuel === null
       ? { texte: 'Visible après inscription', classe: 'gris' }
       : VERDICTS[central.soutenabilite]
   const jumeaux = ouvert ? jumeauxGeographiques(tous, resultat) : []
+
+  // La note de l'adresse n'est demandée qu'une fois la fiche réellement
+  // arrivée à l'écran : chaque appel est une requête Places facturée.
+  const [ref, vu] = useVisible<HTMLElement>()
+  const avis = useAvisLieu(formation.etablissement, formation.ville, vu)
+
+  const resteTexte =
+    central.ravMensuel === null
+      ? verrouille
+        ? 'après inscription'
+        : 'non calculable'
+      : euros(central.ravMensuel)
+
   return (
-    <article className={`carte ${verdict.classe}`}>
-      <div className="carte-rav">
-        {central.ravMensuel === null ? (
-          <span className="rav-absent">
-            {verrouille ? 'Réservé aux inscrits' : 'Non calculable'}
-          </span>
-        ) : (
-          <>
-            <span className="rav">{euros(central.ravMensuel)}</span>
-            <span className="rav-unite">par mois pour vivre</span>
-          </>
-        )}
+    <article className={`carte ${verdict.classe}`} ref={ref}>
+      <div className="carte-tete">
+        <h3 className="carte-titre">{formation.libelle}</h3>
         <span className={`verdict ${verdict.classe}`}>{verdict.texte}</span>
       </div>
 
-      <h3>{resultat.formation.libelle}</h3>
-      <p className="etab">
-        {resultat.formation.etablissement} — {resultat.formation.ville} (
-        {resultat.formation.departement})
+      <p className="carte-lieu">
+        <Epingle />
+        <span>
+          {formation.etablissement} · {formation.ville} ({formation.departement})
+        </span>
       </p>
+      <PastilleNote avis={avis} />
+
+      {/* Trois cases de même taille : aucune ne domine, aucune ne s'additionne. */}
+      <div className="trio">
+        <div className="trio-case">
+          <span className="trio-titre">Tes chances</span>
+          <span className="trio-valeur">{chancesCourtes(resultat.admissibilite)}</span>
+          <span className="trio-note">d’avoir une proposition</span>
+        </div>
+        <div className="trio-case">
+          <span className="trio-titre">Ce qui te ressemble</span>
+          <span className="trio-valeur">{affiniteCourte(resultat.affinite)}</span>
+          <span className="trio-note">{affiniteNote(resultat.affinite)}</span>
+        </div>
+        <div className={`trio-case trio-reste ${verdict.classe}`}>
+          <span className="trio-titre">Il te restera</span>
+          <span className="trio-valeur">{resteTexte}</span>
+          <span className="trio-note">
+            {central.ravMensuel === null ? 'pour vivre, chaque mois' : 'par mois pour vivre'}
+          </span>
+        </div>
+      </div>
 
       {central.ravMensuel !== null ? (
         <p className="fourchette">
           Entre {euros(resultat.parScenario.prudent.ravMensuel ?? 0)} et{' '}
-          {euros(resultat.parScenario.optimiste.ravMensuel ?? 0)} selon le scénario de loyer et de job.
+          {euros(resultat.parScenario.optimiste.ravMensuel ?? 0)} selon le scénario de loyer
+          et de job.
         </p>
       ) : null}
 
-      <div className="axes">
-        <div className="axe">
-          <span className="axe-titre">Ce qui te correspond</span>
-          {resultat.affinite.domaineInconnu ? (
-            <span className="axe-absent">Domaine non reconnu</span>
-          ) : (
-            <span className="axe-valeur">{resultat.affinite.score}/100</span>
-          )}
-        </div>
-        <div className="axe">
-          <span className="axe-titre">Ce qu’il te reste</span>
-          <span className="axe-valeur">
-            {central.ravMensuel === null
-              ? verrouille
-                ? 'après inscription'
-                : 'non calculable'
-              : euros(central.ravMensuel)}
-          </span>
-        </div>
-      </div>
-
-      <Admission resultat={resultat} />
       <ResumeRetours agregat={retours} />
 
       {central.avertissements.map((a) => (
@@ -215,18 +230,45 @@ function Carte({
       ))}
       {resultat.raisonAide ? <p className="avertissement">{resultat.raisonAide}</p> : null}
 
-      {verrouille ? (
-        <button type="button" className="lien" onClick={onInscrire}>
-          Créer mon compte pour voir le budget
-        </button>
-      ) : (
-        <button type="button" className="lien" onClick={onOuvrir}>
-          {ouvert ? 'Replier le budget' : 'Voir le budget, poste par poste'}
-        </button>
-      )}
+      <div className="carte-actions">
+        {verrouille ? (
+          <button type="button" className="secondaire carte-deplier" onClick={onInscrire}>
+            Créer mon compte pour voir le budget
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="secondaire carte-deplier"
+            onClick={onOuvrir}
+            aria-expanded={ouvert}
+          >
+            {ouvert ? 'Replier le budget' : 'Voir le budget, poste par poste'}
+          </button>
+        )}
+      </div>
+
+      {/* En savoir plus : des pages tenues par d'autres, ouvertes dans un
+          nouvel onglet. On ne prétend pas connaître le site propre de
+          l'établissement — l'open data Parcoursup ne le publie pas. */}
+      {formation.lien || avis?.urlMaps ? (
+        <p className="carte-liens">
+          {formation.lien ? (
+            <a href={formation.lien} target="_blank" rel="noreferrer">
+              Fiche officielle Parcoursup
+            </a>
+          ) : null}
+          {avis?.urlMaps ? (
+            <a href={avis.urlMaps} target="_blank" rel="noreferrer">
+              Voir l’adresse sur la carte
+            </a>
+          ) : null}
+        </p>
+      ) : null}
 
       {ouvert ? (
         <div className="detail">
+          <Admission resultat={resultat} />
+
           {resultat.affinite.raisons.length > 0 ? (
             <div className="raisons">
               <h4>Pourquoi cette formation te correspond, ou pas</h4>
@@ -275,20 +317,9 @@ function Carte({
             </div>
           ) : null}
 
-          <PanneauRetours codFormation={resultat.formation.id} />
+          <PanneauRetours codFormation={formation.id} />
 
-          <NoteDuLieu
-            etablissement={resultat.formation.etablissement}
-            ville={resultat.formation.ville}
-          />
-
-          {resultat.formation.lien ? (
-            <p>
-              <a href={resultat.formation.lien} target="_blank" rel="noreferrer">
-                La fiche officielle sur Parcoursup
-              </a>
-            </p>
-          ) : null}
+          <NoteDuLieu avis={avis} />
         </div>
       ) : null}
     </article>

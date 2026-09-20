@@ -55,8 +55,59 @@ PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
   DOMAIN=kitetudiant.fr TLS=1 TLS_EMAIL=lotierimmobilier@gmail.com \
   ADMIN_TOKEN="…" ADMIN_MASTER_KEY="…" COMPTES_MASTER_KEY="…" \
   ADMIN_EMAILS="vous@exemple.fr" \
+  AUTO_MAJ=1 \
   bash deploy/vps-setup.sh
 ```
+
+### `AUTO_MAJ=1` — la mise en ligne devient automatique
+
+Avec ce drapeau, le script installe un minuteur systemd sur le VPS. Toutes les
+cinq minutes, le VPS regarde si `main` a bougé ; si oui, il se redéploie tout
+seul. **Vous ne relancez plus jamais la commande à la main.**
+
+C'est un modèle « pull » : c'est la machine qui va chercher, personne ne pousse
+vers elle.
+
+|  | Ce modèle (`AUTO_MAJ=1`) | GitHub Actions (méthode B) |
+| --- | --- | --- |
+| Clé SSH à déposer chez GitHub | **aucune** | oui, avec accès root au VPS |
+| Accès entrant à ouvrir | **aucun** | SSH depuis les runners GitHub |
+| À révoquer si le dépôt change de mains | **rien** | la clé, vite |
+| Délai de mise en ligne | jusqu'à 5 min | quelques secondes |
+
+Pour un site d'orientation, cinq minutes ne se voient pas. C'est donc la
+méthode à préférer.
+
+Réglages et commandes utiles :
+
+```bash
+MINUTES_MAJ=15     # intervalle de vérification (5 par défaut)
+AUTO_MAJ=0         # désactive le minuteur sans rien supprimer
+
+systemctl list-timers kitetudiant-maj.timer   # prochain passage
+journalctl -u kitetudiant-maj -n 50           # ce qu'il a fait
+systemctl start kitetudiant-maj.service       # déployer tout de suite
+```
+
+Le minuteur ne relance un déploiement **que si le commit distant a changé** :
+sans ce garde-fou, certbot et le pré-vol DNS tourneraient toutes les cinq
+minutes pour rien, et le quota Let's Encrypt est de cinq demandes par heure.
+
+### Les secrets ne se perdent plus entre deux relances
+
+Le script réécrit `/opt/<slug>/.env` de zéro à chaque passage. Avant de le
+faire, il **relit celui qui est en place** et reprend toute variable que vous
+ne lui repassez pas. Sans cela, une relance sans les clés effacerait
+`COMPTES_MASTER_KEY` — les comptes déjà créés deviendraient illisibles et le
+détail chiffré s'ouvrirait à tout le monde —, `ADMIN_TOKEN` et
+`ANTHROPIC_API_KEY`.
+
+Une valeur passée à l'appel **l'emporte toujours** sur celle du fichier : c'est
+ainsi qu'on remplace une clé.
+
+Le fichier est lu ligne à ligne, jamais exécuté, et seuls des noms de variables
+plausibles sont repris — une ligne trafiquée ne devient pas une commande.
+
 
 `ADMIN_TOKEN` (≥ 24 caractères) ouvre la console `/kitetudiant/admin.html` ;
 `ADMIN_MASTER_KEY` (≥ 16) chiffre le coffre où les clés API sont rangées. Les

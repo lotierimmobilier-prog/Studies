@@ -75,6 +75,8 @@ REDIRECT_ROOT="${REDIRECT_ROOT:-1}"           # « / » -> « /<SLUG>/ »
 DOMAIN="${DOMAIN:-}"                          # nom de domaine (vide = IP seule)
 TLS="${TLS:-0}"                               # 1 = certificat Let's Encrypt
 TLS_EMAIL="${TLS_EMAIL:-}"                    # contact exigé par Let's Encrypt
+AUTO_MAJ="${AUTO_MAJ:-0}"                     # 1 = mise en ligne automatique à chaque commit
+MINUTES_MAJ="${MINUTES_MAJ:-5}"               # intervalle de vérification, en minutes
 
 SRC_DIR="/opt/${SLUG}-src"                    # copie de travail du dépôt
 WEB_ROOT="/var/www/${SLUG}"                   # front statique servi par nginx
@@ -146,6 +148,36 @@ for f in package.json package-lock.json tsconfig.server.json; do
 done
 cd "${APP_DIR}"
 npm ci
+
+# --- reprise des secrets déjà en place --------------------------------------
+# Le fichier .env est réécrit INTÉGRALEMENT juste en dessous. Sans cette
+# relecture, relancer le script sans repasser les secrets les effacerait :
+# COMPTES_MASTER_KEY perdue, les comptes déjà créés deviennent illisibles et le
+# détail chiffré s'ouvre à tout le monde ; ADMIN_TOKEN perdu, la console se
+# referme ; ANTHROPIC_API_KEY perdue, l'analyse de bulletin retombe en panne.
+#
+# On reprend donc, pour chaque variable NON fournie à cet appel, la valeur déjà
+# écrite. Une valeur passée en ligne de commande l'emporte toujours : c'est
+# ainsi qu'on remplace une clé.
+#
+# Sans ce bloc, la mise à jour automatique (AUTO_MAJ) serait impossible : elle
+# tourne sans personne pour retaper les clés.
+if [ -f "${APP_DIR}/.env" ]; then
+  HERITEES=""
+  while IFS= read -r ligne || [ -n "${ligne}" ]; do
+    case "${ligne}" in ''|'#'*) continue ;; esac
+    cle="${ligne%%=*}"
+    # Le fichier est écrit par ce script, mais on ne laisse pas un contenu
+    # nommer ce qu'on exporte : seul un identifiant plausible est accepté.
+    case "${cle}" in ''|*[!A-Za-z0-9_]*) continue ;; esac
+    [ -n "${!cle:-}" ] && continue
+    export "${cle}=${ligne#*=}"
+    HERITEES="${HERITEES} ${cle}"
+  done < "${APP_DIR}/.env"
+  if [ -n "${HERITEES}" ]; then
+    log "Secrets repris du .env existant :${HERITEES}"
+  fi
+fi
 
 # Clés API (facultatives), tracées dans .env pour référence. Elles sont surtout
 # transmises au process via l'environnement (pm2 les capte au démarrage).
@@ -498,10 +530,98 @@ elif [ -n "${DOMAIN}" ]; then
   log "Domaine servi en HTTP simple. Ajoute TLS=1 TLS_EMAIL=… pour passer en HTTPS."
 fi
 
+# ------------------------------------------------- mise en ligne automatique
+# Modèle « pull » : c'est le VPS qui va chercher les nouveautés, personne ne
+# pousse vers lui. Aucune clé SSH à déposer chez GitHub, aucun accès entrant à
+# ouvrir, et rien à révoquer si le dépôt change de mains. Le prix : la mise en
+# ligne arrive avec un délai d'au plus MINUTES_MAJ minutes au lieu d'être
+# instantanée. Pour un site d'orientation, c'est sans conséquence.
+#
+# Le minuteur ne relance le déploiement QUE si le commit distant a bougé :
+# sans ce garde-fou, certbot et le pré-vol DNS tourneraient toutes les cinq
+# minutes pour rien.
+MAJ_BIN="/usr/local/bin/${SLUG}-maj"
+MAJ_UNITE="${SLUG}-maj"
+if [ "${AUTO_MAJ}" = "1" ]; then
+  log "Installation de la mise en ligne automatique (toutes les ${MINUTES_MAJ} min)…"
+
+  cat > "${MAJ_BIN}" <<MAJ
+#!/usr/bin/env bash
+# Déploie ${SLUG} si — et seulement si — la branche ${BRANCH} a bougé.
+# Écrit par deploy/vps-setup.sh (AUTO_MAJ=1). Ne pas modifier à la main :
+# le prochain déploiement le réécrira.
+set -euo pipefail
+SRC="${SRC_DIR}"
+[ -d "\${SRC}/.git" ] || { echo "Dépôt absent : \${SRC}"; exit 1; }
+git -C "\${SRC}" fetch --quiet --depth 1 origin "${BRANCH}"
+ICI="\$(git -C "\${SRC}" rev-parse HEAD)"
+LA="\$(git -C "\${SRC}" rev-parse "origin/${BRANCH}")"
+if [ "\${ICI}" = "\${LA}" ]; then
+  exit 0                       # rien de neuf : on ne touche à rien
+fi
+echo "Nouveau commit \${LA} — déploiement."
+# Les secrets ne sont PAS répétés ici : le script les reprend dans
+# ${APP_DIR}/.env. Ce fichier est en 0600, ce script en clair.
+exec env \\
+  PROJET="${PROJET}" SLUG="${SLUG}" API_PORT="${API_PORT}" \\
+  SERVER_NAME="${SERVER_NAME}" DOMAIN="${DOMAIN}" \\
+  TLS="${TLS}" TLS_EMAIL="${TLS_EMAIL}" \\
+  REDIRECT_ROOT="${REDIRECT_ROOT}" AUTO_MAJ=1 MINUTES_MAJ="${MINUTES_MAJ}" \\
+  bash "\${SRC}/deploy/vps-setup.sh"
+MAJ
+  chmod 755 "${MAJ_BIN}"
+
+  cat > "/etc/systemd/system/${MAJ_UNITE}.service" <<UNITE
+[Unit]
+Description=Mise en ligne de ${SLUG} quand la branche ${BRANCH} bouge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=${MAJ_BIN}
+# Un déploiement complet (npm ci + build) prend quelques minutes.
+TimeoutStartSec=1800
+UNITE
+
+  cat > "/etc/systemd/system/${MAJ_UNITE}.timer" <<UNITE
+[Unit]
+Description=Vérifie toutes les ${MINUTES_MAJ} min si ${SLUG} doit être redéployé
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=${MINUTES_MAJ}min
+# Le service est « oneshot » : systemd ne le relance pas tant qu'il tourne,
+# donc deux déploiements ne peuvent pas se chevaucher.
+Unit=${MAJ_UNITE}.service
+
+[Install]
+WantedBy=timers.target
+UNITE
+
+  systemctl daemon-reload
+  systemctl enable --now "${MAJ_UNITE}.timer" >/dev/null 2>&1 || \
+    systemctl enable --now "${MAJ_UNITE}.timer"
+  log "Mise en ligne automatique active. Journal : journalctl -u ${MAJ_UNITE} -f"
+elif [ -f "/etc/systemd/system/${MAJ_UNITE}.timer" ]; then
+  # AUTO_MAJ repassé à 0 : on arrête, sans supprimer, pour que ce soit
+  # réversible et visible.
+  systemctl disable --now "${MAJ_UNITE}.timer" >/dev/null 2>&1 || true
+  log "Mise en ligne automatique désactivée (AUTO_MAJ=0)."
+fi
+
 log "Terminé ! Le site est en ligne : ${URL_FINALE}"
 echo "   Vérifs utiles :"
 echo "     pm2 status"
 echo "     curl localhost:${API_PORT}/api/sante"
 echo "     curl ${URL_FINALE}api/sante"
-echo "   Mettre à jour ce projet : relance ce script."
+if [ "${AUTO_MAJ}" = "1" ]; then
+  echo "   Mise à jour : automatique, au plus ${MINUTES_MAJ} min après chaque commit sur ${BRANCH}."
+  echo "     systemctl list-timers ${MAJ_UNITE}.timer"
+  echo "     journalctl -u ${MAJ_UNITE} -n 50"
+  echo "     systemctl start ${MAJ_UNITE}.service   # forcer tout de suite"
+else
+  echo "   Mettre à jour ce projet : relance ce script."
+  echo "   Automatiser : rajoute AUTO_MAJ=1 à cette commande, une fois."
+fi
 echo "   Ajouter un 2e projet : SLUG=monsite API_PORT=8788 bash deploy/vps-setup.sh"
