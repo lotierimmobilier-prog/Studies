@@ -440,11 +440,19 @@ export function Accueil({
             <strong>Il n’invente aucun montant.</strong> Pas de valeur de repli, pas
             d’estimation déguisée : une donnée absente s’affiche comme absente.
           </li>
+          {/* Cette promesse a été réécrite le 20/09/2026, quand la liste de
+              vœux est devenue enregistrable. L'ancienne disait « aucune donnée
+              scolaire », vœux compris — elle est devenue fausse le jour où on
+              a enregistré un vœu. Une promesse qu'on rétrécit sans le dire est
+              un mensonge ; une promesse qu'on précise en expliquant pourquoi
+              est tenable. Voir DECISIONS.md, D1. */}
           <li>
-            <strong>Il n’enregistre aucune donnée scolaire.</strong> Même inscrit, tes
-            notes, tes bulletins et tes vœux restent dans ton navigateur. Le compte ne
-            connaît que ton adresse, chiffrée, et il est effacé après trois ans sans
-            usage.
+            <strong>Il n’enregistre pas tes notes.</strong> Tes moyennes, tes bulletins
+            et ton budget restent dans ton navigateur, même une fois inscrit : ils ne
+            sont jamais envoyés. Le serveur ne garde que ton adresse, chiffrée, et — si
+            tu es connecté — <strong>ta liste de vœux</strong>, pour que tu la retrouves
+            d’un appareil à l’autre. Un vœu, c’est un code de formation et son rang :
+            aucun montant, aucune note. Tout est effacé après trois ans sans usage.
           </li>
         </ul>
       </section>

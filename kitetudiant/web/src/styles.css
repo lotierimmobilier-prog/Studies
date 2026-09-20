@@ -2833,3 +2833,105 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 .liens-externes {
   margin: 0.75rem 0 0;
 }
+
+/* ═══════════════════════════════════════════════════════ la liste de vœux
+ *
+ * Une liste ordonnée, et elle en a l'air : le rang est écrit en gros à
+ * gauche, parce que c'est lui qui compte sur Parcoursup.
+ *
+ * Aucun style ne distingue un vœu d'un autre — pas de couleur de « bon »
+ * choix, pas de mise en avant. Les trois critères restent séparés et
+ * l'ordre est celui de l'élève (règles 4 et 5 de CLAUDE.md).
+ */
+.voeux {
+  margin: 1.25rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+.voeu {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0.25rem 0.75rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--trait);
+}
+.voeu-rang {
+  font-family: var(--titres);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--doux);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.voeu-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.voeu-titre {
+  font-family: var(--titres);
+  font-weight: 600;
+  line-height: 1.3;
+  color: inherit;
+  text-decoration: none;
+}
+.voeu-titre:hover,
+.voeu-titre:focus-visible {
+  text-decoration: underline;
+}
+.voeu-signalement {
+  margin: 0.35rem 0 0;
+  padding: 0.5rem 0.65rem;
+  border-left: 3px solid var(--orange);
+  border-radius: 0 6px 6px 0;
+  background: var(--fond);
+  font-size: 0.9rem;
+}
+.voeu-note {
+  margin-top: 0.6rem;
+}
+.voeu-note input {
+  width: 100%;
+}
+.voeu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  align-items: center;
+  grid-column: 2;
+}
+.voeu-fleche {
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.voeu-fleche:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* « Retirer » est une action destructrice : elle se distingue des autres
+   sans pour autant crier — un bouton rouge vif à côté de « Noter » ferait
+   hésiter sur tout le reste. */
+.voeu-retirer {
+  color: var(--rouge);
+}
+.voeu-ajout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.8rem;
+  align-items: center;
+  margin-top: 0.9rem;
+}
+.voeu-ajout .secondaire {
+  flex: 0 0 auto;
+  width: auto;
+}

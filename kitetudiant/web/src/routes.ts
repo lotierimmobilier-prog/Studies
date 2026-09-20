@@ -58,6 +58,9 @@ export type Route =
   // « précédent ». Exactement le défaut que les fiches de formation
   // viennent de perdre.
   | { readonly vue: 'collection' }
+  // La liste de vœux. Elle a une adresse comme le reste : c'est la page
+  // qu'un élève rouvre le plus souvent, et celle qu'il montre à ses parents.
+  | { readonly vue: 'voeux' }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -82,6 +85,8 @@ export function cheminDe(route: Route): string {
       return `${BASE}etablissement/${route.uai}`
     case 'collection':
       return `${BASE}mes-cartes`
+    case 'voeux':
+      return `${BASE}mes-voeux`
   }
 }
 
@@ -113,6 +118,7 @@ export function routeDuChemin(chemin: string): Route | null {
   if (reste === 'mon-compte') return { vue: 'compte' }
   if (reste === 'chercher-une-ecole') return { vue: 'recherche' }
   if (reste === 'mes-cartes') return { vue: 'collection' }
+  if (reste === 'mes-voeux') return { vue: 'voeux' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
   const formation = /^formation\/(.+)$/.exec(reste)

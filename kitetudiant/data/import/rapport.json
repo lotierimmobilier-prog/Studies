@@ -1,0 +1,38 @@
+{
+  "commune": {
+    "lignes": 34888,
+    "millesime": 2025,
+    "index_utilisable": 34888,
+    "noms_ambigus_dans_leur_departement": 0,
+    "ecartees_sans_centroide": 0,
+    "codes_epci_illisibles": 0,
+    "fichier": "data/import/commune.csv"
+  },
+  "parcoursup": {
+    "session": 2025,
+    "formations": 14252,
+    "etablissements": 4058,
+    "insee_resolu": 14153,
+    "insee_resolu_pct": 99.31,
+    "methodes": {
+      "nom_departement": 12487,
+      "arrondissement": 1666,
+      "non_resolu": 99
+    },
+    "sans_coordonnees": 38,
+    "etablissements_multi_communes": 0,
+    "doublons_cod_aff_form": 0
+  },
+  "loyers": {
+    "lignes": 139600,
+    "communes": 34900,
+    "typologies": [
+      "appartement",
+      "appartement +3 pièces",
+      "appartement 1 ou 2 pièces",
+      "maison"
+    ],
+    "bornes_incoherentes_ecartees": 0,
+    "mailles_inconnues": {}
+  }
+}

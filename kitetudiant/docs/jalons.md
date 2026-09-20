@@ -92,7 +92,7 @@ n'est **pas** publiée — le champ `fili` de Parcoursup est le TYPE de formatio
 
 **Dépend de :** MVP1-D.
 
-### MVP1-F · Comptes en base et profil déclaratif
+### MVP1-F · Comptes en base et profil déclaratif — **à moitié fait**
 
 Étape D : migration du fichier chiffré, jetons de session en empreinte.
 `/mon-profil` : année de naissance, bac, commune, mobilité. Et la liste, à
@@ -101,7 +101,7 @@ lignes, sinon c'est que quelque chose a dérivé.
 
 **Dépend de :** MVP1-D.
 
-### MVP1-G · Les vœux persistés
+### MVP1-G · Les vœux persistés — **fait**
 
 Étape E : `/mes-voeux`, ajout depuis une fiche ou l'explorateur, réordonnancement,
 signalement. Proposition **explicite et unique** d'enregistrer la liste locale.
@@ -112,7 +112,14 @@ si tu es connecté, est enregistrée pour que tu la retrouves ». Cette
 réécriture fait partie du lot — la livrer après serait livrer une promesse
 fausse.
 
-**Dépend de :** MVP1-F.
+**Livré sans attendre MVP1-F** : le compte est recopié du fichier chiffré
+vers `eleve.compte` à la volée, sans jamais déchiffrer son adresse — la base
+reçoit le chiffré, son nonce et sa balise tels quels. Le fichier reste la
+source d'autorité pour la connexion, exactement comme le prévoit l'étape D
+du plan de migration.
+
+Reste de MVP1-F : l'écran `/mon-profil` déclaratif, et la fin de la campagne
+de recopie (étape F, quand le fichier pourra disparaître).
 
 ---
 

@@ -89,12 +89,17 @@ jobs:
           deja=$(printf '%s' "$sortie" | grep -c 'déjà appliquée')
           test "$deja" -ge 3
 
-      - name: Le pilote PostgreSQL parle à une vraie base
+      - name: Le pilote et les vœux, contre une vraie base
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/migrations
         run: |
           npm ci
-          npx vitest run server/__tests__/bd.test.ts
+          # Les vœux sont éprouvés contre PostgreSQL et jamais contre un
+          # simulacre : ce qu'on vérifie — unicité d'un rang, resserrement
+          # après retrait, cascade à la suppression d'un compte — est tenu par
+          # le schéma, et un simulacre le tiendrait par construction sans rien
+          # prouver.
+          npx vitest run server/__tests__/bd.test.ts server/__tests__/voeux.test.ts
 
       - name: Vérifier que les contraintes rejettent ce qu'elles doivent rejeter
         env:

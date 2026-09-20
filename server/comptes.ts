@@ -108,7 +108,7 @@ export class TropDEssais extends Error {
   }
 }
 
-interface CompteStocke {
+export interface CompteStocke {
   readonly index: string
   readonly emailChiffre: string
   readonly nonce: string
@@ -497,6 +497,31 @@ export class DepotComptes {
       // Mieux vaut refuser l'accès que de deviner à qui appartient ce compte.
       return null
     }
+  }
+
+  /**
+   * L'enregistrement chiffré du titulaire d'une session, tel qu'il est stocké.
+   *
+   * Sert à RECOPIER un compte vers PostgreSQL sans jamais déchiffrer son
+   * adresse : la base reçoit le chiffré, le nonce et la balise
+   * d'authentification tels quels, et l'index sert de clé de recherche. Le
+   * secret maître ne sort donc pas de ce fichier, et la recopie ne crée
+   * aucun instant où une adresse existe en clair quelque part.
+   *
+   * `null` quand la session est inconnue ou expirée.
+   */
+  async enregistrementDeSession(
+    jeton: string,
+    maintenant: Date = new Date(),
+  ): Promise<CompteStocke | null> {
+    if (!this.configure || jeton.length === 0) return null
+    const fichier = await this.charger(maintenant)
+    const empreinte = DepotComptes.empreinteJeton(jeton)
+    const session = fichier.sessions.find(
+      (s) => s.empreinteJeton === empreinte && s.expireLe > maintenant.toISOString(),
+    )
+    if (session === undefined) return null
+    return fichier.comptes.find((c) => c.index === session.index) ?? null
   }
 
   async deconnecter(jeton: string, maintenant: Date = new Date()): Promise<void> {

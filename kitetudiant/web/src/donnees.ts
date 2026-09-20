@@ -431,6 +431,121 @@ export async function listerFilieres(
     .map((r) => ({ libelle: r.fili, nombre: r.nombre ?? 0 }))
 }
 
+/* -------------------------------------------------------------------- vœux */
+
+export interface Voeu {
+  readonly rang: number
+  readonly codeFormation: string
+  readonly session: number
+  readonly signalement: string | null
+  readonly ajouteLe: string
+}
+
+/**
+ * Levée quand le serveur ne sait pas encore enregistrer de vœux.
+ *
+ * Distincte d'une session finie, et c'est tout l'intérêt : une session finie
+ * se répare en se reconnectant, une base absente ne se répare pas par
+ * l'élève. Lui proposer de se reconnecter en boucle serait lui faire perdre
+ * son temps sur un problème qui n'est pas le sien.
+ */
+export class VoeuxIndisponibles extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'VoeuxIndisponibles'
+  }
+}
+
+/**
+ * Un appel à l'API des vœux.
+ *
+ * Chaque modification renvoie la liste À JOUR : l'écran ne recompose jamais
+ * son état à partir de ce qu'il croit avoir demandé, il affiche ce que le
+ * serveur dit. C'est ce qui évite qu'un rang affiché diverge du rang stocké
+ * après un aller-retour raté.
+ */
+async function appelerVoeux(
+  options: RequestInit,
+  recherche = '',
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<Voeu[]> {
+  const jeton = jetonSession()
+  if (jeton === '') throw new InscriptionRequise('Connecte-toi pour retrouver tes vœux.')
+  const reponse = await recuperer(`${base}/voeux${recherche}`, {
+    ...options,
+    headers: {
+      ...(options.body === undefined ? {} : { 'Content-Type': 'application/json' }),
+      ...(options.headers ?? {}),
+      Authorization: `Bearer ${jeton}`,
+    },
+  })
+  const corps = (await reponse.json().catch(() => ({}))) as {
+    voeux?: Voeu[]
+    erreur?: string
+  }
+  if (reponse.status === 401) throw new InscriptionRequise(corps.erreur ?? 'Session expirée.')
+  if (reponse.status === 503) {
+    throw new VoeuxIndisponibles(corps.erreur ?? 'Enregistrement des vœux indisponible.')
+  }
+  if (!reponse.ok) throw new Error(corps.erreur ?? `Erreur ${reponse.status}`)
+  return corps.voeux ?? []
+}
+
+export function chercherVoeux(base = BASE_API, recuperer: typeof fetch = fetch): Promise<Voeu[]> {
+  return appelerVoeux({ method: 'GET' }, '', base, recuperer)
+}
+
+export function ajouterVoeu(
+  code: string,
+  session: number,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<Voeu[]> {
+  return appelerVoeux(
+    { method: 'POST', body: JSON.stringify({ code, session }) },
+    '',
+    base,
+    recuperer,
+  )
+}
+
+export function retirerVoeu(
+  rang: number,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<Voeu[]> {
+  return appelerVoeux({ method: 'DELETE' }, `?rang=${rang}`, base, recuperer)
+}
+
+export function deplacerVoeu(
+  rang: number,
+  vers: 'haut' | 'bas',
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<Voeu[]> {
+  return appelerVoeux(
+    { method: 'PATCH', body: JSON.stringify({ rang, vers }) },
+    '',
+    base,
+    recuperer,
+  )
+}
+
+export function signalerVoeu(
+  rang: number,
+  signalement: string | null,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<Voeu[]> {
+  return appelerVoeux(
+    { method: 'PATCH', body: JSON.stringify({ rang, signalement }) },
+    '',
+    base,
+    recuperer,
+  )
+}
+
 /* ------------------------------------------------------------------ comptes */
 
 /**
