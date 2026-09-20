@@ -19,7 +19,7 @@ import {
   type Article,
   type Bloc,
 } from '../../packages/articles/src/index.ts'
-import { Marque } from './marque.tsx'
+import { MarqueLien } from './marque.tsx'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { FilAriane } from './filAriane.tsx'
 
@@ -118,7 +118,7 @@ export function ListeArticles({
     <main className="app app-large">
       <header className="entete entete-accueil">
         <h1 className="marque">
-          <Marque />
+          <MarqueLien onNaviguer={onNaviguer} />
         </h1>
         <button type="button" className="entete-cta" onClick={onRetour}>
           Retour au site
@@ -226,7 +226,7 @@ export function PageArticle({
     <main className="app">
       <header className="entete entete-accueil">
         <h1 className="marque">
-          <Marque />
+          <MarqueLien onNaviguer={onNaviguer} />
         </h1>
         <button type="button" className="entete-cta" onClick={onBlog}>
           Tous les articles

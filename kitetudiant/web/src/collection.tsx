@@ -29,7 +29,7 @@ import {
   type Obtention,
 } from './collection.ts'
 import { NOMBRE_COMMUNES_AVEC_LOYER } from './donnees.ts'
-import { Marque } from './marque.tsx'
+import { MarqueLien } from './marque.tsx'
 import { nombre } from './nombres.ts'
 import { FilAriane } from './filAriane.tsx'
 import type { Route } from './routes.ts'
@@ -262,7 +262,7 @@ export function Collection({
     <main className="app app-large">
       <header className="entete entete-accueil">
         <h1 className="marque">
-          <Marque />
+          <MarqueLien onNaviguer={onNaviguer} />
         </h1>
         <button type="button" className="entete-cta" onClick={onRetour}>
           Retour

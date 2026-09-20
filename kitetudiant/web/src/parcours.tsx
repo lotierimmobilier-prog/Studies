@@ -244,59 +244,107 @@ function BulletinsDeposes({ bulletins }: { bulletins: readonly BulletinDepose[] 
   )
 }
 
+/** Nombre de matières lues sur le dernier bulletin de la liste. */
+function dernierLu(bulletins: Reponses['bulletins']): number {
+  return bulletins[bulletins.length - 1]?.matieresLues ?? 0
+}
+
 export function Question({ etape, reponses, academies, onChange }: Props) {
   const [lecture, setLecture] = useState<'repos' | 'en_cours' | 'erreur'>('repos')
   const [messageLecture, setMessageLecture] = useState<string | null>(null)
 
-  async function importerBulletin(fichier: File) {
+  /** Un fichier lu et converti en bulletin déposé, ou une erreur. */
+  async function lireUnBulletin(
+    fichier: File,
+    rang: number,
+  ): Promise<Reponses['bulletins'][number]> {
+    const tampon = await fichier.arrayBuffer()
+    let binaire = ''
+    const octets = new Uint8Array(tampon)
+    for (let i = 0; i < octets.length; i += 1) binaire += String.fromCharCode(octets[i] as number)
+    const extrait = await lireBulletin(btoa(binaire), fichier.type)
+    const notes: Partial<Record<Matiere, number>> = {}
+    for (const m of MATIERES) {
+      const v = extrait.notes[m]
+      if (typeof v === 'number') notes[m] = v
+    }
+    return {
+      libelle: `Bulletin ${rang}`,
+      notes,
+      signaux: extrait.signaux,
+      matieresLues: extrait.matieresLues,
+      avis: extrait.avis ?? null,
+    }
+  }
+
+  /**
+   * Dépose un OU PLUSIEURS bulletins, en une fois.
+   *
+   * ── Le piège que cette fonction évite ────────────────────────────────
+   *
+   * `reponses` est une prop : elle ne change pas pendant que cette fonction
+   * tourne, React ne la réémet qu'au rendu suivant. Une boucle qui repartirait
+   * de `reponses.bulletins` à chaque tour construirait donc trois fois une
+   * liste d'UN élément, et le dernier `onChange` écraserait les précédents :
+   * sur trois fichiers déposés, un seul survivrait — sans erreur, sans
+   * message, sans que rien ne le signale.
+   *
+   * L'accumulation est donc locale, et `onChange` n'est appelé qu'une fois,
+   * à la fin.
+   *
+   * ── Un fichier illisible n'emporte pas les autres ────────────────────
+   *
+   * Chaque lecture est isolée. Une photo floue au milieu de trois bulletins
+   * ne fait pas perdre les deux qui se lisaient : elle est nommée dans le
+   * message, et les autres sont gardés.
+   */
+  async function importerBulletins(fichiers: readonly File[]): Promise<void> {
+    if (fichiers.length === 0) return
     setLecture('en_cours')
     setMessageLecture(null)
-    try {
-      const tampon = await fichier.arrayBuffer()
-      let binaire = ''
-      const octets = new Uint8Array(tampon)
-      for (let i = 0; i < octets.length; i += 1) binaire += String.fromCharCode(octets[i] as number)
-      const extrait = await lireBulletin(btoa(binaire), fichier.type)
-      const notes: Partial<Record<Matiere, number>> = {}
-      for (const m of MATIERES) {
-        const v = extrait.notes[m]
-        if (typeof v === 'number') notes[m] = v
-      }
 
-      // Le bulletin S'AJOUTE aux précédents, il ne les remplace pas : c'est
-      // ce qui permet de moyenner sur plusieurs trimestres et de constater
-      // une progression au lieu de la supposer.
-      const bulletins = [
-        ...reponses.bulletins,
-        {
-          libelle: `Bulletin ${reponses.bulletins.length + 1}`,
-          notes,
-          signaux: extrait.signaux,
-          matieresLues: extrait.matieresLues,
-          avis: extrait.avis ?? null,
-        },
-      ]
+    const avant = reponses.bulletins.length
+    let bulletins = [...reponses.bulletins]
+    const echecs: string[] = []
+
+    for (const fichier of fichiers) {
+      try {
+        bulletins = [...bulletins, await lireUnBulletin(fichier, bulletins.length + 1)]
+      } catch (e) {
+        echecs.push(`${fichier.name} — ${(e as Error).message}`)
+      }
+    }
+
+    const ajoutes = bulletins.length - avant
+    if (ajoutes > 0) {
+      const dernier = bulletins[bulletins.length - 1]!
       onChange({
         bulletins,
         // Les moyennes affichées sont celles de TOUS les bulletins, calculées
         // ici — jamais demandées au modèle (règle 1).
         notes: moyennesCumulees(bulletins),
         notesImportees: true,
-        signaux: extrait.signaux,
+        signaux: dernier.signaux,
       })
-      setLecture('repos')
-      setMessageLecture(
-        bulletins.length === 1
-          ? `${extrait.matieresLues} matières lues. Vérifie-les : elles sont modifiables.`
-          : `${extrait.matieresLues} matières lues. Les moyennes affichées portent ` +
-            `maintenant sur ${bulletins.length} bulletins.`,
-      )
-    } catch (e) {
-      setLecture('erreur')
-      setMessageLecture(
-        `${(e as Error).message} Tu peux saisir tes moyennes à la main juste en dessous.`,
-      )
     }
+
+    setLecture(ajoutes === 0 ? 'erreur' : 'repos')
+    setMessageLecture(
+      [
+        ajoutes === 0
+          ? null
+          : bulletins.length === 1
+            ? `${dernierLu(bulletins)} matières lues. Vérifie-les : elles sont modifiables.`
+            : `${ajoutes} bulletin${ajoutes > 1 ? 's' : ''} ajouté${ajoutes > 1 ? 's' : ''}. ` +
+              `Les moyennes affichées portent maintenant sur ${bulletins.length} bulletins.`,
+        echecs.length === 0
+          ? null
+          : `Non lu${echecs.length > 1 ? 's' : ''} : ${echecs.join(' ; ')} ` +
+            `Tu peux saisir ces moyennes à la main juste en dessous.`,
+      ]
+        .filter((t): t is string => t !== null)
+        .join(' '),
+    )
   }
 
   if (etape === 0) {
@@ -340,23 +388,33 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
           <input
             type="file"
             accept="application/pdf,image/png,image/jpeg"
+            /* Plusieurs d'un coup : trois trimestres se sélectionnent
+               ensemble dans le sélecteur de fichiers, plutôt qu'en trois
+               allers-retours. */
+            multiple
             onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) void importerBulletin(f)
+              const fichiers = [...(e.target.files ?? [])]
+              /* Le champ est vidé APRÈS lecture. Sans cela, redéposer le
+                 MÊME fichier ne déclenche rien : la valeur du champ n'a pas
+                 changé, donc « change » ne se produit pas. Le défaut est
+                 invisible — on clique, on choisit, et il ne se passe rien. */
+              e.target.value = ''
+              void importerBulletins(fichiers)
             }}
           />
           <span>
             {lecture === 'en_cours'
-              ? 'Lecture du bulletin…'
+              ? 'Lecture en cours…'
               : reponses.bulletins.length === 0
-                ? 'Importer un bulletin (PDF ou photo)'
-                : 'Ajouter un autre bulletin'}
+                ? 'Importer un ou plusieurs bulletins (PDF ou photo)'
+                : 'Ajouter d’autres bulletins'}
           </span>
         </label>
         <p className="note">
-          Tu peux en déposer plusieurs — un par trimestre. Les moyennes se cumulent,
-          et ta progression devient visible. Seules les moyennes et trois indicateurs
-          chiffrés sont extraits ; le texte des appréciations n’est jamais conservé.
+          Tu peux en déposer plusieurs à la fois — un par trimestre. Les moyennes se
+          cumulent, et ta progression devient visible. Seules les moyennes et trois
+          indicateurs chiffrés sont extraits ; le texte des appréciations n’est jamais
+          conservé.
         </p>
         {messageLecture ? (
           <p className={lecture === 'erreur' ? 'erreur' : 'note'}>{messageLecture}</p>

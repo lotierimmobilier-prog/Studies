@@ -8,8 +8,15 @@
  *
  * ── Ce que le menu montre, et quand ──────────────────────────────────────
  *
- * Déconnecté : le blog, se connecter, créer un compte.
- * Connecté : le blog, mon compte, se déconnecter.
+ * Déconnecté : le blog, se connecter, créer un compte. Quatre entrées « du
+ * dehors », toutes de même nature, qui tiennent en ligne.
+ *
+ * Connecté : le blog, puis TOUT le reste derrière « Mon espace ». Posées à
+ * plat, les entrées personnelles — cartes, compte, déconnexion — faisaient
+ * cinq boutons de poids visuel égal dans lesquels rien ne ressortait, et la
+ * barre débordait dès qu'on y ajoutait quoi que ce soit. Les regrouper dit
+ * aussi quelque chose de juste : ce sont les affaires de l'élève, pas des
+ * pages du site.
  *
  * « Mon compte » a longtemps été jugé inutile ici, au motif que le site ne
  * connaît qu'une adresse chiffrée et qu'une page affichant cette seule donnée
@@ -53,6 +60,53 @@ export interface EntreesMenu {
   readonly onCommencer: () => void
 }
 
+/**
+ * Un panneau qui s'ouvre sous son bouton.
+ *
+ * Deux exigences, et elles ne sont pas décoratives. `aria-expanded` dit
+ * l'état à qui n'a pas la couleur pour le lire ; `aria-haspopup` prévient
+ * qu'un panneau va s'ouvrir plutôt qu'une page se charger, ce qui évite de
+ * quitter la page pour rien.
+ *
+ * La fermeture à l'échappement et au clic dehors est gérée par le menu qui
+ * l'englobe : deux jeux d'écouteurs sur la même zone se marcheraient dessus,
+ * et l'un des deux finirait par ne plus fermer.
+ */
+function Panneau({
+  titre,
+  ouvert,
+  onBascule,
+  children,
+}: {
+  readonly titre: React.ReactNode
+  readonly ouvert: boolean
+  readonly onBascule: () => void
+  readonly children: React.ReactNode
+}) {
+  const identifiant = useId()
+  return (
+    <div className="menu-panneau">
+      <button
+        type="button"
+        className="entete-lien menu-panneau-bouton"
+        aria-expanded={ouvert}
+        aria-haspopup="true"
+        aria-controls={identifiant}
+        onClick={onBascule}
+      >
+        {titre}
+        <span className="menu-chevron" aria-hidden="true" />
+      </button>
+      <div
+        id={identifiant}
+        className={ouvert ? 'menu-panneau-liste menu-panneau-ouvert' : 'menu-panneau-liste'}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}
+
 /** Un lien de menu qui navigue sans recharger, sans cesser d'être un lien. */
 function LienMenu({
   route,
@@ -94,10 +148,17 @@ export function Menu({
   onCommencer,
 }: EntreesMenu) {
   const [ouvert, setOuvert] = useState(false)
+  const [espace, setEspace] = useState(false)
   const identifiant = useId()
   const zone = useRef<HTMLDivElement>(null)
 
-  const fermer = useCallback(() => setOuvert(false), [])
+  /* Un seul point de fermeture pour les deux niveaux. Deux jeux d'écouteurs
+     sur la même zone se marcheraient dessus, et l'un finirait par ne plus
+     fermer — un menu qui reste ouvert piège les gens. */
+  const fermer = useCallback(() => {
+    setOuvert(false)
+    setEspace(false)
+  }, [])
 
   useEffect(() => {
     if (!ouvert) return
@@ -146,7 +207,10 @@ export function Menu({
           Le blog
         </LienMenu>
 
-        {cartes > 0 ? (
+        {/* Déconnecté, la pastille reste dans la barre : les cartes vivent
+            dans le navigateur, on peut en avoir sans compte, et il n'y a
+            alors pas d'« espace » derrière quoi les ranger. */}
+        {cartes > 0 && !connecte ? (
           <button
             type="button"
             className="pastille"
@@ -161,26 +225,65 @@ export function Menu({
         ) : null}
 
         {connecte ? (
-          <>
+          <Panneau
+            titre="Mon espace"
+            ouvert={espace}
+            onBascule={() => setEspace((e) => !e)}
+          >
+            <button
+              type="button"
+              className="menu-entree"
+              onClick={() => {
+                onCommencer()
+                fermer()
+              }}
+            >
+              <span className="menu-entree-titre">Ma recherche</span>
+              <span className="menu-entree-note">Les sept questions, et tes résultats</span>
+            </button>
+
+            <button
+              type="button"
+              className="menu-entree"
+              onClick={() => {
+                onCollection()
+                fermer()
+              }}
+            >
+              <span className="menu-entree-titre">
+                Mes cartes
+                {cartes > 0 ? <span className="menu-entree-compte">{cartes}</span> : null}
+              </span>
+              <span className="menu-entree-note">
+                {cartes > 0
+                  ? 'Les villes et les paliers déjà gagnés'
+                  : 'Aucune pour l’instant — elles se gagnent en se servant du site'}
+              </span>
+            </button>
+
             <LienMenu
               route={{ vue: 'compte' }}
               onNaviguer={onNaviguer}
               onApres={fermer}
-              className="entete-lien"
+              className="menu-entree"
             >
-              Mon compte
+              <span className="menu-entree-titre">Mon compte</span>
+              <span className="menu-entree-note">Ce que le site sait de toi, et ton mot de passe</span>
             </LienMenu>
+
+            {/* La déconnexion est détachée : c'est la seule entrée qui défait
+                quelque chose, et elle ne doit pas se cliquer par glissement. */}
             <button
               type="button"
-              className="entete-lien"
+              className="menu-entree menu-entree-sortie"
               onClick={() => {
                 onDeconnexion()
                 fermer()
               }}
             >
-              Se déconnecter
+              <span className="menu-entree-titre">Se déconnecter</span>
             </button>
-          </>
+          </Panneau>
         ) : (
           <>
             <LienMenu

@@ -379,6 +379,11 @@ input[type='range'] { width: 100%; min-height: 44px; }
    typographiques de l'ancienne marque écrite (interlettrage, graisse) n'ont
    plus d'objet et fausseraient l'alignement vertical. */
 .marque { margin: 0; font-size: 0; letter-spacing: normal; line-height: 0; }
+/* Le logo est un lien : il ne doit en porter aucune marque — pas de
+   soulignement, pas de couleur de lien. Ce qui dit qu'il est cliquable, c'est
+   la convention, et le curseur. */
+.marque-lien { display: inline-block; text-decoration: none; color: inherit; cursor: pointer; }
+.marque-lien:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 .entete-cta {
   padding: 0.45rem 0.9rem;
   border: 1px solid var(--trait);
@@ -1275,6 +1280,23 @@ h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }
 }
 
 @media (min-width: 48rem) {
+  /* Le panneau flotte sous son bouton. En dessous de ce palier, le menu est
+     déjà replié derrière « Menu » : le panneau s'y ouvre en poussant le
+     contenu, ce qui est le bon comportement dans une liste déjà verticale. */
+  .menu-panneau-liste {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 25;
+    min-width: 17rem;
+    padding: 0.5rem;
+    border: 1px solid var(--trait);
+    border-radius: var(--rayon);
+    background: var(--carte);
+    box-shadow: 0 10px 30px -12px rgba(23, 34, 46, 0.35);
+  }
+  .menu-panneau-bouton { width: auto; }
+
   /* Assez de place : tout s'aligne, et le bouton de bascule disparaît. */
   .menu-bascule { display: none; }
   .menu-entrees {
@@ -1499,6 +1521,262 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   line-height: 1.5;
   color: var(--doux);
 }
+
+/* ------------------------------------ encadré de tête cliquable, logement */
+
+/* Le texte réservé aux lecteurs d'écran. Il est LU mais pas vu : « Voir le
+   détail » seul, répété trois fois sur la page, ne dit pas de quoi. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.choix-cliquable { cursor: pointer; transition: border-color 120ms ease; }
+.choix-cliquable:hover { border-color: var(--accent); }
+
+.choix-ouvrir {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: 0.55rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-family: var(--titres);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+/* Le bouton s'étend à toute la carte : on clique n'importe où, et le clavier
+   garde une cible réelle. Un gestionnaire de clic posé sur l'encadré aurait
+   rendu la carte inatteignable au clavier, sans que rien ne le signale. */
+.choix-ouvrir::before { content: ''; position: absolute; inset: 0; }
+.choix-ouvrir:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.choix-ouvrir-fleche {
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 120ms ease;
+}
+.choix-cliquable:hover .choix-ouvrir-fleche { transform: rotate(45deg) translate(2px, -2px); }
+
+/* Se loger : une ligne détachée, sous les autres liens. */
+.carte-logement {
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--trait);
+}
+.carte-logement-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.3rem;
+  color: var(--doux);
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+.carte-logement-titre .illu-picto { width: 18px; height: 18px; stroke: var(--doux); }
+
+/* ----------------------------------------------------- écran d'attente */
+/* Préfixe « chargement- » : la feuille est partagée par toutes les vues
+   (cf. styles.test.ts). */
+
+.chargement {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--fond);
+}
+.chargement-boite {
+  width: 100%;
+  max-width: 30rem;
+  padding: 2rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.chargement-sur {
+  margin: 0 0 0.4rem;
+  font-family: var(--titres);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+}
+.chargement-titre {
+  margin: 0 0 1.5rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.chargement-etapes { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.chargement-etape { display: flex; gap: 0.8rem; align-items: flex-start; }
+.chargement-texte { display: flex; flex-direction: column; gap: 0.1rem; }
+.chargement-etape-titre { font-weight: 600; font-size: 0.98rem; line-height: 1.3; }
+.chargement-etape-note { color: var(--doux); font-size: 0.82rem; line-height: 1.4; }
+
+/* La marque de chaque étape : un disque. Trois états, trois dessins — la
+   couleur seule ne suffirait pas à distinguer « faite » de « en attente »
+   pour qui ne la voit pas, d'où la coche. */
+.chargement-marque {
+  flex: 0 0 auto;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-top: 0.15rem;
+  border-radius: 50%;
+  border: 2px solid var(--trait);
+}
+
+/* Faite : disque plein et coche. Deux bordures d'un carré tourné — deux
+   dégradés croisés donneraient une croix, ce qui dit l'inverse. */
+.chargement-faite .chargement-marque { border-color: var(--accent); background: var(--accent); }
+.chargement-faite .chargement-marque::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--fond);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.chargement-faite .chargement-etape-titre { color: var(--doux); }
+
+/* En cours : un anneau qui bat lentement. */
+.chargement-encours .chargement-marque {
+  border-color: var(--accent);
+  animation: chargement-pulse 1.4s ease-in-out infinite;
+}
+.chargement-encours .chargement-etape-titre { color: var(--encre); }
+
+/* En attente : en retrait, sans être illisible. */
+.chargement-attente { opacity: 0.55; }
+
+@keyframes chargement-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(27, 129, 132, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(27, 129, 132, 0); }
+}
+
+/* Le système demande moins d'animations : on retire la pulsation, et l'étape
+   en cours se distingue par son disque plein. Une animation qu'on ne peut pas
+   couper déclenche des malaises chez certaines personnes. */
+@media (prefers-reduced-motion: reduce) {
+  .chargement-encours .chargement-marque {
+    animation: none;
+    background: var(--accent);
+  }
+}
+
+.chargement-compte {
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--trait);
+  font-family: var(--titres);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--doux);
+}
+.chargement-pied { margin-top: 0.4rem; }
+
+/* ------------------------------------------- panneau « Mon espace » du menu */
+
+.menu-panneau { position: relative; }
+.menu-panneau-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  justify-content: space-between;
+}
+/* Un chevron dessiné en CSS : deux bordures d'un carré tourné. Une flèche
+   écrite en texte (« ▾ ») serait lue à voix haute par un lecteur d'écran, et
+   la forme varie d'une police à l'autre. */
+.menu-chevron {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 120ms ease;
+}
+.menu-panneau-bouton[aria-expanded='true'] .menu-chevron {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.menu-panneau-liste { display: none; flex-direction: column; gap: 0.15rem; }
+.menu-panneau-ouvert { display: flex; }
+
+.menu-entree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: var(--rayon);
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 48px;
+}
+.menu-entree:hover { border-color: var(--trait); background: var(--fond); }
+.menu-entree-titre {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--titres);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+/* La note explique l'entrée. Elle disparaît sur les écrans étroits, où la
+   place manque et où le libellé suffit. */
+.menu-entree-note { color: var(--doux); font-size: 0.78rem; line-height: 1.35; }
+.menu-entree-compte {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--fond);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Détachée : c'est la seule entrée qui défait quelque chose. */
+.menu-entree-sortie {
+  margin-top: 0.3rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--trait);
+  border-radius: 0;
+  color: var(--doux);
+}
+.menu-entree-sortie:hover { border-color: var(--trait); color: var(--encre); }
 
 /* ------------------------------------------------------- espace personnel */
 /* Préfixe « compte- » : la feuille est partagée par toutes les vues, et un
