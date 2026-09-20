@@ -401,7 +401,7 @@ export function MonCompte({
         onNaviguer={onNaviguer}
       />
 
-      <h2 className="article-titre">Mon compte</h2>
+      <h1 className="article-titre">Mon compte</h1>
 
       {!charge ? (
         <p className="note">Chargement…</p>

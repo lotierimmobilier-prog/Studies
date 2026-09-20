@@ -2826,3 +2826,10 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   font-weight: 600;
   line-height: 1;
 }
+
+/* Un lien qui sort du site. La flèche le dit déjà ; cette règle lui donne
+   seulement de l'air, pour qu'il ne se confonde pas avec le paragraphe qui
+   le précède. */
+.liens-externes {
+  margin: 0.75rem 0 0;
+}

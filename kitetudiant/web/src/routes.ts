@@ -53,6 +53,11 @@ export type Route =
   // L'établissement, lui, est identifié par son UAI. Deux lycées peuvent
   // porter le même nom ; aucun ne partage son UAI.
   | { readonly vue: 'etablissement'; readonly uai: string }
+  // La collection n'était qu'un état en mémoire : on ne pouvait ni la
+  // partager, ni la mettre en favori, ni y revenir avec le bouton
+  // « précédent ». Exactement le défaut que les fiches de formation
+  // viennent de perdre.
+  | { readonly vue: 'collection' }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -75,6 +80,8 @@ export function cheminDe(route: Route): string {
       return `${BASE}formation/${route.code}`
     case 'etablissement':
       return `${BASE}etablissement/${route.uai}`
+    case 'collection':
+      return `${BASE}mes-cartes`
   }
 }
 
@@ -105,6 +112,7 @@ export function routeDuChemin(chemin: string): Route | null {
   if (reste === 'inscription') return { vue: 'inscription' }
   if (reste === 'mon-compte') return { vue: 'compte' }
   if (reste === 'chercher-une-ecole') return { vue: 'recherche' }
+  if (reste === 'mes-cartes') return { vue: 'collection' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
   const formation = /^formation\/(.+)$/.exec(reste)

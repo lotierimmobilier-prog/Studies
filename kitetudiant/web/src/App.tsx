@@ -816,7 +816,6 @@ export default function App() {
         connecte={connecte}
         cartes={nombreCartes}
         onNaviguer={naviguer}
-        onCollection={() => setVue('collection')}
         onDeconnexion={() => void seDeconnecter()}
       />
       <div className="coque-page">{page}</div>

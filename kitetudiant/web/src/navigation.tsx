@@ -37,15 +37,20 @@ import { Boussole, Carnet, Etoile, Fiche, Loupe } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
 import { cheminDe, type Route } from './routes.ts'
 
-/** Une entrée de la barre. `action` sert aux vues sans adresse. */
+/**
+ * Une entrée de la barre.
+ *
+ * Toutes ont une adresse, sans exception : une destination sans adresse ne se
+ * partage pas, ne se met pas en favori, et le bouton « précédent » ne la
+ * retrouve pas. C'était le cas de la collection jusqu'ici.
+ */
 interface Entree {
   readonly cle: string
   readonly libelle: string
   /** Libellé court, pour la barre du bas où la place manque. */
   readonly court: string
   readonly icone: React.ReactNode
-  readonly route: Route | null
-  readonly action?: () => void
+  readonly route: Route
   /** Vues considérées comme « ici », pour signaler l'entrée courante. */
   readonly actif: readonly string[]
 }
@@ -56,7 +61,6 @@ export interface Navigation {
   /** Nombre de cartes gagnées. Zéro : l'entrée ne s'affiche pas. */
   readonly cartes: number
   readonly onNaviguer: (route: Route) => void
-  readonly onCollection: () => void
   readonly onDeconnexion: () => void
 }
 
@@ -90,17 +94,20 @@ function entrees(nav: Navigation): Entree[] {
     },
   ]
 
-  if (nav.cartes > 0) {
-    liste.push({
-      cle: 'collection',
-      libelle: `Mes cartes (${nav.cartes})`,
-      court: 'Cartes',
-      icone: <Etoile />,
-      route: null,
-      action: nav.onCollection,
-      actif: ['collection'],
-    })
-  }
+  /* L'entrée reste visible même à zéro carte.
+   *
+   * Elle ne l'était pas : on ne découvrait la collection qu'en ayant déjà
+   * gagné quelque chose, donc par hasard. Une entrée cachée derrière la
+   * chose qu'elle sert à découvrir ne se découvre jamais — et la page, quand
+   * elle est vide, dit maintenant comment on gagne une carte. */
+  liste.push({
+    cle: 'collection',
+    libelle: nav.cartes > 0 ? `Mes cartes (${nav.cartes})` : 'Mes cartes',
+    court: 'Cartes',
+    icone: <Etoile />,
+    route: { vue: 'collection' },
+    actif: ['collection'],
+  })
 
   liste.push(
     nav.connecte
@@ -148,15 +155,6 @@ function Lien({
     ...(courant ? { 'aria-current': 'page' as const } : {}),
   }
 
-  if (entree.route === null) {
-    return (
-      <button type="button" className={classe} onClick={entree.action} {...marque}>
-        {entree.icone}
-        <span className="rail-libelle">{entree.libelle}</span>
-        <span className="rail-court">{entree.court}</span>
-      </button>
-    )
-  }
   const route = entree.route
   return (
     <a

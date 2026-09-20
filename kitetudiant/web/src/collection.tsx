@@ -265,6 +265,8 @@ export function Collection({
         onNaviguer={onNaviguer}
       />
 
+      <h1 className="article-titre">Tes cartes</h1>
+
       {/* Les récompenses d'abord, et seules dans leur section. Mêlées aux
           villes, elles disparaissaient : le compteur annonçait « 8 sur 1 253 »,
           un dénominateur écrasé par l'album, qui faisait passer six
