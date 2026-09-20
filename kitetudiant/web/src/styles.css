@@ -11,6 +11,10 @@
   --rouge: #9a2b2b;
   --gris: #5b6169;
   --accent: #1d3f78;
+  /* Accent chaud, purement décoratif : jamais utilisé pour un verdict. */
+  --chaud: #c2560f;
+  --ciel-haut: #dbe8fb;
+  --ciel-bas: #f3e9dd;
   --rayon: 14px;
 }
 
@@ -26,6 +30,9 @@
     --rouge: #f09a9a;
     --gris: #a6adb6;
     --accent: #9cc0ff;
+    --chaud: #f0a06a;
+    --ciel-haut: #1b2432;
+    --ciel-bas: #241f2b;
   }
 }
 
@@ -40,6 +47,9 @@
   --rouge: #f09a9a;
   --gris: #a6adb6;
   --accent: #9cc0ff;
+  --chaud: #f0a06a;
+  --ciel-haut: #1b2432;
+  --ciel-bas: #241f2b;
 }
 
 * { box-sizing: border-box; }
@@ -416,17 +426,19 @@ input[type='range'] { width: 100%; min-height: 44px; }
   border-radius: var(--rayon);
   padding: 1.1rem 1.1rem 1.2rem;
 }
+/* Porte désormais un picto plutôt qu'un chiffre : même pastille, contenu
+   dessiné. Le fond devient transparent, sinon le trait du picto disparaîtrait
+   sur l'aplat d'accent. */
 .pilier-numero {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 2.4rem;
+  height: 2.4rem;
   border-radius: 999px;
-  background: var(--accent);
-  color: var(--fond);
-  font-size: 0.85rem;
-  font-weight: 700;
+  background: transparent;
+  border: 1px solid var(--trait);
+  color: var(--accent);
   margin-bottom: 0.6rem;
 }
 .pilier-titre { margin: 0 0 0.15rem; font-size: 1.02rem; }
@@ -640,3 +652,50 @@ input[type='range'] { width: 100%; min-height: 44px; }
 /* La liste des échelons n'apparaît qu'une fois « boursier » choisi. */
 .sous-question { margin-top: 0.4rem; }
 .sous-question .champ-label { display: block; margin-bottom: 0.5rem; }
+
+/* ------------------------------------------------------------ illustrations */
+/* Dessinées en SVG dans illustrations.tsx : aucune requête vers un service
+   tiers, donc aucune adresse IP d'élève communiquée pour afficher une image.
+   Les couleurs passent par les variables de thème, donc elles suivent le mode
+   clair comme le mode sombre sans seconde version du dessin. */
+
+.illu-ville {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 1.75rem;
+  border-radius: var(--rayon);
+}
+.illu-ciel-haut { stop-color: var(--ciel-haut); }
+.illu-ciel-bas { stop-color: var(--ciel-bas); }
+.illu-astre { fill: var(--chaud); opacity: 0.85; }
+.illu-loin rect { fill: var(--accent); opacity: 0.28; }
+.illu-pres rect { fill: var(--accent); opacity: 0.6; }
+.illu-fenetres rect { fill: var(--chaud); opacity: 0.9; }
+.illu-sol { fill: var(--accent); opacity: 0.16; }
+.illu-chemin { fill: var(--chaud); opacity: 0.22; }
+
+.illu-picto {
+  width: 1.45rem;
+  height: 1.45rem;
+  stroke: currentColor;
+  fill: currentColor;
+  vertical-align: -0.2em;
+}
+/* Les tracés déclarés « fill: none » gardent leur intérieur vide : la règle
+   ci-dessus ne remplit que les formes pleines (le point du porte-monnaie). */
+
+/* Une épingle devant le titre des loyers. */
+.bloc h2 .illu-picto { margin-right: 0.45rem; color: var(--chaud); }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Les fenêtres s'allument doucement à l'arrivée sur la page. Discret, et
+     désactivé pour qui a demandé moins d'animation. */
+  .illu-fenetres rect { animation: illu-allumage 1.2s ease-out both; }
+  .illu-fenetres rect:nth-child(3n) { animation-delay: 0.15s; }
+  .illu-fenetres rect:nth-child(3n + 1) { animation-delay: 0.3s; }
+}
+@keyframes illu-allumage {
+  from { opacity: 0; }
+  to { opacity: 0.9; }
+}

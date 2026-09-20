@@ -25,6 +25,7 @@ import {
   SOURCE_PARCOURSUP,
   TYPOLOGIE_LOYERS,
 } from './donnees.ts'
+import { Boussole, Carnet, Epingle, PorteMonnaie, Ville } from './illustrations.tsx'
 
 /** Surface du logement type servant à l'illustration. */
 const SURFACE = 25
@@ -90,6 +91,7 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
       <p className="hero-mentions">
         Sept questions · aperçu sans compte · aucune note enregistrée
       </p>
+      <Ville />
     </section>
   )
 }
@@ -125,6 +127,8 @@ function Bandeau() {
 // « axe » et « axes » sont déjà pris par l’affichage des résultats (App.tsx) :
 // les réutiliser ici faisait hériter cette section de leur grille à deux colonnes.
 
+const PICTOS = [Boussole, Carnet, PorteMonnaie] as const
+
 const PILIERS: readonly { readonly titre: string; readonly question: string; readonly texte: string }[] = [
   {
     titre: 'Tes chances',
@@ -155,14 +159,19 @@ function Piliers() {
         te ressemble pas se quitte au bout d’un an.
       </p>
       <div className="piliers-grille">
-        {PILIERS.map((a, i) => (
+        {PILIERS.map((a, i) => {
+          const Picto = PICTOS[i] ?? Boussole
+          return (
           <article className="pilier" key={a.titre}>
-            <span className="pilier-numero">{i + 1}</span>
+            <span className="pilier-numero">
+              <Picto />
+            </span>
             <h3 className="pilier-titre">{a.titre}</h3>
             <p className="pilier-question">{a.question}</p>
             <p className="pilier-texte">{a.texte}</p>
           </article>
-        ))}
+          )
+        })}
       </div>
       <p className="bloc-chute">
         Les trois réponses restent côte à côte, chacune avec sa source.{' '}
@@ -193,7 +202,10 @@ function Comparaison() {
 
   return (
     <section className="bloc">
-      <h2>Pourquoi la ville compte autant que l’école</h2>
+      <h2>
+        <Epingle />
+        Pourquoi la ville compte autant que l’école
+      </h2>
       <p className="bloc-intro">
         Le même studio de {SURFACE} m², loyer d’annonce charges comprises, millésime{' '}
         {MILLESIME_LOYERS}.
