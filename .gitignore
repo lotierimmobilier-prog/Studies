@@ -31,3 +31,14 @@ dist-kitetudiant
 .claude/skills/canvas-design
 .claude/skills/frontend-design
 .claude/skills/theme-factory
+
+# CSV préparés pour le chargement en base. Ce sont des ARTEFACTS : ils se
+# régénèrent en quatre secondes à partir de data/brut/ par
+# kitetudiant/scripts/import/preparer.py, et ils pèsent une vingtaine de
+# mégaoctets. Ce qui doit être versionné, c'est le manifeste de collecte —
+# URL, date, taille, SHA-256 — et le rapport de préparation, pas les lignes.
+# Les CSV seulement, et non le dossier : git ne descend pas dans un dossier
+# ignoré, et le rapport de préparation — 14 252 formations, 99,31 % de
+# rattachement, les méthodes employées — mérite d'être versionné. C'est la
+# trace de ce que l'import a vraiment fait ce jour-là.
+kitetudiant/data/import/*.csv

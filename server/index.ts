@@ -58,6 +58,18 @@ import {
   jetonDeLEnTete,
 } from './comptes.ts'
 import { DepotReleves } from './releves.ts'
+import { configuree as baseConfiguree } from './bd.ts'
+import {
+  BaseIndisponible,
+  FormationInconnue,
+  ListeComplete,
+  ajouter as ajouterVoeu,
+  compteDeSession,
+  deplacer as deplacerVoeu,
+  lire as lireVoeux,
+  retirer as retirerVoeu,
+  signaler as signalerVoeu,
+} from './voeux.ts'
 import {
   ReleveInvalide,
   relevesEnCsv,
@@ -436,6 +448,93 @@ async function demarrer(): Promise<void> {
 
       // KITETUDIANT — note publique du lieu. Affichée dans le détail d'une
       // fiche, attribuée à Google, jamais dans un tri ni dans un score.
+      // KITETUDIANT — les vœux.
+      //
+      // Tout passe par un seul chemin, avec la méthode pour verbe : une
+      // liste de dix éléments n'a pas besoin de cinq routes, et une seule
+      // permet de renvoyer la liste À JOUR après chaque modification.
+      // L'écran n'a donc jamais à deviner ce que le serveur a fait.
+      if (url.pathname === '/api/voeux') {
+        const jeton = jetonDeLEnTete(req.headers.authorization)
+        let compte: string | null
+        try {
+          compte = await compteDeSession(depotComptes, jeton)
+        } catch (e) {
+          if (e instanceof BaseIndisponible) {
+            return envoyerJson(res, 503, { erreur: e.message })
+          }
+          throw e
+        }
+        if (compte === null) {
+          // Deux causes possibles, et l'écran doit pouvoir les
+          // distinguer : une session finie se répare en se reconnectant,
+          // une base absente ne se répare pas par l'élève.
+          if (!baseConfiguree()) {
+            return envoyerJson(res, 503, {
+              erreur:
+                'L’enregistrement des vœux n’est pas encore activé sur ce serveur.',
+            })
+          }
+          return envoyerJson(res, 401, { erreur: 'Session expirée ou invalide.' })
+        }
+
+        try {
+          if (req.method === 'GET') {
+            return envoyerJson(res, 200, { voeux: await lireVoeux(compte) })
+          }
+          if (req.method === 'POST') {
+            const { code, session } = JSON.parse(await lireCorps(req)) as {
+              code?: string
+              session?: number
+            }
+            if (!code || typeof session !== 'number') {
+              return envoyerJson(res, 400, { erreur: 'Formation ou session manquante.' })
+            }
+            return envoyerJson(res, 200, { voeux: await ajouterVoeu(compte, code, session) })
+          }
+          if (req.method === 'PATCH') {
+            const { rang, vers, signalement } = JSON.parse(await lireCorps(req)) as {
+              rang?: number
+              vers?: 'haut' | 'bas'
+              signalement?: string | null
+            }
+            if (typeof rang !== 'number') {
+              return envoyerJson(res, 400, { erreur: 'Rang manquant.' })
+            }
+            if (vers === 'haut' || vers === 'bas') {
+              return envoyerJson(res, 200, {
+                voeux: await deplacerVoeu(compte, rang, vers),
+              })
+            }
+            if (signalement !== undefined) {
+              return envoyerJson(res, 200, {
+                voeux: await signalerVoeu(compte, rang, signalement),
+              })
+            }
+            return envoyerJson(res, 400, { erreur: 'Rien à modifier.' })
+          }
+          if (req.method === 'DELETE') {
+            const rang = Number(url.searchParams.get('rang'))
+            if (!Number.isInteger(rang)) {
+              return envoyerJson(res, 400, { erreur: 'Rang manquant.' })
+            }
+            return envoyerJson(res, 200, { voeux: await retirerVoeu(compte, rang) })
+          }
+        } catch (e) {
+          if (e instanceof ListeComplete) {
+            return envoyerJson(res, 409, { erreur: e.message })
+          }
+          if (e instanceof FormationInconnue) {
+            return envoyerJson(res, 404, { erreur: e.message })
+          }
+          if (e instanceof BaseIndisponible) {
+            return envoyerJson(res, 503, { erreur: e.message })
+          }
+          throw e
+        }
+        return envoyerJson(res, 405, { erreur: 'Méthode non autorisée.' })
+      }
+
       // KITETUDIANT — comptes élèves. Aucune donnée scolaire ne transite ici :
       // seulement une adresse et un mot de passe (voir comptes.ts).
       if (url.pathname.startsWith('/api/comptes/')) {

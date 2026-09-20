@@ -44,6 +44,7 @@ import { Collection } from './collection.tsx'
 import { Chargement, type EtapeCalcul } from './chargement.tsx'
 import { RechercheEcoles } from './rechercheEcoles.tsx'
 import { BarreNavigation } from './navigation.tsx'
+import { MesVoeux } from './mesVoeux.tsx'
 import { PageFormation } from './pageFormation.tsx'
 import { PageEtablissement } from './pageEtablissement.tsx'
 import { MonCompte } from './monCompte.tsx'
@@ -454,6 +455,7 @@ export default function App() {
     | 'recherche'
     | 'formation'
     | 'etablissement'
+    | 'voeux'
   >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
@@ -831,6 +833,7 @@ export default function App() {
     return coque(
       <PageFormation
         code={adresse.code}
+        connecte={connecte}
         onNaviguer={naviguer}
         onCommencer={() => {
           setVue('parcours')
@@ -842,6 +845,10 @@ export default function App() {
 
   if (vue === 'etablissement' && adresse.vue === 'etablissement') {
     return coque(<PageEtablissement uai={adresse.uai} onNaviguer={naviguer} />)
+  }
+
+  if (vue === 'voeux') {
+    return coque(<MesVoeux connecte={connecte} onNaviguer={naviguer} />)
   }
 
   if (vue === 'recherche') {

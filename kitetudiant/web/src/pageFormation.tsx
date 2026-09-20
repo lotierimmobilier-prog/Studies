@@ -32,6 +32,7 @@
 import { useEffect, useState } from 'react'
 
 import { CarteALaDemande } from './carte.tsx'
+import { BoutonVoeu } from './mesVoeux.tsx'
 import { FilAriane } from './filAriane.tsx'
 import { liensLogement } from './logement.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
@@ -344,10 +345,12 @@ function Apres({ formation }: { readonly formation: Formation }) {
 
 export function PageFormation({
   code,
+  connecte,
   onNaviguer,
   onCommencer,
 }: {
   readonly code: string
+  readonly connecte: boolean
   readonly onNaviguer: (route: Route) => void
   readonly onCommencer: () => void
 }) {
@@ -471,6 +474,16 @@ export function PageFormation({
                   : ''}
               </p>
             ) : null}
+
+            {/* Posé dans l'en-tête et non au bas de la page : c'est la
+                décision que la fiche sert à prendre, et elle se prend souvent
+                avant d'avoir tout lu. */}
+            <BoutonVoeu
+              code={formation.id}
+              session={Number(formation.session) || new Date().getFullYear()}
+              connecte={connecte}
+              onNaviguer={onNaviguer}
+            />
           </header>
 
           <div className="fiche-onglets" role="tablist" aria-label="Sections de la fiche">

@@ -33,7 +33,7 @@
  * qui découvre le site, ce serait du bruit.
  */
 
-import { Boussole, Carnet, Etoile, Fiche, Loupe } from './illustrations.tsx'
+import { Boussole, Carnet, Etoile, Fiche, Loupe, Toit } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
 import { cheminDe, type Route } from './routes.ts'
 
@@ -83,6 +83,14 @@ function entrees(nav: Navigation): Entree[] {
       // Une fiche de formation ou d'établissement est une destination de la
       // recherche : l'entrée reste allumée pour dire d'où l'on vient.
       actif: ['recherche', 'formation', 'etablissement'],
+    },
+    {
+      cle: 'voeux',
+      libelle: 'Mes vœux',
+      court: 'Vœux',
+      icone: <Toit />,
+      route: { vue: 'voeux' },
+      actif: ['voeux'],
     },
     {
       cle: 'blog',

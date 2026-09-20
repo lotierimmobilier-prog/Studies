@@ -5,7 +5,7 @@
     "dataset_id": "fr-esr-parcoursup",
     "url_csv": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup/exports/csv?delimiter=%3B&with_bom=false",
     "url_meta": "https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup",
-    "collecte_utc": "2026-09-19T06:36:55+00:00",
+    "collecte_utc": "2026-09-20T20:50:51+00:00",
     "octets": 12880727,
     "sha256": "649c64e406463157bf09f8bd997cbe1fa25f7a35a5e294145f294b53dfd0c18e"
   },
@@ -65,7 +65,7 @@
     "dataset_id": "indicateur-loyers-communes-millesime",
     "url_csv": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/indicateur-loyers-communes-millesime/exports/csv?delimiter=%3B&with_bom=false",
     "url_meta": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/indicateur-loyers-communes-millesime",
-    "collecte_utc": "2026-09-19T06:37:44+00:00",
+    "collecte_utc": "2026-09-20T20:51:37+00:00",
     "octets": 23850307,
     "sha256": "f608f5b04a778a0969759cdb99bdfbd693f7a1e71b6b91964c96d8eebeb59631"
   },
@@ -85,7 +85,7 @@
     "dataset_id": "georef-france-commune",
     "url_csv": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-france-commune/exports/csv?delimiter=%3B&with_bom=false&select=com_code,com_current_code,com_name,com_name_upper,dep_code,dep_name,reg_code,reg_name,epci_code,com_type,geo_point_2d,year",
     "url_meta": "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/georef-france-commune",
-    "collecte_utc": "2026-09-19T06:38:00+00:00",
+    "collecte_utc": "2026-09-20T20:51:26+00:00",
     "octets": 4601929,
     "sha256": "0743f9484787d4f214949fe10cb94f36f8c0b8b09c375bc10ff7f4f2fcf4d529"
   }

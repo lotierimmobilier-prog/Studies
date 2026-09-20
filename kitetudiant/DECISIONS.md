@@ -56,6 +56,17 @@ qui identifie un choix, jamais ce qui décrit une personne.**
   `eleve.simulation_voeu` et les colonnes financières de `eleve.profil_eleve`
   existent dans `db/schema.sql` mais **ne sont pas déployées** (voir D5).
 
+### Appliqué le 20/09/2026
+
+La promesse d'accueil a été réécrite le jour où la liste de vœux est devenue
+enregistrable. Elle disait « il n'enregistre aucune donnée scolaire », vœux
+compris — elle serait devenue fausse au premier vœu enregistré. Elle dit
+maintenant « il n'enregistre pas tes notes », et nomme explicitement la liste
+de vœux parmi ce que le serveur garde.
+
+Une promesse qu'on rétrécit sans le dire est un mensonge ; une promesse qu'on
+précise en expliquant pourquoi est tenable.
+
 ### Écarté
 
 - **Tout au serveur, chiffré.** Parité complète avec le concurrent, mais il
