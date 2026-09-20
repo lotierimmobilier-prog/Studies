@@ -119,17 +119,68 @@ describe('chaque balise image', () => {
   })
 
   it.each(BALISES.map((b) => [`${b.fichier}:${b.ligne}`, b.texte] as const))(
-    '%s réserve sa place et reste muette pour un lecteur d’écran',
+    '%s réserve sa place',
     (_ou, texte) => {
       // width et height : la place est réservée avant le chargement, le texte
       // ne saute pas au moment où l'image arrive.
       expect(texte).toMatch(/\bwidth=/)
       expect(texte).toMatch(/\bheight=/)
-      // alt vide + aria-hidden : l'illustration est décorative, le sens est
-      // dans le texte voisin.
-      expect(texte).toMatch(/\balt=""/)
-      // loading : tout ne peut pas être prioritaire, sinon rien ne l'est.
-      expect(texte).toMatch(/\bloading=/)
     },
   )
+
+  it.each(BALISES.map((b) => [`${b.fichier}:${b.ligne}`, b.texte] as const))(
+    '%s dit clairement si elle porte du sens',
+    (_ou, texte) => {
+      // Toute image a un `alt`. Deux cas, et pas de troisième :
+      //
+      //   - décorative : alt vide ET aria-hidden, pour qu'un lecteur d'écran
+      //     la saute au lieu de l'annoncer comme un élément inconnu ;
+      //   - porteuse de sens : un alt non vide, et surtout PAS aria-hidden,
+      //     qui la masquerait justement à qui en a besoin.
+      //
+      // Ce test exigeait `alt=""` partout jusqu'au 20/09/2026 — vrai tant que
+      // les seules images étaient des illustrations, faux dès l'arrivée du
+      // logo, dont le nom du site doit être lu.
+      expect(texte).toMatch(/\balt=/)
+      const decorative = /\balt=""/.test(texte)
+      const masquee = /\baria-hidden="true"/.test(texte)
+      expect(
+        decorative === masquee,
+        decorative
+          ? 'alt vide sans aria-hidden : elle sera annoncée comme une image sans nom.'
+          : 'alt non vide avec aria-hidden : son texte ne sera jamais lu.',
+      ).toBe(true)
+    },
+  )
+
+  it('toute image lourde attend d’être vue', () => {
+    // Au-delà de 100 Ko, une image ne doit pas partir avant qu'on la regarde.
+    // En dessous, `loading` n'a pas de sens : le logo est dans l'en-tête et
+    // doit arriver tout de suite.
+    for (const b of BALISES) {
+      const m = /src=\{(\w+)\}/.exec(b.texte)
+      if (m === null) continue
+      const source = CONTENUS.get(resolve(SRC, b.fichier)) ?? ''
+      const imp = new RegExp(`import ${m[1]} from '\\./images/([^']+)'`).exec(source)
+      if (imp === null) continue
+      const poids = statSync(join(IMAGES, imp[1]!)).size
+      if (poids > 100 * 1024) {
+        expect(b.texte, `${b.fichier}:${b.ligne} pèse ${Math.round(poids / 1024)} Ko`).toMatch(
+          /\bloading=/,
+        )
+      }
+    }
+  })
+
+  it('le dossier d’images reste léger', () => {
+    // Garde-fou de poids. Quatre illustrations dessinées y ont pesé 886 Ko
+    // jusqu'au 20/09/2026 — pour des images que la page finissait par ne plus
+    // afficher, et que Vite embarquait quand même. Une limite chiffrée rend
+    // la prochaine dérive visible tout de suite.
+    const total = FICHIERS_IMAGE.reduce((n, f) => n + statSync(join(IMAGES, f)).size, 0)
+    expect(
+      Math.round(total / 1024),
+      `${FICHIERS_IMAGE.join(', ')} — au-delà de 300 Ko, il faut une bonne raison.`,
+    ).toBeLessThan(300)
+  })
 })

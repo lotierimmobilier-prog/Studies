@@ -1,5 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#1d3f78"/>
-  <text x="32" y="43" font-family="ui-sans-serif, system-ui, sans-serif" font-size="30"
-        font-weight="800" fill="#fbfaf8" text-anchor="middle">K</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="KitEtudiant.fr">
+  <!-- La toque du logo, seule : à 16 px, c'est la seule forme qui survive.
+       Teintes relevées sur le logo fourni. -->
+  <rect width="64" height="64" rx="12" fill="#19304A"/>
+  <path d="M32 17 55 27 32 37 9 27Z" fill="#F7F9FA"/>
+  <path d="M19 31.5v9c0 3.6 5.8 6.5 13 6.5s13-2.9 13-6.5v-9" fill="none"
+        stroke="#1F969A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M51 29v9" stroke="#F7F9FA" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="51" cy="40.5" r="2.8" fill="#D59C24"/>
 </svg>

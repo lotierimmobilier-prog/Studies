@@ -22,18 +22,21 @@ import {
   cartesPossibles,
   exporter,
   importer,
-  LIBELLE_RARETE,
   type Carte,
   type Obtention,
 } from './collection.ts'
 import { NOMBRE_COMMUNES_AVEC_LOYER } from './donnees.ts'
+import { Marque } from './marque.tsx'
+import { nombre } from './nombres.ts'
 
 /* ------------------------------------------------------------ une carte */
 
 export function VignetteCarte({ carte }: { carte: Carte }) {
   return (
     <article className={`carte-collec carte-collec-${carte.rarete}`}>
-      <p className="carte-collec-rarete">{LIBELLE_RARETE[carte.rarete]}</p>
+      {carte.mention !== null ? (
+        <p className="carte-collec-mention">{carte.mention}</p>
+      ) : null}
       <h3 className="carte-collec-titre">{carte.titre}</h3>
       {carte.valeur !== null ? <p className="carte-collec-valeur">{carte.valeur}</p> : null}
       <p className="carte-collec-detail">{carte.detail}</p>
@@ -80,10 +83,10 @@ export function dessinerCarte(canvas: HTMLCanvasElement, carte: Carte): void {
 
   // Fond. Les couleurs sont écrites ici plutôt que lues dans le thème : une
   // image partagée quitte le site, elle ne suit plus le mode clair ou sombre
-  // de personne.
+  // de personne. Ce sont les teintes de la marque, en clair.
   const ciel = ctx.createLinearGradient(0, 0, 0, HAUTEUR)
-  ciel.addColorStop(0, '#dbe8fb')
-  ciel.addColorStop(1, '#f3e9dd')
+  ciel.addColorStop(0, '#e2ecef')
+  ciel.addColorStop(1, '#f7f9fa')
   ctx.fillStyle = ciel
   ctx.fillRect(0, 0, LARGEUR, HAUTEUR)
 
@@ -95,8 +98,9 @@ export function dessinerCarte(canvas: HTMLCanvasElement, carte: Carte): void {
   ctx.roundRect(marge, marge, large, HAUTEUR - marge * 2, 36)
   ctx.fill()
 
+  // Teal, marine, gris : les trois teintes du logo.
   const teinte =
-    carte.rarete === 'rare' ? '#c2560f' : carte.rarete === 'peu-frequente' ? '#1d3f78' : '#5b6169'
+    carte.rarete === 'rare' ? '#1b8184' : carte.rarete === 'peu-frequente' ? '#19304a' : '#546475'
   ctx.fillStyle = teinte
   ctx.beginPath()
   ctx.roundRect(marge, marge, large, 14, [36, 36, 0, 0])
@@ -105,12 +109,17 @@ export function dessinerCarte(canvas: HTMLCanvasElement, carte: Carte): void {
   let y = marge + 130
   const x = marge + 70
 
-  ctx.fillStyle = teinte
-  ctx.font = `600 30px ${POLICE}`
-  ctx.fillText(LIBELLE_RARETE[carte.rarete].toUpperCase(), x, y)
+  if (carte.mention !== null) {
+    ctx.fillStyle = teinte
+    ctx.font = `600 26px ${POLICE}`
+    for (const ligne of enLignes(ctx, carte.mention, large - 140)) {
+      ctx.fillText(ligne, x, y)
+      y += 34
+    }
+  }
 
-  y += 90
-  ctx.fillStyle = '#17191c'
+  y += 70
+  ctx.fillStyle = '#17222e'
   ctx.font = `700 76px ${POLICE}`
   for (const ligne of enLignes(ctx, carte.titre, large - 140)) {
     ctx.fillText(ligne, x, y)
@@ -126,7 +135,7 @@ export function dessinerCarte(canvas: HTMLCanvasElement, carte: Carte): void {
   }
 
   y += 70
-  ctx.fillStyle = '#5b6169'
+  ctx.fillStyle = '#546475'
   ctx.font = `400 34px ${POLICE}`
   for (const ligne of enLignes(ctx, carte.detail, large - 140)) {
     ctx.fillText(ligne, x, y)
@@ -135,7 +144,7 @@ export function dessinerCarte(canvas: HTMLCanvasElement, carte: Carte): void {
 
   if (carte.provenance !== null) {
     y += 30
-    ctx.fillStyle = '#8b9199'
+    ctx.fillStyle = '#7f8c9c'
     ctx.font = `400 24px ${POLICE}`
     for (const ligne of enLignes(ctx, carte.provenance, large - 140)) {
       ctx.fillText(ligne, x, y)
@@ -145,12 +154,12 @@ export function dessinerCarte(canvas: HTMLCanvasElement, carte: Carte): void {
 
   // Pied : l'adresse du site, sans paramètre de suivi. C'est tout ce qui
   // ramène ici, et c'est volontaire.
-  ctx.fillStyle = '#17191c'
+  ctx.fillStyle = '#17222e'
   ctx.font = `700 34px ${POLICE}`
-  ctx.fillText('KITETUDIANT', x, HAUTEUR - marge - 90)
-  ctx.fillStyle = '#5b6169'
+  ctx.fillText('KitEtudiant.fr', x, HAUTEUR - marge - 90)
+  ctx.fillStyle = '#546475'
   ctx.font = `400 28px ${POLICE}`
-  ctx.fillText('kitetudiant.fr', x, HAUTEUR - marge - 48)
+  ctx.fillText('Tout pour bien démarrer ta vie étudiante', x, HAUTEUR - marge - 48)
 }
 
 /** Nom de fichier lisible, sans accent ni espace. */
@@ -228,7 +237,9 @@ export function Collection({
   return (
     <main className="app">
       <header className="entete entete-accueil">
-        <h1 className="marque">KITETUDIANT</h1>
+        <h1 className="marque">
+          <Marque />
+        </h1>
         <button type="button" className="entete-cta" onClick={onRetour}>
           Retour
         </button>
@@ -237,9 +248,10 @@ export function Collection({
       <section className="bloc">
         <h2>Ta collection</h2>
         <p className="bloc-intro">
-          {cartes.length} carte{cartes.length > 1 ? 's' : ''} sur {total.toLocaleString('fr-FR')}.
-          Chaque carte se gagne en te servant du site — jamais en invitant
-          quelqu’un. Elles restent dans ton navigateur : rien n’est envoyé.
+          {cartes.length} carte{cartes.length > 1 ? 's' : ''} sur {nombre(total)}.
+          Chacune retient une ville que tu as regardée, avec son loyer et sa place
+          parmi les autres. Elles se gagnent en te servant du site — jamais en
+          invitant quelqu’un — et restent dans ton navigateur.
         </p>
 
         {cartes.length === 0 ? (

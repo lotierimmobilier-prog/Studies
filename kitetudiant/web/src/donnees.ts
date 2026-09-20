@@ -648,3 +648,35 @@ export async function chercherAvisLieu(
     return { ref: 'lieu', raison: `Service injoignable : ${(e as Error).message}` }
   }
 }
+
+// ------------------------------------------------------------------- articles
+
+import type { Article as ArticlePublie } from '../../packages/articles/src/index.ts'
+
+export type { ArticlePublie }
+
+/**
+ * Les articles écrits depuis la console d'administration.
+ *
+ * Ceux du dépôt sont déjà dans le paquet : cette liste ne contient que les
+ * ajouts faits après le déploiement. Le front les fusionne, la console
+ * l'emportant à slug égal — c'est ainsi qu'on corrige un texte publié sans
+ * attendre une mise en ligne.
+ *
+ * En cas d'échec, on rend une liste vide plutôt qu'une erreur : le blog doit
+ * rester lisible même API éteinte, puisque l'essentiel est déjà embarqué.
+ */
+export async function chercherArticles(
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<ArticlePublie[]> {
+  try {
+    const reponse = await recuperer(`${base}/articles`)
+    if (!reponse.ok) return []
+    const lu: unknown = await reponse.json()
+    return Array.isArray(lu) ? (lu as ArticlePublie[]) : []
+  } catch {
+    return []
+  }
+}
+

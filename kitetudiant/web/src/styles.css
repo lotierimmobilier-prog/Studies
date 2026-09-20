@@ -1,55 +1,119 @@
+/* ------------------------------------------------------------------ polices
+ * Poppins, la famille du logo, servie DEPUIS CE SITE.
+ *
+ * Passer par fonts.googleapis.com aurait envoyé l'adresse IP de chaque élève
+ * à Google à chaque visite, ce que la page d'accueil promet justement de ne
+ * pas faire. Les fichiers sont donc embarqués : trois graisses, sous-ensemble
+ * latin uniquement — il couvre U+0000-00FF, donc é, à, è, ç, ainsi que œ et
+ * l'euro. 24 Ko en tout.
+ *
+ * Licence SIL Open Font 1.1 (Indian Type Foundry, Jonny Pinhorn, Ninad Kale) ;
+ * le texte de la licence accompagne les fichiers, comme elle l'exige.
+ *
+ * Elle sert aux TITRES, aux chiffres et aux boutons — là où la page doit
+ * ressembler au logo. Le texte courant reste sur la police du système :
+ * Poppins est géométrique et large, très bien en grand, fatigante sur un
+ * paragraphe lu au téléphone.
+ *
+ * « swap » : le texte s'affiche tout de suite dans la police du système et
+ * bascule quand Poppins arrive. Jamais de page blanche en attendant. *
+ * `unicode-range` n'est pas un détail : sans lui, Poppins est réclamée pour
+ * TOUS les caractères, y compris l'espace fine insécable (U+202F) que
+ * « toLocaleString('fr-FR') » place dans « 1 246 » — et qui disparaissait,
+ * donnant « 1246 ». La plage ci-dessous dit exactement ce que Poppins sait
+ * rendre ; tout le reste retombe sur la police du système, qui, elle, sait.
+ * Constaté au navigateur le 20/09/2026.
+ */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./polices/poppins-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./polices/poppins-600.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./polices/poppins-700.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+
 /* Mobile d'abord. Le reste-à-vivre est le plus gros caractère de la page. */
 
+/* ------------------------------------------------------------------ couleurs
+ * Toutes relevées sur le logo, puis ajustées jusqu'au contraste exigé.
+ *
+ *   marine    #19304A   accent d'interface — liens, boutons        13,4:1 ✅
+ *   teal      #1F969A   décor : pictogrammes, accents               3,6:1 ❌
+ *   ambre     #D59C24   verdict « tendu »                           2,4:1 ❌
+ *
+ * Deux des trois teintes ne passent pas pour du texte, là où il en faut 4,5.
+ * Ce site affiche des montants à des lycéens sur téléphone : on garde la
+ * teinte, on corrige la luminosité. Le marine, lui, est repris tel quel.
+ *
+ * Les trois verdicts sont étagés en LUMINOSITÉ autant qu'en teinte, pour ne
+ * pas dépendre de la seule couleur ; chacun reste écrit en toutes lettres.
+ *
+ * En thème sombre, les teintes sont remontées en gardant teinte et saturation
+ * plutôt que mélangées à du blanc, qui les aurait délavées en gris-bleu.
+ */
+
 :root {
-  --fond: #fbfaf8;
-  --encre: #17191c;
-  --doux: #5b6169;
-  --trait: #e2e0db;
+  --fond: #f7f9fa;
+  --encre: #17222e;
+  --doux: #546475;
+  --trait: #dce2e8;
   --carte: #ffffff;
-  --vert: #1f6b46;
-  --orange: #8a5a10;
-  --rouge: #9a2b2b;
-  --gris: #5b6169;
-  --accent: #1d3f78;
-  /* Accent chaud, purement décoratif : jamais utilisé pour un verdict. */
-  --chaud: #c2560f;
-  --ciel-haut: #dbe8fb;
-  --ciel-bas: #f3e9dd;
-  --rayon: 14px;
+  --vert: #14846b;
+  --orange: #7c5a15;
+  --rouge: #8c2a1f;
+  --gris: #546475;
+  --accent: #19304a;
+  /* Accent vif, purement décoratif : jamais utilisé pour un verdict. */
+  --vif: #1b8184;
+  --rayon: 10px;
+  --titres: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --fond: #14161a;
-    --encre: #f2f1ee;
-    --doux: #a6adb6;
-    --trait: #2b3038;
-    --carte: #1b1e24;
-    --vert: #6fd3a0;
-    --orange: #e0ad5a;
-    --rouge: #f09a9a;
-    --gris: #a6adb6;
-    --accent: #9cc0ff;
-    --chaud: #f0a06a;
-    --ciel-haut: #1b2432;
-    --ciel-bas: #241f2b;
+    --fond: #111a22;
+    --encre: #e9eef3;
+    --doux: #8494a7;
+    --trait: #28323d;
+    --carte: #19232e;
+    --vert: #1fcaa2;
+    --orange: #e8c477;
+    --rouge: #da675b;
+    --gris: #8494a7;
+    --accent: #5c8fc8;
+    --vif: #24b0b5;
   }
 }
 
 :root[data-theme='dark'] {
-  --fond: #14161a;
-  --encre: #f2f1ee;
-  --doux: #a6adb6;
-  --trait: #2b3038;
-  --carte: #1b1e24;
-  --vert: #6fd3a0;
-  --orange: #e0ad5a;
-  --rouge: #f09a9a;
-  --gris: #a6adb6;
-  --accent: #9cc0ff;
-  --chaud: #f0a06a;
-  --ciel-haut: #1b2432;
-  --ciel-bas: #241f2b;
+  --fond: #111a22;
+  --encre: #e9eef3;
+  --doux: #8494a7;
+  --trait: #28323d;
+  --carte: #19232e;
+  --vert: #1fcaa2;
+  --orange: #e8c477;
+  --rouge: #da675b;
+  --gris: #8494a7;
+  --accent: #5c8fc8;
+  --vif: #24b0b5;
 }
 
 * { box-sizing: border-box; }
@@ -59,7 +123,9 @@ body {
   background: var(--fond);
   color: var(--encre);
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
+  /* 1.6 plutôt que 1.5 : le texte respire, ce qui compte plus que la taille
+     pour qu'une page paraisse posée. */
+  line-height: 1.6;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -69,7 +135,7 @@ body {
   margin: 0;
   font-size: 1.05rem;
   letter-spacing: 0.14em;
-  font-weight: 700;
+  font-weight: 600;
 }
 .baseline { margin: 0.15rem 0 1.5rem; color: var(--doux); font-size: 0.95rem; }
 
@@ -79,7 +145,7 @@ body {
 .pas.fait { background: var(--accent); }
 
 .compteur { margin: 0; color: var(--doux); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
-.etape h2 { margin: 0.35rem 0 0.25rem; font-size: 1.6rem; line-height: 1.2; }
+.etape h2 { margin: 0.35rem 0 0.3rem; font-size: 1.4rem; font-weight: 600; line-height: 1.25; }
 .aide { margin: 0 0 1.5rem; color: var(--doux); }
 .note { color: var(--doux); font-size: 0.85rem; margin: 0.5rem 0 0; }
 
@@ -127,6 +193,10 @@ body {
   padding: 0.9rem 1rem;
   border-radius: var(--rayon);
   font: inherit;
+  /* Après « font: inherit », qui écrase la famille — et la classe l'emporte
+     sur le sélecteur « button ». Sans cette ligne, les boutons restaient sur
+     la police du système. Constaté au navigateur le 20/09/2026. */
+  font-family: var(--titres);
   font-weight: 600;
   cursor: pointer;
   min-height: 48px;
@@ -305,7 +375,10 @@ input[type='range'] { width: 100%; min-height: 44px; }
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--trait);
 }
-.marque { margin: 0; font-size: 1.05rem; letter-spacing: 0.14em; font-weight: 700; }
+/* Le titre de niveau 1 ne porte plus de texte, mais le logo : les réglages
+   typographiques de l'ancienne marque écrite (interlettrage, graisse) n'ont
+   plus d'objet et fausseraient l'alignement vertical. */
+.marque { margin: 0; font-size: 0; letter-spacing: normal; line-height: 0; }
 .entete-cta {
   padding: 0.45rem 0.9rem;
   border: 1px solid var(--trait);
@@ -325,19 +398,21 @@ input[type='range'] { width: 100%; min-height: 44px; }
 /* ------------------------------------------------------------------ hero */
 .hero { margin: 2rem 0 2.5rem; }
 .hero-sur {
+  font-family: var(--titres);
   margin: 0 0 0.75rem;
   color: var(--accent);
   font-size: 0.78rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.07em;
 }
 .promesse {
   margin: 0 0 1rem;
-  font-size: 2rem;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
-  font-weight: 800;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  /* 700 et non 800 : au-delà, un titre crie. */
+  font-weight: 700;
 }
 .promesse em { font-style: italic; color: var(--accent); }
 .hero-texte { margin: 0 0 1.75rem; color: var(--doux); font-size: 1.02rem; max-width: 34rem; }
@@ -378,9 +453,10 @@ input[type='range'] { width: 100%; min-height: 44px; }
   gap: 0.2rem;
 }
 .bandeau-chiffre {
-  font-size: 1.6rem;
-  font-weight: 800;
-  line-height: 1;
+  font-family: var(--titres);
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.1;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
 }
@@ -388,7 +464,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 
 /* ---------------------------------------------------------------- blocs */
 .bloc { margin-bottom: 2.75rem; }
-.bloc h2 { margin: 0 0 0.4rem; font-size: 1.3rem; letter-spacing: -0.01em; }
+.bloc h2 { margin: 0 0 0.5rem; font-size: 1.2rem; font-weight: 600; letter-spacing: -0.005em; }
 .bloc-intro { margin: 0 0 1.1rem; color: var(--doux); font-size: 0.92rem; }
 .bloc-chute { margin: 1.25rem 0 0; font-size: 0.95rem; }
 
@@ -433,7 +509,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   padding: 0.85rem 1rem;
 }
 .comparaison-ville { font-weight: 600; }
-.comparaison-montant { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.comparaison-montant { font-family: var(--titres); font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .comparaison-m2 { grid-column: 1 / -1; color: var(--doux); font-size: 0.8rem; }
 
 .etapes-accueil { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
@@ -455,14 +531,14 @@ input[type='range'] { width: 100%; min-height: 44px; }
   text-align: center;
   margin-bottom: 2rem;
 }
-.cta-final h2 { margin: 0 0 0.5rem; font-size: 1.35rem; letter-spacing: -0.01em; }
+.cta-final h2 { margin: 0 0 0.5rem; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.005em; }
 .cta-final p { margin: 0 0 1.25rem; color: var(--doux); font-size: 0.95rem; }
 .cta-final .principal { width: 100%; font-size: 1.02rem; padding: 1rem; }
 .cta-final .hero-mentions { margin-top: 0.8rem; }
 
 /* Au-delà du téléphone : deux puis trois colonnes, et un titre qui respire. */
 @media (min-width: 40rem) {
-  .promesse { font-size: 2.6rem; }
+  .promesse { font-size: 2.25rem; }
   .cta-groupe { flex-direction: row; align-items: center; }
   .cta-groupe .principal { width: auto; flex: 0 1 auto; padding-inline: 2rem; }
   .cta-groupe .cta-secondaire { flex: 0 0 auto; }
@@ -628,27 +704,11 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .sous-question { margin-top: 0.4rem; }
 .sous-question .champ-label { display: block; margin-bottom: 0.5rem; }
 
-/* ------------------------------------------------------------ illustrations */
-/* Dessinées en SVG dans illustrations.tsx : aucune requête vers un service
-   tiers, donc aucune adresse IP d'élève communiquée pour afficher une image.
-   Les couleurs passent par les variables de thème, donc elles suivent le mode
-   clair comme le mode sombre sans seconde version du dessin. */
 
-.illu-ville {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin-top: 1.75rem;
-  border-radius: var(--rayon);
-}
-.illu-ciel-haut { stop-color: var(--ciel-haut); }
-.illu-ciel-bas { stop-color: var(--ciel-bas); }
-.illu-astre { fill: var(--chaud); opacity: 0.85; }
-.illu-loin rect { fill: var(--accent); opacity: 0.28; }
-.illu-pres rect { fill: var(--accent); opacity: 0.6; }
-.illu-fenetres rect { fill: var(--chaud); opacity: 0.9; }
-.illu-sol { fill: var(--accent); opacity: 0.16; }
-.illu-chemin { fill: var(--chaud); opacity: 0.22; }
+/* ------------------------------------------------------------ pictogrammes */
+/* Dessinés en SVG dans illustrations.tsx : aucune requête vers un tiers, donc
+   aucune adresse IP d'élève communiquée pour les afficher, et les couleurs
+   suivent le thème sans seconde version. */
 
 .illu-picto {
   width: 1.45rem;
@@ -661,64 +721,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
    ci-dessus ne remplit que les formes pleines (le point du porte-monnaie). */
 
 /* Une épingle devant le titre des loyers. */
-.bloc h2 .illu-picto { margin-right: 0.45rem; color: var(--chaud); }
-
-@media (prefers-reduced-motion: no-preference) {
-  /* Les fenêtres s'allument doucement à l'arrivée sur la page. Discret, et
-     désactivé pour qui a demandé moins d'animation. */
-  .illu-fenetres rect { animation: illu-allumage 1.2s ease-out both; }
-  .illu-fenetres rect:nth-child(3n) { animation-delay: 0.15s; }
-  .illu-fenetres rect:nth-child(3n + 1) { animation-delay: 0.3s; }
-}
-@keyframes illu-allumage {
-  from { opacity: 0; }
-  to { opacity: 0.9; }
-}
-
-/* ------------------------------------------- les quatre grandes illustrations */
-/* Fichiers WebP embarqués dans le paquet, jamais appelés chez un tiers : aucune
-   adresse IP d'élève n'est communiquée pour les afficher (cf. illustrations.tsx).
-   Elles sont décoratives — `alt` vide, `aria-hidden` — et ne portent aucun
-   chiffre : le sens reste dans le texte qu'elles accompagnent. */
-
-.illu-photo {
-  display: block;
-  width: 100%;
-  /* Indispensable : l'attribut `height` de la balise — celui qui réserve la
-     place pendant le chargement — vaut sinon hauteur imposée, et l'image
-     s'affiche étirée sur 941 px de haut quelle que soit la largeur.
-     Constaté au navigateur le 20/09/2026, invisible aux tests unitaires. */
-  height: auto;
-  margin: 1.5rem 0;
-  border-radius: var(--rayon);
-  /* Le ton du fond des fichiers : le cadre ne clignote pas en blanc pendant
-     que l'image arrive, et sa place est déjà réservée par width/height. */
-  background: var(--ciel-haut);
-  /* Sur téléphone, le format natif (~16/9) réduirait les personnages à presque
-     rien. On resserre, et on coupe le côté laissé vide par l'illustration. */
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
-.illu-photo-gauche { object-position: 15% center; }
-.illu-photo-droite { object-position: 85% center; }
-
-/* La silhouette dessinée ferme la page, au-dessus du dernier appel à l'action.
-   Volontairement plus petite que les quatre illustrations : c'est un ornement,
-   pas une cinquième image. */
-.cta-final .illu-ville { margin: 0 auto 1.5rem; max-width: 21rem; }
-
-@media (min-width: 40rem) {
-  /* Assez large pour montrer l'illustration entière : plus de recadrage. */
-  .illu-photo { aspect-ratio: 1672 / 941; object-position: center; }
-}
-
-/* En thème sombre, ces illustrations très claires éblouissent à côté d'un fond
-   presque noir. On les assombrit légèrement plutôt que d'en fabriquer une
-   seconde version. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .illu-photo { filter: brightness(0.82) saturate(0.9); }
-}
-:root[data-theme='dark'] .illu-photo { filter: brightness(0.82) saturate(0.9); }
+.bloc h2 .illu-picto { margin-right: 0.45rem; color: var(--vif); }
 
 /* ------------------------------------------------------------- collection */
 /* Noms préfixés « carte-collec- » et « collec- » : « .carte » est déjà pris par
@@ -744,7 +747,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   font-weight: 600;
   cursor: pointer;
 }
-.pastille:hover { border-color: var(--chaud); color: var(--chaud); }
+.pastille:hover { border-color: var(--vif); color: var(--vif); }
 /* Sur un téléphone, le nombre suffit : le mot prend la place du bouton voisin. */
 .pastille-libelle { display: none; }
 
@@ -774,11 +777,11 @@ input[type='range'] { width: 100%; min-height: 44px; }
 }
 /* La rareté se lit à la couleur du liseré. Elle vient du décile réel du loyer
    parmi les communes couvertes, jamais d'un tirage (cf. collection.ts). */
-.carte-collec-rare { border-top-color: var(--chaud); }
+.carte-collec-rare { border-top-color: var(--vif); }
 .carte-collec-peu-frequente { border-top-color: var(--accent); }
 .carte-collec-courante { border-top-color: var(--gris); }
 
-.carte-collec-rarete {
+.carte-collec-mention {
   margin: 0 0 0.35rem;
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -787,6 +790,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 }
 .carte-collec-titre { margin: 0 0 0.2rem; font-size: 1.05rem; line-height: 1.25; }
 .carte-collec-valeur {
+  font-family: var(--titres);
   margin: 0 0 0.4rem;
   font-size: 1.5rem;
   font-weight: 700;
@@ -841,7 +845,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   color: var(--doux);
   font-size: 0.88rem;
 }
-.carte-lieu .illu-picto { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--chaud); }
+.carte-lieu .illu-picto { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--vif); }
 
 /* La note de l'adresse : discrète, et jamais présentée comme un quatrième
    critère. Le libellé dit « sur l'adresse », jamais « l'école ». */
@@ -855,7 +859,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   color: var(--doux);
 }
 .pastille-note-valeur { font-weight: 700; color: var(--encre); font-variant-numeric: tabular-nums; }
-.etoiles { color: var(--chaud); letter-spacing: 0.05em; }
+.etoiles { color: var(--vif); letter-spacing: 0.05em; }
 .etoiles-vides { opacity: 0.28; }
 
 /* Les trois cases. Même largeur, même graisse : aucune ne domine. */
@@ -881,10 +885,11 @@ input[type='range'] { width: 100%; min-height: 44px; }
   color: var(--doux);
 }
 .trio-valeur {
-  font-size: 1.15rem;
-  font-weight: 800;
-  line-height: 1.15;
-  letter-spacing: -0.02em;
+  font-family: var(--titres);
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
 .trio-note { font-size: 0.7rem; color: var(--doux); line-height: 1.3; }
@@ -917,4 +922,199 @@ input[type='range'] { width: 100%; min-height: 44px; }
   .trio { grid-template-columns: 1fr; }
   .trio-case { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
   .trio-note { display: none; }
+}
+
+/* ------------------------------------------------------------------- logo */
+/* Deux découpes du logo fourni, assemblées en bandeau horizontal. La bascule
+   clair/sombre se fait dans marque.tsx, par <picture> : le navigateur ne
+   télécharge que la version dont il a besoin. */
+
+.marque-logo { display: inline-flex; align-items: center; }
+.marque-mot { display: block; width: auto; height: 1.3rem; }
+/* Signature de la marque : du texte, pas une image — net à toute taille, lu
+   par un lecteur d'écran, et traduisible. */
+.marque-logo-signee { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+.marque-logo-signee .marque-mot { height: 1.6rem; }
+.marque-signature {
+  font-family: var(--titres);
+  font-size: 0.8rem;
+  /* Sans cela, la signature hérite du gras du « h1 » qui la contient. */
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--doux);
+  letter-spacing: 0.005em;
+}
+
+/* Poppins pour les titres, les boutons et les chiffres — le reste garde la
+   police du système. Par sélecteurs d'élément plutôt que par une règle
+   groupée de classes : la feuille interdit qu'une classe soit définie deux
+   fois au premier niveau, et styles.test.ts le vérifie. */
+h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }
+
+/* ------------------------------------------------------------ chronologie */
+/* Les dates de la dernière session, en repère. L'avertissement est au-dessus
+   des dates, pas en bas de page : un élève qui se fierait à une date périmée
+   manquerait un vœu. */
+
+.avertissement-calendrier {
+  margin: 0 0 1.5rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--orange);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  font-size: 0.88rem;
+  color: var(--doux);
+}
+.avertissement-calendrier strong { color: var(--encre); }
+
+.chrono { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.75rem; }
+
+.chrono-phase {
+  position: relative;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--trait);
+}
+/* La pastille qui marque le début d'une phase sur le fil. */
+.chrono-phase::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 0.35rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--vif);
+}
+
+.chrono-periode {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--doux);
+}
+.chrono-titre { margin: 0.15rem 0 0.35rem; font-size: 1.02rem; line-height: 1.3; }
+.chrono-resume { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.9rem; }
+
+.chrono-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.chrono-etape { display: flex; flex-direction: column; gap: 0.1rem; }
+.chrono-date {
+  font-family: var(--titres);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.chrono-quoi { font-size: 0.92rem; }
+.chrono-detail { color: var(--doux); font-size: 0.85rem; }
+
+.chrono-note {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  color: var(--doux);
+  font-style: italic;
+}
+.chrono-source { margin-top: 1.5rem; }
+
+@media (min-width: 40rem) {
+  /* La date passe en colonne : l'œil balaie le fil sans lire les libellés. */
+  .chrono-etape { display: grid; grid-template-columns: 12rem 1fr; gap: 0.1rem 1rem; }
+  .chrono-date { grid-row: span 2; padding-top: 0.1rem; }
+  .chrono-detail { grid-column: 2; }
+}
+
+/* ------------------------------------------------------------------- blog */
+/* Le corps d'un article est une suite de blocs typés rendus par des
+   composants : aucun HTML brut n'est injecté, donc un article écrit depuis la
+   console d'administration ne peut pas exécuter de script. */
+
+.entete-lien {
+  border: none;
+  background: none;
+  padding: 0.5rem 0.2rem;
+  min-height: 44px;
+  color: var(--doux);
+  font: inherit;
+  font-family: var(--titres);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.entete-lien:hover { color: var(--accent); }
+
+.articles { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+
+.article-vignette {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: inherit;
+  text-decoration: none;
+}
+.article-vignette:hover { border-color: var(--accent); }
+.article-vignette-titre {
+  margin: 0 0 0.3rem;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--accent);
+}
+.article-vignette-chapeau { margin: 0; color: var(--doux); font-size: 0.9rem; }
+.article-vignette-pied {
+  margin: 0.6rem 0 0;
+  color: var(--doux);
+  font-size: 0.78rem;
+}
+
+/* Un article se lit : colonne étroite, interligne généreux. */
+.article { max-width: 38rem; }
+.article-pied {
+  margin: 0 0 0.4rem;
+  color: var(--doux);
+  font-size: 0.78rem;
+  text-transform: lowercase;
+}
+.article-titre {
+  margin: 0 0 0.6rem;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+.article-chapeau {
+  margin: 0 0 1.75rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--doux);
+}
+.article-titre-section {
+  margin: 2rem 0 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.article-paragraphe { margin: 0 0 1.1rem; line-height: 1.7; }
+.article-liste { margin: 0 0 1.1rem; padding-left: 1.2rem; line-height: 1.7; }
+.article-liste li { margin-bottom: 0.5rem; }
+
+.article-encadre {
+  margin: 1.4rem 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--vif);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  line-height: 1.6;
+}
+
+.article-source {
+  margin: 2.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 40rem) {
+  .articles-apercu { grid-template-columns: repeat(3, 1fr); }
+  .article-titre { font-size: 2rem; }
 }

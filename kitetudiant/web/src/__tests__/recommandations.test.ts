@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 
 import { estUnChoix, troisChoix, type Proposition } from '../recommandations.ts'
 import type { ResultatFormation } from '../calcul.ts'
+import { euros } from '../nombres.ts'
 
 /**
  * Fabrique un résultat minimal. On ne construit que ce que les trois choix
@@ -105,7 +106,10 @@ describe('les trois choix', () => {
   it('choisit le meilleur reste-à-vivre pour le critère économique', () => {
     const eco = critere(troisChoix(jeu, null, false), 'economique')
     expect(estUnChoix(eco) && eco.resultat.formation.id).toBe('b')
-    expect(estUnChoix(eco) && eco.valeur).toBe('380 € par mois')
+    // Comparé à la mise en forme partagée plutôt qu'à une chaîne recopiée :
+    // les espaces y sont insécables, et une chaîne écrite à la main dériverait
+    // au premier changement de typographie.
+    expect(estUnChoix(eco) && eco.valeur).toBe(`${euros(380)} par mois`)
   })
 
   it('ne choisit jamais deux fois le même critère au même endroit', () => {

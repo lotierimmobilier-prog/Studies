@@ -25,7 +25,19 @@ import {
   SOURCE_PARCOURSUP,
   TYPOLOGIE_LOYERS,
 } from './donnees.ts'
-import { Boussole, Carnet, Epingle, Photo, PorteMonnaie, Ville } from './illustrations.tsx'
+import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
+import { Marque } from './marque.tsx'
+import { ARTICLES } from '../../packages/articles/src/index.ts'
+import { cheminDe } from './routes.ts'
+import {
+  AVERTISSEMENT,
+  enToutesLettres,
+  MILLESIME_CALENDRIER,
+  PHASES,
+  RELEVE_LE,
+  SOURCE_CALENDRIER,
+} from './calendrier.ts'
+import { euros, eurosPrecis, nombre } from './nombres.ts'
 
 /** Surface du logement type servant à l'illustration. */
 const SURFACE = 25
@@ -38,16 +50,8 @@ interface LigneVille {
   readonly loyer: NonNullable<ReturnType<typeof loyerDe>>
 }
 
-function euros(v: number): string {
-  return `${Math.round(v).toLocaleString('fr-FR')} €`
-}
-
 function eurosParM2(v: number): string {
-  return `${v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €/m²`
-}
-
-function nombre(v: number): string {
-  return v.toLocaleString('fr-FR')
+  return `${eurosPrecis(v)}/m²`
 }
 
 /**
@@ -75,7 +79,7 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
         L’école supérieure qui te va, <em>et</em> dans laquelle tu pourras tenir.
       </h1>
       <p className="hero-texte">
-        Fac, BUT, BTS, école d’ingénieurs, prépa : KITETUDIANT regarde chaque formation
+        Fac, BUT, BTS, école d’ingénieurs, prépa : KitEtudiant.fr regarde chaque formation
         sous trois angles — tes chances d’y entrer, ce qu’elle vaut pour toi, et ce qu’il
         te restera pour vivre une fois sur place. Trois réponses, jamais fondues en une
         note.
@@ -91,7 +95,6 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
       <p className="hero-mentions">
         Sept questions · aperçu sans compte · aucune note enregistrée
       </p>
-      <Photo nom="campus" prioritaire />
     </section>
   )
 }
@@ -158,7 +161,6 @@ function Piliers() {
         Une école excellente et inabordable reste inabordable. Une école abordable qui ne
         te ressemble pas se quitte au bout d’un an.
       </p>
-      <Photo nom="avenir" />
       <div className="piliers-grille">
         {PILIERS.map((a, i) => {
           const Picto = PICTOS[i] ?? Boussole
@@ -211,7 +213,6 @@ function Comparaison() {
         Le même studio de {SURFACE} m², loyer d’annonce charges comprises, millésime{' '}
         {MILLESIME_LOYERS}.
       </p>
-      <Photo nom="logement" />
       <ul className="comparaison">
         {triees.map((l) => (
           <li key={l.code}>
@@ -232,28 +233,90 @@ function Comparaison() {
   )
 }
 
+/* ------------------------------------------------------- la chronologie */
+
+/**
+ * Le calendrier de la dernière session, en repère.
+ *
+ * L'avertissement est DANS le bloc, avant les dates, et non relégué en note de
+ * bas de page : un élève qui se fierait à une date périmée manquerait un vœu.
+ * Il vient de calendrier.ts, pour qu'aucune vue ne puisse afficher les dates
+ * sans lui.
+ */
+function Chronologie() {
+  return (
+    <section className="bloc" id="calendrier">
+      <h2>Le calendrier, dans les grandes lignes</h2>
+      <p className="bloc-intro">
+        Trois phases qui se suivent toujours dans le même ordre : on regarde, on
+        formule, on répond. Ce qui change d’une année sur l’autre, ce sont les dates.
+      </p>
+
+      <p className="avertissement-calendrier">
+        <strong>À lire avant de noter quoi que ce soit.</strong> {AVERTISSEMENT}
+      </p>
+
+      <ol className="chrono">
+        {PHASES.map((phase) => (
+          <li className="chrono-phase" key={phase.numero}>
+            <p className="chrono-periode">{phase.periode}</p>
+            <h3 className="chrono-titre">{phase.titre}</h3>
+            <p className="chrono-resume">{phase.resume}</p>
+            <ul className="chrono-etapes">
+              {phase.etapes.map((e) => (
+                <li className="chrono-etape" key={e.le}>
+                  <time className="chrono-date" dateTime={e.le}>
+                    {enToutesLettres(e.le)}
+                  </time>
+                  <span className="chrono-quoi">{e.titre}</span>
+                  {e.detail !== null ? <span className="chrono-detail">{e.detail}</span> : null}
+                </li>
+              ))}
+            </ul>
+            {phase.note !== null ? <p className="chrono-note">{phase.note}</p> : null}
+          </li>
+        ))}
+      </ol>
+
+      <p className="sources chrono-source">
+        {SOURCE_CALENDRIER}, millésime {MILLESIME_CALENDRIER}, relevé le{' '}
+        {dateLisible(RELEVE_LE)}.
+      </p>
+    </section>
+  )
+}
+
 /* ----------------------------------------------------------------- la page */
 
 export function Accueil({
   onCommencer,
   onCollection,
+  onBlog,
+  onArticle,
   cartes,
 }: {
   onCommencer: () => void
   onCollection: () => void
+  onBlog: () => void
+  onArticle: (slug: string) => void
   /** Nombre de cartes déjà gagnées. Zéro : la pastille ne s'affiche pas. */
   cartes: number
 }) {
   return (
     <main className="app accueil">
       <header className="entete entete-accueil">
-        <h1 className="marque">KITETUDIANT</h1>
+        <h1 className="marque">
+          <Marque signature />
+        </h1>
         <div className="entete-actions">
+          <button type="button" className="entete-lien" onClick={onBlog}>
+            Le blog
+          </button>
           {/* La collection n'apparaît qu'une fois la première carte gagnée :
               pour un visiteur qui découvre le site, ce serait du bruit. */}
           {cartes > 0 ? (
             <button type="button" className="pastille" onClick={onCollection}>
-              <span aria-hidden="true">◆</span> {cartes}
+              {cartes}
               <span className="pastille-libelle"> cartes</span>
             </button>
           ) : null}
@@ -270,7 +333,6 @@ export function Accueil({
 
       <section className="bloc" id="methode">
         <h2>Comment ça marche</h2>
-        <Photo nom="dossier" />
         <ol className="etapes-accueil">
           <li>
             <strong>Tu réponds à sept questions.</strong> Ton bac, tes notes — importées
@@ -302,6 +364,8 @@ export function Accueil({
           </button>
         </div>
       </section>
+
+      <Chronologie />
 
       <section className="bloc">
         <h2>Ce que ce site ne fait pas</h2>
@@ -348,8 +412,38 @@ export function Accueil({
         </ul>
       </section>
 
+      <section className="bloc" id="blog">
+        <h2>Bien gérer sa scolarité</h2>
+        <p className="bloc-intro">
+          Ce qu’il faut comprendre de la procédure, comment monter un dossier qui tient,
+          et comment choisir une ville où l’on pourra rester jusqu’au diplôme.
+        </p>
+        <ul className="articles articles-apercu">
+          {ARTICLES.slice(0, 3).map((a) => (
+            <li key={a.slug}>
+              <a
+                className="article-vignette"
+                href={cheminDe({ vue: 'article', slug: a.slug })}
+                onClick={(ev) => {
+                  if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return
+                  ev.preventDefault()
+                  onArticle(a.slug)
+                }}
+              >
+                <h3 className="article-vignette-titre">{a.titre}</h3>
+                <p className="article-vignette-chapeau">{a.chapeau}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div className="cta-groupe cta-groupe-bloc">
+          <button type="button" className="secondaire" onClick={onBlog}>
+            Tous les articles
+          </button>
+        </div>
+      </section>
+
       <section className="cta-final">
-        <Ville />
         <h2>Tes vœux se décident maintenant.</h2>
         <p>
           Sept questions, et tu sauras lesquels tu peux tenir jusqu’au diplôme.
@@ -364,7 +458,7 @@ export function Accueil({
 
       <footer className="pieds">
         <p className="non-affiliation">
-          KITETUDIANT n’est pas affilié à Parcoursup, au ministère de l’Enseignement
+          KitEtudiant.fr n’est pas affilié à Parcoursup, au ministère de l’Enseignement
           supérieur ni aux CROUS.
         </p>
       </footer>

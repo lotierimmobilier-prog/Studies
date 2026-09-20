@@ -15,9 +15,9 @@
  *   - règle 6 : chaque carte qui porte un euro porte sa source et son millésime.
  *     Une carte sans chiffre n'a pas de provenance, et c'est écrit `null`, pas
  *     une chaîne vide ;
- *   - la rareté n'est pas inventée. C'est le décile du loyer de la commune
- *     parmi les 1 246 couvertes : une ville très chère ou très bon marché est
- *     rare parce qu'elle l'est réellement dans les données.
+ *   - rien n'est inventé, pas même la couleur d'une carte. Elle vient du
+ *     décile du loyer de la commune parmi les 1 246 couvertes, et ce décile
+ *     est aussi écrit en toutes lettres au-dessus du titre.
  *
  * Rien ne part au serveur. La collection vit dans le navigateur, comme les
  * notes et les vœux, et la promesse « aucune note enregistrée » reste vraie.
@@ -31,16 +31,28 @@ import {
   SOURCE_LOYERS,
   SURFACE_TYPE,
 } from './donnees.ts'
+import { euros } from './nombres.ts'
 
 /* ------------------------------------------------------------------ rareté */
 
 export type Rarete = 'courante' | 'peu-frequente' | 'rare'
 
-/** Libellé affiché pour chaque rareté. */
-export const LIBELLE_RARETE: Readonly<Record<Rarete, string>> = {
-  courante: 'courante',
-  'peu-frequente': 'peu fréquente',
-  rare: 'rare',
+/**
+ * Ce qui est écrit au-dessus du titre d'une carte de ville.
+ *
+ * « rare », « peu fréquente » : ce vocabulaire de collection disait au fond
+ * quelque chose de vérifiable — la place du loyer parmi les communes
+ * couvertes. Autant l'écrire. On y gagne une information utile et on y perd
+ * un ton de jeu qui n'allait pas à un outil d'orientation.
+ *
+ * La rareté reste, mais seulement comme accent de couleur.
+ */
+export function situationDuLoyer(decile: number): string {
+  if (decile <= 1) return 'parmi les 10 % de communes les moins chères'
+  if (decile <= 3) return 'moins chère que sept communes sur dix'
+  if (decile >= 10) return 'parmi les 10 % de communes les plus chères'
+  if (decile >= 8) return 'plus chère que sept communes sur dix'
+  return 'loyer proche de la médiane des communes couvertes'
 }
 
 /**
@@ -73,6 +85,8 @@ export type Famille = 'ville' | 'etape' | 'ecart'
 export interface Carte {
   readonly id: string
   readonly famille: Famille
+  /** La ligne au-dessus du titre. `null` quand il n'y a rien de factuel à dire. */
+  readonly mention: string | null
   readonly titre: string
   /** Le chiffre que porte la carte, déjà mis en forme. `null` s'il n'y en a pas. */
   readonly valeur: string | null
@@ -140,10 +154,6 @@ export function idEtape(etape: IdEtape): string {
   return `etape:${etape}`
 }
 
-function euros(v: number): string {
-  return `${Math.round(v).toLocaleString('fr-FR')} €`
-}
-
 /**
  * La carte d'une commune, ou `null` si son loyer est inconnu.
  *
@@ -158,6 +168,7 @@ export function carteVille(codeInsee: string): Carte | null {
   return {
     id: idVille(codeInsee),
     famille: 'ville',
+    mention: situationDuLoyer(decile),
     titre: nom.replace(/\s+Arrondissement$/i, ''),
     valeur: `${euros(loyer.euroParM2.central * SURFACE_TYPE)} / mois`,
     detail: `Studio de ${SURFACE_TYPE} m², loyer d’annonce charges comprises.`,
@@ -172,6 +183,8 @@ export function carteEtape(etape: IdEtape): Carte {
   return {
     id: idEtape(etape),
     famille: 'etape',
+    // Une étape franchie n'a pas de chiffre : rien à mentionner au-dessus.
+    mention: null,
     titre: def.titre,
     valeur: null,
     detail: def.detail,
@@ -205,6 +218,7 @@ export function carteEcart(codesInsee: readonly string[]): Carte | null {
   return {
     id: 'ecart',
     famille: 'ecart',
+    mention: 'entre les deux villes que tu as comparées',
     titre: 'L’écart',
     valeur: `${euros(ecart)} / mois`,
     detail: `Ce qui sépare ${lisible(bas.nom)} de ${lisible(haut.nom)}, à logement identique.`,
