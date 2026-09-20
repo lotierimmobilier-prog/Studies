@@ -22,7 +22,6 @@
 import { useEffect, useState } from 'react'
 
 import { FilAriane } from './filAriane.tsx'
-import { MarqueLien } from './marque.tsx'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import {
   formationsDeLEtablissement,
@@ -85,19 +84,6 @@ export function PageEtablissement({
 
   return (
     <main className="app app-large">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button
-          type="button"
-          className="entete-cta"
-          onClick={() => onNaviguer({ vue: 'recherche' })}
-        >
-          Chercher une école
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },
@@ -108,7 +94,7 @@ export function PageEtablissement({
       />
 
       <section className="bloc">
-        <h2>{nom}</h2>
+        <h1>{nom}</h1>
         {premiere !== undefined ? (
           <p className="bloc-intro">
             {premiere.ville} ({premiere.departement}) · académie de {premiere.academie}

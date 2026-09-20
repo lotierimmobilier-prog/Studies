@@ -29,7 +29,6 @@ import {
   type Obtention,
 } from './collection.ts'
 import { NOMBRE_COMMUNES_AVEC_LOYER } from './donnees.ts'
-import { MarqueLien } from './marque.tsx'
 import { nombre } from './nombres.ts'
 import { FilAriane } from './filAriane.tsx'
 import type { Route } from './routes.ts'
@@ -231,12 +230,10 @@ const TOUTES_RECOMPENSES = (
 
 export function Collection({
   collection,
-  onRetour,
   onNaviguer,
   onImporter,
 }: {
   collection: readonly Obtention[]
-  onRetour: () => void
   onNaviguer: (route: Route) => void
   onImporter: (cartes: Obtention[]) => void
 }) {
@@ -260,15 +257,6 @@ export function Collection({
 
   return (
     <main className="app app-large">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button type="button" className="entete-cta" onClick={onRetour}>
-          Retour
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },

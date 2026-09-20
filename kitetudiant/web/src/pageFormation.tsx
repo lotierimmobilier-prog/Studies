@@ -34,7 +34,6 @@ import { useEffect, useState } from 'react'
 import { CarteALaDemande } from './carte.tsx'
 import { FilAriane } from './filAriane.tsx'
 import { liensLogement } from './logement.ts'
-import { MarqueLien } from './marque.tsx'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import {
@@ -356,19 +355,6 @@ export function PageFormation({
 
   return (
     <main className="app">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button
-          type="button"
-          className="entete-cta"
-          onClick={() => onNaviguer({ vue: 'recherche' })}
-        >
-          Chercher une école
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },
@@ -419,7 +405,7 @@ export function PageFormation({
       {formation !== null && etat === 'prete' ? (
         <article className="fiche-formation">
           <header className="fiche-entete">
-            <h2>{formation.libelle}</h2>
+            <h1>{formation.libelle}</h1>
             <p className="fiche-lieu">
               {formation.uai !== null ? (
                 <a href={cheminDe({ vue: 'etablissement', uai: formation.uai })}

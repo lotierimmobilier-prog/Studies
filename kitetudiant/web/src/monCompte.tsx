@@ -39,7 +39,6 @@ import {
   type ProfilCompte,
 } from './donnees.ts'
 import { FilAriane } from './filAriane.tsx'
-import { MarqueLien } from './marque.tsx'
 import { nombre } from './nombres.ts'
 import { chargerCollection, villesDe } from './collection.ts'
 import { LIBELLES_MATIERE } from '../../packages/profil-scolaire/src/index.ts'
@@ -394,19 +393,6 @@ export function MonCompte({
 
   return (
     <main className="app app-large">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button
-          type="button"
-          className="entete-cta"
-          onClick={() => onNaviguer({ vue: 'accueil' })}
-        >
-          Retour au site
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },

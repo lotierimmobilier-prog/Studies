@@ -40,10 +40,8 @@ import {
   TYPOLOGIE_LOYERS,
 } from './donnees.ts'
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
-import { Marque } from './marque.tsx'
 import { ARTICLES } from '../../packages/articles/src/index.ts'
 import { cheminDe, type Route } from './routes.ts'
-import { Menu } from './menu.tsx'
 import {
   AVERTISSEMENT,
   enToutesLettres,
@@ -343,38 +341,15 @@ function Chronologie() {
 
 export function Accueil({
   onCommencer,
-  onCollection,
   onNaviguer,
   onArticle,
-  onDeconnexion,
-  connecte,
-  cartes,
 }: {
   onCommencer: () => void
-  onCollection: () => void
   onNaviguer: (route: Route) => void
   onArticle: (slug: string) => void
-  onDeconnexion: () => void
-  connecte: boolean
-  /** Nombre de cartes déjà gagnées. Zéro : la pastille ne s'affiche pas. */
-  cartes: number
 }) {
   return (
     <main className="app accueil">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <Marque signature />
-        </h1>
-        <Menu
-          connecte={connecte}
-          cartes={cartes}
-          onNaviguer={onNaviguer}
-          onCollection={onCollection}
-          onDeconnexion={onDeconnexion}
-          onCommencer={onCommencer}
-        />
-      </header>
-
       {/* L'accroche et sa photographie forment UNE zone, pas deux blocs
           empilés. Sur un grand écran elles se posent côte à côte : sans cela,
           la moitié droite de l'écran restait vide à hauteur du titre, ce qui

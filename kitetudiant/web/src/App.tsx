@@ -43,6 +43,7 @@ import {
 import { Collection } from './collection.tsx'
 import { Chargement, type EtapeCalcul } from './chargement.tsx'
 import { RechercheEcoles } from './rechercheEcoles.tsx'
+import { BarreNavigation } from './navigation.tsx'
 import { PageFormation } from './pageFormation.tsx'
 import { PageEtablissement } from './pageEtablissement.tsx'
 import { MonCompte } from './monCompte.tsx'
@@ -50,7 +51,6 @@ import { Cle, Epingle, Etoile, Fiche, Loupe, Residence, Toit } from './illustrat
 import { liensLogement } from './logement.ts'
 import { moyenneGenerale } from '../../packages/profil-scolaire/src/index.ts'
 import { trancheMoyenne, trancheReste } from '../../packages/statistiques/src/index.ts'
-import { MarqueLien } from './marque.tsx'
 import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
 import { ListeArticles, PageArticle } from './blog.tsx'
 import { cheminDe, routeDuChemin, type Route } from './routes.ts'
@@ -794,8 +794,34 @@ export default function App() {
   const affiches = useMemo(() => classer(retenus, classement), [retenus, classement])
 
   /* Posé avant toute vue : l'attente couvre l'écran, quelle que soit la page
-     d'où l'on est parti — la dernière question du parcours, ou l'accueil. */
+     d'où l'on est parti — la dernière question du parcours, ou l'accueil.
+     C'est le seul écran SANS la barre de navigation : pendant qu'un calcul
+     tourne, proposer d'aller ailleurs ne ferait que le faire perdre. */
   if (enCours) return <Chargement etape={etapeCalcul} />
+
+  /**
+   * La coque commune à tous les écrans : la barre de navigation, puis la
+   * page.
+   *
+   * Elle est appliquée ici, une fois, plutôt que dans chaque composant
+   * d'écran. Chaque écran portait auparavant son propre en-tête avec UN
+   * bouton différent — « Retour au site », « Tous les articles », « Chercher
+   * une école » — si bien que, depuis n'importe où, une seule destination
+   * était atteignable, et jamais la même.
+   */
+  const coque = (page: React.ReactNode) => (
+    <div className="coque">
+      <BarreNavigation
+        vue={vue}
+        connecte={connecte}
+        cartes={nombreCartes}
+        onNaviguer={naviguer}
+        onCollection={() => setVue('collection')}
+        onDeconnexion={() => void seDeconnecter()}
+      />
+      <div className="coque-page">{page}</div>
+    </div>
+  )
 
   /* Les deux pages à clé pivot. Elles sont posées avant les autres vues
      parce qu'elles se suffisent à elles-mêmes : elles ne dépendent ni du
@@ -803,7 +829,7 @@ export default function App() {
      d'ouvrir une adresse de formation reçue par message sans rien avoir
      rempli au préalable. */
   if (vue === 'formation' && adresse.vue === 'formation') {
-    return (
+    return coque(
       <PageFormation
         code={adresse.code}
         onNaviguer={naviguer}
@@ -816,11 +842,11 @@ export default function App() {
   }
 
   if (vue === 'etablissement' && adresse.vue === 'etablissement') {
-    return <PageEtablissement uai={adresse.uai} onNaviguer={naviguer} />
+    return coque(<PageEtablissement uai={adresse.uai} onNaviguer={naviguer} />)
   }
 
   if (vue === 'recherche') {
-    return (
+    return coque(
       <RechercheEcoles
         onNaviguer={naviguer}
         onCommencer={() => {
@@ -832,7 +858,7 @@ export default function App() {
   }
 
   if (vue === 'compte') {
-    return (
+    return coque(
       <MonCompte
         /* `reponses` vaut REPONSES_PAR_DEFAUT tant que rien n'a été rempli.
            Les afficher telles quelles donnerait à l'élève un récapitulatif
@@ -847,12 +873,11 @@ export default function App() {
   }
 
   if (vue === 'blog') {
-    return (
+    return coque(
       <ListeArticles
         articles={articles}
         onNaviguer={naviguer}
         onArticle={(s) => naviguer({ vue: 'article', slug: s })}
-        onRetour={() => naviguer({ vue: 'accueil' })}
       />
     )
   }
@@ -862,20 +887,18 @@ export default function App() {
     // Adresse inconnue : on montre la liste plutôt qu'une page vide, et on
     // remet l'adresse d'aplomb pour ne pas laisser une URL morte dans la barre.
     if (article === undefined) {
-      return (
+      return coque(
         <ListeArticles
           articles={articles}
           onNaviguer={naviguer}
           onArticle={(s) => naviguer({ vue: 'article', slug: s })}
-          onRetour={() => naviguer({ vue: 'accueil' })}
-        />
+        />,
       )
     }
-    return (
+    return coque(
       <PageArticle
         article={article}
         onNaviguer={naviguer}
-        onBlog={() => naviguer({ vue: 'blog' })}
         onCommencer={() => {
           naviguer({ vue: 'accueil' })
           setVue('parcours')
@@ -885,11 +908,10 @@ export default function App() {
   }
 
   if (vue === 'collection') {
-    return (
+    return coque(
       <Collection
         collection={collection}
         onNaviguer={naviguer}
-        onRetour={() => setVue(resultats === null ? 'accueil' : 'parcours')}
         onImporter={(cartes) => {
           setCollection((actuelle) => {
             const suivante = ajouter(
@@ -906,15 +928,11 @@ export default function App() {
   }
 
   if (vue === 'accueil' && resultats === null) {
-    return (
+    return coque(
       <Accueil
         onCommencer={() => setVue('parcours')}
-        onCollection={() => setVue('collection')}
         onNaviguer={naviguer}
         onArticle={(s) => naviguer({ vue: 'article', slug: s })}
-        onDeconnexion={() => void seDeconnecter()}
-        connecte={connecte}
-        cartes={nombreCartes}
       />
     )
   }
@@ -923,20 +941,8 @@ export default function App() {
   // même : seul le mode initial change, et l'utilisateur peut basculer de
   // l'un à l'autre depuis le formulaire.
   if (vue === 'connexion' || vue === 'inscription') {
-    return (
+    return coque(
       <main className="app">
-        <header className="entete entete-accueil">
-          <h1 className="marque">
-            <MarqueLien onNaviguer={naviguer} />
-          </h1>
-          <button
-            type="button"
-            className="entete-lien"
-            onClick={() => naviguer({ vue: 'accueil' })}
-          >
-            Retour au site
-          </button>
-        </header>
         <Compte
           mode={vue === 'connexion' ? 'connexion' : 'inscription'}
           message={
@@ -955,13 +961,8 @@ export default function App() {
   }
 
   if (formulaireCompte) {
-    return (
+    return coque(
       <main className="app">
-        <header className="entete">
-          <h1 className="marque">
-            <MarqueLien onNaviguer={naviguer} />
-          </h1>
-        </header>
         <Compte
           message={verrou ?? 'Ton compte te donne accès au détail de chaque budget.'}
           onOuvert={() => {
@@ -976,34 +977,13 @@ export default function App() {
   }
 
   if (resultats !== null) {
-    return (
+    return coque(
       <main className="app app-large">
+        {/* La marque, la pastille des cartes et la déconnexion ont rejoint
+            le rail : elles y sont sur tous les écrans, et non plus sur
+            celui-ci seulement. Il ne reste ici que le titre de la page. */}
         <header className="entete entete-resultats">
-          <div>
-            <h1 className="marque">
-            <MarqueLien onNaviguer={naviguer} />
-          </h1>
-            <p className="baseline">La meilleure solution pour l’année prochaine.</p>
-          </div>
-          {nombreCartes > 0 ? (
-            <button type="button" className="pastille" onClick={() => setVue('collection')}>
-              {nombreCartes}
-              <span className="pastille-libelle"> cartes</span>
-            </button>
-          ) : null}
-          {connecte ? (
-            <button
-              type="button"
-              className="lien"
-              onClick={() => {
-                void deconnecter()
-                setConnecte(false)
-                void lancer()
-              }}
-            >
-              Se déconnecter
-            </button>
-          ) : null}
+          <h1 className="promesse-resultats">Ce que tu peux viser l’an prochain</h1>
         </header>
 
         {verrou ? (
@@ -1114,13 +1094,10 @@ export default function App() {
     )
   }
 
-  return (
+  return coque(
     <main className="app">
       <header className="entete">
-        <h1 className="marque">
-            <MarqueLien onNaviguer={naviguer} />
-          </h1>
-        <p className="baseline">La meilleure solution pour l’année prochaine.</p>
+        <h1 className="promesse-parcours">La meilleure solution pour l’année prochaine.</h1>
       </header>
 
       <div className="progression" aria-label={`Étape ${etape + 1} sur ${ETAPES.length}`}>

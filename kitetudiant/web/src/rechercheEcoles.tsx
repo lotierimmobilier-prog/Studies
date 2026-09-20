@@ -26,7 +26,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { chercherFormations, type Formation } from './donnees.ts'
 import { FilAriane } from './filAriane.tsx'
-import { MarqueLien } from './marque.tsx'
 import { Cle, Epingle, Fiche, Residence } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
 import { nombre } from './nombres.ts'
@@ -201,15 +200,6 @@ export function RechercheEcoles({
 
   return (
     <main className="app app-large">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button type="button" className="entete-cta" onClick={() => onNaviguer({ vue: 'accueil' })}>
-          Retour au site
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },
@@ -218,7 +208,7 @@ export function RechercheEcoles({
         onNaviguer={onNaviguer}
       />
 
-      <h2 className="article-titre">Tu sais déjà où tu veux aller ?</h2>
+      <h1 className="article-titre">Tu sais déjà où tu veux aller ?</h1>
       <p className="bloc-intro">
         Tape une ville, et regarde ce qui s’y trouve. Les formations, leurs établissements
         et leurs taux d’accès publiés — directement depuis l’open data du ministère.
