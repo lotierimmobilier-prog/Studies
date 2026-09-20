@@ -449,6 +449,39 @@ chiffre exact peut l'être tout autant qu'une phrase.
 
 ---
 
+## D17 — Le lien vers la console vit dans l'espace personnel
+
+**Tranché le 20/09/2026.**
+
+`ADMIN_EMAILS` ouvrait déjà la console à un compte listé, mais sans le lui
+dire : il fallait connaître l'adresse `…/admin.html` et la taper. Le profil
+renvoyé par le serveur porte désormais un booléen `administrateur`, et « Mon
+espace » affiche une section « Administration » quand il vaut vrai.
+
+Trois points, parce que le raccourci est facile à mal lire :
+
+- **Ce booléen n'est pas un contrôle d'accès.** `GardeAdmin.verifier` refait la
+  vérification côté serveur à chaque appel de `/api/admin/*`. Un navigateur qui
+  forcerait `administrateur` à vrai n'obtiendrait qu'un lien. Cacher un lien ne
+  protège rien : l'adresse de la console est publiée dans `robots.txt`, en
+  « Disallow » — ce qui la nomme autant que l'inverse. Un test vérifie que les
+  deux lectures d'`ADMIN_EMAILS` — celle du lien et celle de la porte —
+  accordent exactement les mêmes adresses ; si elles divergeaient, on montrerait
+  un lien menant à un refus.
+- **Pas dans la barre de navigation.** Elle est commune à tous les visiteurs et
+  compte déjà six entrées sur mobile. Une septième, visible d'un seul compte,
+  déplacerait les six autres pour lui seul.
+- **Une vraie navigation, pas une route.** La console est une seconde entrée
+  Vite : son code ne part pas dans le paquet que les élèves téléchargent. En
+  faire une vue de l'application annulerait cette séparation.
+
+La session du site sert de jeton : `lireJeton` retombe dessus quand aucun jeton
+d'exploitation n'a été saisi, et le serveur l'accepte si l'adresse est listée.
+Le jeton de quarante caractères reste la voie de secours si un compte est
+compromis.
+
+---
+
 ## Questions encore ouvertes
 
 | # | Question | Ce qui bloque | Échéance |

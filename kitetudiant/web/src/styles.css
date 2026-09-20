@@ -203,6 +203,19 @@ body {
 }
 .principal { background: var(--accent); color: var(--fond); border: 1px solid var(--accent); }
 .principal[disabled] { opacity: 0.6; cursor: progress; }
+/* Un lien qui doit avoir l'air d'un bouton. La console d'administration est
+   une autre page HTML : on l'ouvre par une vraie navigation, pas par le
+   routeur. Sans ces lignes, l'ancre reste « inline » — « padding » et
+   « min-height » n'ont aucun effet, le texte n'est pas centré, et le
+   soulignement du lien traverse le bouton. */
+a.principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding-inline: 1.5rem;
+  text-decoration: none;
+}
 .secondaire { background: transparent; color: var(--encre); border: 1px solid var(--trait); }
 .sans-compte { margin-top: 1rem; color: var(--doux); font-size: 0.8rem; text-align: center; }
 

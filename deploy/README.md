@@ -125,6 +125,11 @@ le jeton en compte quarante. `ADMIN_TOKEN` continue de fonctionner en parallèle
 ce qui reste la voie de secours si un compte administrateur est compromis.
 Laissée vide — le défaut — seul le jeton ouvre la porte.
 
+Une adresse listée ici voit en plus, dans son espace personnel, une section
+« Administration » avec un lien vers la console. Ce lien ne donne aucun droit :
+il évite seulement de retenir l'adresse `…/admin.html`. Un visiteur ordinaire
+ne le voit pas, mais la console reste gardée côté serveur pour tout le monde.
+
 `COMPTES_MASTER_KEY` (≥ 16) chiffre les comptes élèves : c'est elle qui active
 l'inscription. **Sans elle, personne ne peut s'inscrire et le détail du résultat
 reste ouvert à tous** — la console d'administration l'affiche en clair, section

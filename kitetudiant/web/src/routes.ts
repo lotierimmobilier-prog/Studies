@@ -139,3 +139,18 @@ export function routeDuChemin(chemin: string): Route | null {
 export function adresseComplete(route: Route, origine = 'https://kitetudiant.fr'): string {
   return `${origine.replace(/\/$/, '')}${cheminDe(route)}`
 }
+
+/**
+ * La console d'administration.
+ *
+ * Ce n'est pas une `Route` : la console est une page HTML à part, bâtie par
+ * Vite comme une seconde entrée (voir `vite.kitetudiant.config.ts`). Elle ne
+ * partage ni le routeur, ni le code de l'application publique — ce qui évite
+ * d'embarquer son écran dans le paquet que tous les visiteurs téléchargent.
+ * On l'ouvre donc par une vraie navigation, pas par `onNaviguer`.
+ *
+ * L'adresse n'est pas un secret : `prerendre.ts` la met dans robots.txt en
+ * « Disallow », ce qui la publie autant que l'inverse. C'est `GardeAdmin` qui
+ * garde la porte, côté serveur.
+ */
+export const CHEMIN_CONSOLE_ADMIN = `${BASE}admin.html`

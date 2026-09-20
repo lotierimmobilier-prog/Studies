@@ -30,7 +30,7 @@ import {
 } from './aideLogement'
 import { extraireBulletin } from './bulletinScolaire'
 import { chercherAvisLieux, type DemandeAvisLieu } from './avisLieu'
-import { GardeAdmin } from './admin'
+import { GardeAdmin, estAdministrateur } from './admin'
 import { etatSysteme } from './etatSysteme'
 import { Coffre, CoffreNonConfigure, estSecretGere } from './secrets'
 import { ArticleIntrouvable, ArticleInvalide, DepotArticles } from './articles'
@@ -658,7 +658,14 @@ async function demarrer(): Promise<void> {
             if (profil === null) {
               return envoyerJson(res, 401, { erreur: 'Session expirée ou invalide.' })
             }
-            return envoyerJson(res, 200, profil)
+            /* `administrateur` sert à AFFICHER le lien vers la console, pas à
+               en protéger l'entrée : GardeAdmin refait la vérification à
+               chaque appel de /api/admin/*. Cacher un lien ne protège rien —
+               l'adresse de la console est publique. */
+            return envoyerJson(res, 200, {
+              ...profil,
+              administrateur: estAdministrateur(profil.email),
+            })
           }
 
           if (url.pathname === '/api/comptes/mot-de-passe' && req.method === 'POST') {

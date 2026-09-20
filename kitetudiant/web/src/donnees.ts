@@ -720,6 +720,13 @@ export interface ProfilCompte {
   readonly inscritLe: string
   readonly vuLe: string
   readonly sessionExpireLe: string
+  /**
+   * L'adresse figure-t-elle dans ADMIN_EMAILS ? Sert UNIQUEMENT à montrer le
+   * lien vers la console dans l'espace personnel. La console elle-même est
+   * gardée côté serveur, qui refait la vérification à chaque appel : un
+   * navigateur qui renverrait `true` ici n'obtiendrait rien de plus.
+   */
+  readonly administrateur: boolean
 }
 
 /** Le profil du titulaire de la session, ou `null` si elle n'est plus valide. */

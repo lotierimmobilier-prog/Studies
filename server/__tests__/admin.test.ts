@@ -2,7 +2,7 @@ import type { IncomingMessage } from 'node:http'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { ECHECS_MAX, GardeAdmin } from '../admin'
+import { ECHECS_MAX, GardeAdmin, estAdministrateur } from '../admin'
 
 const JETON = 'un-jeton-administration-de-plus-de-24-caracteres'
 const ENV = { ...process.env }
@@ -225,5 +225,50 @@ describe('administrer avec son compte (ADMIN_EMAILS)', () => {
       porteur({}),
     )
     expect(refus).toBeNull()
+  })
+})
+
+describe('estAdministrateur — affichage du lien, pas contrôle d’accès', () => {
+  it('reconnaît une adresse de la liste, quelle que soit la casse et les espaces', () => {
+    process.env.ADMIN_EMAILS = '  Jerome@Exemple.FR , autre@exemple.fr '
+    expect(estAdministrateur('jerome@exemple.fr')).toBe(true)
+    expect(estAdministrateur(' JEROME@exemple.fr ')).toBe(true)
+    expect(estAdministrateur('autre@exemple.fr')).toBe(true)
+  })
+
+  it('refuse une adresse absente de la liste', () => {
+    process.env.ADMIN_EMAILS = 'jerome@exemple.fr'
+    expect(estAdministrateur('eleve@exemple.fr')).toBe(false)
+  })
+
+  it('refuse tout quand ADMIN_EMAILS est absente ou vide', () => {
+    delete process.env.ADMIN_EMAILS
+    expect(estAdministrateur('jerome@exemple.fr')).toBe(false)
+    process.env.ADMIN_EMAILS = '  ,  '
+    expect(estAdministrateur('jerome@exemple.fr')).toBe(false)
+  })
+
+  it('ne laisse pas une adresse vide passer pour une entrée vide de la liste', () => {
+    // Le piège : « a@b, » se découpe en deux, dont une chaîne vide. Si on ne
+    // filtrait pas, un compte sans adresse serait administrateur.
+    process.env.ADMIN_EMAILS = 'jerome@exemple.fr,'
+    expect(estAdministrateur('')).toBe(false)
+    expect(estAdministrateur('   ')).toBe(false)
+  })
+
+  it('accorde le lien exactement aux mêmes adresses que la garde', async () => {
+    // Deux lectures d'ADMIN_EMAILS vivent dans ce fichier — celle du lien et
+    // celle de la porte. Si elles divergeaient, on montrerait un lien qui
+    // mène à un refus, ou on cacherait la console à qui y a droit.
+    process.env.ADMIN_EMAILS = 'jerome@exemple.fr'
+    const garde = new GardeAdmin()
+    for (const email of ['jerome@exemple.fr', 'JEROME@EXEMPLE.FR', 'eleve@exemple.fr']) {
+      const ouverte =
+        (await garde.verifier(
+          requete({ authorization: 'Bearer session-a-resoudre' }, { chiffre: true }),
+          async () => email,
+        )) === null
+      expect(ouverte).toBe(estAdministrateur(email))
+    }
   })
 })

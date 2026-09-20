@@ -28,6 +28,29 @@ import type { IncomingMessage } from 'node:http'
 
 import { jetonValide } from './secrets'
 
+/**
+ * Cette adresse est-elle celle d'un administrateur ?
+ *
+ * Exportée pour que l'espace personnel puisse AFFICHER le lien vers la
+ * console à qui y a droit. Ce n'est PAS un contrôle d'accès : la console est
+ * protégée par `GardeAdmin.verifier`, qui refait la vérification côté
+ * serveur à chaque appel. Cacher un lien ne protège rien — l'adresse de la
+ * console est publique — et l'afficher ne donne rien de plus.
+ *
+ * Lue à chaque appel, comme `adressesAdmin` : le coffre hydrate
+ * l'environnement au démarrage, et figer la valeur à l'import ferait dépendre
+ * le résultat d'un ordre d'initialisation.
+ */
+export function estAdministrateur(email: string): boolean {
+  const normalisee = email.trim().toLowerCase()
+  if (normalisee === '') return false
+  return String(process.env.ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((a) => a.trim().toLowerCase())
+    .filter((a) => a.length > 0)
+    .includes(normalisee)
+}
+
 export type RefusAdmin =
   | { readonly code: 503; readonly erreur: string }
   | { readonly code: 421; readonly erreur: string }
