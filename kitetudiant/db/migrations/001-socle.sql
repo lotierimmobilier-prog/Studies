@@ -1,31 +1,14 @@
--- KITETUDIANT — schéma PostgreSQL 16 + PostGIS
+-- 001 — socle de référence et retours d'étudiants
 --
--- DOCUMENT DE CONCEPTION. Ce fichier n'est plus l'artefact exécutable : ce
--- qui tourne réellement sur l'instance vit dans db/migrations/, appliqué par
--- db/migrations/appliquer.sh.
+-- Première migration réellement appliquée. Elle reprend les parties
+-- « reference » et « communaute » de db/schema.sql, qui reste le document de
+-- conception complet.
 --
--- Il reste ici parce qu'il dit la conception ENTIÈRE, y compris les tables que
--- la décision D1 laisse hors périmètre (db/hors-perimetre.sql) et qu'aucune
--- migration ne crée. Le lire, c'est comprendre le modèle ; lire les
--- migrations, c'est savoir ce qui existe.
+-- Ce qui n'est PAS ici : les tables du schéma « eleve », qui arrivent en 002,
+-- et celles que la décision D1 met hors périmètre (db/hors-perimetre.sql).
 --
--- Correspondance :
---   reference.*, communaute.*  → 001-socle.sql, à l'identique
---   eleve.compte, session      → 002, nouveaux (venus du fichier chiffré)
---   eleve.profil_eleve         → 002, SANS les colonnes financières (D1)
---   eleve.panier, panier_voeu  → 002, sans budget_familial_mensuel (D1)
---   le reste du schéma eleve   → hors-perimetre.sql, jamais créé
---
--- Principes, tirés de CLAUDE.md et de l'inventaire des données :
---   * Trois clés pivots : UAI pour les établissements, code INSEE pour la
---     géographie, cod_aff_form pour les formations Parcoursup. Le code Onisep
---     AF/FOR n'existe dans aucun jeu Parcoursup : il n'est donc pas clé pivot,
---     mais un enrichissement à la maille établissement.
---   * Toutes les tables de référence sont millésimées, et un millésime déjà
---     publié ne se modifie jamais : on en insère un nouveau.
---   * Aucun montant n'existe sans sa source et son millésime.
---   * Les données personnelles concernent des mineurs : minimisation stricte,
---     pas de date de naissance complète, purge des textes bruts.
+-- Voir DECISIONS.md — D3 (PostgreSQL France), D5 (tables hors périmètre),
+-- D7 (cod_aff_form comme clé pivot).
 
 BEGIN;
 
@@ -248,136 +231,6 @@ CREATE TABLE reference.bareme_aide (
 COMMENT ON TABLE reference.bareme_aide IS
   'Miroir en base de packages/baremes/donnees. Un montant sans texte officiel est rejeté.';
 
--- ═══════════════════════════════════════════════════════════ côté élève
-
--- Minimisation : pas de date de naissance, pas de nom, pas d'adresse.
-CREATE TABLE eleve.profil_eleve (
-  id                    uuid         PRIMARY KEY,
-  annee_naissance       smallint     NOT NULL,
-  mineur                boolean      NOT NULL,
-  consentement_parental_le timestamptz,
-  code_insee_domicile   char(5),
-  echelon_bourse_estime text,
-  exonere_cvec          boolean      NOT NULL DEFAULT false,
-  contribution_familiale_mensuelle numeric(8,2),
-  job_etudiant_bas      numeric(8,2),
-  job_etudiant_haut     numeric(8,2),
-  aides_regionales_annuelles numeric(8,2),
-  repas_crous_par_mois  smallint,
-  courses_mensuelles    numeric(8,2),
-  frais_divers_mensuels numeric(8,2),
-  cree_le               timestamptz  NOT NULL DEFAULT now(),
-  purge_prevue_le       date         NOT NULL,
-  CONSTRAINT profil_consentement_si_mineur CHECK (
-    NOT mineur OR consentement_parental_le IS NOT NULL
-  ),
-  CONSTRAINT profil_job_ordonne CHECK (
-    job_etudiant_bas IS NULL OR job_etudiant_haut IS NULL
-    OR job_etudiant_bas <= job_etudiant_haut
-  ),
-  CONSTRAINT profil_echelon_connu CHECK (
-    echelon_bourse_estime IS NULL
-    OR echelon_bourse_estime IN ('0bis', '1', '2', '3', '4', '5', '6', '7')
-  )
-);
-COMMENT ON COLUMN eleve.profil_eleve.annee_naissance IS
-  'Année seule : suffisante pour la majorité, insuffisante pour identifier.';
-
-CREATE TABLE eleve.bulletin_matiere (
-  profil_id             uuid         NOT NULL REFERENCES eleve.profil_eleve (id) ON DELETE CASCADE,
-  annee_scolaire        text         NOT NULL,
-  periode               text         NOT NULL,
-  matiere               text         NOT NULL,
-  moyenne               numeric(4,2),
-  moyenne_classe        numeric(4,2),
-  -- Le texte brut de l'appréciation n'est jamais stocké : seuls les signaux
-  -- extraits le sont, et la date de purge prouve que l'extraction a eu lieu.
-  signaux               jsonb,
-  texte_brut_purge_le   timestamptz  NOT NULL,
-  saisie_manuelle       boolean      NOT NULL DEFAULT false,
-  PRIMARY KEY (profil_id, annee_scolaire, periode, matiere),
-  CONSTRAINT bulletin_moyenne_bornee CHECK (
-    moyenne IS NULL OR moyenne BETWEEN 0 AND 20
-  )
-);
-
-CREATE TYPE eleve.scenario_budget AS ENUM ('optimiste', 'central', 'prudent');
-CREATE TYPE eleve.soutenabilite AS ENUM (
-  'soutenable', 'tendu', 'non_financable', 'indeterminable'
-);
-
-CREATE TABLE eleve.simulation_voeu (
-  id                    uuid         PRIMARY KEY,
-  profil_id             uuid         NOT NULL REFERENCES eleve.profil_eleve (id) ON DELETE CASCADE,
-  cod_aff_form          text         NOT NULL,
-  session               smallint     NOT NULL,
-  scenario              eleve.scenario_budget NOT NULL,
-  -- NULL dès qu'un poste manque : un RAV partiel serait un montant inventé.
-  rav_mensuel           numeric(9,2),
-  soutenabilite         eleve.soutenabilite NOT NULL,
-  postes_manquants      text[]       NOT NULL DEFAULT '{}',
-  avertissements        text[]       NOT NULL DEFAULT '{}',
-  calcule_le            timestamptz  NOT NULL DEFAULT now(),
-  FOREIGN KEY (cod_aff_form, session) REFERENCES reference.formation (cod_aff_form, session),
-  UNIQUE (profil_id, cod_aff_form, session, scenario),
-  CONSTRAINT simulation_rav_absent_si_indeterminable CHECK (
-    (soutenabilite = 'indeterminable') = (rav_mensuel IS NULL)
-  ),
-  CONSTRAINT simulation_postes_manquants_coherents CHECK (
-    (cardinality(postes_manquants) > 0) <= (soutenabilite = 'indeterminable')
-  )
-);
-
-CREATE TYPE eleve.sens_budget AS ENUM ('depense', 'ressource');
-CREATE TYPE eleve.statut_ligne AS ENUM ('calcule', 'manquant', 'sans_objet');
-
-CREATE TABLE eleve.ligne_budget (
-  simulation_id         uuid         NOT NULL REFERENCES eleve.simulation_voeu (id) ON DELETE CASCADE,
-  poste                 text         NOT NULL,
-  sens                  eleve.sens_budget NOT NULL,
-  statut                eleve.statut_ligne NOT NULL,
-  montant               numeric(9,2),
-  montant_mensualise    numeric(9,2),
-  source                text,
-  millesime             text,
-  hypothese             text,
-  raison                text,
-  PRIMARY KEY (simulation_id, poste),
-  -- La règle 1 de CLAUDE.md, écrite en contrainte : pas de montant sans
-  -- source, sans millésime et sans hypothèse ; pas d'absence sans raison.
-  CONSTRAINT ligne_budget_montant_source CHECK (
-    statut <> 'calcule'
-    OR (montant IS NOT NULL AND montant_mensualise IS NOT NULL
-        AND source IS NOT NULL AND millesime IS NOT NULL AND hypothese IS NOT NULL)
-  ),
-  CONSTRAINT ligne_budget_absence_motivee CHECK (
-    statut = 'calcule' OR (raison IS NOT NULL AND montant IS NULL)
-  )
-);
-
-CREATE TABLE eleve.panier (
-  id                    uuid         PRIMARY KEY,
-  profil_id             uuid         NOT NULL REFERENCES eleve.profil_eleve (id) ON DELETE CASCADE,
-  cree_le               timestamptz  NOT NULL DEFAULT now(),
-  budget_familial_mensuel numeric(8,2)
-);
-
-CREATE TYPE eleve.classe_risque AS ENUM ('ambitieux', 'median', 'sur', 'filet');
-
-CREATE TABLE eleve.panier_voeu (
-  panier_id             uuid         NOT NULL REFERENCES eleve.panier (id) ON DELETE CASCADE,
-  rang                  smallint     NOT NULL,
-  cod_aff_form          text         NOT NULL,
-  session               smallint     NOT NULL,
-  classe_risque         eleve.classe_risque NOT NULL,
-  -- Un vœu peut être signalé, jamais retiré : la colonne dit pourquoi il est
-  -- signalé, elle ne le supprime pas du panier (règle 4 de CLAUDE.md).
-  signalement           text,
-  PRIMARY KEY (panier_id, rang),
-  UNIQUE (panier_id, cod_aff_form, session),
-  FOREIGN KEY (cod_aff_form, session) REFERENCES reference.formation (cod_aff_form, session),
-  CONSTRAINT panier_voeu_rang_parcoursup CHECK (rang BETWEEN 1 AND 10)
-);
 
 -- ═══════════════════════════════════════════════ retours d'étudiants (M10)
 
@@ -435,5 +288,6 @@ $$;
 CREATE TRIGGER retour_millesime_clos
   BEFORE INSERT OR UPDATE OR DELETE ON communaute.retour_etudiant
   FOR EACH ROW EXECUTE FUNCTION communaute.refuser_millesime_clos();
+
 
 COMMIT;
