@@ -25,7 +25,7 @@ import {
   SOURCE_PARCOURSUP,
   TYPOLOGIE_LOYERS,
 } from './donnees.ts'
-import { Boussole, Carnet, Epingle, PorteMonnaie, Ville } from './illustrations.tsx'
+import { Boussole, Carnet, Epingle, Photo, PorteMonnaie, Ville } from './illustrations.tsx'
 
 /** Surface du logement type servant à l'illustration. */
 const SURFACE = 25
@@ -91,7 +91,7 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
       <p className="hero-mentions">
         Sept questions · aperçu sans compte · aucune note enregistrée
       </p>
-      <Ville />
+      <Photo nom="campus" prioritaire />
     </section>
   )
 }
@@ -158,6 +158,7 @@ function Piliers() {
         Une école excellente et inabordable reste inabordable. Une école abordable qui ne
         te ressemble pas se quitte au bout d’un an.
       </p>
+      <Photo nom="avenir" />
       <div className="piliers-grille">
         {PILIERS.map((a, i) => {
           const Picto = PICTOS[i] ?? Boussole
@@ -210,6 +211,7 @@ function Comparaison() {
         Le même studio de {SURFACE} m², loyer d’annonce charges comprises, millésime{' '}
         {MILLESIME_LOYERS}.
       </p>
+      <Photo nom="logement" />
       <ul className="comparaison">
         {triees.map((l) => (
           <li key={l.code}>
@@ -249,6 +251,7 @@ export function Accueil({ onCommencer }: { onCommencer: () => void }) {
 
       <section className="bloc" id="methode">
         <h2>Comment ça marche</h2>
+        <Photo nom="dossier" />
         <ol className="etapes-accueil">
           <li>
             <strong>Tu réponds à sept questions.</strong> Ton bac, tes notes — importées
@@ -327,6 +330,7 @@ export function Accueil({ onCommencer }: { onCommencer: () => void }) {
       </section>
 
       <section className="cta-final">
+        <Ville />
         <h2>Tes vœux se décident maintenant.</h2>
         <p>
           Sept questions, et tu sauras lesquels tu peux tenir jusqu’au diplôme.
