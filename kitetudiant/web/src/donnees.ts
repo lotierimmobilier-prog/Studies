@@ -276,6 +276,12 @@ export interface FiltreFormations {
   readonly academie?: string
   /** Mots-clés cherchés dans l'intitulé de la formation, en OU. */
   readonly motsCles?: readonly string[]
+  /**
+   * Ville de l'établissement. Cherchée et non comparée : « saint etienne »
+   * doit trouver « Saint-Étienne », et personne ne tape les accents ni les
+   * traits d'union sur un téléphone.
+   */
+  readonly ville?: string
   readonly limite?: number
 }
 
@@ -294,6 +300,7 @@ export async function chercherFormations(
   const conditions: string[] = []
   if (filtre.filiere) conditions.push(`fili = "${filtre.filiere.replace(/"/g, '')}"`)
   if (filtre.academie) conditions.push(`acad_mies = "${filtre.academie.replace(/"/g, '')}"`)
+  if (filtre.ville) conditions.push(`search(ville_etab, "${filtre.ville.replace(/"/g, '')}")`)
   if (filtre.motsCles && filtre.motsCles.length > 0) {
     const recherche = filtre.motsCles
       .map((mot) => `search(lib_for_voe_ins, "${mot.replace(/"/g, '')}")`)
