@@ -17,6 +17,7 @@
 
 import { describe, expect, it } from 'vitest'
 
+import { nombre } from '../../kitetudiant/packages/budget-engine/src/nombres.ts'
 import { ClientEmploi, EmploiNonConfigure, lienOffres } from '../emploi.ts'
 import type { Coffre } from '../secrets.ts'
 
@@ -203,5 +204,56 @@ describe('le lien vers France Travail', () => {
     expect(url).not.toContain('api.francetravail')
     expect(decodeURIComponent(url)).toContain('Développeur')
     expect(url).toContain('region=75')
+  })
+})
+
+describe('éprouver la connexion depuis la console', () => {
+  it('dit à quelle étape ça casse, et pas seulement que ça casse', async () => {
+    // « Échec » tout court oblige l'exploitant à deviner : clé fausse ?
+    // portée manquante ? panne chez eux ? Les trois se réparent autrement.
+    const { recuperer } = faussetch(() => new Response('', { status: 401 }))
+    const client = new ClientEmploi(coffre(), recuperer)
+    const r = await client.essayer()
+    expect(r.ok).toBe(false)
+    expect(r.etape).toBe('authentification')
+  })
+
+  it('signale les identifiants manquants avant d’appeler qui que ce soit', async () => {
+    const { recuperer, appels } = faussetch(() => jetonOk())
+    const client = new ClientEmploi(coffre(null, null), recuperer)
+    const r = await client.essayer()
+    expect(r.etape).toBe('identifiants')
+    expect(appels).toEqual([])
+  })
+
+  it('va jusqu’à un comptage réel, pas seulement jusqu’au jeton', async () => {
+    /* Des identifiants valables mais sans la portée `api_offresdemploiv2`
+       donnent un jeton et échouent ensuite. S'arrêter au jeton afficherait
+       « la connexion fonctionne » sur une configuration qui ne compte rien. */
+    const { recuperer, appels } = faussetch((url) =>
+      url.includes('oauth2')
+        ? jetonOk()
+        : url.includes('referentiel')
+          ? new Response(JSON.stringify([{ code: 'M1805', libelle: 'Dév' }]), { status: 200 })
+          : comptage(9600),
+    )
+    const client = new ClientEmploi(coffre(), recuperer)
+    const r = await client.essayer()
+    expect(r.ok).toBe(true)
+    expect(appels.some((a) => a.includes('offres/search'))).toBe(true)
+    /* `nombre()` et non « 9 600 » écrit à la main : la locale française
+       sépare les milliers par une espace FINE INSÉCABLE (U+202F), pas par
+       une espace ordinaire. Le test échouait sur une chaîne pourtant
+       juste. */
+    expect(r.detail).toContain(nombre(9600))
+  })
+
+  it('ne relaie jamais le corps de la réponse de France Travail', async () => {
+    const { recuperer } = faussetch(
+      () => new Response(`{"erreur":"clé ${SECRET} invalide"}`, { status: 400 }),
+    )
+    const client = new ClientEmploi(coffre(), recuperer)
+    const r = await client.essayer()
+    expect(JSON.stringify(r)).not.toContain(SECRET)
   })
 })

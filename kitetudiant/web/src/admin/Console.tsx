@@ -14,16 +14,30 @@ import { Statistiques } from './Statistiques.tsx'
 
 import {
   chercherEtat,
+  essayerEmploi,
   ecrireJeton,
   enregistrerCle,
   ErreurAdmin,
   lireJeton,
   oublierCle,
+  type EssaiEmploi,
   type EtatSecret,
   type EtatSysteme,
 } from './api.ts'
 
-const LIBELLES: Record<string, { titre: string; role: string; ou: string }> = {
+interface Libelle {
+  readonly titre: string
+  readonly role: string
+  readonly ou: string
+  /**
+   * Service dont la clé fait partie. Deux clés d'un même service ne valent
+   * rien l'une sans l'autre : la console doit le dire, sinon on pose la
+   * première, on voit « configurée », et on croit avoir fini.
+   */
+  readonly service?: string
+}
+
+const LIBELLES: Record<string, Libelle> = {
   ANTHROPIC_API_KEY: {
     titre: 'Lecture des bulletins',
     role: 'Sans elle, l’import de bulletin est indisponible et l’élève saisit ses moyennes à la main.',
@@ -34,14 +48,36 @@ const LIBELLES: Record<string, { titre: string; role: string; ou: string }> = {
     role: 'Sans elle, la section « note publique de l’adresse » ne s’affiche pas.',
     ou: 'Google Cloud Console, API Places',
   },
+  FRANCE_TRAVAIL_ID: {
+    titre: 'France Travail — identifiant client',
+    role: 'Sans lui, l’onglet « Après » d’une fiche n’affiche aucun nombre d’offres d’emploi.',
+    ou: 'francetravail.io, « Mes applications » — commence par PAR_',
+    service: 'France Travail',
+  },
+  FRANCE_TRAVAIL_SECRET: {
+    titre: 'France Travail — clé secrète',
+    role: 'Va avec l’identifiant ci-dessus. L’un sans l’autre ne sert à rien.',
+    ou: 'francetravail.io, la même application',
+    service: 'France Travail',
+  },
+}
+
+/** Les clés d'un service, dans l'ordre où la console les présente. */
+function clesDuService(service: string): string[] {
+  return Object.entries(LIBELLES)
+    .filter(([, l]) => l.service === service)
+    .map(([nom]) => nom)
 }
 
 function Secret({
   secret,
   onChange,
+  incomplet,
 }: {
   secret: EtatSecret
   onChange: () => void
+  /** Vrai quand cette clé est posée mais que son binôme manque. */
+  incomplet: boolean
 }) {
   const [valeur, setValeur] = useState('')
   const [occupe, setOccupe] = useState(false)
@@ -86,6 +122,16 @@ function Secret({
         )}
       </p>
 
+      {/* Une clé posée dont le binôme manque : le service reste éteint, et
+          rien d'autre ne le dirait — la ligne au-dessus affiche
+          « Configurée » en vert. */}
+      {incomplet ? (
+        <p className="avertissement">
+          Il manque l’autre moitié : {LIBELLES[secret.nom]?.service} a besoin de ses deux
+          clés. Tant qu’une seule est posée, la fonctionnalité reste éteinte.
+        </p>
+      ) : null}
+
       {secret.provenance === 'environnement' ? (
         <p className="note">
           Cette clé vient de l’environnement du serveur : elle ne peut pas être
@@ -129,6 +175,73 @@ function Secret({
       )}
       {message ? <p className="erreur">{message}</p> : null}
     </article>
+  )
+}
+
+/**
+ * Cette clé est-elle posée alors que son binôme manque ?
+ *
+ * Sans ce contrôle, poser la première des deux affiche « Configurée » en
+ * vert et laisse croire que c'est fait, alors que le service reste éteint.
+ */
+function binomeManquant(secrets: readonly EtatSecret[], secret: EtatSecret): boolean {
+  const service = LIBELLES[secret.nom]?.service
+  if (service === undefined || !secret.configure) return false
+  return clesDuService(service).some(
+    (nom) => nom !== secret.nom && !secrets.find((s) => s.nom === nom)?.configure,
+  )
+}
+
+/**
+ * Le bouton qui éprouve vraiment la connexion France Travail.
+ *
+ * « Configurée » ne veut dire que « une valeur est posée ». Une clé
+ * recopiée de travers, révoquée, ou dont l'application n'a pas la bonne
+ * portée s'affiche exactement pareil — et la panne ne se voit alors que sur
+ * la fiche d'une formation, où personne ne la relie à la console.
+ *
+ * L'essai ne s'exécute qu'au clic : il consomme du quota chez France Travail,
+ * dont la limite est de dix requêtes par seconde.
+ */
+function EssaiFranceTravail({ secrets }: { secrets: readonly EtatSecret[] }) {
+  const [essai, setEssai] = useState<EssaiEmploi | null>(null)
+  const [occupe, setOccupe] = useState(false)
+  const [erreur, setErreur] = useState<string | null>(null)
+
+  const posees = clesDuService('France Travail').every(
+    (nom) => secrets.find((s) => s.nom === nom)?.configure,
+  )
+
+  return (
+    <div className="essai">
+      <button
+        type="button"
+        className="secondaire"
+        disabled={occupe || !posees}
+        onClick={() => {
+          setOccupe(true)
+          setErreur(null)
+          essayerEmploi()
+            .then(setEssai)
+            .catch((e: unknown) => setErreur((e as Error).message))
+            .finally(() => setOccupe(false))
+        }}
+      >
+        {occupe ? 'Essai en cours…' : 'Tester la connexion France Travail'}
+      </button>
+
+      {!posees ? (
+        <p className="note">Pose les deux clés pour pouvoir l’essayer.</p>
+      ) : null}
+
+      {essai !== null ? (
+        <p className={essai.ok ? 'etat-ok' : 'erreur'}>
+          {essai.ok ? 'La connexion fonctionne. ' : `Échec à l’étape « ${essai.etape} ». `}
+          {essai.detail}
+        </p>
+      ) : null}
+      {erreur !== null ? <p className="erreur">{erreur}</p> : null}
+    </div>
   )
 }
 
@@ -218,8 +331,15 @@ export function Console() {
               l’environnement du serveur l’emporte toujours sur celle d’ici.
             </p>
             {etat.secrets.map((s) => (
-              <Secret key={s.nom} secret={s} onChange={() => void rafraichir()} />
+              <Secret
+                key={s.nom}
+                secret={s}
+                onChange={() => void rafraichir()}
+                incomplet={binomeManquant(etat.secrets, s)}
+              />
             ))}
+
+            <EssaiFranceTravail secrets={etat.secrets} />
           </section>
 
           <section className="bloc">

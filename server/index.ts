@@ -113,6 +113,7 @@ import {
  *   GET    /api/admin/etat               → clés, barèmes, millésimes
  *   PUT    /api/admin/cles  body {nom, valeur} → enregistre une clé
  *   DELETE /api/admin/cles?nom=          → oublie une clé
+ *   POST   /api/admin/emploi/essai       → éprouve la connexion France Travail
  *
  * Le scraping des sites d'écoles et l'appel à l'API Google Places se font ici,
  * côté serveur (le navigateur en est empêché par CORS). Cache 30 jours.
@@ -849,6 +850,16 @@ async function demarrer(): Promise<void> {
           // La valeur recopiée dans l'environnement doit partir aussi.
           coffre.deshydrater(nom)
           return envoyerJson(res, 200, { ok: true })
+        }
+
+        /* Essayer la connexion France Travail depuis la console.
+        
+           POST et non GET : cet appel CONSOMME du quota chez France Travail
+           (un jeton, le référentiel, un comptage). Un GET serait rejoué par
+           un rafraîchissement de page ou un préchargement de navigateur, et
+           l'exploitant verrait son quota fondre sans comprendre. */
+        if (url.pathname === '/api/admin/emploi/essai' && req.method === 'POST') {
+          return envoyerJson(res, 200, await clientEmploi.essayer())
         }
 
         if (url.pathname === '/api/admin/articles' && req.method === 'GET') {

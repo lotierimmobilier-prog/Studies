@@ -125,6 +125,24 @@ export function enregistrerCle(nom: string, valeur: string): Promise<EtatSecret>
   })
 }
 
+/**
+ * Éprouve la connexion France Travail.
+ *
+ * POST et non GET : l'appel consomme du quota chez eux. Un GET serait rejoué
+ * par un rafraîchissement ou un préchargement, et le quota fondrait sans que
+ * personne comprenne pourquoi.
+ */
+export interface EssaiEmploi {
+  readonly ok: boolean
+  /** Où ça s'est arrêté : identifiants, authentification, référentiel, comptage. */
+  readonly etape: string
+  readonly detail: string | null
+}
+
+export function essayerEmploi(): Promise<EssaiEmploi> {
+  return appeler<EssaiEmploi>('/emploi/essai', { method: 'POST' })
+}
+
 export function oublierCle(nom: string): Promise<{ ok: boolean }> {
   return appeler<{ ok: boolean }>(`/cles?nom=${encodeURIComponent(nom)}`, { method: 'DELETE' })
 }

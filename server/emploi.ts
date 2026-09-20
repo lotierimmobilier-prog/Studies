@@ -31,6 +31,7 @@
  * parallèle.
  */
 
+import { nombre } from '../kitetudiant/packages/budget-engine/src/nombres.ts'
 import { Coffre } from './secrets.ts'
 
 const OAUTH =
@@ -99,6 +100,45 @@ export class ClientEmploi {
     private readonly recuperer: typeof fetch = fetch,
     private readonly maintenant: () => number = Date.now,
   ) {}
+
+  /**
+   * Essaie vraiment la connexion, pour la console d'administration.
+   *
+   * Un jeton, puis un comptage : les deux étapes échouent pour des raisons
+   * différentes, et l'exploitant doit savoir laquelle. Des identifiants
+   * acceptés mais sans la bonne portée donnent un jeton et échouent ensuite.
+   *
+   * Ne lève jamais, et ne rend jamais le corps de la réponse de France
+   * Travail : il peut répéter l'identifiant.
+   */
+  async essayer(): Promise<{ ok: boolean; etape: string; detail: string | null }> {
+    if (!(await this.configure())) {
+      return { ok: false, etape: 'identifiants', detail: 'Les deux clés ne sont pas posées.' }
+    }
+    try {
+      await this.jetonValide()
+    } catch (e) {
+      return { ok: false, etape: 'authentification', detail: (e as Error).message }
+    }
+    try {
+      const metiers = await this.metiers()
+      // Un comptage réel : c'est la portée `api_offresdemploiv2` qui est
+      // éprouvée ici, et elle peut manquer alors que le jeton est valable.
+      const [total] = await this.totaux(['M18'], null)
+      if (total?.enFrance === null) {
+        return { ok: false, etape: 'comptage', detail: 'Le comptage n’a rien rendu.' }
+      }
+      return {
+        ok: true,
+        etape: 'comptage',
+        // `nombre()` et non l'entier brut : « 1911 » au lieu de « 1 911 »
+        // passerait pour un identifiant plutôt que pour un compte.
+        detail: `${nombre(metiers.length)} métiers au référentiel, ${nombre(total?.enFrance ?? 0)} offres dans les systèmes d’information.`,
+      }
+    } catch (e) {
+      return { ok: false, etape: 'référentiel', detail: (e as Error).message }
+    }
+  }
 
   async configure(): Promise<boolean> {
     const [id, secret] = await this.identifiants().catch(() => [null, null])
