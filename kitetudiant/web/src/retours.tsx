@@ -14,10 +14,7 @@ import {
   deposerRetour,
   type AgregatRetours,
 } from './donnees.ts'
-
-function euros(v: number): string {
-  return `${Math.round(v).toLocaleString('fr-FR')} €`
-}
+import { euros } from './nombres.ts'
 
 /** Résumé d'une ligne, sur la carte. */
 export function ResumeRetours({ agregat }: { agregat: AgregatRetours | undefined }) {

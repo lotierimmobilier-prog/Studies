@@ -27,6 +27,7 @@ import {
 } from './donnees.ts'
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
+import { euros, eurosPrecis, nombre } from './nombres.ts'
 
 /** Surface du logement type servant à l'illustration. */
 const SURFACE = 25
@@ -39,16 +40,8 @@ interface LigneVille {
   readonly loyer: NonNullable<ReturnType<typeof loyerDe>>
 }
 
-function euros(v: number): string {
-  return `${Math.round(v).toLocaleString('fr-FR')} €`
-}
-
 function eurosParM2(v: number): string {
-  return `${v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €/m²`
-}
-
-function nombre(v: number): string {
-  return v.toLocaleString('fr-FR')
+  return `${eurosPrecis(v)}/m²`
 }
 
 /**

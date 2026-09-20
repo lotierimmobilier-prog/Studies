@@ -22,6 +22,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { chercherAvisLieu, type AvisLieu, type AvisLieuIndisponible } from './donnees.ts'
+import { nombre } from './nombres.ts'
 
 function estIndisponible(r: AvisLieu | AvisLieuIndisponible): r is AvisLieuIndisponible {
   return 'raison' in r
@@ -106,7 +107,7 @@ export function PastilleNote({ avis }: { avis: AvisLieu | null }) {
       <Etoiles note={avis.note} />
       <span className="pastille-note-valeur">{avis.note.toFixed(1)}</span>
       <span className="pastille-note-detail">
-        · {avis.nombreAvis.toLocaleString('fr-FR')} avis sur l’adresse
+        · {nombre(avis.nombreAvis)} avis sur l’adresse
       </span>
     </p>
   )
@@ -119,7 +120,7 @@ export function NoteDuLieu({ avis }: { avis: AvisLieu | null }) {
     <div className="note-lieu">
       <h4>Note publique de l’adresse</h4>
       <p className="note-lieu-valeur">
-        <strong>{avis.note.toFixed(1)}/5</strong> sur {avis.nombreAvis.toLocaleString('fr-FR')} avis
+        <strong>{avis.note.toFixed(1)}/5</strong> sur {nombre(avis.nombreAvis)} avis
       </p>
       <p className="note">{avis.miseEnGarde}</p>
       <p className="note">

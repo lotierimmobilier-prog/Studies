@@ -81,6 +81,30 @@ describe('feuille de style', () => {
     ).toEqual([])
   })
 
+  it('ne charge aucune police depuis un service tiers', () => {
+    // Le site promet « aucun traceur » à des mineurs. Un @import vers
+    // fonts.googleapis.com, ou un src pointant fonts.gstatic.com, enverrait
+    // l'adresse IP de chaque élève à Google à chaque visite. Poppins est donc
+    // servie depuis le site, en licence OFL.
+    const fautifs = [...CSS.matchAll(/@import[^;]+;|url\((https?:[^)]*)\)/g)].map((m) => m[0])
+    expect(
+      fautifs,
+      'Une police ou une feuille chargée depuis un domaine tiers rompt la ' +
+        'promesse « aucun traceur ». Embarque le fichier dans le paquet.',
+    ).toEqual([])
+  })
+
+  it('déclare toutes les graisses de Poppins qu’elle utilise', () => {
+    // Une graisse déclarée mais jamais utilisée, c'est du poids livré pour
+    // rien ; une graisse utilisée mais non déclarée est synthétisée par le
+    // navigateur : le rendu s'épaissit grossièrement, et cela ne se voit sur
+    // aucun test unitaire.
+    const declarees = new Set(
+      [...CSS.matchAll(/@font-face \{[^}]*font-weight:\s*(\d+)[^}]*\}/g)].map((m) => m[1]),
+    )
+    expect(declarees).toEqual(new Set(['400', '600', '700']))
+  })
+
   it('reconnaît bien un doublon quand il y en a un', () => {
     // Garde-fou : sans lui, une expression régulière cassée ferait passer le
     // test ci-dessus pour de bonnes raisons apparentes et ne protégerait rien.

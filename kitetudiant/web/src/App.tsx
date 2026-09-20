@@ -40,6 +40,7 @@ import {
 import { Collection } from './collection.tsx'
 import { Epingle } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
+import { euros, eurosPrecis } from './nombres.ts'
 import { affiniteCourte, affiniteNote, chancesCourtes } from './libelles.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 import { Accueil } from './accueil.tsx'
@@ -57,17 +58,6 @@ const ACADEMIES = [
   'Nice', 'Normandie', 'Orléans-Tours', 'Paris', 'Poitiers', 'Reims', 'Rennes',
   'Strasbourg', 'Toulouse', 'Versailles',
 ]
-
-/** Le signe moins typographique, pas le trait d'union du clavier. */
-function euros(v: number): string {
-  const arrondi = Math.round(v)
-  const absolu = Math.abs(arrondi).toLocaleString('fr-FR')
-  return `${arrondi < 0 ? '\u2212' : ''}${absolu} €`
-}
-
-function eurosPrecis(v: number): string {
-  return `${v.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
-}
 
 const VERDICTS: Record<Soutenabilite, { texte: string; classe: string }> = {
   soutenable: { texte: 'Finançable', classe: 'vert' },

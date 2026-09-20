@@ -22,6 +22,7 @@
 import type { ResultatFormation } from './calcul.ts'
 import { distanceKm } from './geo.ts'
 import { positionDe } from './donnees.ts'
+import { euros } from './nombres.ts'
 
 export type Critere = 'geographique' | 'strategique' | 'economique'
 
@@ -171,7 +172,7 @@ function economique(
   return {
     critere: 'economique',
     resultat: meilleur,
-    valeur: `${Math.round(rav).toLocaleString('fr-FR')} € par mois`,
+    valeur: `${euros(rav)} par mois`,
     pourquoi:
       'Ce qu’il te reste une fois le loyer, les courses, les transports et les frais ' +
       'de scolarité payés, aide au logement et bourse comprises. Chaque euro est ' +

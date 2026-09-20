@@ -1,3 +1,54 @@
+/* ------------------------------------------------------------------ polices
+ * Poppins, la famille du logo, servie DEPUIS CE SITE.
+ *
+ * Passer par fonts.googleapis.com aurait envoyé l'adresse IP de chaque élève
+ * à Google à chaque visite, ce que la page d'accueil promet justement de ne
+ * pas faire. Les fichiers sont donc embarqués : trois graisses, sous-ensemble
+ * latin uniquement — il couvre U+0000-00FF, donc é, à, è, ç, ainsi que œ et
+ * l'euro. 24 Ko en tout.
+ *
+ * Licence SIL Open Font 1.1 (Indian Type Foundry, Jonny Pinhorn, Ninad Kale) ;
+ * le texte de la licence accompagne les fichiers, comme elle l'exige.
+ *
+ * Elle sert aux TITRES, aux chiffres et aux boutons — là où la page doit
+ * ressembler au logo. Le texte courant reste sur la police du système :
+ * Poppins est géométrique et large, très bien en grand, fatigante sur un
+ * paragraphe lu au téléphone.
+ *
+ * « swap » : le texte s'affiche tout de suite dans la police du système et
+ * bascule quand Poppins arrive. Jamais de page blanche en attendant. *
+ * `unicode-range` n'est pas un détail : sans lui, Poppins est réclamée pour
+ * TOUS les caractères, y compris l'espace fine insécable (U+202F) que
+ * « toLocaleString('fr-FR') » place dans « 1 246 » — et qui disparaissait,
+ * donnant « 1246 ». La plage ci-dessous dit exactement ce que Poppins sait
+ * rendre ; tout le reste retombe sur la police du système, qui, elle, sait.
+ * Constaté au navigateur le 20/09/2026.
+ */
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./polices/poppins-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./polices/poppins-600.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./polices/poppins-700.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+
 /* Mobile d'abord. Le reste-à-vivre est le plus gros caractère de la page. */
 
 /* ------------------------------------------------------------------ couleurs
@@ -32,6 +83,7 @@
   /* Accent vif, purement décoratif : jamais utilisé pour un verdict. */
   --vif: #1b8184;
   --rayon: 10px;
+  --titres: 'Poppins', ui-sans-serif, system-ui, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -141,6 +193,10 @@ body {
   padding: 0.9rem 1rem;
   border-radius: var(--rayon);
   font: inherit;
+  /* Après « font: inherit », qui écrase la famille — et la classe l'emporte
+     sur le sélecteur « button ». Sans cette ligne, les boutons restaient sur
+     la police du système. Constaté au navigateur le 20/09/2026. */
+  font-family: var(--titres);
   font-weight: 600;
   cursor: pointer;
   min-height: 48px;
@@ -342,6 +398,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 /* ------------------------------------------------------------------ hero */
 .hero { margin: 2rem 0 2.5rem; }
 .hero-sur {
+  font-family: var(--titres);
   margin: 0 0 0.75rem;
   color: var(--accent);
   font-size: 0.78rem;
@@ -396,6 +453,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   gap: 0.2rem;
 }
 .bandeau-chiffre {
+  font-family: var(--titres);
   font-size: 1.4rem;
   font-weight: 700;
   line-height: 1.1;
@@ -451,7 +509,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   padding: 0.85rem 1rem;
 }
 .comparaison-ville { font-weight: 600; }
-.comparaison-montant { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.comparaison-montant { font-family: var(--titres); font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 .comparaison-m2 { grid-column: 1 / -1; color: var(--doux); font-size: 0.8rem; }
 
 .etapes-accueil { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
@@ -732,6 +790,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 }
 .carte-collec-titre { margin: 0 0 0.2rem; font-size: 1.05rem; line-height: 1.25; }
 .carte-collec-valeur {
+  font-family: var(--titres);
   margin: 0 0 0.4rem;
   font-size: 1.5rem;
   font-weight: 700;
@@ -826,6 +885,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   color: var(--doux);
 }
 .trio-valeur {
+  font-family: var(--titres);
   font-size: 1.1rem;
   font-weight: 700;
   line-height: 1.2;
@@ -876,8 +936,17 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .marque-logo-signee { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
 .marque-logo-signee .marque-mot { height: 1.6rem; }
 .marque-signature {
+  font-family: var(--titres);
   font-size: 0.8rem;
+  /* Sans cela, la signature hérite du gras du « h1 » qui la contient. */
+  font-weight: 400;
   line-height: 1.3;
   color: var(--doux);
   letter-spacing: 0.005em;
 }
+
+/* Poppins pour les titres, les boutons et les chiffres — le reste garde la
+   police du système. Par sélecteurs d'élément plutôt que par une règle
+   groupée de classes : la feuille interdit qu'une classe soit définie deux
+   fois au premier niveau, et styles.test.ts le vérifie. */
+h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }

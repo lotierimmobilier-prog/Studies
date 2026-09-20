@@ -31,6 +31,7 @@ import {
   SOURCE_LOYERS,
   SURFACE_TYPE,
 } from './donnees.ts'
+import { euros } from './nombres.ts'
 
 /* ------------------------------------------------------------------ rareté */
 
@@ -151,10 +152,6 @@ export function idVille(codeInsee: string): string {
 /** Identifiant stable d'une carte d'étape. */
 export function idEtape(etape: IdEtape): string {
   return `etape:${etape}`
-}
-
-function euros(v: number): string {
-  return `${Math.round(v).toLocaleString('fr-FR')} €`
 }
 
 /**

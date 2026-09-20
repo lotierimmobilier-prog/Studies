@@ -27,6 +27,7 @@ import {
 } from './collection.ts'
 import { NOMBRE_COMMUNES_AVEC_LOYER } from './donnees.ts'
 import { Marque } from './marque.tsx'
+import { nombre } from './nombres.ts'
 
 /* ------------------------------------------------------------ une carte */
 
@@ -247,7 +248,7 @@ export function Collection({
       <section className="bloc">
         <h2>Ta collection</h2>
         <p className="bloc-intro">
-          {cartes.length} carte{cartes.length > 1 ? 's' : ''} sur {total.toLocaleString('fr-FR')}.
+          {cartes.length} carte{cartes.length > 1 ? 's' : ''} sur {nombre(total)}.
           Chacune retient une ville que tu as regardée, avec son loyer et sa place
           parmi les autres. Elles se gagnent en te servant du site — jamais en
           invitant quelqu’un — et restent dans ton navigateur.
