@@ -29,6 +29,13 @@
 #   COMPTES_MASTER_KEY=...       # chiffre les comptes élèves (≥ 16 caractères).
 #                                #   Sans elle, l'inscription est impossible ET le
 #                                #   détail du résultat reste ouvert à tous.
+#   DATABASE_URL=postgres://...  # base PostgreSQL. SANS elle, rien ne change :
+#                                #   comptes dans le fichier chiffré, formations
+#                                #   chez le ministère. C'est le mode normal tant
+#                                #   que la bascule n'est pas faite. Les migrations
+#                                #   ne sont PAS appliquées par ce script : elles
+#                                #   restent une opération délibérée
+#                                #   (kitetudiant/db/migrations/appliquer.sh).
 #   ADMIN_EMAILS=a@b.fr,c@d.fr   # comptes autorisés à ouvrir la console avec
 #                                #   leur propre session, sans ressaisir le jeton.
 #                                #   Plus commode et PLUS FAIBLE qu'ADMIN_TOKEN :
@@ -217,6 +224,16 @@ if [ -n "${COMPTES_MASTER_KEY:-}" ]; then
   log "Comptes élèves activés : le détail du résultat demande une inscription."
 else
   log "Pas de COMPTES_MASTER_KEY : inscription impossible, détail ouvert à tous."
+fi
+# La base. Le script ne l'installe pas et n'applique aucune migration : poser
+# un schéma sur une base de production est une décision, pas un effet de bord
+# d'un déploiement. Il se contente de transmettre l'adresse au serveur.
+if [ -n "${DATABASE_URL:-}" ]; then
+  echo "DATABASE_URL=${DATABASE_URL}" >> "${APP_DIR}/.env"
+  log "Base PostgreSQL configurée. Migrations à appliquer à part si besoin :"
+  log "  PGURL=\"\$DATABASE_URL\" bash kitetudiant/db/migrations/appliquer.sh"
+else
+  log "Pas de DATABASE_URL : fichier chiffré et open data, comme avant."
 fi
 if [ -n "${ADMIN_TOKEN:-}" ] && [ -n "${ADMIN_MASTER_KEY:-}" ]; then
   echo "ADMIN_TOKEN=${ADMIN_TOKEN}" >> "${APP_DIR}/.env"

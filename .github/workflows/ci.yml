@@ -64,10 +64,38 @@ jobs:
           --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - name: Appliquer le schéma sur une base neuve
         env:
           PGURL: postgresql://postgres:postgres@localhost:5432/postgres
         run: kitetudiant/db/valider_schema.sh
+      - name: Appliquer les migrations, puis les rejouer
+        env:
+          PGURL: postgresql://postgres:postgres@localhost:5432/migrations
+        run: |
+          # Une base à part : le schéma de conception a déjà été appliqué sur
+          # « postgres », et les deux se marcheraient dessus. Ce qui est
+          # vérifié ici, c'est ce qui TOURNE — pas le document.
+          psql "postgresql://postgres:postgres@localhost:5432/postgres" \
+            -c 'create database migrations'
+          bash kitetudiant/db/migrations/appliquer.sh
+          # Rejouées : une migration déjà appliquée doit être sautée, pas
+          # relancée. Sans ce garde, un second passage casserait la base.
+          sortie=$(bash kitetudiant/db/migrations/appliquer.sh)
+          printf '%s\n' "$sortie"
+          deja=$(printf '%s' "$sortie" | grep -c 'déjà appliquée')
+          test "$deja" -ge 3
+
+      - name: Le pilote PostgreSQL parle à une vraie base
+        env:
+          DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/migrations
+        run: |
+          npm ci
+          npx vitest run server/__tests__/bd.test.ts
+
       - name: Vérifier que les contraintes rejettent ce qu'elles doivent rejeter
         env:
           PGURL: postgresql://postgres:postgres@localhost:5432/postgres
