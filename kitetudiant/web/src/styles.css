@@ -1526,6 +1526,80 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   color: var(--doux);
 }
 
+/* ------------------------------------------------- lycée et spécialités */
+
+/* Les étiquettes de spécialités : treize boutons courts qui doivent tenir
+   sur quelques lignes, pas treize blocs empilés comme les autres choix. */
+.choix-etiquettes { flex-direction: row; flex-wrap: wrap; gap: 0.4rem; }
+.choix-etiquettes button {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  min-height: 44px;
+}
+
+.lycee { margin-top: 1.75rem; }
+.lycee-propositions { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.25rem; }
+.lycee-proposition {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+}
+.lycee-proposition:hover { border-color: var(--accent); }
+
+.lycee-choisi {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.lycee-nom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.lycee-changer {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  min-height: 36px;
+}
+.lycee-changer:hover { border-color: var(--accent); color: var(--accent); }
+.lycee-titre { margin: 0 0 0.7rem; font-size: 0.98rem; font-weight: 600; }
+
+.lycee-mentions { list-style: none; margin: 0 0 0.9rem; padding: 0; display: grid; gap: 0.4rem; }
+.lycee-mentions li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 11rem) 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+}
+.lycee-mention-libelle { color: var(--doux); }
+/* La barre est un repère, le pourcentage est la donnée — il est toujours
+   écrit à côté, comme partout ailleurs sur ce site. */
+.lycee-barre { height: 8px; border-radius: 4px; background: var(--trait); overflow: hidden; }
+.lycee-barre span { display: block; height: 100%; background: var(--accent); }
+.lycee-mention-part { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 2.7rem; text-align: right; }
+
 /* ------------------------------------------------------------- recherche */
 /* Préfixe « recherche- » et « ecole- » : la feuille est partagée par toutes
    les vues, et un nom déjà pris ferait hériter ces écrans d'une autre mise en

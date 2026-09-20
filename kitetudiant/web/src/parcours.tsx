@@ -30,10 +30,16 @@ import {
 } from './budgetSimple.ts'
 import type { Reponses } from './calcul.ts'
 import { lireBulletin } from './donnees.ts'
+import { MonLycee } from './monLycee.tsx'
+import { OPTIONS, SPECIALITES } from './specialites.ts'
 import { moyennesCumulees, progressionConstatee, type BulletinDepose } from './calcul.ts'
 
 export const REPONSES_PAR_DEFAUT: Reponses = {
   typeBac: 'general',
+  specialites: [],
+  options: [],
+  lyceeUai: null,
+  lyceeNom: null,
   notes: {},
   notesImportees: false,
   bulletins: [],
@@ -244,6 +250,62 @@ function BulletinsDeposes({ bulletins }: { bulletins: readonly BulletinDepose[] 
   )
 }
 
+/**
+ * Un choix à plusieurs réponses, borné.
+ *
+ * Le plafond est une COMMODITÉ, pas une règle : il évite qu'on coche les
+ * treize spécialités par réflexe, ce qui ne dirait plus rien. Il ne bloque
+ * pas — il remplace la plus ancienne par la nouvelle, de sorte qu'un clic
+ * n'est jamais sans effet. Un bouton qui ne répond pas laisse croire à une
+ * panne.
+ */
+function ChoixMultiple({
+  titre,
+  aide,
+  catalogue,
+  choisies,
+  maximum,
+  onChange,
+}: {
+  readonly titre: string
+  readonly aide: string
+  readonly catalogue: readonly { readonly cle: string; readonly libelle: string; readonly complet: string }[]
+  readonly choisies: readonly string[]
+  readonly maximum: number
+  readonly onChange: (choisies: string[]) => void
+}) {
+  return (
+    <div className="budget-question">
+      <p className="champ-label">{titre}</p>
+      <p className="budget-resume">{aide}</p>
+      <div className="choix choix-etiquettes">
+        {catalogue.map((c) => {
+          const active = choisies.includes(c.cle)
+          return (
+            <button
+              key={c.cle}
+              type="button"
+              className={active ? 'choix-actif' : ''}
+              title={c.complet}
+              aria-pressed={active}
+              onClick={() => {
+                if (active) {
+                  onChange(choisies.filter((x) => x !== c.cle))
+                  return
+                }
+                const suite = [...choisies, c.cle]
+                onChange(suite.length > maximum ? suite.slice(suite.length - maximum) : suite)
+              }}
+            >
+              {c.libelle}
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /** Nombre de matières lues sur le dernier bulletin de la liste. */
 function dernierLu(bulletins: Reponses['bulletins']): number {
   return bulletins[bulletins.length - 1]?.matieresLues ?? 0
@@ -376,6 +438,38 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
           L’année seule suffit à calculer tes droits. On ne te demande ni ton nom,
           ni ta date de naissance complète.
         </p>
+
+        {/* Les spécialités ne servent qu'au bac général : les proposer à un
+            bachelier technologique ou professionnel lui ferait remplir un
+            formulaire qui ne le concerne pas. */}
+        {reponses.typeBac === 'general' ? (
+          <>
+            <ChoixMultiple
+              titre="Tes spécialités de terminale"
+              aide="Deux, en général. Elles affinent ce qu’on te propose, et permettent de te comparer à ce que les admis avaient vraiment."
+              catalogue={SPECIALITES}
+              choisies={reponses.specialites}
+              maximum={3}
+              onChange={(specialites) => onChange({ specialites })}
+            />
+            <ChoixMultiple
+              titre="Tes options"
+              aide="Facultatif. Maths expertes ou complémentaires pèsent dans certaines filières."
+              catalogue={OPTIONS}
+              choisies={reponses.options}
+              maximum={2}
+              onChange={(options) => onChange({ options })}
+            />
+          </>
+        ) : null}
+
+        <MonLycee
+          uai={reponses.lyceeUai}
+          nom={reponses.lyceeNom}
+          onChoisir={(choix) =>
+            onChange({ lyceeUai: choix?.uai ?? null, lyceeNom: choix?.nom ?? null })
+          }
+        />
       </div>
     )
   }
