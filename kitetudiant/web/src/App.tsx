@@ -29,6 +29,7 @@ import {
   type AgregatRetours,
   type AideLogement,
   type FiltreFormations,
+  envoyerReleve,
 } from './donnees.ts'
 import {
   ajouter,
@@ -44,6 +45,8 @@ import { Chargement, type EtapeCalcul } from './chargement.tsx'
 import { MonCompte } from './monCompte.tsx'
 import { Epingle, Toit } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
+import { moyenneGenerale } from '../../packages/profil-scolaire/src/index.ts'
+import { trancheMoyenne, trancheReste } from '../../packages/statistiques/src/index.ts'
 import { MarqueLien } from './marque.tsx'
 import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
 import { ListeArticles, PageArticle } from './blog.tsx'
@@ -638,6 +641,33 @@ export default function App() {
         calculerResultats(formations, reponses, parRef, aujourdHui),
       )
       setResultats(calcules)
+
+      /* Un relevé ANONYME d'usage : pas d'identifiant, pas de note exacte,
+         pas de vœu. Il dit quelles villes et quelles filières intéressent,
+         et à quel reste-à-vivre les simulations aboutissent — de quoi savoir
+         où le site sert, sans constituer de dossier sur un mineur.
+
+         Les TRANCHES sont calculées ici et non côté serveur : une note
+         exacte qui partirait sur le réseau serait déjà partie, même si le
+         serveur la jetait ensuite. */
+      const chiffres = calcules.filter((r) => r.parScenario.central.ravMensuel !== null)
+      envoyerReleve({
+        typeBac: reponses.typeBac,
+        academie: reponses.academie,
+        trancheMoyenne: trancheMoyenne(moyenneGenerale(reponses.notes)),
+        boursier: reponses.echelonInconnu ? null : reponses.echelonBourse !== null,
+        mobilite: reponses.mobilite,
+        filiere: reponses.filiere === '' ? null : reponses.filiere,
+        communes: chiffres.flatMap((r) => (r.formation.codeInsee === null ? [] : [r.formation.codeInsee])),
+        trancheReste: trancheReste(
+          chiffres.length === 0
+            ? null
+            : Math.max(...chiffres.map((r) => r.parScenario.central.ravMensuel ?? 0)),
+        ),
+        bulletins: reponses.bulletins.length,
+        formations: calcules.length,
+      })
+
       // Une carte de ville ne se gagne que si un reste-à-vivre a réellement été
       // calculé : sans compte, l'aperçu ne chiffre rien et ne débloque rien.
       gagner(

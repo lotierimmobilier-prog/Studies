@@ -57,6 +57,11 @@ import {
   TropDEssais,
   jetonDeLEnTete,
 } from './comptes.ts'
+import { DepotReleves } from './releves.ts'
+import {
+  ReleveInvalide,
+  relevesEnCsv,
+} from '../kitetudiant/packages/statistiques/src/index.ts'
 
 /**
  * Serveur HTTP minimal (sans dépendance) exposant l'API de prix.
@@ -109,6 +114,9 @@ const depotTemoignages = new DepotTemoignages(
 // KITETUDIANT — un fichier par année universitaire, les années passées ne sont
 // jamais réécrites.
 const depotRetours = new DepotRetours(join(process.cwd(), '.data', 'retours'))
+// KITETUDIANT — relevés ANONYMES d'usage. Aucun identifiant, aucune note
+// exacte, aucune adresse IP : voir kitetudiant/packages/statistiques.
+const depotReleves = new DepotReleves(join(process.cwd(), '.data', 'releves'))
 const coffre = new Coffre(join(process.cwd(), '.data', 'secrets.json'))
 const depotArticles = new DepotArticles(join(process.cwd(), '.data', 'articles.json'))
 // KITETUDIANT — comptes élèves. Sans COMPTES_MASTER_KEY, le dépôt se déclare
@@ -394,6 +402,28 @@ async function demarrer(): Promise<void> {
         })
       }
 
+      // KITETUDIANT — dépôt d'un relevé ANONYME, après une simulation.
+      //
+      // Publique et sans jeton, à dessein : exiger une session rattacherait
+      // le relevé à un compte, et il cesserait d'être anonyme. Le corps est
+      // reconstruit champ par champ à partir des seules valeurs permises
+      // (voir le paquet statistiques), donc rien d'autre ne peut entrer.
+      if (url.pathname === '/api/releves' && req.method === 'POST') {
+        try {
+          const corps = await lireCorps(req)
+          if (corps.length > 8_000) {
+            return envoyerJson(res, 413, { erreur: 'Relevé trop volumineux.' })
+          }
+          await depotReleves.deposer(JSON.parse(corps))
+          return envoyerJson(res, 204, {})
+        } catch (e) {
+          if (e instanceof ReleveInvalide) return envoyerJson(res, 400, { erreur: e.message })
+          // Un relevé qui échoue ne doit JAMAIS gêner l'élève : c'est une
+          // mesure d'usage, pas une étape de son parcours.
+          return envoyerJson(res, 204, {})
+        }
+      }
+
       if (url.pathname === '/api/retours/agregats' && req.method === 'POST') {
         const corps = await lireCorps(req)
         const formations = JSON.parse(corps) as string[]
@@ -581,6 +611,35 @@ async function demarrer(): Promise<void> {
 
         if (url.pathname === '/api/admin/etat' && req.method === 'GET') {
           return envoyerJson(res, 200, await etatSysteme(coffre, depotRetours, depotComptes))
+        }
+
+        // Les statistiques : compteurs de comptes (sans aucune adresse) et
+        // agrégats des relevés anonymes.
+        if (url.pathname === '/api/admin/statistiques' && req.method === 'GET') {
+          const depuis = url.searchParams.get('depuis') ?? undefined
+          const jusqua = url.searchParams.get('jusqua') ?? undefined
+          return envoyerJson(res, 200, {
+            comptes: await depotComptes.statistiques(),
+            releves: await depotReleves.agregat(depuis, jusqua),
+            mois: await depotReleves.moisConnus(),
+          })
+        }
+
+        // L'export. Les relevés sortent TELS QUELS parce qu'ils sont
+        // anonymes : il n'y a rien à caviarder, et c'est la preuve que la
+        // conception tient.
+        if (url.pathname === '/api/admin/statistiques.csv' && req.method === 'GET') {
+          const depuis = url.searchParams.get('depuis') ?? undefined
+          const jusqua = url.searchParams.get('jusqua') ?? undefined
+          const csv = relevesEnCsv(await depotReleves.lire(depuis, jusqua))
+          cors(res)
+          res.writeHead(200, {
+            'Content-Type': 'text/csv; charset=utf-8',
+            'Content-Disposition': 'attachment; filename="kitetudiant-releves.csv"',
+          })
+          // La marque d'ordre des octets : sans elle, un tableur français
+          // ouvre le fichier en latin-1 et « académie » devient « acadÃ©mie ».
+          return res.end(`\uFEFF${csv}`)
         }
 
         if (url.pathname === '/api/admin/cles' && req.method === 'PUT') {

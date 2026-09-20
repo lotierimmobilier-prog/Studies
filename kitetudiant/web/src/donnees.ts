@@ -507,6 +507,39 @@ export async function supprimerCompte(
   }
 }
 
+/**
+ * Dépose un relevé ANONYME d'usage.
+ *
+ * ── Ce que cet appel n'envoie pas ────────────────────────────────────────
+ *
+ * Le jeton de session n'est PAS joint, et c'est délibéré : l'envoyer
+ * rattacherait le relevé à un compte, et il cesserait d'être anonyme. Le
+ * serveur reconstruit d'ailleurs chaque champ à partir des seules valeurs
+ * permises, donc rien d'autre ne peut entrer même si cet appel changeait.
+ *
+ * ── Pourquoi il n'échoue jamais bruyamment ───────────────────────────────
+ *
+ * C'est une mesure d'usage, pas une étape du parcours de l'élève. Un serveur
+ * de statistiques indisponible ne doit pas produire un message d'erreur sur
+ * l'écran de quelqu'un qui cherche son école. L'erreur est donc avalée —
+ * c'est l'un des très rares endroits du code où c'est la bonne conduite.
+ */
+export function envoyerReleve(
+  releve: Record<string, unknown>,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): void {
+  void recuperer(`${base}/releves`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(releve),
+    // « keepalive » : la requête survit si l'élève quitte la page dans la
+    // foulée. Sans lui, un relevé sur deux se perdrait au moment précis où
+    // la page change.
+    keepalive: true,
+  }).catch(() => undefined)
+}
+
 export interface DemandeAide {
   readonly ref: string
   readonly codeInsee: string

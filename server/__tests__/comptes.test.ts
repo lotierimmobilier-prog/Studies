@@ -328,6 +328,68 @@ describe('espace personnel — effacement', () => {
   })
 })
 
+describe('statistiques de comptes', () => {
+  it('compte les inscrits, les sessions et les créations par jour', async () => {
+    const d = depot()
+    await d.inscrire('a@exemple.fr', MDP)
+    await d.inscrire('b@exemple.fr', MDP)
+    const s = await d.statistiques()
+    expect(s.comptes).toBe(2)
+    expect(s.sessionsActives).toBe(2)
+    expect(s.creationsParJour).toHaveLength(1)
+    expect(s.creationsParJour[0]!.nombre).toBe(2)
+    expect(s.premierCompteLe).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+  })
+
+  it('ne laisse fuir AUCUNE adresse, même partielle', async () => {
+    // Le test central. Le fichier chiffre les adresses au repos pour qu'on ne
+    // puisse pas les énumérer ; une fonction d'administration qui les
+    // déchiffrerait en bloc annulerait cette protection, sur une base
+    // d'utilisateurs mineurs (règle 3 de CLAUDE.md).
+    const d = depot()
+    await d.inscrire('eleve.unique@exemple.fr', MDP)
+    const texte = JSON.stringify(await d.statistiques())
+    for (const fuite of ['eleve.unique', 'exemple.fr', '@']) {
+      expect(texte, `« ${fuite} » a fui dans les statistiques`).not.toContain(fuite)
+    }
+  })
+
+  it('range la série des créations en ordre chronologique', async () => {
+    const d = depot()
+    const vieux = new Date(Date.now() - 3 * 86400_000)
+    await d.inscrire('a@exemple.fr', MDP, vieux)
+    await d.inscrire('b@exemple.fr', MDP)
+    const jours = (await d.statistiques()).creationsParJour.map((c) => c.le)
+    expect(jours).toEqual([...jours].sort())
+  })
+
+  it('compte les actifs des trente derniers jours', async () => {
+    const d = depot()
+    await d.inscrire('a@exemple.fr', MDP)
+    expect((await d.statistiques()).actifs30j).toBe(1)
+    // Quarante jours plus tard, le même compte n'est plus actif.
+    const plusTard = new Date(Date.now() + 40 * 86400_000)
+    expect((await d.statistiques(plusTard)).actifs30j).toBe(0)
+  })
+
+  it('annonce les comptes qui approchent de la purge', async () => {
+    // Une durée de conservation qu'on ne voit pas approcher est une durée
+    // qu'on découvre après coup.
+    const d = depot()
+    await d.inscrire('a@exemple.fr', MDP)
+    expect((await d.statistiques()).bientotPurges).toBe(0)
+    const presque = new Date(Date.now() + (PURGE_APRES_JOURS - 30) * 86400_000)
+    expect((await d.statistiques(presque)).bientotPurges).toBe(1)
+  })
+
+  it('rend des compteurs vides, et pas une erreur, sans secret maître', async () => {
+    const s = await depotSansSecret().statistiques()
+    expect(s.configure).toBe(false)
+    expect(s.comptes).toBe(0)
+    expect(s.creationsParJour).toEqual([])
+  })
+})
+
 describe('conservation', () => {
   it('supprime les comptes dormants au-delà du délai', async () => {
     const t0 = new Date('2020-01-01T00:00:00Z')

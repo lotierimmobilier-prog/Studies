@@ -118,6 +118,82 @@ export function oublierCle(nom: string): Promise<{ ok: boolean }> {
   return appeler<{ ok: boolean }>(`/cles?nom=${encodeURIComponent(nom)}`, { method: 'DELETE' })
 }
 
+/* --------------------------------------------------------- statistiques */
+
+export interface Comptage {
+  readonly valeur: string
+  readonly nombre: number
+}
+
+export interface StatistiquesAdmin {
+  readonly comptes: {
+    readonly configure: boolean
+    readonly comptes: number
+    readonly sessionsActives: number
+    readonly creationsParJour: readonly { readonly le: string; readonly nombre: number }[]
+    readonly actifs30j: number
+    readonly bientotPurges: number
+    readonly premierCompteLe: string | null
+    readonly dernierCompteLe: string | null
+  }
+  readonly releves: {
+    readonly total: number
+    readonly duPremier: string | null
+    readonly auDernier: string | null
+    readonly parJour: readonly Comptage[]
+    readonly parTypeBac: readonly Comptage[]
+    readonly parAcademie: readonly Comptage[]
+    readonly parTrancheMoyenne: readonly Comptage[]
+    readonly parTrancheReste: readonly Comptage[]
+    readonly parMobilite: readonly Comptage[]
+    readonly parFiliere: readonly Comptage[]
+    readonly communes: readonly Comptage[]
+    readonly boursiers: { readonly oui: number; readonly non: number; readonly inconnu: number }
+  }
+  readonly mois: readonly string[]
+}
+
+export function chercherStatistiques(
+  depuis?: string,
+  jusqua?: string,
+): Promise<StatistiquesAdmin> {
+  const p = new URLSearchParams()
+  if (depuis) p.set('depuis', depuis)
+  if (jusqua) p.set('jusqua', jusqua)
+  const q = p.toString()
+  return appeler<StatistiquesAdmin>(`/statistiques${q === '' ? '' : `?${q}`}`)
+}
+
+/**
+ * L'adresse de l'export CSV.
+ *
+ * Le jeton voyage dans l'adresse, et non dans un en-tête : un téléchargement
+ * déclenché par un lien ne peut pas porter d'en-tête. C'est un compromis
+ * assumé et borné — le jeton n'est PAS accepté ainsi par l'API (elle exige
+ * l'en-tête), donc ce lien passe par un `fetch` qui fabrique le fichier en
+ * mémoire. Rien n'atterrit dans l'historique du navigateur ni dans les
+ * journaux d'un serveur mandataire.
+ */
+export async function telechargerReleves(depuis?: string, jusqua?: string): Promise<void> {
+  const p = new URLSearchParams()
+  if (depuis) p.set('depuis', depuis)
+  if (jusqua) p.set('jusqua', jusqua)
+  const q = p.toString()
+  const reponse = await fetch(`${BASE_API}/admin/statistiques.csv${q === '' ? '' : `?${q}`}`, {
+    headers: { Authorization: `Bearer ${lireJeton()}` },
+  })
+  if (!reponse.ok) throw new ErreurAdmin(`Erreur ${reponse.status}`, reponse.status)
+  const blob = await reponse.blob()
+  const adresse = URL.createObjectURL(blob)
+  const lien = document.createElement('a')
+  lien.href = adresse
+  lien.download = `kitetudiant-releves${depuis ? `-${depuis}` : ''}.csv`
+  lien.click()
+  // Libérer l'adresse : sans cela, le fichier reste en mémoire tant que
+  // l'onglet est ouvert.
+  URL.revokeObjectURL(adresse)
+}
+
 /* ------------------------------------------------------------- articles */
 
 /**
