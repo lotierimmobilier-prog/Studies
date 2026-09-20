@@ -78,6 +78,33 @@ function donneesStructurees(article: Article): string {
 }
 
 /**
+ * Les questions fréquentes, en données structurées.
+ *
+ * C'est le format que les moteurs — et surtout les moteurs génératifs —
+ * savent reprendre tel quel. Une question posée avec sa réponse autoportante
+ * est la plus petite unité citable qui existe : elle tient debout hors de
+ * son article, ce qu'un paragraphe au milieu d'un fil ne fait pas.
+ *
+ * Rendu `null` quand l'article n'en a pas : un FAQPage vide serait signalé
+ * comme une erreur par les validateurs, et surtout il annoncerait un contenu
+ * qui n'existe pas.
+ */
+function questionsFrequentes(article: Article): string | null {
+  const questions = article.questions ?? []
+  if (questions.length === 0) return null
+  const objet = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: questions.map((q) => ({
+      '@type': 'Question',
+      name: q.question,
+      acceptedAnswer: { '@type': 'Answer', text: q.reponse },
+    })),
+  }
+  return JSON.stringify(objet).replaceAll('</', '<\\/')
+}
+
+/**
  * Le fil d'Ariane, en données structurées.
  *
  * Il existe déjà à l'écran (web/src/filAriane.tsx) mais un moteur ne le
@@ -222,13 +249,32 @@ if (!coquille.includes('<div id="root"></div>')) {
 // ---------------------------------------------------------------- articles
 for (const article of ARTICLES) {
   const canonique = `${ORIGINE}${BASE}blog/${article.slug}`
+  const faq = questionsFrequentes(article)
+  // Les questions sont écrites dans le HTML autant que dans les données
+  // structurées. Un moteur qui ne lit pas le JSON-LD — et un lecteur arrivé
+  // là avant que l'application ne prenne la main — les trouve quand même.
+  const questionsHtml =
+    (article.questions ?? []).length === 0
+      ? ''
+      : `
+      <section>
+      <h2>Questions fréquentes</h2>
+      <dl>
+        ${(article.questions ?? [])
+          .map(
+            (q) =>
+              `<dt>${echapper(q.question)}</dt><dd>${echapper(q.reponse)}</dd>`,
+          )
+          .join('\n        ')}
+      </dl>
+      </section>`
   const contenu = `
     <main>
       <article>
       <h1>${echapper(article.titre)}</h1>
       <p><time datetime="${article.publieLe}">${article.publieLe}</time></p>
       <p>${echapper(article.chapeau)}</p>
-      ${corpsEnHtml(article)}
+      ${corpsEnHtml(article)}${questionsHtml}
       <p>${echapper(MENTION_SOURCE)}</p>
       </article>
     </main>`
@@ -244,6 +290,7 @@ for (const article of ARTICLES) {
         ...enTetesDePartage(article.slug, `${article.titre} — KitEtudiant.fr`),
         `<script type="application/ld+json">${donneesStructurees(article)}</script>`,
         `<script type="application/ld+json">${filDAriane(article)}</script>`,
+        ...(faq !== null ? [`<script type="application/ld+json">${faq}</script>`] : []),
       ].join('\n    '),
     ),
   )

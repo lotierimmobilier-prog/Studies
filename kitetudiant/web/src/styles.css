@@ -1500,6 +1500,41 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   color: var(--doux);
 }
 
+/* ------------------------------------------------- questions fréquentes */
+/* Une liste de définitions, pas une suite de paragraphes : la question et sa
+   réponse sont liées sémantiquement, et un lecteur d'écran l'annonce. */
+
+.questions {
+  margin: 2.5rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--trait);
+}
+.questions-titre {
+  margin: 0 0 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.questions-liste { margin: 0; }
+.questions-paire { margin: 0 0 1.4rem; }
+.questions-paire:last-child { margin-bottom: 0; }
+.questions-question {
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+/* La réponse est décalée et tenue par un filet : elle se lit comme un bloc
+   détachable, ce qu'elle est — c'est le morceau qu'un moteur reprendra seul. */
+.questions-reponse {
+  margin: 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
 /* ----------------------------------------------------- barre de classement */
 /* Préfixe « barre-tri- » : la feuille est partagée par toutes les vues, et un
    nom déjà pris ferait hériter cette barre d'une autre mise en page sans rien

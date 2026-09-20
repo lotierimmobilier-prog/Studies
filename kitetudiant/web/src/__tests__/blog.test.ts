@@ -7,6 +7,7 @@ import {
   MENTION_SOURCE,
   minutesDeLecture,
   mots,
+  tousLesTextes,
 } from '../../../packages/articles/src/index.ts'
 import { adresseComplete, cheminDe, routeDuChemin } from '../routes.ts'
 
@@ -112,8 +113,7 @@ describe('les articles', () => {
   it('ne citent aucun montant en euros', () => {
     const fautifs: string[] = []
     for (const a of ARTICLES) {
-      const textes = [a.chapeau, ...a.corps.flatMap((b) => (b.type === 'liste' ? b.points : [b.texte]))]
-      for (const texte of textes) {
+      for (const texte of tousLesTextes(a)) {
         if (/\d[\d   ]*(€|euros?\b)/i.test(texte)) {
           fautifs.push(`${a.slug} → ${texte.slice(0, 60)}…`)
         }
@@ -161,12 +161,7 @@ describe('les articles', () => {
       'janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre'
     const fautifs: string[] = []
     for (const a of ARTICLES) {
-      const textes = [
-        a.titre,
-        a.chapeau,
-        ...a.corps.flatMap((b) => (b.type === 'liste' ? b.points : [b.texte])),
-      ]
-      for (const texte of textes) {
+      for (const texte of tousLesTextes(a)) {
         if (new RegExp(`\\b\\d{1,2}(er|ᵉʳ)?\\s+(${MOIS})\\b`, 'i').test(texte))
           fautifs.push(`${a.slug} — jour précis → ${texte.slice(0, 60)}…`)
         if (/\b20\d\d\b/.test(texte))
