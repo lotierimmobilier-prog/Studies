@@ -304,6 +304,18 @@ location /${SLUG}/api/ {
     proxy_http_version 1.1;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
+    # Sans ces deux en-têtes, l'API ne voit qu'une connexion HTTP venue de
+    # 127.0.0.1, et deux choses cassent en silence :
+    #
+    #   - X-Forwarded-Proto : la console d'administration exige HTTPS. Elle ne
+    #     peut pas le constater elle-même derrière nginx, qui termine le TLS.
+    #     Sans cet en-tête elle répond 421 même sur un site en HTTPS valide —
+    #     observé sur kitetudiant.fr le 20/09/2026, certificat en place.
+    #   - X-Forwarded-For : le verrouillage après cinq échecs se compte par
+    #     client. Sans cet en-tête, tous les visiteurs partagent l'adresse de
+    #     nginx : les échecs d'un seul verrouilleraient tout le monde.
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_read_timeout 30s;
 }
 
