@@ -42,7 +42,8 @@ import {
 import { Collection } from './collection.tsx'
 import { Chargement, type EtapeCalcul } from './chargement.tsx'
 import { MonCompte } from './monCompte.tsx'
-import { Epingle } from './illustrations.tsx'
+import { Epingle, Toit } from './illustrations.tsx'
+import { liensLogement } from './logement.ts'
 import { MarqueLien } from './marque.tsx'
 import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
 import { ListeArticles, PageArticle } from './blog.tsx'
@@ -142,6 +143,17 @@ function Ligne({ ligne }: { ligne: LigneBudget }) {
  * La ville accompagne le nom : « Université de Lorraine » seule ramène des
  * pages de toute la région, et l'élève cherche UN site précis.
  */
+/**
+ * L'ancre d'une fiche dans la page.
+ *
+ * Préfixée, parce qu'un identifiant de formation est un code du ministère —
+ * « 1234 » — et qu'un `id` purement numérique n'est pas un sélecteur CSS
+ * valide : `document.querySelector('#1234')` lève une erreur.
+ */
+function ancreDe(idFormation: string): string {
+  return `formation-${idFormation}`
+}
+
 function rechercheWeb(etablissement: string, ville: string): string {
   const requete = `${etablissement} ${ville} site officiel`.trim()
   return `https://www.google.com/search?q=${encodeURIComponent(requete)}`
@@ -194,7 +206,7 @@ function Carte({
       : euros(central.ravMensuel)
 
   return (
-    <article className={`carte ${verdict.classe}`} ref={ref}>
+    <article className={`carte ${verdict.classe}`} id={ancreDe(formation.id)} ref={ref}>
       <div className="carte-tete">
         <h3 className="carte-titre">{formation.libelle}</h3>
         <span className={`verdict ${verdict.classe}`}>{verdict.texte}</span>
@@ -294,6 +306,34 @@ function Carte({
           Chercher le site de l’école
           <span aria-hidden="true"> ↗</span>
         </a>
+      </p>
+
+      {/* Se loger. Le CROUS d'abord, parce que c'est ce que les articles du
+          site conseillent et que la résidence universitaire est la solution
+          la moins chère — un produit qui conseille une chose puis met en
+          avant son contraire ne mérite pas qu'on le croie.
+
+          Le site n'a aucun lien avec ces services et ne peut pas vérifier ce
+          qu'on y trouve : les libellés disent « chercher », jamais
+          « trouver ». */}
+      <p className="carte-liens carte-logement">
+        <span className="carte-logement-titre">
+          <Toit />
+          Se loger à {formation.ville}
+        </span>
+        {liensLogement(formation.ville).map((l) => (
+          <a
+            className="carte-lien"
+            key={l.cle}
+            href={l.url}
+            title={l.note}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {l.libelle}
+            <span aria-hidden="true"> ↗</span>
+          </a>
+        ))}
       </p>
 
       {ouvert ? (
@@ -635,6 +675,37 @@ export default function App() {
    * avec le bouton qui le ramène. Un filtre dont on ne voit pas la portée
    * serait indiscernable d'un vœu retiré de la vue (règle 4 de CLAUDE.md).
    */
+  /**
+   * Ouvre une fiche depuis un encadré de tête, et y amène l'écran.
+   *
+   * Trois précautions :
+   *
+   * - Si le détail est VERROUILLÉ, on ouvre le formulaire d'inscription
+   *   plutôt qu'une fiche dépliée sur un budget masqué. Montrer un détail
+   *   vide serait une fausse promesse.
+   * - Si un filtre écarte la formation mise en avant, on le lève : sinon le
+   *   clic n'aurait aucun effet visible, et rien ne dirait pourquoi.
+   * - Le défilement attend le rendu suivant. Appelé tout de suite, il
+   *   viserait une fiche que React n'a pas encore dépliée, et l'écran
+   *   s'arrêterait au mauvais endroit.
+   */
+  const voirDetail = useCallback(
+    (idFormation: string) => {
+      if (verrou !== null) {
+        setFormulaireCompte(true)
+        return
+      }
+      setFiltres(SANS_FILTRE)
+      setOuvert(idFormation)
+      gagner([idEtape('detail')])
+      requestAnimationFrame(() => {
+        const cible = document.getElementById(`formation-${idFormation}`)
+        cible?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    },
+    [verrou, gagner],
+  )
+
   const { retenus, ecartes } = useMemo(
     () => filtrer(resultats ?? [], filtres),
     [resultats, filtres],
@@ -844,6 +915,7 @@ export default function App() {
           localisationEnCours={positionEnCours}
           onLocaliser={() => void demanderPosition()}
           onInscrire={() => setFormulaireCompte(true)}
+          onVoirDetail={voirDetail}
         />
         {messagePosition ? <p className="note choix-message">{messagePosition}</p> : null}
 

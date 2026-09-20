@@ -32,11 +32,14 @@ export function TroisChoix({
   localisationEnCours,
   onLocaliser,
   onInscrire,
+  onVoirDetail,
 }: {
   readonly propositions: readonly Proposition[]
   readonly localisationEnCours: boolean
   readonly onLocaliser: () => void
   readonly onInscrire: () => void
+  /** Ouvre la fiche correspondante dans la liste, et y amène l'écran. */
+  readonly onVoirDetail: (idFormation: string) => void
 }) {
   return (
     <section className="choix-tete" aria-label="Trois façons de choisir">
@@ -50,7 +53,12 @@ export function TroisChoix({
         {propositions.map((p) => {
           const entete = ENTETES[p.critere]
           return (
-            <article className={`choix-carte choix-${p.critere}`} key={p.critere}>
+            <article
+              className={
+                estUnChoix(p) ? `choix-carte choix-cliquable choix-${p.critere}` : `choix-carte choix-${p.critere}`
+              }
+              key={p.critere}
+            >
               {/* Pas de pastille numérotée. Trois critères que tout le produit
                   affirme ÉGAUX (règle 5 de CLAUDE.md) ne se numérotent pas :
                   « 1, 2, 3 » se lit comme un classement, et c'est précisément
@@ -81,6 +89,21 @@ export function TroisChoix({
                     {p.resultat.formation.etablissement} — {p.resultat.formation.ville}
                   </p>
                   <p className="choix-pourquoi">{p.pourquoi}</p>
+                  {/* Un VRAI bouton, et non un gestionnaire de clic posé sur
+                      l'encadré. Une carte cliquable sans élément focalisable
+                      est inatteignable au clavier, et rien ne l'annonce à un
+                      lecteur d'écran. Le bouton s'étend sur toute la carte
+                      par un pseudo-élément (voir styles.css) : on peut donc
+                      cliquer n'importe où, sans perdre le clavier. */}
+                  <button
+                    type="button"
+                    className="choix-ouvrir"
+                    onClick={() => onVoirDetail(p.resultat.formation.id)}
+                  >
+                    Voir le détail
+                    <span className="choix-ouvrir-fleche" aria-hidden="true" />
+                    <span className="sr-only"> de {p.resultat.formation.libelle}</span>
+                  </button>
                 </>
               ) : (
                 <>

@@ -19,6 +19,34 @@
  */
 
 /** Épingle de carte — le choix géographique. */
+/**
+ * Un toit. Le pictogramme des liens de logement.
+ *
+ * Dessiné au trait comme les autres : une maison pleine ferait une tache
+ * sombre au milieu d'une ligne de liens, et attirerait l'œil plus que le
+ * chiffre du reste-à-vivre, qui est la raison d'être de la fiche.
+ */
+export function Toit() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path
+        d="M3.5 10.8 12 4l8.5 6.8"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.8 12.5V19a.8.8 0 0 0 .8.8h10.8a.8.8 0 0 0 .8-.8v-6.5"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M10 19.8v-4.2h4v4.2" fill="none" strokeWidth="1.8" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function Epingle() {
   return (
     <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
