@@ -151,11 +151,43 @@ describe('les articles', () => {
     }
   })
 
+  it('ne citent aucune date précise ni aucun millésime de session', () => {
+    // Les articles parlent en mois, parce que l'ordre des phases est la seule
+    // chose stable d'une année sur l'autre. Un « 13 mars 2027 » écrit ici
+    // échapperait à l'avertissement du calendrier et survivrait à la
+    // publication du vrai calendrier — donc deviendrait faux sans que rien ne
+    // le signale. Les jours vivent dans calendrier.ts, eux seuls.
+    const MOIS =
+      'janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre'
+    const fautifs: string[] = []
+    for (const a of ARTICLES) {
+      const textes = [
+        a.titre,
+        a.chapeau,
+        ...a.corps.flatMap((b) => (b.type === 'liste' ? b.points : [b.texte])),
+      ]
+      for (const texte of textes) {
+        if (new RegExp(`\\b\\d{1,2}(er|ᵉʳ)?\\s+(${MOIS})\\b`, 'i').test(texte))
+          fautifs.push(`${a.slug} — jour précis → ${texte.slice(0, 60)}…`)
+        if (/\b20\d\d\b/.test(texte))
+          fautifs.push(`${a.slug} — année → ${texte.slice(0, 60)}…`)
+      }
+    }
+    expect(
+      fautifs,
+      'Un article se lit pendant plusieurs sessions. Parle en mois, et laisse les ' +
+        'jours au calendrier, qui porte son millésime et son avertissement.',
+    ).toEqual([])
+  })
+
   it('annoncent qu’ils ne sont pas un texte officiel', () => {
     // Le site n'est pas affilié à Parcoursup ; un article qui décrit la
     // procédure doit le dire, sans quoi il passe pour une source officielle.
     expect(MENTION_SOURCE).toMatch(/pas un texte officiel/i)
     expect(MENTION_SOURCE).toMatch(/parcoursup\.gouv\.fr/)
+    // Et qu'il ne prétend pas donner les dates de la session à venir.
+    expect(MENTION_SOURCE).toMatch(/non les dates de la session à venir/i)
+    expect(MENTION_SOURCE).toMatch(/fixées chaque année par l’État|fixées chaque année par l'État/)
   })
 
   it('annoncent un temps de lecture cohérent avec leur longueur', () => {

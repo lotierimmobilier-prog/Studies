@@ -19,12 +19,18 @@
  *    « dangerouslySetInnerHTML », donc aucune injection possible par un
  *    article écrit depuis la console d'administration.
  *
- * ── Sur la provenance ────────────────────────────────────────────────────
+ * ── Sur la provenance, et sur les dates ──────────────────────────────────
  *
- * La procédure décrite est celle de Parcoursup ; les dates citées sont celles
- * de la session 2026, reprises du calendrier publié par le ministère. Le
- * texte est original : rien n'est recopié de parcoursup.gouv.fr, dont le
- * contenu reste la référence en cas de doute. Chaque article le dit.
+ * La procédure décrite est celle de Parcoursup. Le texte est original : rien
+ * n'est recopié de parcoursup.gouv.fr, dont le contenu reste la référence en
+ * cas de doute. Chaque article le dit.
+ *
+ * Les articles parlent en MOIS — « les vœux se ferment en mars » — et jamais
+ * en jours. Ce n'est pas un raccourci de rédaction : le calendrier de la
+ * session à venir n'est pas publié au moment où ils sont écrits, et l'ordre
+ * des phases est la seule chose qui ne change pas d'une année sur l'autre. Les
+ * jours vivent dans web/src/calendrier.ts, avec leur millésime et leur
+ * avertissement ; un test interdit qu'une date précise entre ici.
  */
 
 export type Bloc =
@@ -52,9 +58,11 @@ export interface Article {
 
 /** Mention affichée au pied de chaque article. */
 export const MENTION_SOURCE =
-  'Article rédigé par KitEtudiant.fr à partir de la procédure Parcoursup et du ' +
-  'calendrier de la session 2026 publié par le ministère de l’Enseignement supérieur. ' +
-  'Ce n’est pas un texte officiel : en cas de doute, parcoursup.gouv.fr fait foi.'
+  'Article rédigé par KitEtudiant.fr à partir de la procédure Parcoursup. Il décrit ' +
+  'l’enchaînement des phases, qui ne change pas d’une année sur l’autre, et non les ' +
+  'dates de la session à venir : celles-ci sont fixées chaque année par l’État et ' +
+  'publiées sur parcoursup.gouv.fr. Ce n’est pas un texte officiel : en cas de doute, ' +
+  'parcoursup.gouv.fr fait foi.'
 
 /** Nombre de mots d'un article, corps compris. */
 export function mots(article: Article): number {

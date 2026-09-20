@@ -32,9 +32,11 @@ import { cheminDe } from './routes.ts'
 import {
   AVERTISSEMENT,
   enToutesLettres,
+  fenetreProjetee,
   MILLESIME_CALENDRIER,
   PHASES,
   RELEVE_LE,
+  SESSION_VISEE,
   SOURCE_CALENDRIER,
 } from './calendrier.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
@@ -236,20 +238,30 @@ function Comparaison() {
 /* ------------------------------------------------------- la chronologie */
 
 /**
- * Le calendrier de la dernière session, en repère.
+ * La chronologie de la session visée.
+ *
+ * Chaque étape porte DEUX lignes, et l'ordre n'est pas indifférent : la
+ * fenêtre prévisionnelle d'abord — c'est ce que l'élève doit retenir — puis,
+ * en dessous et en plus petit, la date réelle de la session précédente, qui
+ * dit d'où la fenêtre est tirée. La seconde justifie la première.
+ *
+ * Seule la date de référence est une vraie date, donc seule elle porte une
+ * balise `time` : marquer ainsi une fenêtre déduite la ferait passer pour un
+ * fait auprès d'un lecteur d'écran comme d'un moteur de recherche.
  *
  * L'avertissement est DANS le bloc, avant les dates, et non relégué en note de
- * bas de page : un élève qui se fierait à une date périmée manquerait un vœu.
+ * bas de page : un élève qui se fierait à une date supposée manquerait un vœu.
  * Il vient de calendrier.ts, pour qu'aucune vue ne puisse afficher les dates
  * sans lui.
  */
 function Chronologie() {
   return (
     <section className="bloc" id="calendrier">
-      <h2>Le calendrier, dans les grandes lignes</h2>
+      <h2>Le calendrier de la session {SESSION_VISEE}, dans les grandes lignes</h2>
       <p className="bloc-intro">
         Trois phases qui se suivent toujours dans le même ordre : on regarde, on
-        formule, on répond. Ce qui change d’une année sur l’autre, ce sont les dates.
+        formule, on répond. Ce qui change d’une année sur l’autre, ce sont les dates —
+        et celles de {SESSION_VISEE} ne sont pas encore fixées.
       </p>
 
       <p className="avertissement-calendrier">
@@ -264,12 +276,18 @@ function Chronologie() {
             <p className="chrono-resume">{phase.resume}</p>
             <ul className="chrono-etapes">
               {phase.etapes.map((e) => (
-                <li className="chrono-etape" key={e.le}>
-                  <time className="chrono-date" dateTime={e.le}>
-                    {enToutesLettres(e.le)}
-                  </time>
+                <li className="chrono-etape" key={e.reference}>
+                  <span className="chrono-date">{fenetreProjetee(e.reference)}</span>
                   <span className="chrono-quoi">{e.titre}</span>
                   {e.detail !== null ? <span className="chrono-detail">{e.detail}</span> : null}
+                  {/* « Session 2026 » et non « en 2026 » : une session court sur
+                      deux années civiles, et la première étape tombe en décembre
+                      de l'année précédente. « En 2026 : … décembre 2025 » se lit
+                      comme une faute. */}
+                  <span className="chrono-repere">
+                    Session {MILLESIME_CALENDRIER} :{' '}
+                    <time dateTime={e.reference}>{enToutesLettres(e.reference)}</time>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -279,8 +297,9 @@ function Chronologie() {
       </ol>
 
       <p className="sources chrono-source">
-        {SOURCE_CALENDRIER}, millésime {MILLESIME_CALENDRIER}, relevé le{' '}
-        {dateLisible(RELEVE_LE)}.
+        Fenêtres déduites du calendrier de la session {MILLESIME_CALENDRIER}, seule
+        session publiée à ce jour. Source : {SOURCE_CALENDRIER}, millésime{' '}
+        {MILLESIME_CALENDRIER}, relevé le {dateLisible(RELEVE_LE)}.
       </p>
     </section>
   )
