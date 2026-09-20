@@ -22,7 +22,7 @@
  * produit incomplet.
  */
 
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { chercherFormations, type Formation } from './donnees.ts'
 import { FilAriane } from './filAriane.tsx'
@@ -32,14 +32,33 @@ import { liensLogement } from './logement.ts'
 import { nombre } from './nombres.ts'
 import { secteurDe } from './tri.ts'
 import { THEMES, motsDuTheme } from './themes.ts'
-import type { Route } from './routes.ts'
+import { cheminDe, type Route } from './routes.ts'
 
-function Resultat({ formation }: { readonly formation: Formation }) {
+function Resultat({
+  formation,
+  onNaviguer,
+}: {
+  readonly formation: Formation
+  readonly onNaviguer: (route: Route) => void
+}) {
   const secteur = secteurDe(formation.statutEtablissement)
+  const vers = { vue: 'formation', code: formation.id } as const
   return (
     <li className="ecole">
+      {/* Le titre EST le lien vers la fiche. Un lien séparé « en savoir plus »
+          au bas de la vignette oblige à chercher où cliquer, alors que le
+          titre est ce qu'on lit en premier et ce qu'on vise naturellement. */}
       <h3 className="ecole-titre" title={formation.libelle}>
-        {formation.libelle}
+        <a
+          href={cheminDe(vers)}
+          onClick={(ev) => {
+            if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return
+            ev.preventDefault()
+            onNaviguer(vers)
+          }}
+        >
+          {formation.libelle}
+        </a>
       </h3>
       <p className="ecole-lieu">
         <Epingle />
@@ -103,9 +122,20 @@ export function RechercheEcoles({
   /** Bascule vers le parcours en sept questions. */
   readonly onCommencer: () => void
 }) {
-  const [ville, setVille] = useState('')
-  const [theme, setTheme] = useState('')
-  const [mots, setMots] = useState('')
+  /* Les critères vivent dans l'adresse, pas seulement en mémoire.
+   *
+   * Deux raisons, et la seconde est la plus importante :
+   *
+   *   - « qu'y a-t-il à Limoges ? » est une question qu'on envoie à
+   *     quelqu'un. Sans les critères dans l'adresse, le lien partagé ouvre
+   *     un formulaire vide ;
+   *   - depuis qu'un résultat mène à sa fiche, revenir en arrière est un
+   *     geste ordinaire. Il ramenait sur une page vide : la recherche était
+   *     perdue, et il fallait tout retaper. */
+  const depart = new URLSearchParams(window.location.search)
+  const [ville, setVille] = useState(depart.get('ville') ?? '')
+  const [theme, setTheme] = useState(depart.get('theme') ?? '')
+  const [mots, setMots] = useState(depart.get('mots') ?? '')
   const [resultats, setResultats] = useState<Formation[] | null>(null)
   const [enCours, setEnCours] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
@@ -119,6 +149,20 @@ export function RechercheEcoles({
     }
     setEnCours(true)
     setErreur(null)
+    /* `replaceState` et non `pushState` : chaque recherche remplace la
+       précédente dans l'historique. Sans cela, cinq essais successifs
+       obligeraient à appuyer cinq fois sur « précédent » pour sortir de la
+       page. */
+    const params = new URLSearchParams()
+    if (ville.trim() !== '') params.set('ville', ville.trim())
+    if (theme !== '') params.set('theme', theme)
+    if (mots.trim() !== '') params.set('mots', mots.trim())
+    const q = params.toString()
+    window.history.replaceState(
+      {},
+      '',
+      `${window.location.pathname}${q === '' ? '' : `?${q}`}`,
+    )
     try {
       /* Les mots du thème et ceux tapés à la main se cumulent en OU : un
          thème est un raccourci vers une liste de mots, pas un filtre qui
@@ -144,6 +188,16 @@ export function RechercheEcoles({
       setEnCours(false)
     }
   }, [ville, theme, mots])
+
+  /* Une recherche déjà écrite dans l'adresse se relance toute seule, une
+     seule fois. Sans le garde, `chercher` changeant à chaque frappe
+     relancerait la requête à chaque caractère tapé. */
+  const relancee = useRef(false)
+  useEffect(() => {
+    if (relancee.current) return
+    relancee.current = true
+    if (ville !== '' || theme !== '' || mots !== '') void chercher()
+  }, [chercher, ville, theme, mots])
 
   return (
     <main className="app app-large">
@@ -276,7 +330,7 @@ export function RechercheEcoles({
 
               <ul className="ecoles">
                 {resultats.map((f) => (
-                  <Resultat formation={f} key={f.id} />
+                  <Resultat formation={f} key={f.id} onNaviguer={onNaviguer} />
                 ))}
               </ul>
             </>

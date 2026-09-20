@@ -35,6 +35,17 @@ const TUILE = 256
 const ZOOM_MIN = 8
 const ZOOM_MAX = 18
 
+/**
+ * Les classes CSS de ce module sont préfixées « plan- », pas « carte- ».
+ *
+ * « carte » est déjà pris par les cartes à collectionner, vingt-huit fois
+ * dans styles.css. Réutiliser le nom n'aurait rien cassé au build : la carte
+ * géographique aurait simplement hérité de la mise en page d'une vignette de
+ * récompense, en silence. styles.test.ts existe précisément pour attraper ce
+ * genre de collision, qui s'est déjà produite une fois sur ce projet.
+ *
+ * « plan » est aussi le nom que l'IGN donne à la couche : Plan IGN.
+ */
 export const SOURCE_CARTE = 'Plan IGN — Géoplateforme, IGN'
 
 function urlTuile(z: number, x: number, y: number): string {
@@ -142,9 +153,9 @@ export function Carte({
   }
 
   return (
-    <div className="carte">
+    <div className="plan">
       <div
-        className="carte-cadre"
+        className="plan-cadre"
         ref={cadre}
         style={{ height: `${hauteur}px` }}
         role="img"
@@ -169,7 +180,7 @@ export function Carte({
         {tuiles.map((t) => (
           <img
             key={t.cle}
-            className="carte-tuile"
+            className="plan-tuile"
             src={urlTuile(zoom, t.x, t.y)}
             alt=""
             aria-hidden="true"
@@ -184,10 +195,10 @@ export function Carte({
         ))}
 
         {visible ? (
-          <span className="carte-repere" style={{ left: `${rx}px`, top: `${ry}px` }} />
+          <span className="plan-repere" style={{ left: `${rx}px`, top: `${ry}px` }} />
         ) : null}
 
-        <div className="carte-zooms">
+        <div className="plan-zooms">
           <button
             type="button"
             aria-label="Agrandir"
@@ -206,7 +217,7 @@ export function Carte({
           </button>
           <button
             type="button"
-            className="carte-recentrer"
+            className="plan-recentrer"
             onClick={() => {
               setCentre({ lat, lon })
               setZoom(15)
@@ -220,7 +231,7 @@ export function Carte({
       {/* La mention est imposée par les conditions de la Géoplateforme, et
           elle est de toute façon la règle de ce site : toute donnée affichée
           dit d'où elle vient. */}
-      <p className="note carte-mention">{SOURCE_CARTE}</p>
+      <p className="note plan-mention">{SOURCE_CARTE}</p>
     </div>
   )
 }
@@ -244,8 +255,8 @@ export function CarteALaDemande({
   const [ouverte, setOuverte] = useState(false)
   if (ouverte) return <Carte lat={lat} lon={lon} libelle={libelle} />
   return (
-    <div className="carte-demande">
-      <button type="button" className="secondaire carte-bouton" onClick={() => setOuverte(true)}>
+    <div className="plan-demande">
+      <button type="button" className="secondaire plan-bouton" onClick={() => setOuverte(true)}>
         Voir sur la carte
       </button>
       <span className="note">

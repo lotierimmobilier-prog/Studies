@@ -41,6 +41,18 @@ export type Route =
   // La recherche directe d'écoles a son adresse : « qu'y a-t-il à Limoges ? »
   // est une question qu'on envoie à quelqu'un, et un lien qu'on met en favori.
   | { readonly vue: 'recherche' }
+  // Une formation sans adresse n'existe que comme une carte dans une liste :
+  // on ne peut ni la partager, ni la mettre en favori, ni y revenir, ni
+  // l'indexer. C'était le manque le plus structurant du site.
+  //
+  // La clé dans l'adresse est `cod_aff_form`, la clé pivot des formations
+  // (DECISIONS.md, D7) — jamais un intitulé transformé en slug : un intitulé
+  // se réécrit d'une session à l'autre, et l'adresse partagée l'an dernier
+  // tomberait alors dans le vide.
+  | { readonly vue: 'formation'; readonly code: string }
+  // L'établissement, lui, est identifié par son UAI. Deux lycées peuvent
+  // porter le même nom ; aucun ne partage son UAI.
+  | { readonly vue: 'etablissement'; readonly uai: string }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -59,8 +71,24 @@ export function cheminDe(route: Route): string {
       return `${BASE}mon-compte`
     case 'recherche':
       return `${BASE}chercher-une-ecole`
+    case 'formation':
+      return `${BASE}formation/${route.code}`
+    case 'etablissement':
+      return `${BASE}etablissement/${route.uai}`
   }
 }
+
+/**
+ * Les formes acceptées dans une adresse.
+ *
+ * Elles sont volontairement étroites. Un motif large laisserait passer
+ * n'importe quel chemin et transformerait une faute de frappe en requête
+ * envoyée à l'open data — puis en page vide sans explication. Ici, ce qui
+ * n'a pas la forme d'une clé n'est tout simplement pas une route.
+ */
+const CODE_FORMATION = /^[A-Za-z0-9_-]{1,32}$/
+/** Sept chiffres et une lettre : c'est la forme d'un code UAI. */
+const CODE_UAI = /^[0-9]{7}[A-Za-z]$/
 
 /**
  * La route que désigne un chemin, ou `null` si ce n'en est pas une.
@@ -79,6 +107,17 @@ export function routeDuChemin(chemin: string): Route | null {
   if (reste === 'chercher-une-ecole') return { vue: 'recherche' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
+  const formation = /^formation\/(.+)$/.exec(reste)
+  if (formation !== null && CODE_FORMATION.test(formation[1]!)) {
+    return { vue: 'formation', code: formation[1]! }
+  }
+  const etablissement = /^etablissement\/(.+)$/.exec(reste)
+  if (etablissement !== null && CODE_UAI.test(etablissement[1]!)) {
+    // L'UAI est normalisé en majuscules : « 0121471j » et « 0121471J »
+    // désignent le même établissement, et deux adresses pour une même page
+    // dispersent son référencement.
+    return { vue: 'etablissement', uai: etablissement[1]!.toUpperCase() }
+  }
   return null
 }
 

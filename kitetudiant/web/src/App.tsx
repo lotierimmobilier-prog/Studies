@@ -43,6 +43,8 @@ import {
 import { Collection } from './collection.tsx'
 import { Chargement, type EtapeCalcul } from './chargement.tsx'
 import { RechercheEcoles } from './rechercheEcoles.tsx'
+import { PageFormation } from './pageFormation.tsx'
+import { PageEtablissement } from './pageEtablissement.tsx'
 import { MonCompte } from './monCompte.tsx'
 import { Cle, Epingle, Etoile, Fiche, Loupe, Residence, Toit } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
@@ -171,6 +173,7 @@ function Carte({
   retours,
   verrouille,
   onInscrire,
+  onNaviguer,
 }: {
   resultat: ResultatFormation
   tous: readonly ResultatFormation[]
@@ -179,6 +182,7 @@ function Carte({
   retours: AgregatRetours | undefined
   /** Ouvre le formulaire d'inscription depuis la fiche elle-même. */
   onInscrire: () => void
+  onNaviguer: (route: Route) => void
   /**
    * Vrai quand le montant existe mais demande un compte. À ne pas confondre
    * avec « non calculable », qui veut dire qu'une donnée manque réellement :
@@ -293,6 +297,21 @@ function Carte({
           « Chercher le site de l'école » remplissaient une ligne à eux deux.
           Le titre complet reste au survol et pour un lecteur d'écran. */}
       <p className="carte-liens">
+        {/* La fiche détaillée du site, en PREMIER — avant la fiche officielle
+            de Parcoursup. Elle a une adresse propre, donc elle s'envoie, se
+            met en favori et s'ouvre dans un onglet comme n'importe quel lien. */}
+        <a
+          className="carte-lien"
+          href={cheminDe({ vue: 'formation', code: formation.id })}
+          onClick={(ev) => {
+            if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return
+            ev.preventDefault()
+            onNaviguer({ vue: 'formation', code: formation.id })
+          }}
+        >
+          <Loupe />
+          Voir le détail
+        </a>
         {formation.lien ? (
           <a
             className="carte-lien"
@@ -433,6 +452,8 @@ export default function App() {
     | 'inscription'
     | 'compte'
     | 'recherche'
+    | 'formation'
+    | 'etablissement'
   >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
@@ -441,10 +462,17 @@ export default function App() {
       return route === null || route.vue === 'accueil' ? 'accueil' : route.vue
     },
   )
-  const [slug, setSlug] = useState<string | null>(() => {
-    const route = routeDuChemin(window.location.pathname)
-    return route !== null && route.vue === 'article' ? route.slug : null
+  /**
+   * L'adresse courante, quand il y en a une.
+   *
+   * Un seul état plutôt qu'un champ par paramètre — un pour le slug d'article,
+   * un pour le code de formation, un pour l'UAI : trois champs parallèles
+   * finissent toujours par se désynchroniser, et rien ne le signale.
+   */
+  const [adresse, setAdresse] = useState<Route>(() => {
+    return routeDuChemin(window.location.pathname) ?? { vue: 'accueil' }
   })
+  const slug = adresse.vue === 'article' ? adresse.slug : null
   const [etape, setEtape] = useState(0)
   const [reponses, setReponses] = useState<Reponses>(REPONSES_PAR_DEFAUT)
   const [resultats, setResultats] = useState<ResultatFormation[] | null>(null)
@@ -521,7 +549,7 @@ export default function App() {
   const naviguer = useCallback((route: Route) => {
     window.history.pushState({}, '', cheminDe(route))
     setVue(route.vue)
-    setSlug(route.vue === 'article' ? route.slug : null)
+    setAdresse(route)
     window.scrollTo(0, 0)
   }, [])
 
@@ -571,7 +599,7 @@ export default function App() {
       const route = routeDuChemin(window.location.pathname)
       if (route === null) return
       setVue(route.vue)
-      setSlug(route.vue === 'article' ? route.slug : null)
+      setAdresse(route)
     }
     window.addEventListener('popstate', surRetour)
     return () => window.removeEventListener('popstate', surRetour)
@@ -768,6 +796,28 @@ export default function App() {
   /* Posé avant toute vue : l'attente couvre l'écran, quelle que soit la page
      d'où l'on est parti — la dernière question du parcours, ou l'accueil. */
   if (enCours) return <Chargement etape={etapeCalcul} />
+
+  /* Les deux pages à clé pivot. Elles sont posées avant les autres vues
+     parce qu'elles se suffisent à elles-mêmes : elles ne dépendent ni du
+     parcours, ni des résultats, ni d'une session. C'est ce qui permet
+     d'ouvrir une adresse de formation reçue par message sans rien avoir
+     rempli au préalable. */
+  if (vue === 'formation' && adresse.vue === 'formation') {
+    return (
+      <PageFormation
+        code={adresse.code}
+        onNaviguer={naviguer}
+        onCommencer={() => {
+          setVue('parcours')
+          setEtape(0)
+        }}
+      />
+    )
+  }
+
+  if (vue === 'etablissement' && adresse.vue === 'etablissement') {
+    return <PageEtablissement uai={adresse.uai} onNaviguer={naviguer} />
+  }
 
   if (vue === 'recherche') {
     return (
@@ -1009,6 +1059,7 @@ export default function App() {
               ouvert={ouvert === r.formation.id}
               verrouille={verrou !== null}
               onInscrire={() => setFormulaireCompte(true)}
+              onNaviguer={naviguer}
               onOuvrir={() => {
                 const ouvrir = ouvert !== r.formation.id
                 setOuvert(ouvrir ? r.formation.id : null)
