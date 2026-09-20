@@ -39,6 +39,9 @@
 #   SERVER_NAME=76.13.37.163     # IP ou domaine servi par nginx
 #                                #   (VPS KITETUDIANT : 76.13.37.193)
 #   REDIRECT_ROOT=1              # « / » redirige vers /<SLUG>/ (défaut : 1)
+#   RACINE=1                     # sert le projet SUR « / » au lieu de « /<SLUG>/ »
+#   HSTS=1                       # en-tête Strict-Transport-Security (défaut : 1, exige TLS=1)
+#   HSTS_AGE=31536000            # durée de l'engagement HSTS, en secondes (défaut : un an)
 #   DOMAIN=kitetudiant.fr        # nom de domaine à servir, en plus de l'IP
 #   TLS=1                        # obtient un certificat Let's Encrypt pour DOMAIN
 #   TLS_EMAIL=vous@exemple.fr    # adresse de contact exigée par Let's Encrypt
@@ -72,6 +75,9 @@ SLUG="${SLUG:-studies}"                       # sous-chemin d'URL et nom du proj
 SERVER_NAME="${SERVER_NAME:-76.13.37.163}"    # IP ou nom de domaine
 API_PORT="${API_PORT:-8787}"                  # port local de l'API (unique/projet)
 REDIRECT_ROOT="${REDIRECT_ROOT:-1}"           # « / » -> « /<SLUG>/ »
+RACINE="${RACINE:-0}"                         # 1 = servir ce projet SUR la racine du domaine
+HSTS="${HSTS:-1}"                             # 1 = interdire au navigateur de retenter HTTP
+HSTS_AGE="${HSTS_AGE:-31536000}"              # durée de l'engagement HSTS, en secondes
 DOMAIN="${DOMAIN:-}"                          # nom de domaine (vide = IP seule)
 TLS="${TLS:-0}"                               # 1 = certificat Let's Encrypt
 TLS_EMAIL="${TLS_EMAIL:-}"                    # contact exigé par Let's Encrypt
@@ -125,7 +131,11 @@ esac
 log "Build du front « ${PROJET} » (base « /${SLUG}/ »)…"
 cd "${SRC_DIR}"
 npm ci
-VITE_BASE="/${SLUG}/" npm run "${COMMANDE_BUILD}"   # assets et API préfixés par /<SLUG>/
+# La base conditionne TOUT ce que le front fabrique : chemins des assets,
+# adresse de l'API, liens du blog, cartes de partage, plan du site. Elle n'est
+# écrite nulle part en dur, précisément pour que ce basculement soit indolore.
+if [ "${RACINE}" = "1" ]; then BASE_WEB="/"; else BASE_WEB="/${SLUG}/"; fi
+VITE_BASE="${BASE_WEB}" npm run "${COMMANDE_BUILD}"   # assets et API préfixés par ${BASE_WEB}
 
 log "Copie du front vers ${WEB_ROOT}…"
 mkdir -p "${WEB_ROOT}"
@@ -314,21 +324,93 @@ NGINX
 fi
 
 # Redirection facultative de « / » vers ce projet (déposée à part, modifiable).
-if [ "${REDIRECT_ROOT}" = "1" ]; then
+# En mode racine elle n'a plus lieu d'être : le projet EST la racine, et la
+# laisser créerait une boucle de redirection sur elle-même.
+if [ "${RACINE}" = "1" ]; then
+  rm -f "${INCLUDE_DIR}/000-root-redirect.conf"
+elif [ "${REDIRECT_ROOT}" = "1" ]; then
   cat > "${INCLUDE_DIR}/000-root-redirect.conf" <<NGINX
 # « / » redirige vers /${SLUG}/ (supprime ce fichier pour une page d'accueil neutre)
 location = / { return 302 /${SLUG}/; }
 NGINX
 fi
 
-# Snippet propre à CE projet : front sous /<SLUG>/ + API sous /<SLUG>/api/.
-cat > "${INCLUDE_DIR}/${SLUG}.conf" <<NGINX
+# ---------------------------------------------------------------- HSTS
+# Strict-Transport-Security interdit au navigateur de retenter HTTP pendant la
+# durée annoncée. Sans lui, un onglet ouvert un jour en clair y revient depuis
+# son cache et affiche « Non sécurisé » alors que le serveur redirige
+# correctement — observé sur kitetudiant.fr le 20/09/2026.
+#
+# L'en-tête ne DOIT être envoyé qu'en HTTPS (RFC 6797 §7.2). Comme le même
+# fichier d'include sert les blocs 80 et 443, on passe par une table : nginx
+# n'émet pas un en-tête dont la valeur est vide.
+#
+# Pas de « includeSubDomains » : ce serait un engagement d'un an sur TOUS les
+# sous-domaines, y compris ceux qui n'existent pas encore. À ajouter à la main
+# le jour où l'on est sûr de les vouloir tous en HTTPS.
+EN_TETE_HSTS=""
+if [ "${HSTS}" = "1" ] && [ "${TLS}" = "1" ]; then
+  cat > /etc/nginx/conf.d/hsts.conf <<NGINX
+# Écrit par deploy/vps-setup.sh. \$hsts vaut la politique en HTTPS, vide sinon.
+map \$scheme \$hsts {
+    default "";
+    https   "max-age=${HSTS_AGE}";
+}
+NGINX
+  EN_TETE_HSTS='    add_header Strict-Transport-Security $hsts always;'
+fi
+
+# Snippet propre à CE projet : front + API.
+if [ "${RACINE}" = "1" ]; then
+  # -------- mode racine : le projet EST le site --------
+  # « location / » est le plus court des préfixes : nginx donne la priorité au
+  # plus long, donc un autre projet déposé sous /autre/ continue d'être servi.
+  # Et cet include ne vit que dans le bloc server de ce domaine : les autres
+  # sites de la machine, qui ont leur propre bloc, ne voient rien de ceci.
+  cat > "${INCLUDE_DIR}/${SLUG}.conf" <<NGINX
+# Projet « ${SLUG} » — servi SUR LA RACINE du domaine + API Node (port ${API_PORT})
+location / {
+    root /var/www/${SLUG};
+    try_files \$uri \$uri/ /index.html;
+${EN_TETE_HSTS}
+}
+
+location /api/ {
+    proxy_pass http://127.0.0.1:${API_PORT}/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    # Sans ces deux en-têtes, l'API ne voit qu'une connexion HTTP venue de
+    # 127.0.0.1, et deux choses cassent en silence :
+    #
+    #   - X-Forwarded-Proto : la console d'administration exige HTTPS. Elle ne
+    #     peut pas le constater elle-même derrière nginx, qui termine le TLS.
+    #     Sans cet en-tête elle répond 421 même sur un site en HTTPS valide.
+    #   - X-Forwarded-For : le verrouillage après cinq échecs se compte par
+    #     client. Sans cet en-tête, tous les visiteurs partagent l'adresse de
+    #     nginx : les échecs d'un seul verrouilleraient tout le monde.
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_read_timeout 30s;
+}
+
+location /assets/ {
+    root /var/www/${SLUG};
+    expires 30d;
+    add_header Cache-Control "public, immutable";
+${EN_TETE_HSTS}
+}
+NGINX
+else
+  # -------- mode sous-chemin : le projet vit sous /<SLUG>/ --------
+  cat > "${INCLUDE_DIR}/${SLUG}.conf" <<NGINX
 # Projet « ${SLUG} » — front statique + API Node (port ${API_PORT})
 location = /${SLUG} { return 301 /${SLUG}/; }
 
 location /${SLUG}/ {
     root /var/www;                       # /${SLUG}/ -> /var/www/${SLUG}/
     try_files \$uri \$uri/ /${SLUG}/index.html;
+${EN_TETE_HSTS}
 }
 
 location /${SLUG}/api/ {
@@ -355,8 +437,10 @@ location /${SLUG}/assets/ {
     root /var/www;
     expires 30d;
     add_header Cache-Control "public, immutable";
+${EN_TETE_HSTS}
 }
 NGINX
+fi
 
 # On teste AVANT de recharger. Si nginx refuse la config, on retire ce qu'on
 # vient de poser et on remet l'ancienne version : sur une machine qui héberge
@@ -382,7 +466,7 @@ systemctl reload nginx
 # Le site collectera des données d'élèves mineurs : le chiffrement du transport
 # n'est pas une option. certbot réécrit la config nginx pour ajouter le bloc 443
 # et la redirection depuis le port 80, puis installe son timer de renouvellement.
-URL_FINALE="http://${SERVER_NAME}/${SLUG}/"
+URL_FINALE="http://${SERVER_NAME}${BASE_WEB}"
 if [ "${TLS}" = "1" ]; then
   if [ -z "${DOMAIN}" ]; then
     echo "TLS=1 exige DOMAIN=<votre-domaine> : un certificat ne s'obtient pas pour une IP." >&2
@@ -524,9 +608,9 @@ if [ "${TLS}" = "1" ]; then
   certbot --nginx --non-interactive --agree-tos --redirect \
     ${COURRIEL_ARGS} ${NOMS_CERT}
   systemctl reload nginx
-  URL_FINALE="https://${DOMAIN}/${SLUG}/"
+  URL_FINALE="https://${DOMAIN}${BASE_WEB}"
 elif [ -n "${DOMAIN}" ]; then
-  URL_FINALE="http://${DOMAIN}/${SLUG}/"
+  URL_FINALE="http://${DOMAIN}${BASE_WEB}"
   log "Domaine servi en HTTP simple. Ajoute TLS=1 TLS_EMAIL=… pour passer en HTTPS."
 fi
 
@@ -566,7 +650,8 @@ exec env \\
   PROJET="${PROJET}" SLUG="${SLUG}" API_PORT="${API_PORT}" \\
   SERVER_NAME="${SERVER_NAME}" DOMAIN="${DOMAIN}" \\
   TLS="${TLS}" TLS_EMAIL="${TLS_EMAIL}" \\
-  REDIRECT_ROOT="${REDIRECT_ROOT}" AUTO_MAJ=1 MINUTES_MAJ="${MINUTES_MAJ}" \\
+  REDIRECT_ROOT="${REDIRECT_ROOT}" RACINE="${RACINE}" \\
+  HSTS="${HSTS}" HSTS_AGE="${HSTS_AGE}" AUTO_MAJ=1 MINUTES_MAJ="${MINUTES_MAJ}" \\
   bash "\${SRC}/deploy/vps-setup.sh"
 MAJ
   chmod 755 "${MAJ_BIN}"
