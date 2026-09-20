@@ -114,8 +114,15 @@ export function communesPositionnees(): CommunePositionnee[] {
   return liste
 }
 
+export interface Coordonnees {
+  readonly lat: number
+  readonly lon: number
+}
+
 export interface Formation {
   readonly id: string
+  /** Code UAI de l'établissement : la clé pivot, jamais son nom. */
+  readonly uai: string | null
   readonly libelle: string
   readonly etablissement: string
   readonly ville: string
@@ -139,6 +146,13 @@ export interface Formation {
    * CLAUDE.md interdit, et elle tromperait sur le coût de la scolarité.
    */
   readonly statutEtablissement: string | null
+  /**
+   * Position publiée de la formation. `null` pour 0,27 % du jeu, et dans ce
+   * cas la carte ne s'affiche pas : elle dit que la position n'est pas
+   * publiée, plutôt que de montrer le centre de la commune comme si c'était
+   * l'adresse de l'école.
+   */
+  readonly coordonnees: Coordonnees | null
   /** Statistiques publiées, telles quelles : aucune n'est recalculée. */
   readonly stats: StatsFormation
 }
@@ -147,6 +161,9 @@ import type { StatsFormation } from '../../packages/admissibilite/src/types.ts'
 
 interface EnregistrementEsr {
   readonly cod_aff_form?: string
+  readonly cod_uai?: string
+  /** « lat, lon » ou { lat, lon } selon la forme du champ geo_point_2d. */
+  readonly g_olocalisation_des_formations?: { lat?: number; lon?: number } | string
   readonly lib_for_voe_ins?: string
   readonly g_ea_lib_vx?: string
   readonly ville_etab?: string
@@ -177,6 +194,32 @@ interface EnregistrementEsr {
 
 function nombreOuNul(v: number | undefined): number | null {
   return typeof v === 'number' ? v : null
+}
+
+/**
+ * Position d'une formation, quelle que soit la forme rendue par l'API.
+ *
+ * L'export CSV écrit « 44.35624, 2.56417 » — latitude d'abord. L'API JSON
+ * rend un objet { lon, lat }. Les deux existent, et confondre l'ordre place
+ * toutes les écoles françaises en Somalie sans qu'aucune vérification ne
+ * proteste : les coordonnées restent parfaitement valides.
+ */
+function coordonneesDe(brut: EnregistrementEsr['g_olocalisation_des_formations']): Coordonnees | null {
+  if (brut === undefined || brut === null) return null
+  if (typeof brut === 'string') {
+    const [a, b] = brut.split(',')
+    const lat = Number(a)
+    const lon = Number(b)
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null
+    return dansLesBornes(lat, lon)
+  }
+  if (typeof brut.lat !== 'number' || typeof brut.lon !== 'number') return null
+  return dansLesBornes(brut.lat, brut.lon)
+}
+
+function dansLesBornes(lat: number, lon: number): Coordonnees | null {
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return null
+  return { lat, lon }
 }
 
 /** Normalisation identique à celle du script de génération. */
@@ -232,6 +275,7 @@ function convertir(e: EnregistrementEsr): Formation | null {
   if (!id || !libelle || !ville || !dep) return null
   return {
     id,
+    uai: e.cod_uai ?? null,
     libelle,
     etablissement: e.g_ea_lib_vx ?? '',
     ville,
@@ -247,6 +291,7 @@ function convertir(e: EnregistrementEsr): Formation | null {
     session: e.session ?? '',
     codeInsee: codeInseeDe(ville, dep),
     statutEtablissement: e.contrat_etab ?? null,
+    coordonnees: coordonneesDe(e.g_olocalisation_des_formations),
     stats: {
       session: e.session ?? '',
       capacite: nombreOuNul(e.capa_fin),
@@ -309,6 +354,57 @@ export async function chercherFormations(
   }
   if (conditions.length > 0) params.set('where', conditions.join(' AND '))
 
+  const reponse = await avecUneRelance(`${ESR}?${params.toString()}`, recuperer)
+  if (!reponse.ok) {
+    throw new Error(`L'open data du ministère a répondu ${reponse.status}.`)
+  }
+  const corps = (await reponse.json()) as { results?: EnregistrementEsr[] }
+  return (corps.results ?? []).map(convertir).filter((f): f is Formation => f !== null)
+}
+
+/**
+ * Une formation, par sa clé pivot.
+ *
+ * `null` veut dire « ce code n'existe pas dans ce millésime », et la page le
+ * dit — elle ne retombe pas sur une formation approchante. Une adresse
+ * partagée qui ouvre la mauvaise école est pire qu'une adresse qui ne s'ouvre
+ * pas : personne ne s'en aperçoit.
+ */
+export async function formationParCode(
+  code: string,
+  recuperer: typeof fetch = fetch,
+): Promise<Formation | null> {
+  const params = new URLSearchParams({
+    limit: '1',
+    where: `cod_aff_form = "${code.replace(/"/g, '')}"`,
+  })
+  const reponse = await avecUneRelance(`${ESR}?${params.toString()}`, recuperer)
+  if (!reponse.ok) {
+    throw new Error(`L'open data du ministère a répondu ${reponse.status}.`)
+  }
+  const corps = (await reponse.json()) as { results?: EnregistrementEsr[] }
+  const premier = (corps.results ?? [])[0]
+  if (premier === undefined) return null
+  return convertir(premier)
+}
+
+/**
+ * Toutes les formations d'un établissement, par son code UAI.
+ *
+ * Jamais par son nom : deux établissements peuvent porter le même, et un nom
+ * se réécrit d'une session à l'autre. La limite de cent est celle de l'API ;
+ * au-delà, la page dit qu'elle n'affiche pas tout, plutôt que de laisser
+ * croire que l'établissement n'a que cent formations.
+ */
+export async function formationsDeLEtablissement(
+  uai: string,
+  recuperer: typeof fetch = fetch,
+): Promise<Formation[]> {
+  const params = new URLSearchParams({
+    limit: '100',
+    order_by: 'voe_tot DESC',
+    where: `cod_uai = "${uai.replace(/"/g, '')}"`,
+  })
   const reponse = await avecUneRelance(`${ESR}?${params.toString()}`, recuperer)
   if (!reponse.ok) {
     throw new Error(`L'open data du ministère a répondu ${reponse.status}.`)

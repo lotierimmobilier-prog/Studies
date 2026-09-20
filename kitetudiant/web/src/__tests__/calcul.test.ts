@@ -47,7 +47,11 @@ function formation(
 ): Formation {
   return {
     id,
+    uai: '0871234A',
     statutEtablissement,
+    // Sans position publiée : c'est le cas de 0,27 % du jeu réel, et la
+    // fiche doit savoir s'en passer.
+    coordonnees: null,
     libelle: `${filiere} de test`,
     etablissement: 'Établissement de test',
     ville,

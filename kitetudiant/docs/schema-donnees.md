@@ -1,11 +1,34 @@
-# Schéma de données — étape 3
+# Schéma de données
 
-Proposition, **non appliquée**. Le prompt d'amorçage demande de montrer le
-schéma avant de l'exécuter.
+**Mis à jour le 20/09/2026.** Le schéma était une proposition non appliquée ;
+il est devenu le plan d'exécution, découpé en migrations.
 
-- DDL : [`db/schema.sql`](../db/schema.sql)
-- Tests de contraintes : [`db/tests_contraintes.sql`](../db/tests_contraintes.sql)
-- Validation : `PGURL=… db/valider_schema.sh`
+| Fichier | Rôle |
+| --- | --- |
+| [`db/schema.sql`](../db/schema.sql) | **Document de conception.** Le modèle entier, y compris ce qui ne sera pas créé. |
+| [`db/migrations/001-socle.sql`](../db/migrations/001-socle.sql) | `reference` et `communaute`, à l'identique du document. |
+| [`db/migrations/002-comptes-profils-voeux.sql`](../db/migrations/002-comptes-profils-voeux.sql) | `eleve` : comptes, sessions, profil **déclaratif**, listes de vœux. |
+| [`db/hors-perimetre.sql`](../db/hors-perimetre.sql) | Ce que la décision D1 laisse dans le navigateur. **Jamais exécuté.** |
+| [`db/tests_contraintes.sql`](../db/tests_contraintes.sql) | Les contraintes exercées une à une sur une vraie instance. |
+
+- Application : `PGURL=… bash db/migrations/appliquer.sh`
+- Validation du document de conception : `PGURL=… db/valider_schema.sh`
+
+## Ce qui a changé, et pourquoi
+
+La décision [D1](../DECISIONS.md) tranche que **le serveur garde ce qui
+identifie un choix, jamais ce qui décrit une personne**. Quatre objets du
+document de conception sortent donc du périmètre déployé :
+`eleve.bulletin_matiere`, `eleve.simulation_voeu`, `eleve.ligne_budget`, et les
+colonnes financières de `eleve.profil_eleve`.
+
+Ils ne sont pas supprimés du document — la conception a été faite et vérifiée —
+mais aucune migration ne les crée. Une table vide est une invitation à la
+remplir ; une table absente est une décision.
+
+Deux tables s'ajoutent, qui n'étaient pas prévues : `eleve.compte` et
+`eleve.session_compte`, qui reprennent le fichier chiffré de
+`server/comptes.ts` pour pouvoir rattacher une liste de vœux à quelqu'un.
 
 ## Deux schémas, deux régimes
 
