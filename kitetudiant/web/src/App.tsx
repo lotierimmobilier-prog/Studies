@@ -39,6 +39,7 @@ import {
 } from './collection.ts'
 import { Collection } from './collection.tsx'
 import { Epingle } from './illustrations.tsx'
+import { Marque } from './marque.tsx'
 import { affiniteCourte, affiniteNote, chancesCourtes } from './libelles.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 import { Accueil } from './accueil.tsx'
@@ -499,7 +500,9 @@ export default function App() {
     return (
       <main className="app">
         <header className="entete">
-          <h1>KITETUDIANT</h1>
+          <h1 className="marque">
+            <Marque />
+          </h1>
         </header>
         <Compte
           message={verrou ?? 'Ton compte te donne accès au détail de chaque budget.'}
@@ -519,7 +522,9 @@ export default function App() {
       <main className="app">
         <header className="entete entete-resultats">
           <div>
-            <h1>KITETUDIANT</h1>
+            <h1 className="marque">
+            <Marque />
+          </h1>
             <p className="baseline">Ce qu’il te restera pour vivre, vœu par vœu.</p>
           </div>
           {nombreCartes > 0 ? (
@@ -632,7 +637,7 @@ export default function App() {
             calculée. En dessous de cinq retours sur une année, rien n’est publié.
           </p>
           <p className="non-affiliation">
-            KITETUDIANT n’est pas affilié à Parcoursup, au ministère ni aux CROUS.
+            KitEtudiant.fr n’est pas affilié à Parcoursup, au ministère ni aux CROUS.
             Rien de ce que tu fais ici n’est transmis à Parcoursup.
           </p>
         </footer>
@@ -643,7 +648,9 @@ export default function App() {
   return (
     <main className="app">
       <header className="entete">
-        <h1>KITETUDIANT</h1>
+        <h1 className="marque">
+            <Marque />
+          </h1>
         <p className="baseline">Ce qu’il te restera pour vivre, vœu par vœu.</p>
       </header>
 

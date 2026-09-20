@@ -119,17 +119,47 @@ describe('chaque balise image', () => {
   })
 
   it.each(BALISES.map((b) => [`${b.fichier}:${b.ligne}`, b.texte] as const))(
-    '%s réserve sa place et reste muette pour un lecteur d’écran',
+    '%s réserve sa place',
     (_ou, texte) => {
       // width et height : la place est réservée avant le chargement, le texte
       // ne saute pas au moment où l'image arrive.
       expect(texte).toMatch(/\bwidth=/)
       expect(texte).toMatch(/\bheight=/)
-      // alt vide + aria-hidden : l'illustration est décorative, le sens est
-      // dans le texte voisin.
-      expect(texte).toMatch(/\balt=""/)
-      // loading : tout ne peut pas être prioritaire, sinon rien ne l'est.
-      expect(texte).toMatch(/\bloading=/)
     },
   )
+
+  it.each(BALISES.map((b) => [`${b.fichier}:${b.ligne}`, b.texte] as const))(
+    '%s dit clairement si elle porte du sens',
+    (_ou, texte) => {
+      // Toute image a un `alt`. Deux cas, et pas de troisième :
+      //
+      //   - décorative : alt vide ET aria-hidden, pour qu'un lecteur d'écran
+      //     la saute au lieu de l'annoncer comme un élément inconnu ;
+      //   - porteuse de sens : un alt non vide, et surtout PAS aria-hidden,
+      //     qui la masquerait justement à qui en a besoin.
+      //
+      // Ce test exigeait `alt=""` partout jusqu'au 20/09/2026 — vrai tant que
+      // les seules images étaient des illustrations, faux dès l'arrivée du
+      // logo, dont le nom du site doit être lu.
+      expect(texte).toMatch(/\balt=/)
+      const decorative = /\balt=""/.test(texte)
+      const masquee = /\baria-hidden="true"/.test(texte)
+      expect(
+        decorative === masquee,
+        decorative
+          ? 'alt vide sans aria-hidden : elle sera annoncée comme une image sans nom.'
+          : 'alt non vide avec aria-hidden : son texte ne sera jamais lu.',
+      ).toBe(true)
+    },
+  )
+
+  it('les grandes illustrations ne sont pas toutes chargées d’emblée', () => {
+    // Elles pèsent 150 à 310 Ko chacune. Le logo, lui, est dans l'en-tête et
+    // doit arriver tout de suite : lui imposer `loading` n'aurait pas de sens.
+    const grandes = BALISES.filter((b) => /illu-photo/.test(b.texte))
+    expect(grandes.length).toBeGreaterThan(0)
+    for (const b of grandes) {
+      expect(b.texte, `${b.fichier}:${b.ligne}`).toMatch(/\bloading=/)
+    }
+  })
 })

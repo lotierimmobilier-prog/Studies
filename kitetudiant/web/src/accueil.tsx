@@ -26,6 +26,7 @@ import {
   TYPOLOGIE_LOYERS,
 } from './donnees.ts'
 import { Boussole, Carnet, Epingle, Photo, PorteMonnaie, Ville } from './illustrations.tsx'
+import { Marque } from './marque.tsx'
 
 /** Surface du logement type servant à l'illustration. */
 const SURFACE = 25
@@ -75,7 +76,7 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
         L’école supérieure qui te va, <em>et</em> dans laquelle tu pourras tenir.
       </h1>
       <p className="hero-texte">
-        Fac, BUT, BTS, école d’ingénieurs, prépa : KITETUDIANT regarde chaque formation
+        Fac, BUT, BTS, école d’ingénieurs, prépa : KitEtudiant.fr regarde chaque formation
         sous trois angles — tes chances d’y entrer, ce qu’elle vaut pour toi, et ce qu’il
         te restera pour vivre une fois sur place. Trois réponses, jamais fondues en une
         note.
@@ -247,7 +248,9 @@ export function Accueil({
   return (
     <main className="app accueil">
       <header className="entete entete-accueil">
-        <h1 className="marque">KITETUDIANT</h1>
+        <h1 className="marque">
+          <Marque />
+        </h1>
         <div className="entete-actions">
           {/* La collection n'apparaît qu'une fois la première carte gagnée :
               pour un visiteur qui découvre le site, ce serait du bruit. */}
@@ -364,7 +367,7 @@ export function Accueil({
 
       <footer className="pieds">
         <p className="non-affiliation">
-          KITETUDIANT n’est pas affilié à Parcoursup, au ministère de l’Enseignement
+          KitEtudiant.fr n’est pas affilié à Parcoursup, au ministère de l’Enseignement
           supérieur ni aux CROUS.
         </p>
       </footer>

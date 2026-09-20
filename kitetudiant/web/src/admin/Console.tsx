@@ -7,6 +7,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
+import { Marque } from '../marque.tsx'
 
 import {
   chercherEtat,
@@ -160,7 +161,9 @@ export function Console() {
   return (
     <main className="app admin">
       <header className="entete">
-        <h1>KITETUDIANT</h1>
+        <h1 className="marque">
+          <Marque />
+        </h1>
         <p className="baseline">Administration</p>
       </header>
 

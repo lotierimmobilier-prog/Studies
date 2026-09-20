@@ -1,55 +1,75 @@
 /* Mobile d'abord. Le reste-à-vivre est le plus gros caractère de la page. */
 
+/* ------------------------------------------------------------------ couleurs
+ * Toutes relevées sur le logo fourni, puis ajustées jusqu'au contraste exigé.
+ * Les teintes de marque telles quelles ne passent pas pour du texte : le
+ * turquoise #0CABC0 est à 2,7:1 sur fond clair et le corail #F06F5B à 3,0:1,
+ * là où il en faut 4,5. Ce site affiche des montants à des lycéens sur
+ * téléphone ; on garde la teinte, on corrige la luminosité.
+ *
+ *   marine     #05335C   accent d'interface — liens, boutons
+ *   turquoise  #0CABC0   décor : pictogrammes, étoiles, illustrations
+ *   jaune      #FDBE26   verdict « tendu »
+ *   gris       #485773   texte secondaire (la baseline du logo)
+ *
+ * Les trois verdicts sont volontairement étagés en LUMINOSITÉ autant qu'en
+ * teinte (écarts de 1,26 à 2,05), pour ne pas dépendre de la seule couleur.
+ * Chacun reste par ailleurs écrit en toutes lettres à côté de sa pastille.
+ *
+ * En thème sombre, les teintes sont remontées en gardant teinte et saturation
+ * plutôt que mélangées à du blanc, qui les aurait délavées en gris-bleu.
+ */
+
 :root {
-  --fond: #fbfaf8;
-  --encre: #17191c;
-  --doux: #5b6169;
-  --trait: #e2e0db;
+  --fond: #f8fafb;
+  --encre: #0e1e2b;
+  --doux: #485773;
+  --trait: #dde4ea;
   --carte: #ffffff;
-  --vert: #1f6b46;
-  --orange: #8a5a10;
-  --rouge: #9a2b2b;
-  --gris: #5b6169;
-  --accent: #1d3f78;
-  /* Accent chaud, purement décoratif : jamais utilisé pour un verdict. */
-  --chaud: #c2560f;
-  --ciel-haut: #dbe8fb;
-  --ciel-bas: #f3e9dd;
+  --vert: #0d8467;
+  --orange: #795b12;
+  --rouge: #8e2619;
+  --gris: #485773;
+  --accent: #05335c;
+  /* Accent vif, purement décoratif : jamais utilisé pour un verdict. */
+  --vif: #098090;
+  --ciel-haut: #dcecf3;
+  --ciel-bas: #eef3f8;
   --rayon: 14px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --fond: #14161a;
-    --encre: #f2f1ee;
-    --doux: #a6adb6;
-    --trait: #2b3038;
-    --carte: #1b1e24;
-    --vert: #6fd3a0;
-    --orange: #e0ad5a;
-    --rouge: #f09a9a;
-    --gris: #a6adb6;
-    --accent: #9cc0ff;
-    --chaud: #f0a06a;
-    --ciel-haut: #1b2432;
-    --ciel-bas: #241f2b;
+    --fond: #111a22;
+    --encre: #edf2f6;
+    --doux: #8494b2;
+    --trait: #2a3744;
+    --carte: #18242e;
+    --vert: #15cb9d;
+    --orange: #fdbf28;
+    --rouge: #e7604f;
+    --gris: #8494b2;
+    --accent: #178df1;
+    --vif: #0cb0c6;
+    --ciel-haut: #14212c;
+    --ciel-bas: #1a2430;
   }
 }
 
 :root[data-theme='dark'] {
-  --fond: #14161a;
-  --encre: #f2f1ee;
-  --doux: #a6adb6;
-  --trait: #2b3038;
-  --carte: #1b1e24;
-  --vert: #6fd3a0;
-  --orange: #e0ad5a;
-  --rouge: #f09a9a;
-  --gris: #a6adb6;
-  --accent: #9cc0ff;
-  --chaud: #f0a06a;
-  --ciel-haut: #1b2432;
-  --ciel-bas: #241f2b;
+  --fond: #111a22;
+  --encre: #edf2f6;
+  --doux: #8494b2;
+  --trait: #2a3744;
+  --carte: #18242e;
+  --vert: #15cb9d;
+  --orange: #fdbf28;
+  --rouge: #e7604f;
+  --gris: #8494b2;
+  --accent: #178df1;
+  --vif: #0cb0c6;
+  --ciel-haut: #14212c;
+  --ciel-bas: #1a2430;
 }
 
 * { box-sizing: border-box; }
@@ -305,7 +325,10 @@ input[type='range'] { width: 100%; min-height: 44px; }
   padding-bottom: 1rem;
   border-bottom: 1px solid var(--trait);
 }
-.marque { margin: 0; font-size: 1.05rem; letter-spacing: 0.14em; font-weight: 700; }
+/* Le titre de niveau 1 ne porte plus de texte, mais le logo : les réglages
+   typographiques de l'ancienne marque écrite (interlettrage, graisse) n'ont
+   plus d'objet et fausseraient l'alignement vertical. */
+.marque { margin: 0; font-size: 0; letter-spacing: normal; line-height: 0; }
 .entete-cta {
   padding: 0.45rem 0.9rem;
   border: 1px solid var(--trait);
@@ -643,12 +666,12 @@ input[type='range'] { width: 100%; min-height: 44px; }
 }
 .illu-ciel-haut { stop-color: var(--ciel-haut); }
 .illu-ciel-bas { stop-color: var(--ciel-bas); }
-.illu-astre { fill: var(--chaud); opacity: 0.85; }
+.illu-astre { fill: var(--vif); opacity: 0.85; }
 .illu-loin rect { fill: var(--accent); opacity: 0.28; }
 .illu-pres rect { fill: var(--accent); opacity: 0.6; }
-.illu-fenetres rect { fill: var(--chaud); opacity: 0.9; }
+.illu-fenetres rect { fill: var(--vif); opacity: 0.9; }
 .illu-sol { fill: var(--accent); opacity: 0.16; }
-.illu-chemin { fill: var(--chaud); opacity: 0.22; }
+.illu-chemin { fill: var(--vif); opacity: 0.22; }
 
 .illu-picto {
   width: 1.45rem;
@@ -661,7 +684,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
    ci-dessus ne remplit que les formes pleines (le point du porte-monnaie). */
 
 /* Une épingle devant le titre des loyers. */
-.bloc h2 .illu-picto { margin-right: 0.45rem; color: var(--chaud); }
+.bloc h2 .illu-picto { margin-right: 0.45rem; color: var(--vif); }
 
 @media (prefers-reduced-motion: no-preference) {
   /* Les fenêtres s'allument doucement à l'arrivée sur la page. Discret, et
@@ -744,7 +767,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   font-weight: 600;
   cursor: pointer;
 }
-.pastille:hover { border-color: var(--chaud); color: var(--chaud); }
+.pastille:hover { border-color: var(--vif); color: var(--vif); }
 /* Sur un téléphone, le nombre suffit : le mot prend la place du bouton voisin. */
 .pastille-libelle { display: none; }
 
@@ -774,7 +797,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 }
 /* La rareté se lit à la couleur du liseré. Elle vient du décile réel du loyer
    parmi les communes couvertes, jamais d'un tirage (cf. collection.ts). */
-.carte-collec-rare { border-top-color: var(--chaud); }
+.carte-collec-rare { border-top-color: var(--vif); }
 .carte-collec-peu-frequente { border-top-color: var(--accent); }
 .carte-collec-courante { border-top-color: var(--gris); }
 
@@ -841,7 +864,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   color: var(--doux);
   font-size: 0.88rem;
 }
-.carte-lieu .illu-picto { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--chaud); }
+.carte-lieu .illu-picto { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--vif); }
 
 /* La note de l'adresse : discrète, et jamais présentée comme un quatrième
    critère. Le libellé dit « sur l'adresse », jamais « l'école ». */
@@ -855,7 +878,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   color: var(--doux);
 }
 .pastille-note-valeur { font-weight: 700; color: var(--encre); font-variant-numeric: tabular-nums; }
-.etoiles { color: var(--chaud); letter-spacing: 0.05em; }
+.etoiles { color: var(--vif); letter-spacing: 0.05em; }
 .etoiles-vides { opacity: 0.28; }
 
 /* Les trois cases. Même largeur, même graisse : aucune ne domine. */
@@ -918,3 +941,14 @@ input[type='range'] { width: 100%; min-height: 44px; }
   .trio-case { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
   .trio-note { display: none; }
 }
+
+/* ------------------------------------------------------------------- logo */
+/* Deux découpes du logo fourni, assemblées en bandeau horizontal. La bascule
+   clair/sombre se fait dans marque.tsx, par <picture> : le navigateur ne
+   télécharge que la version dont il a besoin. */
+
+.marque-logo { display: inline-flex; align-items: center; gap: 0.5rem; }
+.marque-dessin { display: block; width: auto; height: 2.1rem; }
+.marque-mot { display: block; width: auto; height: 1.25rem; }
+/* En-tête étroit : le nom seul reste identifiable, le dessin seul ne l'est pas. */
+.marque-logo-compact .marque-dessin { display: none; }
