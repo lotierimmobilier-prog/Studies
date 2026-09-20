@@ -2210,6 +2210,18 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     padding-inline: 2rem;
   }
 
+  /* Le rail occupe 15rem : la colonne de contenu en a d'autant moins. Le
+     bouton principal était en « flex: 0 1 auto », donc compressible : son
+     libellé se cassait sur trois lignes et il devenait un pavé au lieu d'un
+     bouton. On l'empêche de rétrécir, et on autorise le groupe à passer à la
+     ligne plutôt qu'à écraser ce qu'il contient. */
+  .cta-groupe {
+    flex-wrap: wrap;
+  }
+  .cta-groupe .principal {
+    flex: 0 0 auto;
+  }
+
   /* ── l'accroche et sa photographie, côte à côte ─────────────────────── */
   .hero-zone {
     display: grid;
@@ -2580,4 +2592,237 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 .ecole-titre a:hover,
 .ecole-titre a:focus-visible {
   text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════ la barre de navigation du site
+ *
+ * Une seule liste de destinations, deux formes selon la largeur : rail
+ * vertical à gauche au-dessus de 1024 px, barre fixée en bas en dessous.
+ *
+ * La barre du bas est à portée de pouce et ne se fait pas recouvrir par le
+ * clavier, contrairement à une barre en haut. Le rail latéral, lui, mangerait
+ * la moitié d'un écran de téléphone.
+ */
+.coque-page {
+  /* La barre du bas flotte au-dessus du contenu : sans cette réserve, elle
+     recouvre les derniers boutons de chaque page — et c'est justement là que
+     se trouve l'action principale. `safe-area-inset` tient compte de la barre
+     gestuelle des téléphones sans encoche déclarée. */
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.rail {
+  position: fixed;
+  z-index: 40;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  border-top: 1px solid var(--trait);
+  background: var(--carte);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+/* Le bandeau de marque du téléphone. Il ne tient PAS dans la barre du bas :
+   il y prendrait la largeur d'une destination sans en être une. */
+.barre-marque {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  padding: 0.7rem 16px;
+  border-bottom: 1px solid var(--trait);
+  background: var(--carte);
+}
+.barre-marque .marque-logo img {
+  height: 1.55rem;
+}
+/* Sur grand écran c'est le rail qui porte la marque ; deux logos à l'écran
+   font double emploi. */
+.rail-marque {
+  display: none;
+}
+.rail-liste {
+  display: flex;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rail-liste > li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.rail-lien {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* 3rem de haut au minimum : c'est la taille sous laquelle une cible tactile
+     se rate. */
+  min-height: 3.4rem;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  border-top: 2px solid transparent;
+  background: none;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.7rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.rail-lien .illu-picto {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+}
+.rail-lien-courant {
+  border-top-color: var(--vif);
+  color: var(--encre);
+  font-weight: 600;
+}
+/* Le libellé long est réservé au rail ; en bas, on n'a la place que du court. */
+.rail-libelle {
+  display: none;
+}
+.rail-court {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rail-deconnexion {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .coque {
+    display: grid;
+    grid-template-columns: 15rem 1fr;
+  }
+  /* `display: none` sort aussi l'élément de la grille : il ne reste que le
+     rail et la page, soit exactement les deux colonnes déclarées. */
+  .barre-marque {
+    display: none;
+  }
+  .coque-page {
+    min-width: 0;
+    padding-bottom: 0;
+  }
+  .rail {
+    position: sticky;
+    top: 0;
+    right: auto;
+    bottom: auto;
+    left: 0;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    padding: 1.25rem 0.9rem 1.5rem;
+    border-top: none;
+    border-right: 1px solid var(--trait);
+  }
+  .rail-marque {
+    display: block;
+    margin: 0 0.35rem 1.5rem;
+  }
+  .rail-liste {
+    flex: 0 1 auto;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .rail-liste > li {
+    flex: 0 0 auto;
+  }
+  .rail-lien {
+    flex-direction: row;
+    gap: 0.7rem;
+    justify-content: flex-start;
+    min-height: 0;
+    padding: 0.65rem 0.75rem;
+    border-top: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  .rail-lien:hover {
+    background: var(--fond);
+    color: var(--encre);
+  }
+  .rail-lien-courant,
+  .rail-lien-courant:hover {
+    background: var(--fond);
+    color: var(--encre);
+    box-shadow: inset 3px 0 0 var(--vif);
+  }
+  .rail-libelle {
+    display: inline;
+  }
+  .rail-court {
+    display: none;
+  }
+  .rail-deconnexion {
+    display: block;
+    margin-top: auto;
+    padding: 0.55rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--doux);
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .rail-deconnexion:hover {
+    color: var(--encre);
+    text-decoration: underline;
+  }
+}
+
+/* Les titres de page qui remplacent l'ancien en-tête à logo. */
+.promesse-parcours,
+.promesse-resultats {
+  margin: 0 0 1.25rem;
+  font-family: var(--titres);
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+/* La carte des résultats de recherche. Ses repères sont cliquables : ce sont
+   de vrais boutons, donc atteignables au clavier, avec le nom de la formation
+   pour nom accessible. */
+.ecoles-carte {
+  margin: 1rem 0 1.5rem;
+}
+.plan-repere-actif {
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.plan-repere-actif:hover,
+.plan-repere-actif:focus-visible {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+/* Un repère qui en regroupe plusieurs porte leur nombre. Il s'élargit pour
+   que le chiffre tienne, reste rond, et passe AU-DESSUS des repères simples :
+   un groupe recouvert par un voisin ne se clique pas. */
+.plan-repere-groupe {
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  background: var(--accent);
+}
+.plan-repere-compte {
+  color: #fff;
+  font-family: var(--titres);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
 }

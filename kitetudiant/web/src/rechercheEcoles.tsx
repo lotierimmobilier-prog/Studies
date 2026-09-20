@@ -25,8 +25,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { chercherFormations, type Formation } from './donnees.ts'
+import { CarteALaDemande, type PointCarte } from './carte.tsx'
 import { FilAriane } from './filAriane.tsx'
-import { MarqueLien } from './marque.tsx'
 import { Cle, Epingle, Fiche, Residence } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
 import { nombre } from './nombres.ts'
@@ -189,6 +189,17 @@ export function RechercheEcoles({
     }
   }, [ville, theme, mots])
 
+  /* Les formations dont la position est publiée, seules à pouvoir figurer
+     sur la carte. */
+  const places: PointCarte[] = (resultats ?? [])
+    .filter((f) => f.coordonnees !== null)
+    .map((f) => ({
+      cle: f.id,
+      lat: f.coordonnees!.lat,
+      lon: f.coordonnees!.lon,
+      libelle: `${f.libelle} — ${f.etablissement}`,
+    }))
+
   /* Une recherche déjà écrite dans l'adresse se relance toute seule, une
      seule fois. Sans le garde, `chercher` changeant à chaque frappe
      relancerait la requête à chaque caractère tapé. */
@@ -201,15 +212,6 @@ export function RechercheEcoles({
 
   return (
     <main className="app app-large">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button type="button" className="entete-cta" onClick={() => onNaviguer({ vue: 'accueil' })}>
-          Retour au site
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },
@@ -218,7 +220,7 @@ export function RechercheEcoles({
         onNaviguer={onNaviguer}
       />
 
-      <h2 className="article-titre">Tu sais déjà où tu veux aller ?</h2>
+      <h1 className="article-titre">Tu sais déjà où tu veux aller ?</h1>
       <p className="bloc-intro">
         Tape une ville, et regarde ce qui s’y trouve. Les formations, leurs établissements
         et leurs taux d’accès publiés — directement depuis l’open data du ministère.
@@ -327,6 +329,36 @@ export function RechercheEcoles({
                   Répondre aux sept questions
                 </button>
               </div>
+
+              {/* La carte des résultats.
+                  
+                  Elle n'apparaît qu'à la demande, comme celle d'une fiche :
+                  rien n'est demandé à l'IGN avant le clic, et le bouton le
+                  dit avant, pas après.
+                  
+                  Les formations sans position publiée (0,27 % du jeu) ne s'y
+                  trouvent pas, et le compte le dit. Les poser au centre de
+                  leur commune ferait croire à une adresse. */}
+              {places.length > 0 ? (
+                <div className="ecoles-carte">
+                  <CarteALaDemande
+                    points={places}
+                    hauteur={360}
+                    libelleBouton={`Voir les ${nombre(places.length)} formations sur la carte`}
+                    onPoint={(cle) => onNaviguer({ vue: 'formation', code: cle })}
+                  />
+                  {places.length < resultats.length ? (
+                    <p className="note ecoles-carte-manquants">
+                      {nombre(resultats.length - places.length)} formation
+                      {resultats.length - places.length > 1 ? 's' : ''} sur{' '}
+                      {nombre(resultats.length)} n’
+                      {resultats.length - places.length > 1 ? 'ont' : 'a'} pas de position
+                      publiée : elle{resultats.length - places.length > 1 ? 's ne figurent' : ' ne figure'}{' '}
+                      pas sur la carte, mais bien dans la liste.
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
               <ul className="ecoles">
                 {resultats.map((f) => (

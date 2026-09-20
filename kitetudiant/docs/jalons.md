@@ -18,7 +18,7 @@ voit ce qui s'y trouve sur une carte et dans une liste, ouvre une formation,
 lit ses statistiques d'admission sourcées, l'ajoute à ses vœux, et la retrouve
 le lendemain sur le téléphone de sa mère.
 
-### MVP1-A · La barre latérale et la navigation
+### MVP1-A · La barre latérale et la navigation — **fait**
 
 Remplace l'en-tête à boutons par une barre latérale persistante : explorer,
 mes vœux, mon profil, le blog, mon espace. Repliée en bas d'écran sur mobile —
@@ -29,7 +29,7 @@ l'on peut aller.
 
 **Dépend de :** rien. **Ne dépend pas de la base.**
 
-### MVP1-B · Les URL de formation et d'établissement
+### MVP1-B · Les URL de formation et d'établissement — **fait**
 
 `/formation/:codAffForm` et `/etablissement/:uai` dans `routes.ts`, plus le
 pré-rendu de ce qui est pré-rendable. C'est le déblocage structurel : sans ces
@@ -37,7 +37,7 @@ routes, ni fiche, ni partage, ni vœu qu'on retrouve.
 
 **Dépend de :** rien.
 
-### MVP1-C · La fiche formation, trois onglets
+### MVP1-C · La fiche formation, trois onglets — **fait**
 
 | Onglet | Contenu | Source |
 | --- | --- | --- |
@@ -64,6 +64,13 @@ bascule de lecture avec repli sur l'API du ministère.
 `/explorer` : facettes avec compteurs (ville, thème, filière, statut public /
 privé sous contrat / privé), carte MapLibre avec regroupement, liste
 synchronisée avec la carte.
+
+**Une part est déjà livrée sans la base** : la page de recherche porte une
+carte des résultats, avec regroupement à l'écran et navigation au clic sur un
+repère. Elle tient jusqu'à la centaine de points que rend l'API du ministère.
+Ce qui manque et qui exige la base : les compteurs de facettes, et le
+chargement des formations d'une zone au fil du zoom — c'est là que MapLibre
+devient nécessaire (décision D4).
 
 Les 16 thèmes existants (droit, sport, langues…) sont réutilisés : ils ont été
 construits et vérifiés un par un contre le jeu réel, parce que la discipline
@@ -177,7 +184,7 @@ que Q1 est tranchée.
 
 | Sujet | État |
 | --- | --- |
-| `carte.tsx` écrit, non branché | CSS, coordonnées GPS dans `Formation`, branchement sur la fiche → MVP1-C |
+| ~~`carte.tsx` écrit, non branché~~ | Fait : branché sur la fiche et sur la recherche |
 | `familyia` sur le VPS | `next-server` pid 130309 tient le port 3000 ; certificat et fichiers non retirés |
 | Badge HTTPS « non sécurisé » | Serveur vérifié propre (HSTS, 301, certificat valide, zéro requête en clair). Reste à confirmer en navigation privée. |
 | `CLAUDE.md` décrit une stack jamais atteinte | À reprendre une fois MVP1 livré, pour qu'il décrive ce qui existe |

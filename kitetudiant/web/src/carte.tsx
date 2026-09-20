@@ -88,19 +88,58 @@ export function latitudeDeY(y: number, z: number): number {
 
 /* ------------------------------------------------------------ la carte */
 
-export function Carte({
-  lat,
-  lon,
-  libelle,
-  hauteur = 280,
-}: {
+export interface PointCarte {
+  readonly cle: string
   readonly lat: number
   readonly lon: number
   readonly libelle: string
+}
+
+/**
+ * Le cadrage initial : centre et zoom qui montrent tous les points.
+ *
+ * Calculé une fois, au montage. Le recalculer à chaque rendu ramènerait la
+ * carte à sa position de départ dès qu'on la déplace — le bogue classique
+ * d'une carte « contrôlée » par ses données.
+ *
+ * Le zoom se déduit de l'étendue en longitude et en latitude, la plus
+ * contraignante des deux l'emportant. On retire un cran de marge : sans lui,
+ * les points extrêmes tombent pile sur le bord, où ils se lisent mal.
+ */
+export function cadrage(points: readonly PointCarte[]): { lat: number; lon: number; zoom: number } {
+  const premier = points[0]
+  if (premier === undefined) return { lat: 46.6, lon: 2.4, zoom: 5 }
+  if (points.length === 1) return { lat: premier.lat, lon: premier.lon, zoom: 15 }
+
+  let latMin = premier.lat
+  let latMax = premier.lat
+  let lonMin = premier.lon
+  let lonMax = premier.lon
+  for (const p of points) {
+    latMin = Math.min(latMin, p.lat)
+    latMax = Math.max(latMax, p.lat)
+    lonMin = Math.min(lonMin, p.lon)
+    lonMax = Math.max(lonMax, p.lon)
+  }
+  const etendue = Math.max(lonMax - lonMin, (latMax - latMin) * 1.6, 0.002)
+  // 360° tiennent dans une tuile au zoom 0 : chaque cran divise par deux.
+  const zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.floor(Math.log2(360 / etendue)) - 1))
+  return { lat: (latMin + latMax) / 2, lon: (lonMin + lonMax) / 2, zoom }
+}
+
+export function Carte({
+  points,
+  hauteur = 280,
+  onPoint,
+}: {
+  readonly points: readonly PointCarte[]
   readonly hauteur?: number
+  /** Appelé au clic sur un repère. Absent : les repères ne sont pas cliquables. */
+  readonly onPoint?: (cle: string) => void
 }) {
-  const [zoom, setZoom] = useState(15)
-  const [centre, setCentre] = useState({ lat, lon })
+  const depart = useRef(cadrage(points)).current
+  const [zoom, setZoom] = useState(depart.zoom)
+  const [centre, setCentre] = useState({ lat: depart.lat, lon: depart.lon })
   const [largeur, setLargeur] = useState(600)
   const cadre = useRef<HTMLDivElement>(null)
   const glisse = useRef<{ x: number; y: number } | null>(null)
@@ -141,10 +180,42 @@ export function Carte({
     }
   }
 
-  // Position du repère : l'école ne bouge pas, c'est la fenêtre qui se déplace.
-  const rx = (xDeLongitude(lon, zoom) - gauche) * TUILE
-  const ry = (yDeLatitude(lat, zoom) - haut) * TUILE
-  const visible = rx >= 0 && rx <= largeur && ry >= 0 && ry <= hauteur
+  /* Les écoles ne bougent pas : c'est la fenêtre qui se déplace. Les repères
+     hors cadre sont écartés plutôt que posés en dehors, où ils déborderaient
+     et se poseraient sur le texte de la page.
+  
+     Le regroupement se fait À L'ÉCRAN, pas sur les coordonnées : deux points
+     distants de trente mètres se superposent au zoom 10 et se séparent au
+     zoom 16. Regrouper sur les coordonnées ne traiterait que les adresses
+     rigoureusement identiques et laisserait, partout ailleurs, une tache de
+     repères empilés dont on ne peut rien cliquer.
+  
+     La grille vaut une fois et demie la taille d'un repère : assez pour
+     qu'ils ne se recouvrent plus, assez peu pour ne pas rassembler des écoles
+     de quartiers différents. */
+  const MAILLE = 30
+  const groupes = new Map<string, { membres: PointCarte[]; sx: number; sy: number }>()
+  for (const p of points) {
+    const x = (xDeLongitude(p.lon, zoom) - gauche) * TUILE
+    const y = (yDeLatitude(p.lat, zoom) - haut) * TUILE
+    if (x < 0 || x > largeur || y < 0 || y > hauteur) continue
+    const cle = `${Math.round(x / MAILLE)}:${Math.round(y / MAILLE)}`
+    const deja = groupes.get(cle)
+    if (deja === undefined) groupes.set(cle, { membres: [p], sx: x, sy: y })
+    else {
+      deja.membres.push(p)
+      deja.sx += x
+      deja.sy += y
+    }
+  }
+  // Le repère se pose au barycentre de son groupe, et non sur son premier
+  // membre : sinon il saute d'un point à l'autre au moindre déplacement.
+  const reperes = [...groupes.values()].map((g) => ({
+    membres: g.membres,
+    tete: g.membres[0]!,
+    x: g.sx / g.membres.length,
+    y: g.sy / g.membres.length,
+  }))
 
   function deplacer(dx: number, dy: number): void {
     const nx = cx - dx / TUILE
@@ -159,8 +230,18 @@ export function Carte({
         ref={cadre}
         style={{ height: `${hauteur}px` }}
         role="img"
-        aria-label={`Carte situant ${libelle}`}
+        aria-label={
+          points.length === 1
+            ? `Carte situant ${points[0]!.libelle}`
+            : `Carte situant ${points.length} formations`
+        }
         onPointerDown={(ev) => {
+          /* Ne pas capturer le pointeur quand il tombe sur un bouton — un
+             repère cliquable, les zooms, « Recentrer ». La capture détourne
+             tous les événements suivants vers le cadre, y compris le
+             « pointerup » qui devait faire naître le clic : le bouton ne
+             réagissait jamais, sans que rien ne le signale. */
+          if ((ev.target as HTMLElement).closest('button') !== null) return
           glisse.current = { x: ev.clientX, y: ev.clientY }
           ev.currentTarget.setPointerCapture(ev.pointerId)
         }}
@@ -194,9 +275,56 @@ export function Carte({
           />
         ))}
 
-        {visible ? (
-          <span className="plan-repere" style={{ left: `${rx}px`, top: `${ry}px` }} />
-        ) : null}
+        {reperes.map((r) => {
+          const seul = r.membres.length === 1
+          const nom = seul
+            ? r.tete.libelle
+            : `${r.membres.length} formations à cet endroit — agrandir pour les séparer`
+          if (onPoint === undefined) {
+            return (
+              <span
+                key={r.tete.cle}
+                className="plan-repere"
+                style={{ left: `${r.x}px`, top: `${r.y}px` }}
+              />
+            )
+          }
+          // Un vrai bouton : il s'atteint au clavier, et son nom dit ce qu'il
+          // désigne. Un repère cliquable qui n'est qu'un `div` n'existe pas
+          // pour qui n'utilise pas de souris.
+          return (
+            <button
+              key={r.tete.cle}
+              type="button"
+              className={
+                seul
+                  ? 'plan-repere plan-repere-actif'
+                  : 'plan-repere plan-repere-actif plan-repere-groupe'
+              }
+              style={{ left: `${r.x}px`, top: `${r.y}px` }}
+              title={nom}
+              aria-label={nom}
+              onClick={() => {
+                if (seul) {
+                  onPoint(r.tete.cle)
+                  return
+                }
+                // Un groupe ne mène nulle part : on ne peut pas choisir pour
+                // l'élève laquelle des dix formations il visait. On agrandit
+                // et on recentre, ce qui les sépare.
+                setCentre({
+                  lon: longitudeDeX(gauche + r.x / TUILE, zoom),
+                  lat: latitudeDeY(haut + r.y / TUILE, zoom),
+                })
+                setZoom((z) => Math.min(ZOOM_MAX, z + 2))
+              }}
+            >
+              {r.membres.length > 1 ? (
+                <span className="plan-repere-compte">{r.membres.length}</span>
+              ) : null}
+            </button>
+          )
+        })}
 
         <div className="plan-zooms">
           <button
@@ -219,8 +347,8 @@ export function Carte({
             type="button"
             className="plan-recentrer"
             onClick={() => {
-              setCentre({ lat, lon })
-              setZoom(15)
+              setCentre({ lat: depart.lat, lon: depart.lon })
+              setZoom(depart.zoom)
             }}
           >
             Recentrer
@@ -244,20 +372,31 @@ export function Carte({
  * fois que c'est parti n'est pas le prévenir.
  */
 export function CarteALaDemande({
-  lat,
-  lon,
-  libelle,
+  points,
+  hauteur,
+  onPoint,
+  libelleBouton = 'Voir sur la carte',
 }: {
-  readonly lat: number
-  readonly lon: number
-  readonly libelle: string
+  readonly points: readonly PointCarte[]
+  readonly hauteur?: number
+  readonly onPoint?: (cle: string) => void
+  readonly libelleBouton?: string
 }) {
   const [ouverte, setOuverte] = useState(false)
-  if (ouverte) return <Carte lat={lat} lon={lon} libelle={libelle} />
+  if (points.length === 0) return null
+  if (ouverte) {
+    return (
+      <Carte
+        points={points}
+        {...(hauteur === undefined ? {} : { hauteur })}
+        {...(onPoint === undefined ? {} : { onPoint })}
+      />
+    )
+  }
   return (
     <div className="plan-demande">
       <button type="button" className="secondaire plan-bouton" onClick={() => setOuverte(true)}>
-        Voir sur la carte
+        {libelleBouton}
       </button>
       <span className="note">
         Les fonds de carte viennent de l’IGN. Rien ne leur est demandé tant que tu n’as pas

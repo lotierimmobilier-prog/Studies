@@ -19,7 +19,6 @@ import {
   type Article,
   type Bloc,
 } from '../../packages/articles/src/index.ts'
-import { MarqueLien } from './marque.tsx'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { FilAriane } from './filAriane.tsx'
 import { chercherArticles } from '../../packages/articles/src/recherche.ts'
@@ -101,12 +100,10 @@ export function ListeArticles({
   articles,
   onArticle,
   onNaviguer,
-  onRetour,
 }: {
   articles: readonly Article[]
   onArticle: (slug: string) => void
   onNaviguer: (route: Route) => void
-  onRetour: () => void
 }) {
   const [requete, setRequete] = useState('')
   const trouvailles = useMemo(() => chercherArticles(articles, requete), [articles, requete])
@@ -120,15 +117,6 @@ export function ListeArticles({
 
   return (
     <main className="app app-large">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button type="button" className="entete-cta" onClick={onRetour}>
-          Retour au site
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },
@@ -138,7 +126,7 @@ export function ListeArticles({
       />
 
       <section className="bloc">
-        <h2>Bien gérer sa scolarité</h2>
+        <h1>Bien gérer sa scolarité</h1>
         <p className="bloc-intro">
           Ce qu’il faut comprendre de Parcoursup, comment monter un dossier qui tient, et
           comment choisir une ville où l’on pourra rester jusqu’au diplôme. Des articles
@@ -254,12 +242,10 @@ function Questions({ article }: { readonly article: Article }) {
 
 export function PageArticle({
   article,
-  onBlog,
   onNaviguer,
   onCommencer,
 }: {
   article: Article
-  onBlog: () => void
   onNaviguer: (route: Route) => void
   onCommencer: () => void
 }) {
@@ -271,15 +257,6 @@ export function PageArticle({
 
   return (
     <main className="app">
-      <header className="entete entete-accueil">
-        <h1 className="marque">
-          <MarqueLien onNaviguer={onNaviguer} />
-        </h1>
-        <button type="button" className="entete-cta" onClick={onBlog}>
-          Tous les articles
-        </button>
-      </header>
-
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },
@@ -297,7 +274,7 @@ export function PageArticle({
           {article.revuLe !== null ? ` · revu le ${dateLisible(article.revuLe)}` : ''} ·{' '}
           {minutesDeLecture(article)} min de lecture
         </p>
-        <h2 className="article-titre">{article.titre}</h2>
+        <h1 className="article-titre">{article.titre}</h1>
         <p className="article-chapeau">{article.chapeau}</p>
 
         {article.corps.map((bloc, i) => (
