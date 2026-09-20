@@ -36,6 +36,7 @@ export interface EtatSysteme {
 }
 
 import { BASE_API } from '../donnees.ts'
+import type { Article } from '../../../packages/articles/src/index.ts'
 
 const CLE_JETON = 'kitetudiant.admin.jeton'
 /** Session d'élève ordinaire, posée par le site (voir donnees.ts). */
@@ -115,4 +116,43 @@ export function enregistrerCle(nom: string, valeur: string): Promise<EtatSecret>
 
 export function oublierCle(nom: string): Promise<{ ok: boolean }> {
   return appeler<{ ok: boolean }>(`/cles?nom=${encodeURIComponent(nom)}`, { method: 'DELETE' })
+}
+
+/* ------------------------------------------------------------- articles */
+
+/**
+ * Les articles écrits depuis la console.
+ *
+ * Ceux du dépôt (kitetudiant/packages/articles) ne passent pas par ici : ils
+ * sont versionnés et pré-rendus au build. La console ne gère que les ajouts
+ * postérieurs — et les corrections d'un article du dépôt, qu'elle recouvre en
+ * republiant sous le même identifiant.
+ */
+export function listerArticles(): Promise<readonly Article[]> {
+  return appeler<readonly Article[]>('/articles')
+}
+
+/** Ce que le formulaire envoie. Le serveur valide, normalise et tranche. */
+export interface SaisieArticle {
+  readonly titre: string
+  readonly chapeau: string
+  /** Texte brut, dans la mini-syntaxe de `enBlocs` (« ## », « - », « > »). */
+  readonly corps: string
+  readonly motsCles: readonly string[]
+  /** Forcé pour recouvrir un article existant ; sinon déduit du titre. */
+  readonly slug?: string
+}
+
+export function publierArticle(saisie: SaisieArticle): Promise<Article> {
+  return appeler<Article>('/articles', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(saisie),
+  })
+}
+
+export function retirerArticle(slug: string): Promise<{ ok: boolean }> {
+  return appeler<{ ok: boolean }>(`/articles?slug=${encodeURIComponent(slug)}`, {
+    method: 'DELETE',
+  })
 }

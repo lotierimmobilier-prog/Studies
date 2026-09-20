@@ -33,6 +33,7 @@ import { chercherAvisLieux, type DemandeAvisLieu } from './avisLieu'
 import { GardeAdmin } from './admin'
 import { etatSysteme } from './etatSysteme'
 import { Coffre, CoffreNonConfigure, estSecretGere } from './secrets'
+import { ArticleIntrouvable, ArticleInvalide, DepotArticles } from './articles'
 import {
   DepotRetours,
   RetourEnDouble,
@@ -107,6 +108,7 @@ const depotTemoignages = new DepotTemoignages(
 // jamais réécrites.
 const depotRetours = new DepotRetours(join(process.cwd(), '.data', 'retours'))
 const coffre = new Coffre(join(process.cwd(), '.data', 'secrets.json'))
+const depotArticles = new DepotArticles(join(process.cwd(), '.data', 'articles.json'))
 // KITETUDIANT — comptes élèves. Sans COMPTES_MASTER_KEY, le dépôt se déclare
 // non configuré : l'inscription est alors impossible ET le détail du résultat
 // reste ouvert, plutôt que de rendre le site inutilisable par omission. L'état
@@ -456,6 +458,13 @@ async function demarrer(): Promise<void> {
         return envoyerJson(res, 200, await chercherAvisLieux(demandes))
       }
 
+      // -------------------------------------------------------------- blog
+      // Publique : le front fusionne ces articles avec ceux du dépôt. Aucune
+      // donnée personnelle ici, rien à protéger en lecture.
+      if (url.pathname === '/api/articles' && req.method === 'GET') {
+        return envoyerJson(res, 200, await depotArticles.lister())
+      }
+
       // ------------------------------------------------------ administration
       if (url.pathname.startsWith('/api/admin/')) {
         // La console accepte le jeton d'exploitation, ou la session d'un
@@ -493,6 +502,36 @@ async function demarrer(): Promise<void> {
           // La valeur recopiée dans l'environnement doit partir aussi.
           coffre.deshydrater(nom)
           return envoyerJson(res, 200, { ok: true })
+        }
+
+        if (url.pathname === '/api/admin/articles' && req.method === 'GET') {
+          return envoyerJson(res, 200, await depotArticles.lister())
+        }
+
+        if (url.pathname === '/api/admin/articles' && req.method === 'POST') {
+          const corps = await lireCorps(req)
+          try {
+            return envoyerJson(res, 201, await depotArticles.publier(JSON.parse(corps)))
+          } catch (e) {
+            // Une saisie refusée est une erreur d'écriture, pas une panne : on
+            // renvoie la raison telle quelle, pour que la console l'affiche
+            // au rédacteur.
+            if (e instanceof ArticleInvalide)
+              return envoyerJson(res, 400, { erreur: e.message })
+            throw e
+          }
+        }
+
+        if (url.pathname === '/api/admin/articles' && req.method === 'DELETE') {
+          const slug = url.searchParams.get('slug') ?? ''
+          try {
+            await depotArticles.retirer(slug)
+            return envoyerJson(res, 200, { ok: true })
+          } catch (e) {
+            if (e instanceof ArticleIntrouvable)
+              return envoyerJson(res, 404, { erreur: e.message })
+            throw e
+          }
         }
 
         return envoyerJson(res, 404, { erreur: 'route d’administration inconnue' })

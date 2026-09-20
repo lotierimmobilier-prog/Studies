@@ -9,6 +9,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Marque } from '../marque.tsx'
 
+import { Articles } from './Articles.tsx'
+
 import {
   chercherEtat,
   ecrireJeton,
@@ -287,6 +289,8 @@ export function Console() {
               </p>
             )}
           </section>
+
+          <Articles />
 
           <div className="navigation">
             <button type="button" className="secondaire" onClick={() => void rafraichir()}>
