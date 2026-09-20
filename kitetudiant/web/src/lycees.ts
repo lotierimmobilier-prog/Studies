@@ -63,17 +63,26 @@ export interface MentionsLycee extends Lycee {
   readonly sansMention: number | null
 }
 
+/**
+ * Une ligne du jeu, telle qu'elle arrive.
+ *
+ * Chaque champ accepte `null` ET `undefined` : le jeu publie littéralement
+ * `null` pour une série absente d'un lycée — un établissement sans filière
+ * technologique n'a pas de taux pour celle-ci — et `exactOptionalPropertyTypes`
+ * distingue « absent » de « présent et nul ». Les deux existent ici, donc le
+ * type doit dire les deux.
+ */
 interface LigneLycee {
-  readonly code_etablissement?: string
-  readonly etablissement?: string
-  readonly commune?: string
-  readonly annee?: string
-  readonly presents_gnle?: number
-  readonly taux_reu_brut_gnle?: string | number
-  readonly nombre_de_mentions_tb_avec_felicitations_g?: number
-  readonly nombre_de_mentions_tb_sans_felicitations_g?: number
-  readonly nombre_de_mentions_b_g?: number
-  readonly nombre_de_mentions_ab_g?: number
+  readonly code_etablissement?: string | null | undefined
+  readonly etablissement?: string | null | undefined
+  readonly commune?: string | null | undefined
+  readonly annee?: string | null | undefined
+  readonly presents_gnle?: number | null | undefined
+  readonly taux_reu_brut_gnle?: string | number | null | undefined
+  readonly nombre_de_mentions_tb_avec_felicitations_g?: number | null | undefined
+  readonly nombre_de_mentions_tb_sans_felicitations_g?: number | null | undefined
+  readonly nombre_de_mentions_b_g?: number | null | undefined
+  readonly nombre_de_mentions_ab_g?: number | null | undefined
 }
 
 function entier(v: unknown): number {
