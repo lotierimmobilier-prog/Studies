@@ -1258,3 +1258,32 @@ h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }
 
 /* Un lien de menu doit ressembler à ses voisins, qui sont des boutons. */
 a.entete-lien { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* --------------------------------------------------- connexion par Google */
+/* Le lien est posé AU-DESSUS du formulaire : c'est le chemin le plus court
+   pour qui a déjà un compte Google, et le plus long à décrire pour les
+   autres. Le séparateur « ou » dit que les deux voies mènent au même endroit. */
+.compte-google { margin: 1.2rem 0 0; }
+.compte-google-lien {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  text-decoration: none;
+}
+.compte-ou {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.2rem 0 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+}
+.compte-ou::before,
+.compte-ou::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--trait);
+}

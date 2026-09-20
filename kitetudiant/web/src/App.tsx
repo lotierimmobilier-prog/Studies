@@ -16,6 +16,7 @@ import {
   chercherAgregatsRetours,
   chercherAidesLogement,
   deconnecter,
+  sessionDepuisTicket,
   InscriptionRequise,
   jetonSession,
   positionDe,
@@ -401,6 +402,46 @@ export default function App() {
     setVue(route.vue)
     setSlug(route.vue === 'article' ? route.slug : null)
     window.scrollTo(0, 0)
+  }, [])
+
+  /**
+   * Le retour de Google.
+   *
+   * Le serveur nous renvoie avec un ticket dans l'adresse — il ne peut pas
+   * faire autrement : une redirection est une navigation ordinaire, sans
+   * en-tête « Authorization ». On l'échange immédiatement contre le vrai
+   * jeton, puis on efface le paramètre de la barre d'adresse avec
+   * `replaceState` : inutile de le laisser dans l'historique alors qu'il est
+   * déjà consommé.
+   */
+  useEffect(() => {
+    const parametres = new URLSearchParams(window.location.search)
+    const ticket = parametres.get('ticket')
+    const annulee = parametres.get('connexion') === 'annulee'
+    if (ticket === null && !annulee) return
+
+    const nettoyer = (): void => {
+      parametres.delete('ticket')
+      parametres.delete('connexion')
+      const reste = parametres.toString()
+      window.history.replaceState(
+        {},
+        '',
+        `${window.location.pathname}${reste === '' ? '' : `?${reste}`}`,
+      )
+    }
+
+    if (annulee) {
+      // L'élève a refusé l'autorisation chez Google. Ce n'est pas une erreur,
+      // c'est une décision : on le ramène sans message d'échec.
+      nettoyer()
+      return
+    }
+
+    void sessionDepuisTicket(ticket!)
+      .then(() => setConnecte(true))
+      .catch((e: unknown) => setErreur((e as Error).message))
+      .finally(nettoyer)
   }, [])
 
   // Le bouton « précédent » du navigateur doit fonctionner comme partout.

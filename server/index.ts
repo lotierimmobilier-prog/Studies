@@ -34,6 +34,8 @@ import { GardeAdmin } from './admin'
 import { etatSysteme } from './etatSysteme'
 import { Coffre, CoffreNonConfigure, estSecretGere } from './secrets'
 import { ArticleIntrouvable, ArticleInvalide, DepotArticles } from './articles'
+import { emailDepuisCode, GoogleRefuse, reglagesGoogle, urlDeDepart } from './googleIdentite.ts'
+import { avecParametre, etatsGoogle, retourSur, ticketsGoogle } from './googleSessions.ts'
 import {
   DepotRetours,
   RetourEnDouble,
@@ -431,17 +433,83 @@ async function demarrer(): Promise<void> {
             await depotComptes.deconnecter(jetonDeLEnTete(req.headers.authorization))
             return envoyerJson(res, 200, { deconnecte: true })
           }
+          // ------------------------------------------------- Google
+          // Aucun script de Google n'est servi au navigateur : le bouton du
+          // site est un simple lien vers « /debut ». Google n'apprend donc
+          // l'existence d'un élève qu'au moment où celui-ci clique, et non à
+          // chaque visite (voir googleIdentite.ts).
+          if (url.pathname === '/api/comptes/google/debut' && req.method === 'GET') {
+            const reglages = reglagesGoogle()
+            if (reglages === null) {
+              return envoyerJson(res, 503, {
+                erreur: 'La connexion par compte Google n’est pas configurée sur ce serveur.',
+              })
+            }
+            // `retourSur` ferme la redirection ouverte : sans lui, un lien
+            // forgé renverrait l'élève — et son ticket — chez un tiers.
+            const etat = etatsGoogle.creer({ retour: retourSur(url.searchParams.get('retour')) })
+            res.writeHead(302, { Location: urlDeDepart(reglages, etat) })
+            return res.end()
+          }
+
+          if (url.pathname === '/api/comptes/google/retour' && req.method === 'GET') {
+            const reglages = reglagesGoogle()
+            if (reglages === null) return envoyerJson(res, 503, { erreur: 'Google non configuré.' })
+
+            const depart = etatsGoogle.consommer(url.searchParams.get('state') ?? '')
+            // Un retour sans état valide n'est pas le nôtre : il peut venir
+            // d'un lien fabriqué par un tiers. On refuse sans rien ouvrir.
+            if (depart === null) {
+              return envoyerJson(res, 400, {
+                erreur: 'Connexion expirée ou invalide. Recommence depuis le site.',
+              })
+            }
+            // L'élève a pu refuser l'autorisation chez Google : ce n'est pas
+            // une erreur, c'est une décision. On le ramène sans drame.
+            const code = url.searchParams.get('code') ?? ''
+            if (code === '') {
+              res.writeHead(302, {
+                Location: avecParametre(depart.retour, 'connexion', 'annulee'),
+              })
+              return res.end()
+            }
+
+            const email = await emailDepuisCode(reglages, code)
+            const session = await depotComptes.ouvrirParFournisseur(email)
+            // Le jeton ne part PAS dans l'adresse : seul un ticket à usage
+            // unique, valable une minute, que l'application échange aussitôt.
+            const ticket = ticketsGoogle.creer(session)
+            res.writeHead(302, { Location: avecParametre(depart.retour, 'ticket', ticket) })
+            return res.end()
+          }
+
+          if (url.pathname === '/api/comptes/google/session' && req.method === 'POST') {
+            const { ticket } = JSON.parse(await lireCorps(req)) as { ticket?: string }
+            const session = ticketsGoogle.consommer(ticket ?? '')
+            if (session === null) {
+              return envoyerJson(res, 400, { erreur: 'Ticket de connexion expiré ou déjà utilisé.' })
+            }
+            return envoyerJson(res, 200, session)
+          }
+
           if (url.pathname === '/api/comptes/moi' && req.method === 'GET') {
             const connecte = await depotComptes.sessionValide(
               jetonDeLEnTete(req.headers.authorization),
             )
-            return envoyerJson(res, 200, { connecte, comptesActifs: depotComptes.configure })
+            // « google » dit à l'interface s'il faut afficher le bouton. Un
+            // bouton qui mène à un mur est pire que pas de bouton du tout.
+            return envoyerJson(res, 200, {
+              connecte,
+              comptesActifs: depotComptes.configure,
+              google: reglagesGoogle() !== null,
+            })
           }
         } catch (e) {
           if (e instanceof InscriptionInvalide) return envoyerJson(res, 400, { erreur: e.message })
           if (e instanceof EmailDejaInscrit) return envoyerJson(res, 409, { erreur: e.message })
           if (e instanceof IdentifiantsRefuses) return envoyerJson(res, 401, { erreur: e.message })
           if (e instanceof TropDEssais) return envoyerJson(res, 429, { erreur: e.message })
+          if (e instanceof GoogleRefuse) return envoyerJson(res, 400, { erreur: e.message })
           if (e instanceof ComptesNonConfigures) return envoyerJson(res, 503, { erreur: e.message })
           throw e
         }
