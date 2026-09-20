@@ -1172,3 +1172,89 @@ h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }
   :root:not([data-theme='light']) .illu-bande img { opacity: 0.88; }
 }
 :root[data-theme='dark'] .illu-bande img { opacity: 0.88; }
+
+/* ------------------------------------------------------------------- menu */
+/* Sur grand écran, les entrées sont posées en ligne et le bouton de bascule
+   n'existe pas. Sur téléphone, l'inverse : à partir de cinq entrées, la barre
+   ne tient plus sur 390 px, et une barre qui déborde pousse le logo hors de
+   l'écran. */
+.menu { position: relative; display: flex; align-items: center; }
+
+.menu-bascule {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-family: var(--titres);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 40px;
+}
+.menu-barres { display: flex; flex-direction: column; gap: 3px; }
+.menu-barres span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.menu-entrees {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 13rem;
+  padding: 0.6rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  /* La seule ombre du site : ce panneau flotte réellement au-dessus du
+     contenu, et rien d'autre ne flotte. */
+  box-shadow: 0 10px 30px -12px rgba(23, 34, 46, 0.35);
+}
+.menu-entrees-ouvert { display: flex; }
+.menu-entrees .entete-lien,
+.menu-entrees .entete-cta,
+.menu-entrees .pastille {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+@media (min-width: 48rem) {
+  /* Assez de place : tout s'aligne, et le bouton de bascule disparaît. */
+  .menu-bascule { display: none; }
+  .menu-entrees {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .menu-entrees .entete-lien,
+  .menu-entrees .entete-cta,
+  .menu-entrees .pastille {
+    width: auto;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* Un lien de menu doit ressembler à ses voisins, qui sont des boutons. */
+a.entete-lien { text-decoration: none; display: inline-flex; align-items: center; }

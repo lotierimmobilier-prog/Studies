@@ -39,7 +39,8 @@ import {
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
 import { ARTICLES } from '../../packages/articles/src/index.ts'
-import { cheminDe } from './routes.ts'
+import { cheminDe, type Route } from './routes.ts'
+import { Menu } from './menu.tsx'
 import {
   AVERTISSEMENT,
   enToutesLettres,
@@ -328,14 +329,18 @@ function Chronologie() {
 export function Accueil({
   onCommencer,
   onCollection,
-  onBlog,
+  onNaviguer,
   onArticle,
+  onDeconnexion,
+  connecte,
   cartes,
 }: {
   onCommencer: () => void
   onCollection: () => void
-  onBlog: () => void
+  onNaviguer: (route: Route) => void
   onArticle: (slug: string) => void
+  onDeconnexion: () => void
+  connecte: boolean
   /** Nombre de cartes déjà gagnées. Zéro : la pastille ne s'affiche pas. */
   cartes: number
 }) {
@@ -345,22 +350,14 @@ export function Accueil({
         <h1 className="marque">
           <Marque signature />
         </h1>
-        <div className="entete-actions">
-          <button type="button" className="entete-lien" onClick={onBlog}>
-            Le blog
-          </button>
-          {/* La collection n'apparaît qu'une fois la première carte gagnée :
-              pour un visiteur qui découvre le site, ce serait du bruit. */}
-          {cartes > 0 ? (
-            <button type="button" className="pastille" onClick={onCollection}>
-              {cartes}
-              <span className="pastille-libelle"> cartes</span>
-            </button>
-          ) : null}
-          <button type="button" className="entete-cta" onClick={onCommencer}>
-            Commencer
-          </button>
-        </div>
+        <Menu
+          connecte={connecte}
+          cartes={cartes}
+          onNaviguer={onNaviguer}
+          onCollection={onCollection}
+          onDeconnexion={onDeconnexion}
+          onCommencer={onCommencer}
+        />
       </header>
 
       <Hero onCommencer={onCommencer} />
@@ -508,7 +505,7 @@ export function Accueil({
           ))}
         </ul>
         <div className="cta-groupe cta-groupe-bloc">
-          <button type="button" className="secondaire" onClick={onBlog}>
+          <button type="button" className="secondaire" onClick={() => onNaviguer({ vue: 'blog' })}>
             Tous les articles
           </button>
         </div>

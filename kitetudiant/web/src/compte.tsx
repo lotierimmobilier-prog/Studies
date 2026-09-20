@@ -18,15 +18,25 @@ type Mode = 'inscription' | 'connexion'
 
 export function Compte({
   message,
+  mode: modeInitial = 'inscription',
+  retour = 'Revenir à mes résultats sans compte',
   onOuvert,
   onAbandon,
 }: {
   /** Pourquoi on demande un compte, formulé par le serveur. */
   readonly message: string
+  /**
+   * Le mode d'ouverture. Il vient de l'adresse : /connexion ouvre sur la
+   * connexion, /inscription sur l'inscription. La bascule reste possible
+   * depuis le formulaire — quelqu'un qui se trompe de lien ne doit pas avoir
+   * à revenir en arrière.
+   */
+  readonly mode?: Mode
+  readonly retour?: string
   readonly onOuvert: () => void
   readonly onAbandon: () => void
 }) {
-  const [mode, setMode] = useState<Mode>('inscription')
+  const [mode, setMode] = useState<Mode>(modeInitial)
   const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [enCours, setEnCours] = useState(false)
@@ -137,7 +147,7 @@ export function Compte({
       </div>
 
       <button type="button" className="lien compte-retour" onClick={onAbandon}>
-        Revenir à mes résultats sans compte
+        {retour}
       </button>
     </section>
   )

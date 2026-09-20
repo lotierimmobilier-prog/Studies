@@ -322,7 +322,9 @@ function Carte({
 }
 
 export default function App() {
-  const [vue, setVue] = useState<'accueil' | 'parcours' | 'collection' | 'blog' | 'article'>(
+  const [vue, setVue] = useState<
+    'accueil' | 'parcours' | 'collection' | 'blog' | 'article' | 'connexion' | 'inscription'
+  >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
       // afficher cet article, pas l'accueil.
@@ -379,6 +381,16 @@ export default function App() {
     for (const a of ajoutes) parSlug.set(a.slug, a)
     return [...parSlug.values()].sort((a, b) => b.publieLe.localeCompare(a.publieLe))
   }, [ajoutes])
+
+  /**
+   * Ferme la session. `deconnecter` oublie le jeton localement AVANT de
+   * prévenir le serveur, et n'échoue jamais : il ne reste qu'à rafraîchir
+   * l'affichage.
+   */
+  const seDeconnecter = useCallback(async () => {
+    await deconnecter()
+    setConnecte(false)
+  }, [])
 
   /**
    * Change de vue ET d'adresse. Seules les vues publiques ont une adresse :
@@ -575,10 +587,47 @@ export default function App() {
       <Accueil
         onCommencer={() => setVue('parcours')}
         onCollection={() => setVue('collection')}
-        onBlog={() => naviguer({ vue: 'blog' })}
+        onNaviguer={naviguer}
         onArticle={(s) => naviguer({ vue: 'article', slug: s })}
+        onDeconnexion={() => void seDeconnecter()}
+        connecte={connecte}
         cartes={nombreCartes}
       />
+    )
+  }
+
+  // Connexion et inscription ont chacune leur adresse. Le composant est le
+  // même : seul le mode initial change, et l'utilisateur peut basculer de
+  // l'un à l'autre depuis le formulaire.
+  if (vue === 'connexion' || vue === 'inscription') {
+    return (
+      <main className="app">
+        <header className="entete entete-accueil">
+          <h1 className="marque">
+            <Marque />
+          </h1>
+          <button
+            type="button"
+            className="entete-lien"
+            onClick={() => naviguer({ vue: 'accueil' })}
+          >
+            Retour au site
+          </button>
+        </header>
+        <Compte
+          mode={vue === 'connexion' ? 'connexion' : 'inscription'}
+          message={
+            vue === 'connexion'
+              ? 'Retrouve tes simulations et le détail de chaque budget.'
+              : 'Ton compte te donne accès au détail de chaque budget.'
+          }
+          onOuvert={() => {
+            setConnecte(true)
+            naviguer({ vue: 'accueil' })
+          }}
+          onAbandon={() => naviguer({ vue: 'accueil' })}
+        />
+      </main>
     )
   }
 
