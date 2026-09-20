@@ -1126,3 +1126,49 @@ h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }
   .articles-apercu { grid-template-columns: repeat(3, 1fr); }
   .article-titre { font-size: 2rem; }
 }
+
+/* ---------------------------------------------------- photographies */
+/* Trois bandeaux, et rien de plus. Le rapport de forme est imposé ici, pas
+   laissé à l'image : la place est réservée avant le chargement, donc le texte
+   ne saute pas quand la photo arrive.
+
+   `max-height` borne la hauteur sur les écrans larges. Sans elle, un bandeau
+   de 1200 px de large prendrait presque la moitié d'un écran de portable en
+   paysage, et repousserait les chiffres — qui sont la raison d'être du site —
+   sous la ligne de flottaison. */
+.illu-bande {
+  margin: 0 0 1.4rem;
+  border-radius: var(--rayon);
+  overflow: hidden;
+  background: var(--trait);
+  line-height: 0;
+}
+.illu-bande img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 14rem;
+  object-fit: cover;
+  object-position: center 38%;
+}
+/* Le bandeau d'ouverture est plus panoramique : il sépare l'accroche du
+   premier chiffre sans s'imposer entre les deux. */
+.illu-bande-large {
+  margin: 0.4rem 0 1.6rem;
+}
+.illu-bande-large img { max-height: 11rem; }
+
+@media (min-width: 40rem) {
+  .illu-bande img { max-height: 17rem; }
+  /* 17rem correspond à la hauteur qu'atteint le bandeau d'ouverture à la
+     largeur du contenu : en dessous, `object-fit: cover` le recadrait une
+     seconde fois et mordait sur le haut des visages. */
+  .illu-bande-large img { max-height: 17rem; }
+}
+
+/* En thème sombre, une photographie claire tape à l'œil au milieu d'une page
+   sombre. On la pose légèrement en retrait plutôt que de la recadrer. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .illu-bande img { opacity: 0.88; }
+}
+:root[data-theme='dark'] .illu-bande img { opacity: 0.88; }
