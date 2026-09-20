@@ -217,7 +217,16 @@ function BoutonPartage({ carte }: { carte: Carte }) {
 
 /** Les six récompenses, dans un ordre fixe : celui où on les rencontre. */
 const TOUTES_RECOMPENSES = (
-  ['premier-budget', 'trois-villes', 'bulletin', 'detail', 'hors-academie', 'dix-villes'] as const
+  [
+    'premier-budget',
+    'trois-villes',
+    'bulletin',
+    'detail',
+    'hors-academie',
+    'dix-villes',
+    'trois-bulletins',
+    'vingt-villes',
+  ] as const
 ).map((id) => ({ id, definition: ETAPES_CARTES[id] }))
 
 export function Collection({

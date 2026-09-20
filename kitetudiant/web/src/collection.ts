@@ -102,8 +102,10 @@ export type IdEtape =
   | 'trois-villes'
   | 'dix-villes'
   | 'bulletin'
+  | 'trois-bulletins'
   | 'detail'
   | 'hors-academie'
+  | 'vingt-villes'
 
 interface DefinitionEtape {
   readonly titre: string
@@ -132,6 +134,13 @@ export const ETAPES_CARTES: Readonly<Record<IdEtape, DefinitionEtape>> = {
     detail: 'Tes signaux sont extraits. Le texte des appréciations, lui, n’est pas conservé.',
     rarete: 'peu-frequente',
   },
+  'trois-bulletins': {
+    titre: 'Trois bulletins',
+    detail:
+      'Trois trimestres déposés : ta progression se voit, et c’est elle que lisent les ' +
+      'commissions.',
+    rarete: 'rare',
+  },
   detail: {
     titre: 'Ligne par ligne',
     detail: 'Tu as ouvert un budget en entier : chaque euro, sa source, son millésime.',
@@ -141,6 +150,13 @@ export const ETAPES_CARTES: Readonly<Record<IdEtape, DefinitionEtape>> = {
     titre: 'Hors de ton académie',
     detail: 'Un vœu ailleurs. C’est souvent là que se trouve la formation qui te va.',
     rarete: 'peu-frequente',
+  },
+  'vingt-villes': {
+    titre: 'Vingt villes',
+    detail:
+      'Vingt communes chiffrées. À ce stade, tu connais mieux la carte que la plupart ' +
+      'des candidats.',
+    rarete: 'rare',
   },
 }
 
@@ -375,8 +391,11 @@ export interface Activite {
   readonly communesChiffrees: readonly string[]
   /** L'élève a ouvert le détail d'un budget, ligne par ligne. */
   readonly detailOuvert: boolean
-  /** Un bulletin a été analysé pendant ce parcours. */
-  readonly bulletinLu: boolean
+  /**
+   * Nombre de bulletins analysés — un booléen ne disait que « au moins un »,
+   * et ne pouvait donc récompenser que le premier. Les paliers se comptent.
+   */
+  readonly bulletinsLus: number
   /** Académie de l'élève, et celles des formations regardées. */
   readonly academieEleve: string | null
   readonly academiesRegardees: readonly string[]
@@ -391,8 +410,10 @@ export function cartesGagnees(activite: Activite): string[] {
   if (villes.length >= 1) gagnees.push(idEtape('premier-budget'))
   if (villes.length >= 3) gagnees.push(idEtape('trois-villes'))
   if (villes.length >= 10) gagnees.push(idEtape('dix-villes'))
+  if (villes.length >= 20) gagnees.push(idEtape('vingt-villes'))
   if (activite.detailOuvert) gagnees.push(idEtape('detail'))
-  if (activite.bulletinLu) gagnees.push(idEtape('bulletin'))
+  if (activite.bulletinsLus >= 1) gagnees.push(idEtape('bulletin'))
+  if (activite.bulletinsLus >= 3) gagnees.push(idEtape('trois-bulletins'))
 
   // « Hors de ton académie » n'a de sens que si l'on connaît la sienne : sans
   // elle, on ne décerne rien plutôt que de supposer.

@@ -33,11 +33,86 @@ import {
 
 import { loyerDe, SOURCE_PARCOURSUP, type AideLogement, type Formation } from './donnees.ts'
 
+/** Un bulletin lu, gardé côté navigateur le temps de la session. */
+export interface BulletinDepose {
+  /** Libellé que l'élève reconnaît : « Bulletin 1 », « Bulletin 2 »… */
+  readonly libelle: string
+  readonly notes: Partial<Readonly<Record<Matiere, number>>>
+  readonly signaux: SignauxBulletin
+  readonly matieresLues: number
+  /** La lecture rédigée des appréciations. `null` si rien d'exploitable. */
+  readonly avis: AvisBulletin | null
+}
+
+/**
+ * L'avis rédigé par l'assistant du site.
+ *
+ * Il porte son auteur avec lui, et cet auteur dit que c'est une MACHINE : sur
+ * un site qui s'adresse à des mineurs, laisser croire qu'un adulte a lu leur
+ * bulletin donnerait à ces phrases un poids qu'elles n'ont pas.
+ */
+export interface AvisBulletin {
+  readonly texte: string
+  readonly pointsForts: readonly string[]
+  readonly aTravailler: readonly string[]
+  readonly auteur: string
+}
+
+/**
+ * Moyenne par matière sur plusieurs bulletins.
+ *
+ * Calcul déterministe, fait ici et jamais demandé à un modèle : c'est une
+ * moyenne arithmétique des bulletins où la matière apparaît. Une matière
+ * absente d'un bulletin n'y compte pas pour zéro — elle n'y compte pas du tout.
+ */
+export function moyennesCumulees(
+  bulletins: readonly BulletinDepose[],
+): Partial<Record<Matiere, number>> {
+  const sommes = new Map<Matiere, { total: number; nombre: number }>()
+  for (const b of bulletins) {
+    for (const [matiere, note] of Object.entries(b.notes)) {
+      if (typeof note !== 'number' || !Number.isFinite(note)) continue
+      const cle = matiere as Matiere
+      const acc = sommes.get(cle) ?? { total: 0, nombre: 0 }
+      sommes.set(cle, { total: acc.total + note, nombre: acc.nombre + 1 })
+    }
+  }
+  const moyennes: Partial<Record<Matiere, number>> = {}
+  for (const [matiere, { total, nombre }] of sommes) {
+    moyennes[matiere] = Math.round((total / nombre) * 100) / 100
+  }
+  return moyennes
+}
+
+/**
+ * L'écart de moyenne générale entre le premier et le dernier bulletin.
+ *
+ * `null` s'il y a moins de deux bulletins : avec un seul, il n'y a pas de
+ * progression à constater, et en inventer une serait une valeur de repli.
+ * C'est une SOUSTRACTION, pas un jugement : le texte qui l'accompagne est
+ * écrit dans l'interface, à partir de ce nombre.
+ */
+export function progressionConstatee(bulletins: readonly BulletinDepose[]): number | null {
+  if (bulletins.length < 2) return null
+  const premier = moyenneGenerale(bulletins[0]!.notes)
+  const dernier = moyenneGenerale(bulletins[bulletins.length - 1]!.notes)
+  if (premier === null || dernier === null) return null
+  return Math.round((dernier - premier) * 100) / 100
+}
+
 export interface Reponses {
   readonly typeBac: TypeBac
   /** Moyennes sur 20, importées d'un bulletin ou saisies à la main. */
   readonly notes: Partial<Readonly<Record<Matiere, number>>>
   readonly notesImportees: boolean
+  /**
+   * Les bulletins déposés, du plus ancien au plus récent.
+   *
+   * Une liste et non un compteur : c'est elle qui permet de moyenner sur
+   * plusieurs trimestres et de VOIR la progression au lieu de la déduire.
+   * Rien n'en sort du navigateur.
+   */
+  readonly bulletins: readonly BulletinDepose[]
   readonly matierePreferee: Matiere | null
   readonly passions: readonly Domaine[]
   readonly motivation: number

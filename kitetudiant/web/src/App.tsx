@@ -549,7 +549,7 @@ export default function App() {
               : [],
           ),
           detailOuvert: false,
-          bulletinLu: reponses.notesImportees,
+          bulletinsLus: reponses.bulletins.length,
           academieEleve: reponses.academie,
           academiesRegardees: calcules.map((r) => r.formation.academie),
         }),
