@@ -38,6 +38,9 @@ export type Route =
   // du navigateur, dans les journaux d'un serveur mandataire, dans un
   // message copié-collé — il ne protège rien.
   | { readonly vue: 'compte' }
+  // La recherche directe d'écoles a son adresse : « qu'y a-t-il à Limoges ? »
+  // est une question qu'on envoie à quelqu'un, et un lien qu'on met en favori.
+  | { readonly vue: 'recherche' }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -54,6 +57,8 @@ export function cheminDe(route: Route): string {
       return `${BASE}inscription`
     case 'compte':
       return `${BASE}mon-compte`
+    case 'recherche':
+      return `${BASE}chercher-une-ecole`
   }
 }
 
@@ -71,6 +76,7 @@ export function routeDuChemin(chemin: string): Route | null {
   if (reste === 'connexion') return { vue: 'connexion' }
   if (reste === 'inscription') return { vue: 'inscription' }
   if (reste === 'mon-compte') return { vue: 'compte' }
+  if (reste === 'chercher-une-ecole') return { vue: 'recherche' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
   return null

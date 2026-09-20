@@ -163,6 +163,39 @@ export interface EtatComptes {
 }
 
 /**
+ * Les compteurs de comptes, pour la console d'administration.
+ *
+ * ── Ce qui n'y figure pas, et pourquoi ───────────────────────────────────
+ *
+ * Aucune adresse. Pas même une liste partielle, pas même hachée. Le fichier
+ * des comptes chiffre les adresses au repos précisément pour qu'on ne puisse
+ * pas les énumérer ; une fonction d'administration qui les déchiffrerait en
+ * bloc annulerait cette protection, sur une base d'utilisateurs MINEURS
+ * (règle 3 de CLAUDE.md).
+ *
+ * Ce qui est rendu, ce sont des COMPTES : combien, depuis quand, à quel
+ * rythme. C'est ce qui sert à piloter, et cela ne désigne personne.
+ *
+ * ── Sur la purge ─────────────────────────────────────────────────────────
+ *
+ * `bientotPurges` est le nombre de comptes qui atteindront leurs trois ans
+ * d'inactivité dans les quatre-vingt-dix jours. Une durée de conservation
+ * qu'on ne voit pas approcher est une durée qu'on découvre après coup.
+ */
+export interface StatistiquesComptes {
+  readonly configure: boolean
+  readonly comptes: number
+  readonly sessionsActives: number
+  /** Créations par jour, en ordre chronologique. */
+  readonly creationsParJour: readonly { readonly le: string; readonly nombre: number }[]
+  /** Comptes vus au moins une fois dans les trente derniers jours. */
+  readonly actifs30j: number
+  readonly bientotPurges: number
+  readonly premierCompteLe: string | null
+  readonly dernierCompteLe: string | null
+}
+
+/**
  * Normalise une adresse avant comparaison. On se contente de retirer les
  * espaces et de passer en minuscules : aucune règle propre à un fournisseur
  * (les points de Gmail, par exemple) n'est appliquée, ce serait deviner.
@@ -598,6 +631,54 @@ export class DepotComptes {
       sessions: fichier.sessions.filter((s) => s.index !== session.index),
     })
     return true
+  }
+
+  /**
+   * Les compteurs, sans qu'aucune adresse ne quitte le chiffrement.
+   *
+   * Tout ce qui est lu ici — dates d'inscription, dates de dernière visite,
+   * sessions — figure déjà en clair dans le fichier : ce sont des dates, pas
+   * des identités. Le champ `emailChiffre` n'est jamais touché.
+   */
+  async statistiques(maintenant: Date = new Date()): Promise<StatistiquesComptes> {
+    if (!this.configure) {
+      return {
+        configure: false,
+        comptes: 0,
+        sessionsActives: 0,
+        creationsParJour: [],
+        actifs30j: 0,
+        bientotPurges: 0,
+        premierCompteLe: null,
+        dernierCompteLe: null,
+      }
+    }
+    const fichier = await this.charger(maintenant)
+    const jours = new Map<string, number>()
+    for (const c of fichier.comptes) {
+      const jour = c.inscritLe.slice(0, 10)
+      jours.set(jour, (jours.get(jour) ?? 0) + 1)
+    }
+    const ms = maintenant.getTime()
+    const ilYA = (n: number): string => new Date(ms - n * 86400_000).toISOString()
+    const seuilActif = ilYA(30)
+    // Purgé à PURGE_APRES_JOURS d'inactivité : « bientôt » veut donc dire
+    // « vu pour la dernière fois il y a plus de (purge − 90) jours ».
+    const seuilPurge = ilYA(PURGE_APRES_JOURS - 90)
+    const dates = fichier.comptes.map((c) => c.inscritLe).sort()
+
+    return {
+      configure: true,
+      comptes: fichier.comptes.length,
+      sessionsActives: fichier.sessions.length,
+      creationsParJour: [...jours.entries()]
+        .map(([le, nombre]) => ({ le, nombre }))
+        .sort((a, b) => a.le.localeCompare(b.le)),
+      actifs30j: fichier.comptes.filter((c) => c.vuLe >= seuilActif).length,
+      bientotPurges: fichier.comptes.filter((c) => c.vuLe < seuilPurge).length,
+      premierCompteLe: dates[0]?.slice(0, 10) ?? null,
+      dernierCompteLe: dates[dates.length - 1]?.slice(0, 10) ?? null,
+    }
   }
 
   async etat(maintenant: Date = new Date()): Promise<EtatComptes> {

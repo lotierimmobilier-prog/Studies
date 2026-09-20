@@ -26,6 +26,92 @@
  * sombre au milieu d'une ligne de liens, et attirerait l'œil plus que le
  * chiffre du reste-à-vivre, qui est la raison d'être de la fiche.
  */
+/**
+ * Les pictogrammes des liens sortants.
+ *
+ * Ils servent à RACCOURCIR les libellés, pas à les décorer. « Fiche
+ * Parcoursup de la formation » et « Chercher le site de l'école » remplissent
+ * une ligne à eux deux ; avec un picto qui dit la nature du lien, « Fiche
+ * Parcoursup » et « Site de l'école » suffisent, et la rangée se lit d'un
+ * coup d'œil.
+ *
+ * Tous au trait, tous au même gabarit, tous sans couleur propre : ils
+ * héritent de celle du lien. Un picto qui apporterait sa propre teinte
+ * ferait trois taches de couleur différentes sur une même ligne.
+ */
+
+/** Un document. La fiche officielle d'une formation. */
+export function Fiche() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path
+        d="M14 3.5H7.2a1.2 1.2 0 0 0-1.2 1.2v14.6a1.2 1.2 0 0 0 1.2 1.2h9.6a1.2 1.2 0 0 0 1.2-1.2V7.5Z"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M14 3.5v4h4" fill="none" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M9 12.5h6M9 16h4" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Une étoile. Les avis du public sur une adresse. */
+export function Etoile() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path
+        d="m12 4 2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5 2.7.9-5.6-4-3.9 5.6-.8Z"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/** Une loupe. Une recherche, et non une destination connue. */
+export function Loupe() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <circle cx="10.8" cy="10.8" r="6.3" fill="none" strokeWidth="1.8" />
+      <path d="m15.4 15.4 4.1 4.1" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Un bâtiment. Une résidence universitaire. */
+export function Residence() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path
+        d="M5 20.3V5.2a.8.8 0 0 1 .8-.8h8.4a.8.8 0 0 1 .8.8v15.1"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M15 10h3.2a.8.8 0 0 1 .8.8v9.5" fill="none" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="M8 8h1.5M8 12h1.5M8 16h1.5" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M3.5 20.3h17" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/** Une clé. Une location dans le parc privé. */
+export function Cle() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <circle cx="8.2" cy="8.2" r="4" fill="none" strokeWidth="1.8" />
+      <path
+        d="m11 11 8 8M16.5 16.5l2-2M14 14l1.6-1.6"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 export function Toit() {
   return (
     <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">

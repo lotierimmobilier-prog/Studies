@@ -95,7 +95,13 @@ function dateLisible(iso: string): string {
 
 /* ------------------------------------------------------------------ hero */
 
-function Hero({ onCommencer }: { onCommencer: () => void }) {
+function Hero({
+  onCommencer,
+  onChercher,
+}: {
+  onCommencer: () => void
+  onChercher: () => void
+}) {
   return (
     <section className="hero">
       <p className="hero-sur">Orientation post-bac · Parcoursup</p>
@@ -110,6 +116,13 @@ function Hero({ onCommencer }: { onCommencer: () => void }) {
       <div className="cta-groupe">
         <button type="button" className="principal" onClick={onCommencer}>
           Trouver mes formations
+        </button>
+        {/* La porte d'entrée de celui qui sait déjà où il veut vivre. Sans
+            elle, la seule façon de voir une liste de formations est de
+            répondre à sept questions sur ses notes et son budget — un prix
+            que sa question ne justifie pas. */}
+        <button type="button" className="cta-secondaire" onClick={onChercher}>
+          Tu sais déjà où aller ?
         </button>
         <a className="cta-secondaire" href="#methode">
           Comment ça marche
@@ -368,7 +381,7 @@ export function Accueil({
           donne à une page l'air d'être inachevée. En dessous de 64rem, rien
           ne change — la grille n'existe pas et les deux s'empilent. */}
       <div className="hero-zone">
-        <Hero onCommencer={onCommencer} />
+        <Hero onCommencer={onCommencer} onChercher={() => onNaviguer({ vue: 'recherche' })} />
 
         <div className="illu-bande illu-bande-large">
           <img

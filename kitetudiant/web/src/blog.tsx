@@ -11,7 +11,7 @@
  * pages, lui, se fait au moment du build (scripts/prerendre.mjs).
  */
 
-import { useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import {
   MENTION_SOURCE,
@@ -22,6 +22,7 @@ import {
 import { MarqueLien } from './marque.tsx'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { FilAriane } from './filAriane.tsx'
+import { chercherArticles } from '../../packages/articles/src/recherche.ts'
 
 /* --------------------------------------------------------- les métadonnées */
 
@@ -107,6 +108,9 @@ export function ListeArticles({
   onNaviguer: (route: Route) => void
   onRetour: () => void
 }) {
+  const [requete, setRequete] = useState('')
+  const trouvailles = useMemo(() => chercherArticles(articles, requete), [articles, requete])
+
   useMetadonnees(
     'Bien gérer sa scolarité — le blog de KitEtudiant.fr',
     'Comprendre Parcoursup, monter son dossier, choisir sa ville et tenir son budget : ' +
@@ -141,8 +145,47 @@ export function ListeArticles({
           courts, sans chiffre inventé.
         </p>
 
+        {/* La recherche tourne dans le navigateur : les onze articles sont
+            déjà chargés quand cette page s'affiche. Rien n'est envoyé, donc
+            rien n'est conservé — ce qui est la façon la plus sûre de tenir
+            la promesse « aucun traceur » faite à des mineurs. */}
+        <form
+          className="recherche"
+          role="search"
+          onSubmit={(ev) => ev.preventDefault()}
+        >
+          <label className="champ-label" htmlFor="recherche-articles">
+            Chercher dans les articles
+          </label>
+          <div className="recherche-ligne">
+            <input
+              id="recherche-articles"
+              type="search"
+              className="recherche-champ"
+              placeholder="bourse, logement, confirmation…"
+              value={requete}
+              onChange={(ev) => setRequete(ev.target.value)}
+              autoComplete="off"
+            />
+            {requete !== '' ? (
+              <button type="button" className="recherche-effacer" onClick={() => setRequete('')}>
+                Effacer
+              </button>
+            ) : null}
+          </div>
+          {/* Annoncé à voix haute : sans cela, un lecteur d'écran ne dit rien
+              quand la liste se réduit sous les doigts. */}
+          <p className="note recherche-compte" role="status" aria-live="polite">
+            {requete === ''
+              ? `${articles.length} article${articles.length > 1 ? 's' : ''}`
+              : trouvailles.length === 0
+                ? 'Aucun article ne contient tous ces mots.'
+                : `${trouvailles.length} article${trouvailles.length > 1 ? 's' : ''} sur ${articles.length}`}
+          </p>
+        </form>
+
         <ul className="articles">
-          {articles.map((a) => (
+          {trouvailles.map(({ article: a, extrait }) => (
             <li key={a.slug}>
               <a
                 className="article-vignette"
@@ -157,6 +200,10 @@ export function ListeArticles({
               >
                 <h3 className="article-vignette-titre">{a.titre}</h3>
                 <p className="article-vignette-chapeau">{a.chapeau}</p>
+                {/* L'extrait montre OÙ le mot a été trouvé. Sans lui, un
+                    résultat dont le titre et le chapeau ne contiennent pas
+                    la requête a l'air d'une erreur. */}
+                {extrait !== null ? <p className="article-vignette-extrait">{extrait}</p> : null}
                 <p className="article-vignette-pied">
                   {dateLisible(a.publieLe)} · {minutesDeLecture(a)} min de lecture
                 </p>

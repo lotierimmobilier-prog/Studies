@@ -29,6 +29,7 @@ import {
   type AgregatRetours,
   type AideLogement,
   type FiltreFormations,
+  envoyerReleve,
 } from './donnees.ts'
 import {
   ajouter,
@@ -41,9 +42,12 @@ import {
 } from './collection.ts'
 import { Collection } from './collection.tsx'
 import { Chargement, type EtapeCalcul } from './chargement.tsx'
+import { RechercheEcoles } from './rechercheEcoles.tsx'
 import { MonCompte } from './monCompte.tsx'
-import { Epingle, Toit } from './illustrations.tsx'
+import { Cle, Epingle, Etoile, Fiche, Loupe, Residence, Toit } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
+import { moyenneGenerale } from '../../packages/profil-scolaire/src/index.ts'
+import { trancheMoyenne, trancheReste } from '../../packages/statistiques/src/index.ts'
 import { MarqueLien } from './marque.tsx'
 import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
 import { ListeArticles, PageArticle } from './blog.tsx'
@@ -284,26 +288,46 @@ function Carte({
           Le site propre de l'établissement n'est pas dans l'open data
           Parcoursup : on ne le devine pas, on propose une recherche et on
           le dit. */}
+      {/* Chaque lien porte un picto qui dit sa nature, ce qui permet des
+          libellés courts : « Fiche Parcoursup de la formation » et
+          « Chercher le site de l'école » remplissaient une ligne à eux deux.
+          Le titre complet reste au survol et pour un lecteur d'écran. */}
       <p className="carte-liens">
         {formation.lien ? (
-          <a className="carte-lien" href={formation.lien} target="_blank" rel="noopener noreferrer">
-            Fiche Parcoursup de la formation
+          <a
+            className="carte-lien"
+            href={formation.lien}
+            title="La fiche officielle de cette formation sur Parcoursup"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Fiche />
+            Fiche Parcoursup
             <span aria-hidden="true"> ↗</span>
           </a>
         ) : null}
         {avis?.urlMaps ? (
-          <a className="carte-lien" href={avis.urlMaps} target="_blank" rel="noopener noreferrer">
-            Avis Google sur l’adresse ({avis.note.toFixed(1)}/5)
+          <a
+            className="carte-lien"
+            href={avis.urlMaps}
+            title={avis.miseEnGarde}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Etoile />
+            {avis.note.toFixed(1)}/5 sur l’adresse
             <span aria-hidden="true"> ↗</span>
           </a>
         ) : null}
         <a
           className="carte-lien"
           href={rechercheWeb(formation.etablissement, formation.ville)}
+          title="Une recherche web : l’open data ne publie pas l’adresse du site des établissements"
           target="_blank"
           rel="noopener noreferrer"
         >
-          Chercher le site de l’école
+          <Loupe />
+          Site de l’école
           <span aria-hidden="true"> ↗</span>
         </a>
       </p>
@@ -330,7 +354,8 @@ function Carte({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {l.libelle}
+            {l.cle === 'crous' ? <Residence /> : <Cle />}
+            {l.cle === 'crous' ? 'Résidence universitaire' : 'Studios et T2'}
             <span aria-hidden="true"> ↗</span>
           </a>
         ))}
@@ -407,6 +432,7 @@ export default function App() {
     | 'connexion'
     | 'inscription'
     | 'compte'
+    | 'recherche'
   >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
@@ -638,6 +664,33 @@ export default function App() {
         calculerResultats(formations, reponses, parRef, aujourdHui),
       )
       setResultats(calcules)
+
+      /* Un relevé ANONYME d'usage : pas d'identifiant, pas de note exacte,
+         pas de vœu. Il dit quelles villes et quelles filières intéressent,
+         et à quel reste-à-vivre les simulations aboutissent — de quoi savoir
+         où le site sert, sans constituer de dossier sur un mineur.
+
+         Les TRANCHES sont calculées ici et non côté serveur : une note
+         exacte qui partirait sur le réseau serait déjà partie, même si le
+         serveur la jetait ensuite. */
+      const chiffres = calcules.filter((r) => r.parScenario.central.ravMensuel !== null)
+      envoyerReleve({
+        typeBac: reponses.typeBac,
+        academie: reponses.academie,
+        trancheMoyenne: trancheMoyenne(moyenneGenerale(reponses.notes)),
+        boursier: reponses.echelonInconnu ? null : reponses.echelonBourse !== null,
+        mobilite: reponses.mobilite,
+        filiere: reponses.filiere === '' ? null : reponses.filiere,
+        communes: chiffres.flatMap((r) => (r.formation.codeInsee === null ? [] : [r.formation.codeInsee])),
+        trancheReste: trancheReste(
+          chiffres.length === 0
+            ? null
+            : Math.max(...chiffres.map((r) => r.parScenario.central.ravMensuel ?? 0)),
+        ),
+        bulletins: reponses.bulletins.length,
+        formations: calcules.length,
+      })
+
       // Une carte de ville ne se gagne que si un reste-à-vivre a réellement été
       // calculé : sans compte, l'aperçu ne chiffre rien et ne débloque rien.
       gagner(
@@ -715,6 +768,18 @@ export default function App() {
   /* Posé avant toute vue : l'attente couvre l'écran, quelle que soit la page
      d'où l'on est parti — la dernière question du parcours, ou l'accueil. */
   if (enCours) return <Chargement etape={etapeCalcul} />
+
+  if (vue === 'recherche') {
+    return (
+      <RechercheEcoles
+        onNaviguer={naviguer}
+        onCommencer={() => {
+          setVue('parcours')
+          setEtape(0)
+        }}
+      />
+    )
+  }
 
   if (vue === 'compte') {
     return (

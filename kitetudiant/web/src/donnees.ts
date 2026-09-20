@@ -276,6 +276,12 @@ export interface FiltreFormations {
   readonly academie?: string
   /** Mots-clés cherchés dans l'intitulé de la formation, en OU. */
   readonly motsCles?: readonly string[]
+  /**
+   * Ville de l'établissement. Cherchée et non comparée : « saint etienne »
+   * doit trouver « Saint-Étienne », et personne ne tape les accents ni les
+   * traits d'union sur un téléphone.
+   */
+  readonly ville?: string
   readonly limite?: number
 }
 
@@ -294,6 +300,7 @@ export async function chercherFormations(
   const conditions: string[] = []
   if (filtre.filiere) conditions.push(`fili = "${filtre.filiere.replace(/"/g, '')}"`)
   if (filtre.academie) conditions.push(`acad_mies = "${filtre.academie.replace(/"/g, '')}"`)
+  if (filtre.ville) conditions.push(`search(ville_etab, "${filtre.ville.replace(/"/g, '')}")`)
   if (filtre.motsCles && filtre.motsCles.length > 0) {
     const recherche = filtre.motsCles
       .map((mot) => `search(lib_for_voe_ins, "${mot.replace(/"/g, '')}")`)
@@ -505,6 +512,39 @@ export async function supprimerCompte(
     const donnees = (await reponse.json().catch(() => ({}))) as { erreur?: string }
     throw new CompteRefuse(donnees.erreur ?? `le service a répondu ${reponse.status}`)
   }
+}
+
+/**
+ * Dépose un relevé ANONYME d'usage.
+ *
+ * ── Ce que cet appel n'envoie pas ────────────────────────────────────────
+ *
+ * Le jeton de session n'est PAS joint, et c'est délibéré : l'envoyer
+ * rattacherait le relevé à un compte, et il cesserait d'être anonyme. Le
+ * serveur reconstruit d'ailleurs chaque champ à partir des seules valeurs
+ * permises, donc rien d'autre ne peut entrer même si cet appel changeait.
+ *
+ * ── Pourquoi il n'échoue jamais bruyamment ───────────────────────────────
+ *
+ * C'est une mesure d'usage, pas une étape du parcours de l'élève. Un serveur
+ * de statistiques indisponible ne doit pas produire un message d'erreur sur
+ * l'écran de quelqu'un qui cherche son école. L'erreur est donc avalée —
+ * c'est l'un des très rares endroits du code où c'est la bonne conduite.
+ */
+export function envoyerReleve(
+  releve: Record<string, unknown>,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): void {
+  void recuperer(`${base}/releves`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(releve),
+    // « keepalive » : la requête survit si l'élève quitte la page dans la
+    // foulée. Sans lui, un relevé sur deux se perdrait au moment précis où
+    // la page change.
+    keepalive: true,
+  }).catch(() => undefined)
 }
 
 export interface DemandeAide {

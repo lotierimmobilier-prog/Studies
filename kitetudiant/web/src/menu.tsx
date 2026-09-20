@@ -207,6 +207,15 @@ export function Menu({
           Le blog
         </LienMenu>
 
+        <LienMenu
+          route={{ vue: 'recherche' }}
+          onNaviguer={onNaviguer}
+          onApres={fermer}
+          className="entete-lien"
+        >
+          Chercher une école
+        </LienMenu>
+
         {/* Déconnecté, la pastille reste dans la barre : les cartes vivent
             dans le navigateur, on peut en avoir sans compte, et il n'y a
             alors pas d'« espace » derrière quoi les ranger. */}

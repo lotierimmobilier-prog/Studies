@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Marque } from '../marque.tsx'
 
 import { Articles } from './Articles.tsx'
+import { Statistiques } from './Statistiques.tsx'
 
 import {
   chercherEtat,
@@ -268,27 +269,24 @@ export function Console() {
             )}
           </section>
 
-          <section className="bloc">
-            <h2>Comptes élèves</h2>
-            {etat.comptes.configure ? (
-              <ul className="baremes">
-                <li>
-                  <span>Comptes</span>
-                  <span className="note">{etat.comptes.comptes}</span>
-                </li>
-                <li>
-                  <span>Sessions ouvertes</span>
-                  <span className="note">{etat.comptes.sessionsActives}</span>
-                </li>
-              </ul>
-            ) : (
+          {/* Le compte des inscrits vit maintenant dans « Statistiques », qui
+              en dit plus : actifs à trente jours, créations par jour, comptes
+              approchant de la purge. Deux sections du même nom affichant des
+              chiffres différents finiraient par se contredire. Seule
+              l'alerte de configuration reste ici : elle doit se voir même
+              quand les statistiques ne chargent pas. */}
+          {!etat.comptes.configure ? (
+            <section className="bloc">
+              <h2>Comptes élèves</h2>
               <p className="alerte">
                 COMPTES_MASTER_KEY n’est pas définie : l’inscription est impossible, et le
                 détail du résultat est ouvert à tous. Pose la variable dans l’environnement
                 du serveur, puis redémarre.
               </p>
-            )}
-          </section>
+            </section>
+          ) : null}
+
+          <Statistiques />
 
           <Articles />
 

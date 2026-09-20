@@ -953,6 +953,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .carte-lien {
   display: inline-flex;
   align-items: center;
+  gap: 0.35rem;
   min-height: 44px;
   padding: 0.35rem 0.8rem;
   border: 1px solid var(--trait);
@@ -962,6 +963,9 @@ input[type='range'] { width: 100%; min-height: 44px; }
   font-weight: 600;
 }
 .carte-lien:hover { border-color: var(--accent); background: var(--accent); color: var(--fond); }
+/* Le picto hérite de la couleur du lien : trois teintes propres sur une même
+   ligne feraient trois taches, et la rangée cesserait de se lire d'un coup. */
+.carte-lien .illu-picto { width: 16px; height: 16px; flex: 0 0 auto; stroke: currentColor; }
 
 /* Sur un téléphone étroit, trois colonnes écraseraient les montants : on passe
    à une seule, et chaque case garde son chiffre lisible. */
@@ -1521,6 +1525,109 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   line-height: 1.5;
   color: var(--doux);
 }
+
+/* ------------------------------------------------------------- recherche */
+/* Préfixe « recherche- » et « ecole- » : la feuille est partagée par toutes
+   les vues, et un nom déjà pris ferait hériter ces écrans d'une autre mise en
+   page sans rien casser visiblement (cf. styles.test.ts). */
+
+.recherche { margin: 0 0 1.5rem; }
+.recherche-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.recherche-ligne { display: flex; gap: 0.5rem; align-items: stretch; }
+.recherche-champ {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  color: var(--encre);
+  font: inherit;
+  min-height: 48px;
+}
+.recherche-champ:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.recherche-effacer {
+  flex: 0 0 auto;
+  padding: 0 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 48px;
+}
+.recherche-effacer:hover { border-color: var(--accent); color: var(--accent); }
+.recherche-compte { margin: 0.5rem 0 0; }
+.recherche .principal { width: auto; padding-inline: 2rem; flex: 0 0 auto; }
+
+/* L'extrait, dans une vignette d'article : il montre OÙ le mot a été trouvé.
+   En retrait et en italique, pour qu'on ne le confonde pas avec le chapeau. */
+.article-vignette-extrait {
+  margin: 0.5rem 0 0;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------- résultats d'une école */
+
+.ecoles { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
+.ecole {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.ecole-titre { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 600; line-height: 1.35; }
+.ecole-lieu {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0 0 0.7rem;
+  color: var(--doux);
+  font-size: 0.88rem;
+}
+.ecole-lieu .illu-picto { width: 18px; height: 18px; flex: 0 0 auto; stroke: var(--doux); }
+
+.ecole-faits { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.3rem; }
+.ecole-etiquette {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  color: var(--doux);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Une teinte par secteur, pour distinguer d'un coup d'œil — sans jamais
+   suggérer qu'un secteur vaut mieux que l'autre : les deux bordures ont la
+   même épaisseur, et aucune n'est remplie. */
+.ecole-public { border-color: var(--accent); color: var(--accent); }
+.ecole-prive { border-color: var(--orange); color: var(--orange); }
+.ecole-inconnu { font-style: italic; }
+
+/* Ce que cette page NE dit pas. Détaché et en évidence : posé en petit au
+   bas de la liste, il serait lu après qu'on a cru que le site ne calcule
+   rien. */
+.ecoles-rappel {
+  margin: 1.25rem 0 0;
+  padding: 1.25rem;
+  border: 1px solid var(--trait);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.ecoles-rappel h3 { margin: 0 0 0.4rem; font-size: 1.05rem; font-weight: 600; }
+.ecoles-rappel p { margin: 0 0 1rem; color: var(--doux); font-size: 0.93rem; }
+.ecoles-rappel .principal { width: auto; padding-inline: 1.75rem; flex: 0 0 auto; }
 
 /* ------------------------------------ encadré de tête cliquable, logement */
 
