@@ -950,3 +950,74 @@ input[type='range'] { width: 100%; min-height: 44px; }
    groupée de classes : la feuille interdit qu'une classe soit définie deux
    fois au premier niveau, et styles.test.ts le vérifie. */
 h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }
+
+/* ------------------------------------------------------------ chronologie */
+/* Les dates de la dernière session, en repère. L'avertissement est au-dessus
+   des dates, pas en bas de page : un élève qui se fierait à une date périmée
+   manquerait un vœu. */
+
+.avertissement-calendrier {
+  margin: 0 0 1.5rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--orange);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  font-size: 0.88rem;
+  color: var(--doux);
+}
+.avertissement-calendrier strong { color: var(--encre); }
+
+.chrono { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.75rem; }
+
+.chrono-phase {
+  position: relative;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--trait);
+}
+/* La pastille qui marque le début d'une phase sur le fil. */
+.chrono-phase::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 0.35rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--vif);
+}
+
+.chrono-periode {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--doux);
+}
+.chrono-titre { margin: 0.15rem 0 0.35rem; font-size: 1.02rem; line-height: 1.3; }
+.chrono-resume { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.9rem; }
+
+.chrono-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.chrono-etape { display: flex; flex-direction: column; gap: 0.1rem; }
+.chrono-date {
+  font-family: var(--titres);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.chrono-quoi { font-size: 0.92rem; }
+.chrono-detail { color: var(--doux); font-size: 0.85rem; }
+
+.chrono-note {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  color: var(--doux);
+  font-style: italic;
+}
+.chrono-source { margin-top: 1.5rem; }
+
+@media (min-width: 40rem) {
+  /* La date passe en colonne : l'œil balaie le fil sans lire les libellés. */
+  .chrono-etape { display: grid; grid-template-columns: 12rem 1fr; gap: 0.1rem 1rem; }
+  .chrono-date { grid-row: span 2; padding-top: 0.1rem; }
+  .chrono-detail { grid-column: 2; }
+}

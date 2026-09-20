@@ -27,6 +27,14 @@ import {
 } from './donnees.ts'
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
+import {
+  AVERTISSEMENT,
+  enToutesLettres,
+  MILLESIME_CALENDRIER,
+  PHASES,
+  RELEVE_LE,
+  SOURCE_CALENDRIER,
+} from './calendrier.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
 
 /** Surface du logement type servant à l'illustration. */
@@ -223,6 +231,59 @@ function Comparaison() {
   )
 }
 
+/* ------------------------------------------------------- la chronologie */
+
+/**
+ * Le calendrier de la dernière session, en repère.
+ *
+ * L'avertissement est DANS le bloc, avant les dates, et non relégué en note de
+ * bas de page : un élève qui se fierait à une date périmée manquerait un vœu.
+ * Il vient de calendrier.ts, pour qu'aucune vue ne puisse afficher les dates
+ * sans lui.
+ */
+function Chronologie() {
+  return (
+    <section className="bloc" id="calendrier">
+      <h2>Le calendrier, dans les grandes lignes</h2>
+      <p className="bloc-intro">
+        Trois phases qui se suivent toujours dans le même ordre : on regarde, on
+        formule, on répond. Ce qui change d’une année sur l’autre, ce sont les dates.
+      </p>
+
+      <p className="avertissement-calendrier">
+        <strong>À lire avant de noter quoi que ce soit.</strong> {AVERTISSEMENT}
+      </p>
+
+      <ol className="chrono">
+        {PHASES.map((phase) => (
+          <li className="chrono-phase" key={phase.numero}>
+            <p className="chrono-periode">{phase.periode}</p>
+            <h3 className="chrono-titre">{phase.titre}</h3>
+            <p className="chrono-resume">{phase.resume}</p>
+            <ul className="chrono-etapes">
+              {phase.etapes.map((e) => (
+                <li className="chrono-etape" key={e.le}>
+                  <time className="chrono-date" dateTime={e.le}>
+                    {enToutesLettres(e.le)}
+                  </time>
+                  <span className="chrono-quoi">{e.titre}</span>
+                  {e.detail !== null ? <span className="chrono-detail">{e.detail}</span> : null}
+                </li>
+              ))}
+            </ul>
+            {phase.note !== null ? <p className="chrono-note">{phase.note}</p> : null}
+          </li>
+        ))}
+      </ol>
+
+      <p className="sources chrono-source">
+        {SOURCE_CALENDRIER}, millésime {MILLESIME_CALENDRIER}, relevé le{' '}
+        {dateLisible(RELEVE_LE)}.
+      </p>
+    </section>
+  )
+}
+
 /* ----------------------------------------------------------------- la page */
 
 export function Accueil({
@@ -294,6 +355,8 @@ export function Accueil({
           </button>
         </div>
       </section>
+
+      <Chronologie />
 
       <section className="bloc">
         <h2>Ce que ce site ne fait pas</h2>
