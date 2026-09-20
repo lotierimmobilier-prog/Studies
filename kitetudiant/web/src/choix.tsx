@@ -72,7 +72,12 @@ export function TroisChoix({
                   <p className="choix-formation" title={p.resultat.formation.libelle}>
                     {p.resultat.formation.libelle}
                   </p>
-                  <p className="choix-etab">
+                  {/* Borné à deux lignes comme le libellé au-dessus : le nom
+                      entier reste au survol et pour un lecteur d'écran. */}
+                  <p
+                    className="choix-etab"
+                    title={`${p.resultat.formation.etablissement} — ${p.resultat.formation.ville}`}
+                  >
                     {p.resultat.formation.etablissement} — {p.resultat.formation.ville}
                   </p>
                   <p className="choix-pourquoi">{p.pourquoi}</p>

@@ -651,17 +651,36 @@ input[type='range'] { width: 100%; min-height: 44px; }
   overflow: hidden;
   overflow-wrap: anywhere;
 }
+/* Même traitement que le libellé de formation, et pour la même raison : un
+   établissement s'appelle « Université de Lorraine - Faculté de Droit,
+   Sciences Economiques et Gestion - Site de Nancy (54) ». En entier, il
+   prenait cinq lignes et noyait le chiffre au-dessus de lui. Deux lignes au
+   plus ; le nom complet reste dans l'attribut « title ». */
 .choix-etab {
   margin: 0 0 0.7rem;
   color: var(--doux);
   font-size: 0.85rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   overflow-wrap: anywhere;
 }
-.choix-pourquoi { margin: 0; color: var(--doux); font-size: 0.8rem; }
+/* 0.85rem et non 0.8 : c'est la phrase qui EXPLIQUE le chiffre, donc celle
+   qu'il faut pouvoir lire. L'interligne compte autant que le corps. */
+.choix-pourquoi { margin: 0; color: var(--doux); font-size: 0.85rem; line-height: 1.5; }
 .choix-absent { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.88rem; }
 /* « auto » colle l'action au bas de la carte : les trois boutons s'alignent
-   quelle que soit la longueur des textes au-dessus d'eux. */
-.choix-action { width: 100%; margin-top: auto; }
+   quelle que soit la longueur des textes au-dessus d'eux.
+
+   « flex: 0 0 auto » n'est pas décoratif. La règle de base des boutons pose
+   « flex: 1 » — pensée pour une rangée, où elle partage la largeur. Dans
+   cette carte, qui est une colonne, la même règle le fait GRANDIR en hauteur
+   jusqu'à avaler tout l'espace libre : le bouton « Utiliser ma position »
+   devenait un cadre vide de trois cents pixels de haut. Constaté au
+   navigateur le 20/09/2026. */
+.choix-action { flex: 0 0 auto; width: 100%; margin-top: auto; }
 .choix-message { margin: -1.5rem 0 1.75rem; }
 
 .choix-confidentialite {
@@ -1465,4 +1484,105 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   font-size: 0.78rem;
   line-height: 1.5;
   color: var(--doux);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GRAND ÉCRAN
+
+   Jusqu'ici la feuille n'avait qu'un seul palier, à 40rem, et la coquille
+   restait à 46rem quoi qu'il arrive. Sur un écran de 1440 px, le site
+   occupait 51 % de la largeur ; sur 1920 px, 38 %. Mesuré, pas supposé.
+
+   Le remède n'est pas d'étirer la page : une ligne de texte de 1100 px de
+   large est illisible, et la mesure de lecture de 46rem est un acquis, pas
+   un défaut. Ce qui s'élargit, ce sont les mises en page qui ONT plusieurs
+   colonnes à montrer — l'accueil, la liste du blog, l'album, les résultats.
+   Le parcours en sept questions et le corps d'un article gardent leur
+   colonne étroite : ce sont des textes qu'on lit, pas des tableaux qu'on
+   balaie.
+
+   Dans la coquille élargie, la prose garde sa mesure et reste alignée à
+   gauche. Le blanc à sa droite n'est pas un oubli : c'est la marge, et elle
+   ne sert à rien d'autre que respirer.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 64rem) {
+  /* 72rem = 1152 px. Au-delà, l'en-tête s'étire jusqu'à ce que la marque et
+     le menu n'aient plus l'air d'appartenir à la même barre. */
+  .app-large,
+  .accueil {
+    max-width: 72rem;
+    padding-inline: 2rem;
+  }
+
+  /* ── l'accroche et sa photographie, côte à côte ─────────────────────── */
+  .hero-zone {
+    display: grid;
+    /* Le texte un peu plus large que l'image : c'est lui qu'on lit d'abord,
+       et la photographie ne doit pas lui disputer l'entrée de page. */
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 3rem;
+    align-items: center;
+    /* La marge haute que portait `.hero` remonte ici : sans elle, l'accroche
+       se colle au filet de l'en-tête. */
+    margin: 2rem 0 2.5rem;
+  }
+  .hero { margin: 0; }
+  /* La mesure du paragraphe d'accroche s'ajuste à sa colonne : le 34rem posé
+     pour un écran étroit y laisserait un décrochement à droite. */
+  .hero-texte { max-width: none; }
+  .hero-zone .illu-bande-large { margin: 0; }
+  /* La photographie prend la hauteur du texte à côté d'elle, au lieu de la
+     bande basse qu'elle formait quand elle occupait toute la largeur. */
+  .hero-zone .illu-bande-large img { max-height: 25rem; }
+
+  /* ── la prose garde sa mesure ───────────────────────────────────────── */
+  .accueil .bloc-intro,
+  .accueil .bloc-chute,
+  .accueil .etapes-accueil {
+    max-width: 44rem;
+  }
+
+  /* ── ce qui peut se lire en deux colonnes ───────────────────────────── */
+  /* Cinq promesses courtes, cinq sources datées : des listes qu'on parcourt,
+     pas qu'on lit en continu. Deux colonnes les rendent embrassables d'un
+     regard au lieu d'étirer la page vers le bas. */
+  .promesses,
+  .sources {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 3rem;
+    align-items: start;
+  }
+
+  /* ── « comment ça marche » : la photographie à côté des étapes ──────── */
+  .etapes-illustrees {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 0 3rem;
+    align-items: start;
+  }
+  .etapes-illustrees .illu-bande { grid-row: 1 / span 3; margin: 0; }
+  .etapes-illustrees .illu-bande img { max-height: 22rem; }
+  .etapes-illustrees > h2,
+  .etapes-illustrees > .etapes-accueil,
+  .etapes-illustrees > .cta-groupe { grid-column: 2; }
+
+  /* ── le pied et l'appel final ───────────────────────────────────────── */
+  .cta-final { padding: 3rem; }
+  .cta-final h2 { font-size: 1.5rem; }
+
+  /* Un bouton large de 1152 px n'est plus un bouton, c'est une barre. La
+     règle de base pose « flex: 1 », qui le fait remplir sa ligne ; le palier
+     de 40rem ne rendait sa taille naturelle qu'au bouton principal. Le même
+     étirement existe entre 640 et 1024 px, où il se voit moins. */
+  .cta-groupe .secondaire {
+    flex: 0 0 auto;
+    width: auto;
+    padding-inline: 2rem;
+  }
+
+  /* ── les vignettes d'articles respirent ─────────────────────────────── */
+  .articles { gap: 1.25rem; }
+  .article-vignette { padding: 1.4rem; }
 }

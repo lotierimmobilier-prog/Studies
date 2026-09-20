@@ -115,7 +115,7 @@ export function ListeArticles({
   )
 
   return (
-    <main className="app">
+    <main className="app app-large">
       <header className="entete entete-accueil">
         <h1 className="marque">
           <Marque />
