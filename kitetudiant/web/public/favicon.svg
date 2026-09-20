@@ -1,17 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="KitEtudiant.fr">
-  <!-- Le sac à dos et la toque du logo, simplifiés : à 16 px, le dessin
-       complet se referme en tache. Teintes relevées sur le logo fourni. -->
-  <rect width="64" height="64" rx="14" fill="#05335C"/>
-  <!-- bretelles -->
-  <rect x="16" y="26" width="7" height="22" rx="3.5" fill="#0A5FA7"/>
-  <rect x="41" y="26" width="7" height="22" rx="3.5" fill="#0A5FA7"/>
-  <!-- corps du sac -->
-  <rect x="19" y="24" width="26" height="26" rx="7" fill="#1178C4"/>
-  <!-- poche -->
-  <rect x="24" y="34" width="16" height="14" rx="4" fill="#1BB7C5"/>
-  <rect x="27" y="39" width="10" height="2.6" rx="1.3" fill="#FFFFFF"/>
-  <!-- toque -->
-  <path d="M32 10 54 19 32 28 10 19Z" fill="#F8FAFB"/>
-  <path d="M50 20.5v7" stroke="#F8FAFB" stroke-width="2.4" stroke-linecap="round"/>
-  <circle cx="50" cy="29.5" r="2.6" fill="#FDBE26"/>
+  <!-- La toque du logo, seule : à 16 px, c'est la seule forme qui survive.
+       Teintes relevées sur le logo fourni. -->
+  <rect width="64" height="64" rx="12" fill="#19304A"/>
+  <path d="M32 17 55 27 32 37 9 27Z" fill="#F7F9FA"/>
+  <path d="M19 31.5v9c0 3.6 5.8 6.5 13 6.5s13-2.9 13-6.5v-9" fill="none"
+        stroke="#1F969A" stroke-width="4" stroke-linecap="round"/>
+  <path d="M51 29v9" stroke="#F7F9FA" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="51" cy="40.5" r="2.8" fill="#D59C24"/>
 </svg>

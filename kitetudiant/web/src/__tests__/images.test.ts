@@ -153,13 +153,34 @@ describe('chaque balise image', () => {
     },
   )
 
-  it('les grandes illustrations ne sont pas toutes chargées d’emblée', () => {
-    // Elles pèsent 150 à 310 Ko chacune. Le logo, lui, est dans l'en-tête et
-    // doit arriver tout de suite : lui imposer `loading` n'aurait pas de sens.
-    const grandes = BALISES.filter((b) => /illu-photo/.test(b.texte))
-    expect(grandes.length).toBeGreaterThan(0)
-    for (const b of grandes) {
-      expect(b.texte, `${b.fichier}:${b.ligne}`).toMatch(/\bloading=/)
+  it('toute image lourde attend d’être vue', () => {
+    // Au-delà de 100 Ko, une image ne doit pas partir avant qu'on la regarde.
+    // En dessous, `loading` n'a pas de sens : le logo est dans l'en-tête et
+    // doit arriver tout de suite.
+    for (const b of BALISES) {
+      const m = /src=\{(\w+)\}/.exec(b.texte)
+      if (m === null) continue
+      const source = CONTENUS.get(resolve(SRC, b.fichier)) ?? ''
+      const imp = new RegExp(`import ${m[1]} from '\\./images/([^']+)'`).exec(source)
+      if (imp === null) continue
+      const poids = statSync(join(IMAGES, imp[1]!)).size
+      if (poids > 100 * 1024) {
+        expect(b.texte, `${b.fichier}:${b.ligne} pèse ${Math.round(poids / 1024)} Ko`).toMatch(
+          /\bloading=/,
+        )
+      }
     }
+  })
+
+  it('le dossier d’images reste léger', () => {
+    // Garde-fou de poids. Quatre illustrations dessinées y ont pesé 886 Ko
+    // jusqu'au 20/09/2026 — pour des images que la page finissait par ne plus
+    // afficher, et que Vite embarquait quand même. Une limite chiffrée rend
+    // la prochaine dérive visible tout de suite.
+    const total = FICHIERS_IMAGE.reduce((n, f) => n + statSync(join(IMAGES, f)).size, 0)
+    expect(
+      Math.round(total / 1024),
+      `${FICHIERS_IMAGE.join(', ')} — au-delà de 300 Ko, il faut une bonne raison.`,
+    ).toBeLessThan(300)
   })
 })

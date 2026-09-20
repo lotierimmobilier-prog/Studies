@@ -1,58 +1,40 @@
 /**
  * Le logo KitEtudiant.fr.
  *
- * Le fichier fourni est un bloc empilé sur fond blanc. Il a été découpé en
- * deux morceaux — le dessin et le nom — pour composer un bandeau horizontal
- * qui tient dans un en-tête, et son fond a été détouré par propagation depuis
- * les bords : le blanc ENFERMÉ dans le dessin (le contour du sac, le trait de
- * la poche) reste blanc, celui des contre-formes des lettres devient
- * transparent. Rien d'autre n'a été retouché.
+ * Le fichier fourni est un bandeau horizontal sur fond blanc : le nom, toque
+ * comprise, puis la signature en dessous. Seul le nom est découpé en image —
+ * son dessin fait la marque. La signature, elle, est du texte : elle reste
+ * nette à toute taille, se lit par un lecteur d'écran, et se traduit.
  *
- * Une seconde version existe pour le thème sombre, où le marine du logo
- * (#05335C) serait illisible sur un fond presque noir. Seul ce marine est
- * éclairci ; le turquoise et le corail sont laissés tels quels, ils passent
- * très bien sur fond sombre (6,4:1 et 6,0:1).
+ * Le fond est détouré par propagation depuis les bords, et les contre-formes
+ * des lettres — le trou du « d », du « a » — sont rendues transparentes : sur
+ * fond sombre, elles seraient apparues en pastilles blanches.
  *
- * La bascule passe par `<picture>` : le navigateur ne télécharge que la
- * version dont il a besoin. Elle suit la préférence système. Si un jour un
- * sélecteur de thème écrit `data-theme` sur la racine — la feuille de style
- * le prévoit déjà —, il faudra basculer ces images en CSS, `<picture>` ne
- * sachant pas lire un attribut.
+ * Une seconde version sert au thème sombre. Le marine du nom (#19304A) et le
+ * « .fr » presque noir (#1F1F1F) y seraient illisibles : eux seuls sont
+ * éclaircis. Le teal (#1F969A) et l'ambre du point sont laissés tels quels.
+ *
+ * La bascule passe par `<picture>` : le navigateur ne télécharge qu'une
+ * version, et elle suit la préférence système. Si un sélecteur de thème
+ * écrivait un jour `data-theme` sur la racine — la feuille de style le prévoit
+ * déjà —, il faudrait basculer ces images en CSS : `<picture>` ne sait pas
+ * lire un attribut.
  */
 
-import dessin from './images/logo-marque.png'
-import dessinSombre from './images/logo-marque-sombre.png'
 import mot from './images/logo-nom.png'
 import motSombre from './images/logo-nom-sombre.png'
 
-/** Dimensions natives des deux découpes, portées sur les balises. */
-const DESSIN = { largeur: 94, hauteur: 112 }
-const MOT = { largeur: 548, hauteur: 72 }
+/** Dimensions natives de la découpe, portées sur la balise. */
+const MOT = { largeur: 665, hauteur: 96 }
 
 const SOMBRE = '(prefers-color-scheme: dark)'
 
-/**
- * Le nom du site, en logo.
- *
- * `compact` masque le dessin et ne garde que le nom : sur un en-tête étroit,
- * le nom seul reste identifiable, le dessin seul ne l'est pas.
- */
-export function Marque({ compact = false }: { compact?: boolean }) {
+/** La signature de la marque, telle qu'elle figure sous le logo. */
+export const SIGNATURE = 'Tout pour bien démarrer ta vie étudiante'
+
+export function Marque({ signature = false }: { signature?: boolean }) {
   return (
-    <span className={`marque-logo${compact ? ' marque-logo-compact' : ''}`}>
-      <picture>
-        <source srcSet={dessinSombre} media={SOMBRE} />
-        {/* Décoratif : le nom juste à côté porte déjà le sens. */}
-        <img
-          className="marque-dessin"
-          src={dessin}
-          alt=""
-          aria-hidden="true"
-          width={DESSIN.largeur}
-          height={DESSIN.hauteur}
-          decoding="async"
-        />
-      </picture>
+    <span className={`marque-logo${signature ? ' marque-logo-signee' : ''}`}>
       <picture>
         <source srcSet={motSombre} media={SOMBRE} />
         <img
@@ -64,6 +46,7 @@ export function Marque({ compact = false }: { compact?: boolean }) {
           decoding="async"
         />
       </picture>
+      {signature ? <span className="marque-signature">{SIGNATURE}</span> : null}
     </span>
   )
 }

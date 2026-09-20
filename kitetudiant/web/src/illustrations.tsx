@@ -1,133 +1,22 @@
 /**
- * Illustrations de la page d'accueil.
+ * Pictogrammes de l'interface.
  *
- * Deux familles, pour deux usages.
+ * Dessinés ici, en SVG : quelques centaines d'octets, les couleurs viennent
+ * des variables de thème — donc ils suivent le mode clair comme le mode
+ * sombre sans seconde version —, et ils restent nets sur n'importe quel écran.
  *
- * Les pictogrammes et la silhouette de ville sont dessinés ici, en SVG : ils
- * pèsent quelques kilo-octets, prennent leurs couleurs dans les variables de
- * thème — donc ils suivent le mode clair comme le mode sombre sans seconde
- * version —, et restent nets sur n'importe quel écran.
+ * Ils sont purement décoratifs : le sens est porté par le texte qu'ils
+ * accompagnent. D'où `aria-hidden` — un lecteur d'écran les saute au lieu de
+ * les annoncer.
  *
- * Les quatre grandes illustrations sont des fichiers WebP fournis par le
- * porteur du projet, importés depuis `./images/`. Deux points valent d'être
- * écrits noir sur blanc :
- *
- *   1. Elles sont EMBARQUÉES dans le paquet, jamais chargées depuis une banque
- *      d'images. Le site s'adresse à des mineurs et promet « aucun traceur » :
- *      une image appelée chez un tiers enverrait l'adresse IP de chaque élève à
- *      ce tiers à chaque visite. Une promesse qu'on tient à moitié n'est pas une
- *      promesse. L'import passe par Vite, qui préfixe l'URL avec la base de
- *      déploiement — le site est servi sous « /kitetudiant/ », un chemin écrit
- *      en dur reviendrait en 404.
- *   2. Elles illustrent, elles n'affirment rien. Aucune ne montre de chiffre,
- *      et le texte qu'elles accompagnent reste seul porteur de sens.
- *
- * Toutes sont purement décoratives, d'où `aria-hidden` et un `alt` vide : un
- * lecteur d'écran les saute au lieu de les annoncer.
+ * Ce fichier a longtemps contenu aussi quatre grandes illustrations dessinées
+ * et une silhouette de ville. Elles ont été retirées le 20/09/2026 : sur un
+ * site qui s'adresse à de futurs adultes et dont la crédibilité tient à ses
+ * chiffres, un dessin de campus tirait la page vers l'application pour
+ * adolescents. La page repose désormais sur sa typographie et ses données.
+ * L'historique git les garde, et de vraies photographies pourront prendre
+ * leur place.
  */
-
-import avenir from './images/avenir.webp'
-import campus from './images/campus.webp'
-import dossier from './images/dossier.webp'
-import logement from './images/logement.webp'
-
-/**
- * Dimensions natives des quatre fichiers — identiques pour les quatre.
- * Portées sur la balise, elles réservent la place avant le chargement : sans
- * elles, le texte saute au moment où l'image arrive.
- */
-const LARGEUR = 1672
-const HAUTEUR = 941
-
-/**
- * `cote` dit où se trouvent les personnages dans l'image. Sur un téléphone, le
- * cadrage est resserré et coupe forcément un côté : on garde celui-là.
- */
-const PHOTOS = {
-  campus: { fichier: campus, cote: 'gauche' },
-  avenir: { fichier: avenir, cote: 'gauche' },
-  logement: { fichier: logement, cote: 'droite' },
-  dossier: { fichier: dossier, cote: 'gauche' },
-} as const satisfies Record<string, { readonly fichier: string; readonly cote: 'gauche' | 'droite' }>
-
-export type NomPhoto = keyof typeof PHOTOS
-
-/**
- * Une grande illustration en bandeau.
- *
- * `prioritaire` est réservé à celle du haut de page, la seule visible d'emblée :
- * elle se charge tout de suite, les autres attendent qu'on descende jusqu'à
- * elles. Mettre tout le monde en priorité haute revient à n'avoir aucune
- * priorité.
- */
-export function Photo({ nom, prioritaire = false }: { nom: NomPhoto; prioritaire?: boolean }) {
-  const { fichier, cote } = PHOTOS[nom]
-  return (
-    <img
-      className={`illu-photo illu-photo-${cote}`}
-      src={fichier}
-      alt=""
-      aria-hidden="true"
-      width={LARGEUR}
-      height={HAUTEUR}
-      decoding="async"
-      loading={prioritaire ? 'eager' : 'lazy'}
-      // React 18 ne connaît pas la propriété « fetchPriority » : il la refuse
-      // avec un avertissement et ne la pose jamais sur la balise — les types
-      // de @types/react 18.3 l'annoncent pourtant, ce qui rend l'erreur
-      // invisible au compilateur. Les attributs en minuscules, eux, passent
-      // tels quels. Constaté au navigateur le 20/09/2026 ; le build de
-      // production masquait l'avertissement.
-      {...{ fetchpriority: prioritaire ? 'high' : 'auto' }}
-    />
-  )
-}
-
-/** Silhouette de ville : la promesse du site tient à la ville autant qu'à l'école. */
-export function Ville() {
-  return (
-    <svg className="illu illu-ville" viewBox="0 0 320 170" role="presentation" aria-hidden="true">
-      <defs>
-        <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" className="illu-ciel-haut" />
-          <stop offset="100%" className="illu-ciel-bas" />
-        </linearGradient>
-      </defs>
-      <rect x="0" y="0" width="320" height="170" rx="14" fill="url(#ciel)" />
-      <circle cx="258" cy="42" r="20" className="illu-astre" />
-
-      {/* Immeubles, du plus lointain au plus proche. */}
-      <g className="illu-loin">
-        <rect x="18" y="72" width="38" height="70" rx="3" />
-        <rect x="64" y="56" width="30" height="86" rx="3" />
-        <rect x="228" y="66" width="34" height="76" rx="3" />
-        <rect x="270" y="84" width="32" height="58" rx="3" />
-      </g>
-      <g className="illu-pres">
-        <rect x="100" y="40" width="46" height="102" rx="4" />
-        <rect x="154" y="64" width="34" height="78" rx="4" />
-        <rect x="194" y="52" width="28" height="90" rx="4" />
-      </g>
-
-      {/* Fenêtres allumées : ce sont des studios d'étudiants. */}
-      <g className="illu-fenetres">
-        {[
-          [108, 52], [124, 52], [108, 70], [124, 70], [108, 88], [124, 88], [108, 106],
-          [162, 76], [174, 76], [162, 94], [174, 94], [162, 112],
-          [200, 64], [210, 64], [200, 82], [210, 82], [200, 100],
-          [26, 84], [38, 84], [26, 102], [72, 68], [82, 68], [72, 86],
-          [236, 78], [248, 78], [236, 96], [278, 96], [290, 96],
-        ].map(([x, y]) => (
-          <rect key={`${x}-${y}`} x={x} y={y} width="7" height="9" rx="1.5" />
-        ))}
-      </g>
-
-      {/* Le sol, et un chemin qui s'en va vers la ville. */}
-      <rect x="0" y="142" width="320" height="28" className="illu-sol" />
-      <path d="M126 170 L146 142 L172 142 L162 170 Z" className="illu-chemin" />
-    </svg>
-  )
-}
 
 /** Épingle de carte — le choix géographique. */
 export function Epingle() {
