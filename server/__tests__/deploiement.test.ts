@@ -205,3 +205,90 @@ describe('la mise en ligne automatique', () => {
     expect(SCRIPT).toMatch(/systemctl disable --now "\$\{MAJ_UNITE\}\.timer"/)
   })
 })
+
+/* ------------------------------------------------- racine du domaine et HSTS */
+
+describe('le mode racine', () => {
+  const script = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
+
+  it('existe, et vaut 0 par défaut', () => {
+    // Un déploiement qui basculerait tout seul sur la racine casserait les
+    // liens existants sans prévenir.
+    expect(script).toMatch(/RACINE="\$\{RACINE:-0\}"/)
+  })
+
+  it('construit le front avec la bonne base', () => {
+    // La base conditionne les chemins des assets, l'adresse de l'API, les
+    // liens du blog, les cartes de partage et le plan du site. Une base fausse
+    // ne casse rien au build : tout revient en 404 une fois en ligne.
+    expect(script).toMatch(/if \[ "\$\{RACINE\}" = "1" \]; then BASE_WEB="\/"; else BASE_WEB="\/\$\{SLUG\}\/"; fi/)
+    expect(script).toContain('VITE_BASE="${BASE_WEB}" npm run "${COMMANDE_BUILD}"')
+  })
+
+  it('n’écrit aucune adresse finale en dur', () => {
+    // Trois messages annonçaient « /${SLUG}/ » : en mode racine ils auraient
+    // envoyé l'exploitant sur une page qui n'existe plus.
+    expect(script).not.toMatch(/URL_FINALE="[^"]*\/\$\{SLUG\}\//)
+    expect((script.match(/URL_FINALE="[^"]*\$\{BASE_WEB\}"/g) ?? []).length).toBeGreaterThanOrEqual(3)
+  })
+
+  it('retire la redirection de « / » quand le projet EST la racine', () => {
+    // La laisser ferait boucler « / » sur lui-même.
+    const bloc = script.slice(script.indexOf('# Redirection facultative'))
+    const racine = bloc.indexOf('if [ "${RACINE}" = "1" ]; then')
+    const suppression = bloc.indexOf('rm -f "${INCLUDE_DIR}/000-root-redirect.conf"')
+    expect(racine).toBeGreaterThan(-1)
+    expect(suppression).toBeGreaterThan(racine)
+  })
+
+  it('sert le front et l’API aux bons chemins dans chaque mode', () => {
+    expect(script).toMatch(/location \/ \{\n\s+root \/var\/www\/\$\{SLUG\};/)
+    expect(script).toMatch(/location \/api\/ \{\n\s+proxy_pass http:\/\/127\.0\.0\.1:\$\{API_PORT\}\/api\//)
+    expect(script).toMatch(/location \/\$\{SLUG\}\/ \{/)
+    expect(script).toMatch(/location \/\$\{SLUG\}\/api\/ \{/)
+  })
+
+  it('garde les deux en-têtes qui cassent l’API en silence, dans les DEUX modes', () => {
+    // Le mode racine a été ajouté en dupliquant le bloc : c'est exactement le
+    // genre de copie où l'on oublie la moitié des en-têtes.
+    expect((script.match(/proxy_set_header X-Forwarded-Proto/g) ?? []).length).toBe(2)
+    expect((script.match(/proxy_set_header X-Forwarded-For/g) ?? []).length).toBe(2)
+  })
+})
+
+describe('HSTS', () => {
+  const script = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
+
+  it('n’est posé qu’avec un certificat', () => {
+    // Annoncer HSTS sans TLS enfermerait les visiteurs devant un site
+    // inatteignable, pour la durée annoncée.
+    expect(script).toMatch(/if \[ "\$\{HSTS\}" = "1" \] && \[ "\$\{TLS\}" = "1" \]; then/)
+  })
+
+  it('passe par une table, pour n’émettre l’en-tête qu’en HTTPS', () => {
+    // Le même fichier d'include sert les blocs 80 et 443. La RFC interdit
+    // d'envoyer l'en-tête en clair ; nginx n'émet pas une valeur vide.
+    expect(script).toMatch(/map \\\$scheme \\\$hsts \{/)
+    expect(script).toMatch(/default\s+"";/)
+    expect(script).toMatch(/https\s+"max-age=\$\{HSTS_AGE\}"/)
+    expect(script).toContain('add_header Strict-Transport-Security $hsts always;')
+  })
+
+  it('ne s’engage pas sur les sous-domaines', () => {
+    // Engager un an sur des sous-domaines qui n'existent pas encore se paie
+    // cher : le jour où l'un d'eux sort en HTTP, il est inatteignable. À
+    // ajouter à la main, en connaissance de cause.
+    //
+    // On inspecte la POLITIQUE émise, pas le fichier entier : la première
+    // version de ce test tombait sur le commentaire qui explique justement
+    // pourquoi on ne le met pas.
+    const politique = /https\s+"([^"]*)"/.exec(script)
+    expect(politique, 'la table HSTS n’a pas de valeur pour https').not.toBeNull()
+    expect(politique![1]).not.toMatch(/includeSubDomains/i)
+    expect(politique![1]).not.toMatch(/preload/i)
+  })
+
+  it('annonce un an par défaut, et reste réglable', () => {
+    expect(script).toMatch(/HSTS_AGE="\$\{HSTS_AGE:-31536000\}"/)
+  })
+})

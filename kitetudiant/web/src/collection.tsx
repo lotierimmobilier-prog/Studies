@@ -18,16 +18,21 @@
 import { useCallback, useRef, useState } from 'react'
 
 import {
+  ETAPES_CARTES,
   cartesDe,
-  cartesPossibles,
   exporter,
+  idEtape,
   importer,
+  recompensesPossibles,
+  separerCartes,
   type Carte,
   type Obtention,
 } from './collection.ts'
 import { NOMBRE_COMMUNES_AVEC_LOYER } from './donnees.ts'
 import { Marque } from './marque.tsx'
 import { nombre } from './nombres.ts'
+import { FilAriane } from './filAriane.tsx'
+import type { Route } from './routes.ts'
 
 /* ------------------------------------------------------------ une carte */
 
@@ -210,19 +215,29 @@ function BoutonPartage({ carte }: { carte: Carte }) {
 
 /* -------------------------------------------------------- la page entière */
 
+/** Les six récompenses, dans un ordre fixe : celui où on les rencontre. */
+const TOUTES_RECOMPENSES = (
+  ['premier-budget', 'trois-villes', 'bulletin', 'detail', 'hors-academie', 'dix-villes'] as const
+).map((id) => ({ id, definition: ETAPES_CARTES[id] }))
+
 export function Collection({
   collection,
   onRetour,
+  onNaviguer,
   onImporter,
 }: {
   collection: readonly Obtention[]
   onRetour: () => void
+  onNaviguer: (route: Route) => void
   onImporter: (cartes: Obtention[]) => void
 }) {
   const cartes = cartesDe(collection)
-  const total = cartesPossibles(NOMBRE_COMMUNES_AVEC_LOYER)
+  const { recompenses, villes } = separerCartes(cartes)
+  const totalRecompenses = recompensesPossibles()
   const [choisie, setChoisie] = useState<string | null>(null)
-  const active = cartes.find((c) => c.id === choisie) ?? cartes[0] ?? null
+  // Seules les cartes de ville se partagent en image : une récompense ne dit
+  // rien à qui la reçoit, une carte de ville porte un loyer et sa source.
+  const active = villes.find((c) => c.id === choisie) ?? villes[0] ?? null
 
   const lireFichier = useCallback(
     (fichier: File) => {
@@ -245,29 +260,95 @@ export function Collection({
         </button>
       </header>
 
+      <FilAriane
+        maillons={[
+          { libelle: 'Accueil', route: { vue: 'accueil' } },
+          { libelle: 'Ta collection', route: null },
+        ]}
+        onNaviguer={onNaviguer}
+      />
+
+      {/* Les récompenses d'abord, et seules dans leur section. Mêlées aux
+          villes, elles disparaissaient : le compteur annonçait « 8 sur 1 253 »,
+          un dénominateur écrasé par l'album, qui faisait passer six
+          récompenses méritées pour un score dérisoire. */}
       <section className="bloc">
-        <h2>Ta collection</h2>
+        <h2>Tes récompenses</h2>
         <p className="bloc-intro">
-          {cartes.length} carte{cartes.length > 1 ? 's' : ''} sur {nombre(total)}.
-          Chacune retient une ville que tu as regardée, avec son loyer et sa place
-          parmi les autres. Elles se gagnent en te servant du site — jamais en
-          invitant quelqu’un — et restent dans ton navigateur.
+          Elles marquent ce que tu as fait avec le site — un budget calculé, des
+          villes comparées, un bulletin lu. Elles se gagnent en t’en servant, jamais
+          en invitant quelqu’un, et restent dans ton navigateur.
         </p>
 
-        {cartes.length === 0 ? (
+        <p className="collec-compte">
+          <strong>
+            {recompenses.length} sur {totalRecompenses}
+          </strong>{' '}
+          obtenues
+        </p>
+        <div
+          className="collec-jauge"
+          role="progressbar"
+          aria-valuenow={recompenses.length}
+          aria-valuemin={0}
+          aria-valuemax={totalRecompenses}
+          aria-label="Récompenses obtenues"
+        >
+          <span style={{ width: `${(recompenses.length / totalRecompenses) * 100}%` }} />
+        </div>
+
+        <ul className="recompenses">
+          {TOUTES_RECOMPENSES.map(({ id, definition }) => {
+            const obtenue = recompenses.find((c) => c.id === idEtape(id)) ?? null
+            return (
+              <li
+                key={id}
+                className={obtenue !== null ? 'recompense recompense-obtenue' : 'recompense'}
+              >
+                <span className="recompense-etat" aria-hidden="true" />
+                <span className="recompense-texte">
+                  <strong>{definition.titre}</strong>
+                  <span>{definition.detail}</span>
+                </span>
+                {/* Une récompense non obtenue reste VISIBLE et lisible : elle
+                    dit quoi faire pour l'avoir. La masquer laisserait croire
+                    qu'il n'y a plus rien à gagner. */}
+                <span className="recompense-mention">
+                  {obtenue !== null ? 'obtenue' : 'à obtenir'}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      </section>
+
+      <section className="bloc">
+        <h2>Tes villes</h2>
+        <p className="bloc-intro">
+          Chaque ville dont tu as regardé le budget laisse une carte : son loyer, et
+          sa place parmi les {nombre(NOMBRE_COMMUNES_AVEC_LOYER)} communes couvertes.
+          Personne ne les aura toutes — c’est un album, pas un score.
+        </p>
+
+        {villes.length === 0 ? (
           <p className="note">
-            Aucune carte pour l’instant. Compare une première ville et la première
-            arrivera.
+            Aucune ville pour l’instant. Compare un premier budget et la première
+            carte arrivera.
           </p>
         ) : (
           <>
+            <p className="collec-compte">
+              <strong>{villes.length}</strong> ville{villes.length > 1 ? 's' : ''} gardée
+              {villes.length > 1 ? 's' : ''}
+            </p>
             <div className="collec-grille">
-              {cartes.map((c) => (
+              {villes.map((c) => (
                 <button
                   type="button"
                   key={c.id}
                   className={`collec-choix${active?.id === c.id ? ' collec-choix-actif' : ''}`}
                   onClick={() => setChoisie(c.id)}
+                  aria-pressed={active?.id === c.id}
                 >
                   <VignetteCarte carte={c} />
                 </button>

@@ -47,18 +47,31 @@ export function TroisChoix({
       </p>
 
       <div className="choix-grille">
-        {propositions.map((p, i) => {
+        {propositions.map((p) => {
           const entete = ENTETES[p.critere]
           return (
             <article className={`choix-carte choix-${p.critere}`} key={p.critere}>
-              <span className="choix-rang">{i + 1}</span>
+              {/* Pas de pastille numérotée. Trois critères que tout le produit
+                  affirme ÉGAUX (règle 5 de CLAUDE.md) ne se numérotent pas :
+                  « 1, 2, 3 » se lit comme un classement, et c'est précisément
+                  ce que ce site refuse de faire. Le filet de couleur suffit à
+                  les distinguer. */}
               <h3 className="choix-titre">{entete.titre}</h3>
               <p className="choix-sous">{entete.sous}</p>
 
               {estUnChoix(p) ? (
                 <>
                   <p className="choix-valeur">{p.valeur}</p>
-                  <p className="choix-formation">{p.resultat.formation.libelle}</p>
+                  {/* Les libellés officiels de formation atteignent deux cents
+                      caractères (« Licence - Langues étrangères appliquées -
+                      Parcours LEA - Développement économique à l'international,
+                      commerce international… »). Affiché en entier, un seul
+                      faisait tripler la hauteur de sa carte et cassait la
+                      rangée. Il est borné à l'écran, et reste entier au
+                      survol comme pour un lecteur d'écran. */}
+                  <p className="choix-formation" title={p.resultat.formation.libelle}>
+                    {p.resultat.formation.libelle}
+                  </p>
                   <p className="choix-etab">
                     {p.resultat.formation.etablissement} — {p.resultat.formation.ville}
                   </p>

@@ -326,6 +326,41 @@ export function cartesPossibles(nombreCommunes: number): number {
   return Object.keys(ETAPES_CARTES).length + nombreCommunes + 1 // + la carte « écart »
 }
 
+/** Combien de récompenses existent en tout. Six, et elles ne bougent pas. */
+export function recompensesPossibles(): number {
+  return Object.keys(ETAPES_CARTES).length
+}
+
+/**
+ * Sépare les deux natures de cartes.
+ *
+ * Elles étaient mélangées dans une grille unique, et le compteur annonçait
+ * « 8 cartes sur 1 253 » : un dénominateur écrasé par les villes, qui faisait
+ * passer six récompenses réellement méritées pour un score dérisoire. Ce
+ * n'était pas qu'un défaut d'affichage — cela rendait le mécanisme
+ * incompréhensible.
+ *
+ * Une RÉCOMPENSE marque ce que l'élève a fait : un premier budget calculé,
+ * trois villes comparées, un bulletin lu. Elles sont six, on peut les avoir
+ * toutes, et c'est cela qui se progresse.
+ *
+ * Une carte de VILLE est une pièce d'album : elle retient une commune
+ * regardée, avec son loyer et sa place parmi les autres. Il y en a autant que
+ * de communes couvertes, et personne ne les aura jamais toutes.
+ */
+export function separerCartes(cartes: readonly Carte[]): {
+  readonly recompenses: Carte[]
+  readonly villes: Carte[]
+} {
+  return {
+    recompenses: cartes.filter((c) => c.famille === 'etape'),
+    // La carte « écart » compare deux villes : sa place est dans l'album,
+    // pas parmi les récompenses, parce qu'elle décrit une donnée et non un
+    // geste accompli.
+    villes: cartes.filter((c) => c.famille !== 'etape'),
+  }
+}
+
 /* ------------------------------------------------- ce qu'une visite débloque */
 
 /**

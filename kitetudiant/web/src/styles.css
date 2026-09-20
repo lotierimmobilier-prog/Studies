@@ -616,6 +616,8 @@ input[type='range'] { width: 100%; min-height: 44px; }
 
 .choix-carte {
   position: relative;
+  display: flex;
+  flex-direction: column;
   background: var(--carte);
   border: 1px solid var(--trait);
   border-radius: var(--rayon);
@@ -627,19 +629,6 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .choix-strategique { border-left: 3px solid var(--vert); }
 .choix-economique { border-left: 3px solid var(--orange); }
 
-.choix-rang {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 999px;
-  border: 1px solid var(--trait);
-  color: var(--doux);
-  font-size: 0.78rem;
-  font-weight: 700;
-  margin-bottom: 0.55rem;
-}
 .choix-titre { margin: 0 0 0.1rem; font-size: 1rem; }
 .choix-sous { margin: 0 0 0.8rem; color: var(--doux); font-size: 0.84rem; }
 .choix-valeur {
@@ -648,11 +637,31 @@ input[type='range'] { width: 100%; min-height: 44px; }
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.choix-formation { margin: 0 0 0.15rem; font-weight: 600; font-size: 0.95rem; }
-.choix-etab { margin: 0 0 0.7rem; color: var(--doux); font-size: 0.85rem; }
+/* Un libellé officiel de formation peut faire deux cents caractères. Affiché
+   en entier, il faisait tripler la hauteur de sa carte et cassait la rangée.
+   Trois lignes au plus ; le texte complet reste dans l'attribut « title ». */
+.choix-formation {
+  margin: 0 0 0.15rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.32;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+.choix-etab {
+  margin: 0 0 0.7rem;
+  color: var(--doux);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
 .choix-pourquoi { margin: 0; color: var(--doux); font-size: 0.8rem; }
 .choix-absent { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.88rem; }
-.choix-action { width: 100%; }
+/* « auto » colle l'action au bas de la carte : les trois boutons s'alignent
+   quelle que soit la longueur des textes au-dessus d'eux. */
+.choix-action { width: 100%; margin-top: auto; }
 .choix-message { margin: -1.5rem 0 1.75rem; }
 
 .choix-confidentialite {
@@ -1286,4 +1295,127 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   flex: 1;
   height: 1px;
   background: var(--trait);
+}
+
+/* ------------------------------------------------------- fil d'Ariane */
+/* Le séparateur est posé ici, jamais dans le texte : écrit en dur entre deux
+   maillons, il serait lu à voix haute à chaque étape. */
+.fil { margin: 0 0 1.25rem; }
+.fil-liste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.45rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.84rem;
+}
+.fil-maillon { display: flex; align-items: center; gap: 0.45rem; }
+.fil-maillon + .fil-maillon::before {
+  content: '';
+  width: 0.34rem;
+  height: 0.34rem;
+  border-top: 1.5px solid var(--trait);
+  border-right: 1.5px solid var(--trait);
+  transform: rotate(45deg);
+  flex: none;
+}
+.fil-lien { color: var(--doux); text-decoration: none; }
+.fil-lien:hover { color: var(--accent); text-decoration: underline; }
+.fil-ici { color: var(--encre); font-weight: 600; }
+
+/* ------------------------------------------------------- récompenses */
+/* Deux natures de cartes, deux traitements. Une récompense marque un geste
+   accompli : elle se lit en liste, elle se compte, on peut les avoir toutes.
+   Une carte de ville est une pièce d'album : elle s'expose en grille, et
+   personne ne les aura jamais toutes. Les mélanger dans une seule grille
+   rendait le mécanisme incompréhensible. */
+
+.collec-compte { margin: 0 0 0.5rem; font-size: 0.92rem; color: var(--doux); }
+.collec-compte strong { color: var(--encre); font-variant-numeric: tabular-nums; }
+
+.collec-jauge {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--trait);
+  overflow: hidden;
+  margin: 0 0 1.25rem;
+}
+.collec-jauge span { display: block; height: 100%; background: var(--vif); }
+
+.recompenses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.recompense {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+/* Une récompense non obtenue reste lisible : elle dit quoi faire pour l'avoir.
+   La griser jusqu'à l'illisible laisserait croire qu'il n'y a rien à gagner. */
+.recompense-obtenue { border-color: var(--vif); }
+
+.recompense-etat {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  border: 2px solid var(--trait);
+}
+.recompense-obtenue .recompense-etat {
+  border-color: var(--vif);
+  background: var(--vif);
+  position: relative;
+}
+/* La coche, dessinée avec deux bords d'un carré tourné : pas de fichier, pas
+   de police d'icônes, et elle suit la couleur du thème.
+   Une première version croisait deux dégradés et produisait une CROIX — qui
+   se lit « échoué » exactement là où il fallait lire « obtenue ». */
+.recompense-obtenue .recompense-etat::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 0.22rem;
+  height: 0.44rem;
+  border: solid var(--carte);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.recompense-texte { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
+.recompense-texte strong { font-size: 0.95rem; }
+.recompense-texte span { color: var(--doux); font-size: 0.85rem; line-height: 1.45; }
+
+.recompense-mention {
+  flex: none;
+  align-self: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--doux);
+}
+.recompense-obtenue .recompense-mention { color: var(--vif); }
+
+/* La provenance est répétée à l'identique sur chaque carte de ville : lue
+   trois fois de suite, elle noie la grille. Elle reste bornée ici, et le
+   texte complet part entier dans l'image partagée — c'est là qu'il compte,
+   puisque l'image voyage sans son contexte (règle 6 de CLAUDE.md). */
+.collec-grille .carte-collec-source {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+
+@media (max-width: 26rem) {
+  /* Sur les écrans les plus étroits, la mention passe sous le texte plutôt
+     que de comprimer celui-ci à trois mots par ligne. */
+  .recompense { flex-wrap: wrap; }
+  .recompense-mention { margin-left: 1.8rem; align-self: flex-start; }
 }
