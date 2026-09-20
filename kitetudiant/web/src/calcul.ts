@@ -113,6 +113,21 @@ export interface Reponses {
    * Rien n'en sort du navigateur.
    */
   readonly bulletins: readonly BulletinDepose[]
+  /**
+   * Spécialités gardées en terminale, et options. Clés du catalogue
+   * `specialites.ts`. Elles servent à deux choses : affiner l'adéquation au
+   * profil, et se comparer à ce que les admis avaient réellement — chiffre
+   * publié, pas déduit. Elles ne retirent jamais une formation de la liste.
+   */
+  readonly specialites: readonly string[]
+  readonly options: readonly string[]
+  /**
+   * Lycée d'origine, par son code UAI — la clé pivot des établissements.
+   * `null` tant qu'aucun n'est choisi : sert uniquement à afficher les
+   * résultats publiés de l'établissement, et n'entre dans aucun calcul.
+   */
+  readonly lyceeUai: string | null
+  readonly lyceeNom: string | null
   readonly matierePreferee: Matiere | null
   readonly passions: readonly Domaine[]
   readonly motivation: number
