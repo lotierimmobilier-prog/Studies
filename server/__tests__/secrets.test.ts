@@ -4,7 +4,7 @@ import { join } from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { Coffre, CoffreNonConfigure, estSecretGere, jetonValide } from '../secrets'
+import { Coffre, CoffreNonConfigure, estSecretGere, jetonValide, SECRETS_GERES } from '../secrets'
 
 const ENV = { ...process.env }
 let dossier: string
@@ -82,7 +82,11 @@ describe('ce que l’administration voit', () => {
   it('dit quelles clés ne sont pas configurées', async () => {
     const etat = await coffre.etat()
     expect(etat.every((e) => !e.configure)).toBe(true)
-    expect(etat.map((e) => e.provenance)).toEqual(['aucune', 'aucune'])
+    // Une par clé gérée, quel que soit leur nombre : figer la liste ici
+    // obligerait à toucher ce test à chaque clé ajoutée, sans rien vérifier
+    // de plus.
+    expect(etat).toHaveLength(SECRETS_GERES.length)
+    expect(etat.map((e) => e.provenance)).toEqual(SECRETS_GERES.map(() => 'aucune'))
   })
 
   it('oublie une clé sur demande', async () => {

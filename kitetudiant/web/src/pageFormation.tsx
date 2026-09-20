@@ -37,16 +37,32 @@ import { FilAriane } from './filAriane.tsx'
 import { liensLogement } from './logement.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
+import { themesDuLibelle } from './themes.ts'
 import {
+  EmploiIndisponible,
+  chercherEmploi,
   formationParCode,
   loyerDe,
   nomCommune,
   SOURCE_PARCOURSUP,
   SURFACE_TYPE,
   type Formation,
+  type OffresParMetier,
 } from './donnees.ts'
 
 type Onglet = 'admission' | 'vivre' | 'apres'
+
+/** Une date ISO écrite comme on la lit en français. */
+function dateLisible(iso: string): string {
+  const d = new Date(`${iso}T12:00:00Z`)
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+}
 
 const ONGLETS: readonly { readonly cle: Onglet; readonly libelle: string }[] = [
   { cle: 'admission', libelle: 'Admission' },
@@ -293,6 +309,140 @@ function rechercheOnisep(libelle: string): string {
 }
 
 /**
+ * Les offres d'emploi du domaine, sur l'onglet « Après ».
+ *
+ * ── Ce que ces chiffres sont, et ce qu'ils ne sont pas ──────────────────
+ *
+ * Le nombre d'annonces ouvertes un jour donné. Pas « le marché de
+ * l'emploi », pas une prévision à cinq ans, et surtout pas un verdict sur un
+ * métier : beaucoup de recrutements ne passent jamais par une annonce, et un
+ * secteur peut embaucher sans publier.
+ *
+ * L'écran le dit. Sans cette phrase, « 738 offres en Nouvelle-Aquitaine »
+ * se lit comme une promesse, et un petit nombre comme une porte fermée.
+ *
+ * ── Deux échelles, jamais le département ────────────────────────────────
+ *
+ * La France et la région, côte à côte (décision D16). Le département
+ * afficherait souvent zéro ou un, ce qui se lit comme un jugement alors que
+ * c'est la photo d'un bassin d'emploi un jour donné.
+ *
+ * ── Le rapprochement est le nôtre, et c'est écrit ───────────────────────
+ *
+ * Parcoursup ne publie aucun lien entre une formation et un métier. Celui-ci
+ * vient de notre table thème → domaines ROME (décision D14). La note
+ * l'accompagne toujours.
+ */
+function Emploi({ formation }: { readonly formation: Formation }) {
+  const [offres, setOffres] = useState<OffresParMetier | null>(null)
+  const [etat, setEtat] = useState<'charge' | 'prete' | 'indisponible' | 'erreur' | 'aucun'>(
+    'charge',
+  )
+  const [message, setMessage] = useState<string | null>(null)
+
+  // Le premier thème de l'intitulé. Plusieurs seraient plus justes, mais
+  // chacun coûte une série d'appels à France Travail, dont le quota est de
+  // dix par seconde.
+  const theme = themesDuLibelle(formation.libelle)[0] ?? null
+
+  useEffect(() => {
+    if (theme === null) {
+      setEtat('aucun')
+      return
+    }
+    let vivant = true
+    setEtat('charge')
+    chercherEmploi(theme, formation.codeInsee)
+      .then((o) => {
+        if (!vivant) return
+        setOffres(o)
+        setEtat('prete')
+      })
+      .catch((e: unknown) => {
+        if (!vivant) return
+        if (e instanceof EmploiIndisponible) {
+          setEtat('indisponible')
+          return
+        }
+        setMessage((e as Error).message)
+        setEtat('erreur')
+      })
+    return () => {
+      vivant = false
+    }
+  }, [theme, formation.codeInsee])
+
+  if (etat === 'aucun') {
+    // Mieux vaut ne rien proposer que de proposer des métiers au hasard.
+    return null
+  }
+  if (etat === 'charge') {
+    return (
+      <p className="note" role="status" aria-live="polite">
+        Comptage des offres d’emploi…
+      </p>
+    )
+  }
+  if (etat === 'indisponible' || etat === 'erreur' || offres === null) {
+    return (
+      <p className="note">
+        Le comptage des offres d’emploi n’est pas disponible pour l’instant
+        {message === null ? '' : ` (${message})`}.
+      </p>
+    )
+  }
+
+  const { total, metiers, region } = offres
+  return (
+    <>
+      <h4 className="fiche-sous-titre">Les offres d’emploi de ce domaine</h4>
+
+      <div className="donnees">
+        <Donnee libelle="Offres en France" valeur={total.enFrance} />
+        {region !== null ? (
+          <Donnee libelle="Dans la région de l’école" valeur={total.enRegion} />
+        ) : null}
+      </div>
+
+      {/* La mise en garde AVANT la liste, pas après : un lecteur qui fait
+          défiler jusqu'en bas a déjà lu les chiffres comme un verdict. */}
+      <p className="note">
+        C’est le nombre d’annonces ouvertes le {dateLisible(offres.releveLe)} — pas « le
+        marché de l’emploi ». Beaucoup de recrutements ne passent jamais par une annonce, et un
+        secteur peut embaucher sans publier. Ces chiffres situent un ordre de grandeur,
+        rien de plus.
+      </p>
+
+      <ul className="metiers">
+        {metiers.map((m) => (
+          <li key={m.codeRome} className="metier">
+            <a href={m.lien} target="_blank" rel="noopener noreferrer">
+              {m.libelle}
+              <span aria-hidden="true"> ↗</span>
+            </a>
+            <span className="note">
+              {m.enFrance === null
+                ? 'comptage indisponible'
+                : `${nombre(m.enFrance)} en France`}
+              {region !== null && m.enRegion !== null
+                ? ` · ${nombre(m.enRegion)} en région`
+                : ''}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <p className="note">
+        Quelques métiers du domaine, pris tout au long de la liste — <strong>ce n’est pas
+        un classement</strong>. {offres.note} Ce rapprochement entre la formation et ces
+        métiers est le nôtre : Parcoursup ne publie aucun lien de ce genre.
+      </p>
+      <p className="fiche-source">{offres.source}</p>
+    </>
+  )
+}
+
+/**
  * L'onglet « Après ».
  *
  * Il dit surtout ce que l'open data NE publie PAS. C'est volontaire : un
@@ -321,6 +471,8 @@ function Apres({ formation }: { readonly formation: Formation }) {
             : 'Elle n’est pas sélective : les candidats du secteur sont prioritaires, et le rang d’appel joue moins.'}
         </li>
       </ul>
+      <Emploi formation={formation} />
+
       <h4 className="fiche-sous-titre">Où trouver les débouchés</h4>
       <p>
         L’Onisep publie des fiches de débouchés par diplôme. Nous ne reprenons pas leur

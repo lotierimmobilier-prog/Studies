@@ -58,7 +58,15 @@ import {
   jetonDeLEnTete,
 } from './comptes.ts'
 import { DepotReleves } from './releves.ts'
-import { configuree as baseConfiguree } from './bd.ts'
+import { bd, configuree as baseConfiguree } from './bd.ts'
+import {
+  ClientEmploi,
+  EmploiNonConfigure,
+  SOURCE_EMPLOI,
+  lienOffres,
+  somme,
+} from './emploi.ts'
+import { metiersDuTheme, themeMetiers } from '../kitetudiant/packages/metiers/src/index.ts'
 import {
   BaseIndisponible,
   FormationInconnue,
@@ -130,6 +138,30 @@ const depotRetours = new DepotRetours(join(process.cwd(), '.data', 'retours'))
 // exacte, aucune adresse IP : voir kitetudiant/packages/statistiques.
 const depotReleves = new DepotReleves(join(process.cwd(), '.data', 'releves'))
 const coffre = new Coffre(join(process.cwd(), '.data', 'secrets.json'))
+const clientEmploi = new ClientEmploi(coffre)
+
+/**
+ * Le code INSEE de région d'une commune, ou `null`.
+ *
+ * Lu dans la table de référence quand la base est là. Sans base, on rend
+ * `null` et l'écran n'affiche que le compte national : une échelle annoncée
+ * vaut mieux qu'une seconde devinée.
+ */
+async function regionDe(codeInsee: string): Promise<string | null> {
+  const sql = bd()
+  if (sql === null || !/^[0-9AB]{5}$/i.test(codeInsee)) return null
+  try {
+    const [ligne] = await sql<{ code_region: string | null }[]>`
+      select code_region from reference.commune
+       where code_insee = ${codeInsee.toUpperCase()}
+       order by millesime desc
+       limit 1
+    `
+    return ligne?.code_region ?? null
+  } catch {
+    return null
+  }
+}
 const depotArticles = new DepotArticles(join(process.cwd(), '.data', 'articles.json'))
 // KITETUDIANT — comptes élèves. Sans COMPTES_MASTER_KEY, le dépôt se déclare
 // non configuré : l'inscription est alors impossible ET le détail du résultat
@@ -448,6 +480,58 @@ async function demarrer(): Promise<void> {
 
       // KITETUDIANT — note publique du lieu. Affichée dans le détail d'une
       // fiche, attribuée à Google, jamais dans un tri ni dans un score.
+      // KITETUDIANT — les offres d'emploi par métier.
+      //
+      // Le navigateur n'appelle JAMAIS France Travail : il appelle ce
+      // serveur, qui appelle France Travail. Sans cela, la clé secrète
+      // serait dans le paquet JavaScript, donc publique.
+      if (url.pathname === '/api/emploi' && req.method === 'GET') {
+        const theme = url.searchParams.get('theme') ?? ''
+        const infos = themeMetiers(theme)
+        if (infos === null) {
+          return envoyerJson(res, 400, { erreur: 'Thème inconnu.' })
+        }
+        if (!(await clientEmploi.configure())) {
+          return envoyerJson(res, 503, { erreur: new EmploiNonConfigure().message })
+        }
+        try {
+          // La région se déduit de la commune de la formation, via la table
+          // de référence. Sans base, on compte la France entière et l'écran
+          // le dit : mieux vaut une seule échelle annoncée qu'une seconde
+          // devinée.
+          const insee = url.searchParams.get('insee')
+          const region = insee === null ? null : await regionDe(insee)
+          /* Le chiffre de tête vient des DOMAINES, pas de la somme des
+             métiers affichés : huit métiers sur quatre-vingt-seize ne font
+             pas un secteur, et additionner ceux qu'on montre donnerait un
+             total faux, plus petit que la réalité. */
+          const totaux = await clientEmploi.totaux(infos.domaines, region)
+          const metiers = metiersDuTheme(theme, await clientEmploi.metiers())
+          return envoyerJson(res, 200, {
+            theme: infos.cle,
+            note: infos.note,
+            region,
+            source: SOURCE_EMPLOI,
+            releveLe: new Date().toISOString().slice(0, 10),
+            total: {
+              enFrance: somme(totaux.map((t) => t.enFrance)),
+              enRegion: region === null ? null : somme(totaux.map((t) => t.enRegion)),
+            },
+            metiers: (await clientEmploi.comptages(metiers, region)).map((c) => ({
+              ...c,
+              lien: lienOffres(c.libelle, region),
+            })),
+          })
+        } catch (e) {
+          if (e instanceof EmploiNonConfigure) {
+            return envoyerJson(res, 503, { erreur: e.message })
+          }
+          return envoyerJson(res, 502, {
+            erreur: 'France Travail n’a pas répondu. Réessaie dans un moment.',
+          })
+        }
+      }
+
       // KITETUDIANT — les vœux.
       //
       // Tout passe par un seul chemin, avec la méthode pour verbe : une

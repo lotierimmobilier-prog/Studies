@@ -431,6 +431,65 @@ export async function listerFilieres(
     .map((r) => ({ libelle: r.fili, nombre: r.nombre ?? 0 }))
 }
 
+/* ------------------------------------------------------------- emploi */
+
+export interface ComptageMetier {
+  readonly codeRome: string
+  readonly libelle: string
+  /** `null` veut dire « on n'a pas pu compter », jamais « aucune offre ». */
+  readonly enFrance: number | null
+  readonly enRegion: number | null
+  readonly lien: string
+}
+
+export interface OffresParMetier {
+  readonly theme: string
+  /** Ce que vaut le rapprochement formation → métiers. Jamais implicite. */
+  readonly note: string
+  readonly region: string | null
+  readonly source: string
+  readonly releveLe: string
+  readonly total: { readonly enFrance: number | null; readonly enRegion: number | null }
+  readonly metiers: readonly ComptageMetier[]
+}
+
+/** Levée quand France Travail n'est pas configuré sur ce serveur. */
+export class EmploiIndisponible extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'EmploiIndisponible'
+  }
+}
+
+/**
+ * Les offres d'emploi d'un thème.
+ *
+ * Le navigateur n'appelle jamais France Travail : il appelle notre serveur,
+ * qui détient la clé. Sans cela, la clé serait dans le paquet JavaScript.
+ */
+export async function chercherEmploi(
+  theme: string,
+  codeInsee: string | null,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<OffresParMetier> {
+  const p = new URLSearchParams({ theme })
+  if (codeInsee !== null) p.set('insee', codeInsee)
+  const reponse = await recuperer(`${base}/emploi?${p.toString()}`)
+  const corps = (await reponse.json().catch(() => ({}))) as
+    | OffresParMetier
+    | { erreur?: string }
+  if (reponse.status === 503) {
+    throw new EmploiIndisponible(
+      ('erreur' in corps && corps.erreur) || 'Offres d’emploi indisponibles.',
+    )
+  }
+  if (!reponse.ok) {
+    throw new Error(('erreur' in corps && corps.erreur) || `Erreur ${reponse.status}`)
+  }
+  return corps as OffresParMetier
+}
+
 /* -------------------------------------------------------------------- vœux */
 
 export interface Voeu {
