@@ -29,4 +29,5 @@ dist-kitetudiant
 # s'ajoute ici.
 .agents/
 .claude/skills/canvas-design
+.claude/skills/frontend-design
 .claude/skills/theme-factory
