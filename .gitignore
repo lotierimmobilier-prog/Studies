@@ -17,3 +17,16 @@ tsconfig.tsbuildinfo
 # données persistées du serveur (témoignages étudiants)
 .data
 dist-kitetudiant
+
+# compétences installées par « npx skills add »
+# Les fichiers installés ne sont pas versionnés : 5,8 Mo, dont 81 polices, que
+# skills-lock.json suffit à réinstaller à l'identique — il porte l'empreinte de
+# chaque compétence.
+#
+# Les liens symboliques de .claude/skills sont nommés un à un, et non le
+# dossier entier, pour qu'une compétence propre au dépôt puisse un jour y être
+# versionnée. Cette liste suit skills-lock.json : une compétence ajoutée là
+# s'ajoute ici.
+.agents/
+.claude/skills/canvas-design
+.claude/skills/theme-factory
