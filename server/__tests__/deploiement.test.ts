@@ -86,3 +86,27 @@ describe('le script de déploiement copie tout ce que l’API importe', () => {
     ).toBe(true)
   })
 })
+
+/**
+ * Le serveur Node tourne derrière nginx, qui termine le TLS. Deux protections
+ * dépendent donc entièrement de ce que nginx veut bien transmettre, et leur
+ * absence ne se voit ni au build, ni aux tests unitaires, ni en local — mais
+ * elles cassent en production, silencieusement.
+ */
+describe('ce que nginx doit transmettre à l’API', () => {
+  const SCRIPT = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
+
+  it('transmet le protocole, sinon la console refuse un site pourtant en HTTPS', () => {
+    // admin.ts exige HTTPS et le constate par x-forwarded-proto. Derrière
+    // nginx, la connexion reçue est en clair : sans cet en-tête la console
+    // répond 421 pour toujours. Observé sur kitetudiant.fr, certificat valide.
+    expect(SCRIPT).toMatch(/proxy_set_header\s+X-Forwarded-Proto\s+\\\$scheme;/)
+  })
+
+  it('transmet l’adresse du client, sinon un seul visiteur verrouille tout le monde', () => {
+    // Le verrou après cinq échecs se compte par client. Sans cet en-tête,
+    // tous les visiteurs partagent l'adresse de nginx (127.0.0.1) et les
+    // échecs de l'un bloquent l'accès des autres.
+    expect(SCRIPT).toMatch(/proxy_set_header\s+X-Forwarded-For\s+\\\$proxy_add_x_forwarded_for;/)
+  })
+})
