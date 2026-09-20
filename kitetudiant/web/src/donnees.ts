@@ -130,6 +130,15 @@ export interface Formation {
   readonly lien: string | null
   readonly session: string
   readonly codeInsee: string | null
+  /**
+   * Statut de l'établissement, TEL QUE PUBLIÉ : « Public », « Privé sous
+   * contrat d'association », « Privé enseignement supérieur », « Privé hors
+   * contrat ». Quatre valeurs, relevées le 20/09/2026 sur le jeu du
+   * ministère. `null` quand le champ est absent — jamais « Public » par
+   * défaut : ce serait exactement la valeur de repli silencieuse que
+   * CLAUDE.md interdit, et elle tromperait sur le coût de la scolarité.
+   */
+  readonly statutEtablissement: string | null
   /** Statistiques publiées, telles quelles : aucune n'est recalculée. */
   readonly stats: StatsFormation
 }
@@ -151,6 +160,7 @@ interface EnregistrementEsr {
   readonly taux_acces_ens?: number
   readonly pct_bours?: number
   readonly lien_form_psup?: string
+  readonly contrat_etab?: string
   readonly session?: string
   readonly acc_bg?: number
   readonly acc_bt?: number
@@ -236,6 +246,7 @@ function convertir(e: EnregistrementEsr): Formation | null {
     lien: e.lien_form_psup ?? null,
     session: e.session ?? '',
     codeInsee: codeInseeDe(ville, dep),
+    statutEtablissement: e.contrat_etab ?? null,
     stats: {
       session: e.session ?? '',
       capacite: nombreOuNul(e.capa_fin),

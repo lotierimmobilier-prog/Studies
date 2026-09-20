@@ -55,6 +55,8 @@ import { troisChoix, type PositionEleve } from './recommandations.ts'
 import { localiser } from './geo.ts'
 import { NoteDuLieu, PastilleNote, useAvisLieu, useVisible } from './avisLieu.tsx'
 import { PanneauRetours, ResumeRetours } from './retours.tsx'
+import { BarreTri } from './barreTri.tsx'
+import { SANS_FILTRE, classer, filtrer, type Classement, type Filtres } from './tri.ts'
 
 const ACADEMIES = [
   'Aix-Marseille', 'Amiens', 'Besançon', 'Bordeaux', 'Clermont-Ferrand', 'Corse',
@@ -127,6 +129,22 @@ function Ligne({ ligne }: { ligne: LigneBudget }) {
  * quatrième case : elle est en petit sous le lieu, dit « sur l'adresse », et
  * n'entre dans aucun tri (voir avisLieu.tsx).
  */
+/**
+ * Une recherche web sur l'établissement.
+ *
+ * L'open data Parcoursup ne publie pas l'adresse du site des écoles : nous
+ * ne l'avons pas, et fabriquer une URL plausible à partir du nom serait
+ * inventer une donnée — ce que ce projet s'interdit. On propose donc une
+ * recherche, et le libellé du lien dit « chercher », pas « le site ».
+ *
+ * La ville accompagne le nom : « Université de Lorraine » seule ramène des
+ * pages de toute la région, et l'élève cherche UN site précis.
+ */
+function rechercheWeb(etablissement: string, ville: string): string {
+  const requete = `${etablissement} ${ville} site officiel`.trim()
+  return `https://www.google.com/search?q=${encodeURIComponent(requete)}`
+}
+
 function Carte({
   resultat,
   tous,
@@ -243,23 +261,38 @@ function Carte({
         )}
       </div>
 
-      {/* En savoir plus : des pages tenues par d'autres, ouvertes dans un
-          nouvel onglet. On ne prétend pas connaître le site propre de
-          l'établissement — l'open data Parcoursup ne le publie pas. */}
-      {formation.lien || avis?.urlMaps ? (
-        <p className="carte-liens">
-          {formation.lien ? (
-            <a href={formation.lien} target="_blank" rel="noreferrer">
-              Fiche officielle Parcoursup
-            </a>
-          ) : null}
-          {avis?.urlMaps ? (
-            <a href={avis.urlMaps} target="_blank" rel="noreferrer">
-              Voir l’adresse sur la carte
-            </a>
-          ) : null}
-        </p>
-      ) : null}
+      {/* En savoir plus. Ce sont des pages tenues par d'AUTRES : chaque
+          libellé dit où il mène, et « ↗ » dit qu'on quitte le site. Rien
+          n'est chargé depuis ces domaines tant qu'on n'a pas cliqué — la
+          promesse « aucun traceur » faite à des mineurs porte sur ce que
+          cette page exécute, et un lien n'exécute rien.
+
+          Le site propre de l'établissement n'est pas dans l'open data
+          Parcoursup : on ne le devine pas, on propose une recherche et on
+          le dit. */}
+      <p className="carte-liens">
+        {formation.lien ? (
+          <a className="carte-lien" href={formation.lien} target="_blank" rel="noopener noreferrer">
+            Fiche Parcoursup de la formation
+            <span aria-hidden="true"> ↗</span>
+          </a>
+        ) : null}
+        {avis?.urlMaps ? (
+          <a className="carte-lien" href={avis.urlMaps} target="_blank" rel="noopener noreferrer">
+            Avis Google sur l’adresse ({avis.note.toFixed(1)}/5)
+            <span aria-hidden="true"> ↗</span>
+          </a>
+        ) : null}
+        <a
+          className="carte-lien"
+          href={rechercheWeb(formation.etablissement, formation.ville)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Chercher le site de l’école
+          <span aria-hidden="true"> ↗</span>
+        </a>
+      </p>
 
       {ouvert ? (
         <div className="detail">
@@ -356,6 +389,13 @@ export default function App() {
   const [position, setPosition] = useState<PositionEleve | null>(null)
   const [positionEnCours, setPositionEnCours] = useState(false)
   const [messagePosition, setMessagePosition] = useState<string | null>(null)
+  /**
+   * Classement et filtres de la liste. Ils partent à « ce qui te correspond »
+   * et SANS aucun filtre : la liste s'ouvre entière, et c'est l'élève qui
+   * choisit d'en écarter (règle 4 de CLAUDE.md).
+   */
+  const [classement, setClassement] = useState<Classement>('pertinence')
+  const [filtres, setFiltres] = useState<Filtres>(SANS_FILTRE)
   /**
    * Cartes gagnées. Elles ne quittent jamais le navigateur : rien n'est envoyé
    * au serveur, et aucune carte ne s'obtient en invitant quelqu'un (collection.ts).
@@ -568,6 +608,19 @@ export default function App() {
     [resultats],
   )
 
+  /**
+   * La liste telle qu'elle s'affiche : filtrée d'abord, classée ensuite.
+   *
+   * `ecartes` n'est pas un rebut : c'est ce que la barre affiche en clair,
+   * avec le bouton qui le ramène. Un filtre dont on ne voit pas la portée
+   * serait indiscernable d'un vœu retiré de la vue (règle 4 de CLAUDE.md).
+   */
+  const { retenus, ecartes } = useMemo(
+    () => filtrer(resultats ?? [], filtres),
+    [resultats, filtres],
+  )
+  const affiches = useMemo(() => classer(retenus, classement), [retenus, classement])
+
   if (vue === 'blog') {
     return (
       <ListeArticles
@@ -761,8 +814,17 @@ export default function App() {
           vivre. Les deux ne sont jamais additionnés, et aucun vœu n’est retiré de la liste.
         </p>
 
+        <BarreTri
+          resultats={resultats}
+          classement={classement}
+          filtres={filtres}
+          ecartes={ecartes.length}
+          onClassement={setClassement}
+          onFiltres={setFiltres}
+        />
+
         <div className="cartes">
-          {resultats.map((r) => (
+          {affiches.map((r) => (
             <Carte
               key={r.formation.id}
               resultat={r}
