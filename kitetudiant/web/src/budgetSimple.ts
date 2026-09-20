@@ -22,7 +22,7 @@
 
 /** Ce qu'un choix de train de vie fixe, en euros par mois sauf mention. */
 export interface TrainDeVie {
-  readonly cle: 'simple' | 'moyen' | 'large'
+  readonly cle: 'pris-en-charge' | 'simple' | 'moyen' | 'large'
   readonly titre: string
   readonly resume: string
   readonly coursesMensuelles: number
@@ -32,6 +32,28 @@ export interface TrainDeVie {
 }
 
 export const TRAINS_DE_VIE: readonly TrainDeVie[] = [
+  {
+    /* Le cas où la famille prend en charge le quotidien en nature : elle fait
+       les courses, paie l'abonnement, remplit le frigo. Il existe, il est
+       fréquent, et sans lui l'élève concerné déclarait des dépenses qu'il
+       n'a pas — donc un reste-à-vivre plus bas que la réalité.
+
+       Zéro n'est PAS une valeur de repli silencieuse : c'est une hypothèse
+       que l'élève choisit lui-même, et le bouton affiche « 0 € de courses ·
+       0 € divers · 0 € transport » comme les autres affichent les leurs. Ce
+       qui est interdit, c'est de poser un montant sans le dire — pas de
+       prendre acte d'une dépense qui n'a pas lieu.
+
+       Ce choix ne touche ni au loyer ni aux frais de scolarité : ceux-là
+       dépendent de la formation et de la ville, et restent calculés. */
+    cle: 'pris-en-charge',
+    titre: 'Mes parents s’occupent de tout',
+    resume: 'Les courses, les transports, le quotidien : je n’avance rien.',
+    coursesMensuelles: 0,
+    fraisDiversMensuels: 0,
+    transportMensuel: 0,
+    repasCrousParMois: 0,
+  },
   {
     cle: 'simple',
     titre: 'Je fais attention',
