@@ -207,10 +207,10 @@ interface Sujet {
 const PAGES: readonly Sujet[] = [
   {
     slug: 'accueil',
-    titre: 'Ce qu’il te restera pour vivre, vœu par vœu',
+    titre: 'Trouve la meilleure solution pour l’année prochaine',
     chapeau:
-      'Chaque formation sous trois angles tenus séparés : tes chances d’y entrer, ce ' +
-      'qu’elle vaut pour toi, et ton reste-à-vivre une fois sur place.',
+      'Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet, ' +
+      'au même endroit, avec des chiffres datés et leur source.',
     publieLe: '2026-09-20',
   },
   {
