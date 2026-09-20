@@ -1336,6 +1336,457 @@ export const ARTICLES: readonly Article[] = [
       ),
     ],
   },
+  {
+    slug: 'le-budget-dune-annee-etudiante',
+    titre: 'Le budget d’une année étudiante, poste par poste',
+    chapeau:
+      'Le loyer n’est qu’une ligne parmi douze. Savoir lesquelles tombent chaque mois, ' +
+      'lesquelles tombent une seule fois, et lesquelles dépendent de la ville.',
+    publieLe: '2026-09-20',
+    revuLe: null,
+    motsCles: ['budget', 'reste à vivre', 'dépenses', 'logement'],
+    questions: [
+      {
+        question: 'Quelle est la plus grosse dépense d’une année étudiante ?',
+        reponse:
+          'Le logement, dans la quasi-totalité des cas. Il pèse souvent plus que tout le reste réuni, et c’est le seul poste qui change du tout au tout selon la commune. C’est aussi pourquoi comparer deux villes sur leur loyer seul induit en erreur : ce qui compte, c’est ce qu’il reste une fois ce loyer payé et les aides reçues.',
+      },
+      {
+        question: 'Quels frais tombent tous en même temps à la rentrée ?',
+        reponse:
+          'Le dépôt de garantie, le premier loyer, l’assurance habitation, la contribution de vie étudiante, les frais d’inscription et l’équipement de base. Ils arrivent le même mois, alors que les premières aides mettent quelques semaines à être versées. Ce décalage surprend chaque année des familles qui avaient pourtant bien calculé l’année.',
+      },
+      {
+        question: 'Comment savoir si une année est finançable ?',
+        reponse:
+          'En posant les ressources d’un côté — aides, bourse, contribution familiale, job éventuel — et les dépenses de l’autre, puis en regardant la différence. C’est ce reste mensuel, et lui seul, qui dit si l’année tient. Un loyer bas dans une commune mal desservie peut laisser moins qu’un loyer élevé à côté du campus.',
+      },
+    ],
+    corps: [
+      p(
+        'On parle du budget étudiant comme d’un chiffre unique. Ce n’en est pas un : c’est ' +
+          'une douzaine de lignes qui n’ont ni le même rythme, ni la même prévisibilité, ni ' +
+          'le même lien avec la ville choisie. Les mélanger est la meilleure façon de se ' +
+          'tromper.',
+      ),
+      t('Ce qui tombe tous les mois'),
+      p(
+        'Le logement d’abord, et de loin : dans la plupart des situations il pèse plus que ' +
+          'tout le reste réuni. Viennent ensuite l’alimentation, le transport, le forfait ' +
+          'téléphonique, la mutuelle éventuelle, et ce qu’on appelle les frais divers — ' +
+          'fournitures, sorties, imprévus. Aucun de ces postes n’est facultatif, et c’est ' +
+          'le dernier qu’on oublie systématiquement de compter.',
+      ),
+      p(
+        'Ces lignes ont une particularité : elles se répètent. Une erreur de quelques ' +
+          'dizaines d’euros sur le loyer se multiplie par douze, puis par trois années de ' +
+          'licence. C’est pourquoi une approximation acceptable sur un mois ne l’est plus ' +
+          'sur un diplôme.',
+      ),
+      t('Ce qui ne tombe qu’une fois, et qui fait mal'),
+      p(
+        'Le mois de la rentrée est le plus lourd de l’année. Le dépôt de garantie, le ' +
+          'premier loyer, l’assurance habitation, la contribution de vie étudiante, les ' +
+          'frais d’inscription et l’équipement de base arrivent ensemble. Les premières ' +
+          'aides, elles, mettent quelques semaines à être versées.',
+      ),
+      e(
+        'Ce décalage entre les dépenses de rentrée et le premier versement des aides se ' +
+          'prévoit. Il surprend pourtant chaque année des familles qui avaient bien calculé ' +
+          'l’année, mais pas ce mois-là.',
+      ),
+      t('Ce qui dépend de la ville, et ce qui n’en dépend pas'),
+      p(
+        'Le loyer dépend de la commune, évidemment. Le transport aussi, et pas seulement ' +
+          'par son prix : habiter à quinze minutes à pied d’un campus supprime un poste ' +
+          'entier que quarante minutes de bus rendent obligatoire. L’aide au logement varie ' +
+          'selon le loyer et la situation. Les repas au restaurant universitaire dépendent ' +
+          'de la proximité d’un restaurant du CROUS.',
+      ),
+      p(
+        'En revanche, les frais de scolarité dépendent de la formation et non du lieu, et ' +
+          'la contribution de vie étudiante est la même partout. Distinguer les deux ' +
+          'familles évite de croire qu’un déménagement règle tout, ou qu’il ne règle rien.',
+      ),
+      t('Les ressources, qui sont l’autre moitié du calcul'),
+      l(
+        'La bourse sur critères sociaux, qui dépend des revenus du foyer, du nombre ' +
+          'd’enfants à charge et de la distance au lieu d’études.',
+        'L’aide au logement, qui se demande une fois le bail signé et change complètement ' +
+          'le budget réel.',
+        'La contribution de la famille, quand elle existe — en argent, ou en nature quand ' +
+          'ce sont les parents qui font les courses.',
+        'Un job étudiant, dont il faut compter les heures autant que le montant.',
+        'Les aides des régions, départements et communes, qui existent presque partout et ' +
+          'sont rarement demandées.',
+      ),
+      t('Pourquoi le chiffre qui compte est une soustraction'),
+      p(
+        'Ce n’est ni le loyer, ni le total des dépenses, ni le montant des aides. C’est ce ' +
+          'qu’il reste une fois tout posé : le reste-à-vivre mensuel. Lui seul dit si ' +
+          'l’année est tenable, parce que lui seul détermine s’il faudra travailler pendant ' +
+          'les cours, et combien d’heures — le facteur le mieux documenté d’échec en ' +
+          'première année.',
+      ),
+      p(
+        'Deux villes affichant le même loyer peuvent laisser des restes très différents, ' +
+          'selon qu’on est boursier, logé en résidence universitaire ou dans le privé, et ' +
+          'selon la distance au campus. C’est exactement ce que le simulateur de ce site ' +
+          'calcule, ligne par ligne, chaque montant portant sa source et son millésime.',
+      ),
+      t('Une méthode qui tient en quatre gestes'),
+      l(
+        'Posez le loyer d’un logement réaliste dans la commune de la formation, pas dans ' +
+          'la métropole voisine.',
+        'Simulez les aides auxquelles vous auriez droit : beaucoup de familles ne le font ' +
+          'jamais et s’excluent à tort.',
+        'Ajoutez le transport quotidien, qui est le poste caché des villes « moins chères ».',
+        'Regardez ce qui reste. Recommencez pour chaque ville de votre liste, avant de ' +
+          'formuler vos vœux et non après les réponses.',
+      ),
+    ],
+  },
+  {
+    slug: 'job-etudiant-combien-dheures',
+    titre: 'Job étudiant : combien d’heures sans casser son année',
+    chapeau:
+      'Travailler pendant ses études est courant et souvent nécessaire. Au-delà d’un ' +
+      'certain volume horaire, cela cesse pourtant d’être rentable.',
+    publieLe: '2026-09-20',
+    revuLe: null,
+    motsCles: ['job étudiant', 'travail', 'budget', 'réussite'],
+    questions: [
+      {
+        question: 'Travailler pendant ses études fait-il rater son année ?',
+        reponse:
+          'Pas en soi : un volume horaire modéré ne nuit pas aux résultats, et beaucoup d’étudiants travaillent sans difficulté. C’est au-delà d’un certain seuil que le temps manque pour assister aux cours et réviser. Le facteur décisif n’est pas le fait de travailler, c’est le nombre d’heures et leur régularité pendant les périodes d’examens.',
+      },
+      {
+        question: 'Quel type de job s’accorde le mieux avec des cours ?',
+        reponse:
+          'Celui dont les horaires sont prévisibles et négociables autour des examens. Un contrat aux horaires fixes le soir ou le week-end se planifie ; un poste où l’on est appelé la veille pour le lendemain oblige à choisir entre le salaire et le partiel. Demandez cette souplesse avant de signer, pas au moment où vous en aurez besoin.',
+      },
+      {
+        question: 'Vaut-il mieux travailler ou choisir une ville moins chère ?',
+        reponse:
+          'Les deux leviers ne coûtent pas la même chose. Réduire le loyer libère de l’argent sans prendre une heure ; travailler libère de l’argent en prenant du temps sur les cours. À économie équivalente, changer de ville ou de logement se paie une fois ; les heures travaillées se paient toutes les semaines, pendant toute l’année.',
+      },
+    ],
+    corps: [
+      p(
+        'Une part importante des étudiants travaille pendant l’année. Ce n’est ni une ' +
+          'anomalie ni un aveu d’échec : c’est souvent ce qui rend l’année possible. La ' +
+          'question utile n’est donc pas « faut-il travailler ? » mais « combien, et quand ? ».',
+      ),
+      t('Le seuil, et ce qui se passe au-delà'),
+      p(
+        'Un petit volume horaire ne dégrade pas les résultats, et apporte une expérience ' +
+          'qui compte. Passé un certain point, en revanche, le temps manque simplement : ' +
+          'les heures de travail rémunéré entrent en concurrence directe avec les heures de ' +
+          'cours et de révision, et aucune organisation ne crée de journée supplémentaire.',
+      ),
+      p(
+        'Ce seuil n’est pas le même pour tout le monde. Une formation avec vingt heures de ' +
+          'cours hebdomadaires ne laisse pas la même place qu’une formation qui en demande ' +
+          'trente-cinq, travail personnel compris. Regardez le volume réel de votre ' +
+          'formation avant de vous engager sur un contrat.',
+      ),
+      t('Les horaires comptent autant que le nombre d’heures'),
+      p(
+        'Deux emplois du même volume n’ont pas le même coût scolaire. Des horaires fixes, ' +
+          'connus à l’avance, se rangent autour des cours. Des horaires appelés la veille ' +
+          'obligent à arbitrer chaque semaine entre le salaire et l’assiduité — et c’est ' +
+          'l’assiduité qui cède, parce que le loyer, lui, ne se reporte pas.',
+      ),
+      e(
+        'Demandez, avant de signer, si vos horaires peuvent être allégés pendant les ' +
+          'partiels. Un employeur qui l’accepte vaut mieux qu’un employeur qui paie un peu ' +
+          'plus et le refuse.',
+      ),
+      t('Les jobs qui se cumulent bien avec des études'),
+      l(
+        'Le tutorat et le soutien scolaire : horaires choisis, et révision indirecte de ' +
+          'ses propres matières.',
+        'Les emplois de l’université elle-même — bibliothèque, accueil, tutorat étudiant — ' +
+          'organisés autour du calendrier universitaire.',
+        'Le travail saisonnier concentré sur les vacances, qui ne prend aucune heure de ' +
+          'cours.',
+        'L’alternance, qui n’est pas un job mais un statut : elle change entièrement ' +
+          'l’équation financière d’une année.',
+      ),
+      t('Ce qu’un job ne remplace pas'),
+      p(
+        'Un job étudiant comble un écart, il ne rattrape pas un budget qui ne tient pas. ' +
+          'Si le reste-à-vivre d’une ville est négatif avant même de compter un salaire, ' +
+          'travailler ne résout rien : il faudra travailler beaucoup, tout le temps, et ' +
+          'l’année deviendra un arbitrage permanent entre les cours et les heures.',
+      ),
+      p(
+        'C’est pourquoi le calcul se fait dans l’autre sens. On regarde d’abord ce que ' +
+          'coûte chaque ville, on pose les aides auxquelles on a droit, et on ne demande au ' +
+          'job que de combler ce qui reste — pas de porter l’année entière.',
+      ),
+      t('Ce que le travail apporte, en plus de l’argent'),
+      p(
+        'Un emploi étudiant n’est pas qu’une ligne de ressources. Il donne une expérience ' +
+          'professionnelle réelle, des références vérifiables, et l’habitude de tenir des ' +
+          'engagements devant quelqu’un qui n’est ni un professeur ni un parent. Ces ' +
+          'éléments comptent ensuite, dans une candidature comme dans un dossier de ' +
+          'location.',
+      ),
+      p(
+        'Il apporte aussi une compétence qu’aucun cours n’enseigne : savoir ce que vaut ' +
+          'une heure de son temps. Un étudiant qui a travaillé compte différemment, et ' +
+          'arbitre mieux entre ce qu’il peut acheter et ce qu’il peut se passer d’acheter.',
+      ),
+      p(
+        'Cela dit, ces bénéfices n’effacent pas l’arithmétique : ils s’obtiennent avec un ' +
+          'volume horaire raisonnable, et disparaissent quand le travail dévore les cours. ' +
+          'Un poste conservé au prix d’une année redoublée n’a rien rapporté du tout.',
+      ),
+      t('Les démarches à ne pas oublier'),
+      l(
+        'Déclarer le job : il peut avoir des conséquences sur les aides, et les ignorer ' +
+          'expose à devoir rembourser.',
+        'Vérifier si votre formation autorise un volume horaire maximal — certaines ' +
+          'filières sélectives l’encadrent.',
+        'Garder trace de vos contrats et bulletins de salaire : ils servent pour les ' +
+          'dossiers de logement, où un revenu régulier rassure un bailleur.',
+      ),
+    ],
+  },
+  {
+    slug: 'alternance-etudes-et-contrat',
+    titre: 'L’alternance : des études, un salaire, et un employeur à trouver',
+    chapeau:
+      'Elle change entièrement l’équation financière d’une année étudiante. À une ' +
+      'condition, qui n’a rien à voir avec le dossier scolaire : trouver l’entreprise.',
+    publieLe: '2026-09-20',
+    revuLe: null,
+    motsCles: ['alternance', 'apprentissage', 'contrat', 'budget'],
+    questions: [
+      {
+        question: 'Être accepté en alternance suffit-il pour commencer l’année ?',
+        reponse:
+          'Non, et c’est la différence la plus importante avec une formation classique. Le centre de formation vous accepte, mais la place ne devient réelle qu’une fois un contrat signé avec une entreprise. Sans employeur, la formation ne démarre pas. La recherche d’entreprise se mène donc en parallèle de la candidature, dès le printemps.',
+      },
+      {
+        question: 'Pourquoi l’alternance change-t-elle autant le budget ?',
+        reponse:
+          'Parce qu’elle inverse deux lignes à la fois : les frais de scolarité sont pris en charge, et l’alternant perçoit une rémunération. Un budget qui ne tenait pas en formation classique peut tenir en alternance, dans la même ville et la même filière. C’est le levier financier le plus puissant de l’orientation post-bac, et le moins utilisé.',
+      },
+      {
+        question: 'Les vœux en alternance sont-ils limités comme les autres ?',
+        reponse:
+          'Ils disposent de leur propre compteur et s’ajoutent aux vœux ordinaires, sans les consommer. Ils suivent aussi un calendrier plus souple : on peut continuer à en formuler après la clôture de la phase principale, parce qu’une place dépend d’un employeur autant que d’une école, et qu’une signature ne se commande pas.',
+      },
+    ],
+    corps: [
+      p(
+        'L’alternance est présentée comme une voie parmi d’autres. Financièrement, elle ' +
+          'n’en est pas une : elle change les termes du problème. Comprendre en quoi évite ' +
+          'à la fois de la négliger et de la surestimer.',
+      ),
+      t('Deux contrats, un même principe'),
+      p(
+        'Deux dispositifs coexistent : le contrat d’apprentissage et le contrat de ' +
+          'professionnalisation. Les conditions d’âge, la durée et le rythme diffèrent, ' +
+          'mais le principe est le même — vous êtes salarié d’une entreprise et étudiant ' +
+          'd’un centre de formation, en alternant les périodes. Le centre vous forme, ' +
+          'l’entreprise vous emploie.',
+      ),
+      p(
+        'Le rythme varie beaucoup : quelques jours par semaine, une semaine sur deux, des ' +
+          'périodes de plusieurs semaines. Ce détail décide de choses très concrètes, à ' +
+          'commencer par le logement : un rythme hebdomadaire suppose d’habiter à distance ' +
+          'raisonnable des deux lieux.',
+      ),
+      t('Ce que cela change au budget'),
+      p(
+        'Deux lignes s’inversent en même temps. Les frais de scolarité ne sont plus à votre ' +
+          'charge, et une rémunération s’ajoute aux ressources. Une année qui ne tenait pas ' +
+          'en formation classique peut tenir en alternance, dans la même ville et la même ' +
+          'filière — sans rien changer d’autre.',
+      ),
+      e(
+        'Si une filière qui vous intéresse existe en alternance, formuler le vœu ne vous ' +
+          'enlève rien : il ne consomme aucun de vos autres vœux.',
+      ),
+      t('Le vrai obstacle : l’entreprise'),
+      p(
+        'Le dossier scolaire ouvre la porte du centre de formation. Il n’ouvre pas celle de ' +
+          'l’entreprise, et c’est elle qui conditionne la rentrée. Une place en alternance ' +
+          'sans contrat signé n’est pas une place : la formation ne démarre pas.',
+      ),
+      p(
+        'La recherche se mène donc en parallèle de la candidature, dès le printemps, et non ' +
+          'après les réponses. Les entreprises recrutent leurs alternants sur plusieurs ' +
+          'mois ; celles qui recrutent encore en août sont celles que personne n’a ' +
+          'demandées, ou celles dont le poste s’est libéré tard.',
+      ),
+      t('Comment chercher une entreprise'),
+      l(
+        'Demandez au centre de formation sa liste d’entreprises partenaires : beaucoup en ' +
+          'tiennent une, et peu de candidats la réclament.',
+        'Candidatez largement et tôt, avec un texte adapté à chaque entreprise — le ' +
+          'copier-coller se repère ici comme ailleurs.',
+        'Visez aussi les structures qui ne publient pas d’annonce : collectivités, ' +
+          'associations, petites entreprises qui n’ont jamais eu d’alternant.',
+        'Préparez-vous à un entretien d’embauche, pas à un entretien d’admission : ce ' +
+          'qu’on vous demandera, c’est ce que vous saurez faire dans l’équipe.',
+      ),
+      t('Où trouver les formations en alternance'),
+      p(
+        'Beaucoup figurent sur la plateforme nationale, avec leur propre compteur de vœux. ' +
+          'D’autres recrutent directement, par leur site ou par leur réseau d’entreprises. ' +
+          'Les centres de formation d’apprentis, les chambres de commerce et les chambres ' +
+          'de métiers en tiennent des listes, rarement consultées par les lycéens.',
+      ),
+      p(
+        'Une même filière peut exister dans les deux régimes, classique et alternance, ' +
+          'parfois dans le même établissement. Vérifiez-le systématiquement : c’est le ' +
+          'genre de détail qui ne saute pas aux yeux sur une fiche et qui change le budget ' +
+          'd’une année entière.',
+      ),
+      t('Le logement, qui se complique'),
+      p(
+        'Un alternant vit entre deux lieux : le centre de formation et l’entreprise. Quand ' +
+          'ils sont dans la même agglomération, rien ne change. Quand ils sont éloignés, la ' +
+          'question du logement se pose autrement — un bail annuel pour une présence ' +
+          'discontinue, ou deux hébergements, ou beaucoup de trajets.',
+      ),
+      p(
+        'C’est une contrainte à examiner AVANT de signer, pas après. Demandez au centre de ' +
+          'formation où se trouvent habituellement ses entreprises partenaires : la réponse ' +
+          'change complètement le calcul du logement, et donc celui du budget.',
+      ),
+      t('Ce à quoi il faut faire attention'),
+      p(
+        'Le rythme est exigeant. Un alternant n’a pas les vacances universitaires : il a ' +
+          'des congés payés, en nombre bien inférieur. Les périodes d’examens tombent au ' +
+          'milieu de semaines travaillées, et il faut réviser en plus du travail.',
+      ),
+      p(
+        'La poursuite d’études, enfin, mérite d’être vérifiée avant de s’engager. Certaines ' +
+          'filières en alternance mènent naturellement à un niveau supérieur, d’autres sont ' +
+          'conçues comme un aboutissement. Posez la question au centre de formation : la ' +
+          'réponse oriente le choix autant que le salaire.',
+      ),
+    ],
+  },
+  {
+    slug: 'se-reorienter-sans-perdre-son-annee',
+    titre: 'Se réorienter sans perdre son année',
+    chapeau:
+      'Changer de voie après quelques mois est fréquent, prévu, et rarement dramatique. ' +
+      'Ce qui coûte, c’est d’attendre le mois de juin pour s’en occuper.',
+    publieLe: '2026-09-20',
+    revuLe: null,
+    motsCles: ['réorientation', 'première année', 'changement de voie'],
+    questions: [
+      {
+        question: 'Se réorienter en première année fait-il perdre une année ?',
+        reponse:
+          'Pas nécessairement. Certaines formations accueillent des étudiants en cours d’année, d’autres permettent de valider un semestre qui sera reconnu ailleurs. Même lorsqu’une année est reprise depuis le début, elle est rarement perdue : les crédits obtenus, les méthodes acquises et la clarification du projet comptent dans le dossier suivant.',
+      },
+      {
+        question: 'Qui contacter quand la formation ne convient pas ?',
+        reponse:
+          'Le service d’orientation de l’établissement en premier, car c’est lui qui connaît les passerelles internes et les délais. Le responsable de la formation ensuite : certaines réorientations se règlent par un changement de parcours au sein du même diplôme. Ces services existent pour cela, et ils voient passer beaucoup d’étudiants dans la même situation.',
+      },
+      {
+        question: 'Quand faut-il commencer à s’en occuper ?',
+        reponse:
+          'Dès que le doute s’installe, et non au moment de la décision. Les passerelles internes ont des délais, la procédure nationale rouvre à date fixe, et certaines formations recrutent en cours d’année. Attendre le printemps réduit les options à celles qui restent disponibles, au lieu de celles qui conviennent.',
+      },
+    ],
+    corps: [
+      p(
+        'Une part notable des étudiants ne termine pas sa première année dans la formation ' +
+          'où elle a commencé. Ce n’est ni rare ni honteux : à dix-sept ans, on choisit avec ' +
+          'les informations qu’on a, et certaines ne s’obtiennent qu’en y étant.',
+      ),
+      t('Distinguer trois situations très différentes'),
+      p(
+        'La première : la formation vous convient, mais le rythme ou la méthode ne passent ' +
+          'pas. Cela se travaille, et c’est souvent affaire de quelques semaines ' +
+          'd’adaptation. La deuxième : le contenu ne correspond pas à ce que vous ' +
+          'imaginiez. La troisième : l’année n’est pas finançable, et c’est le budget qui ' +
+          'décide à votre place.',
+      ),
+      p(
+        'Les trois demandent des réponses différentes, et les confondre fait perdre du ' +
+          'temps. La première relève du tutorat et de la méthode ; la deuxième d’une ' +
+          'passerelle ou d’un nouveau vœu ; la troisième d’un changement de ville, de ' +
+          'logement, ou d’un passage en alternance.',
+      ),
+      t('Les chemins qui existent'),
+      l(
+        'Les passerelles internes : changer de parcours au sein du même diplôme, parfois ' +
+          'sans perdre le semestre en cours.',
+        'Les formations qui recrutent en cours d’année, notamment au second semestre.',
+        'La procédure nationale, qui rouvre chaque année et accepte les étudiants déjà ' +
+          'inscrits ailleurs.',
+        'La phase complémentaire, ouverte tout l’été sur les formations qui ont encore des ' +
+          'places.',
+      ),
+      t('Ce qui se garde quand on change'),
+      p(
+        'Les crédits validés ne disparaissent pas. Un semestre obtenu peut être reconnu ' +
+          'dans une autre formation, parfois intégralement, parfois en partie — cela se ' +
+          'demande et se négocie avec le responsable du diplôme visé.',
+      ),
+      p(
+        'Le reste se garde aussi, même s’il ne figure sur aucun relevé : savoir travailler ' +
+          'en autonomie, avoir compris ce qu’on ne veut pas faire, pouvoir l’expliquer dans ' +
+          'un projet motivé. Un candidat qui écrit « j’ai commencé cette filière, voici ce ' +
+          'que j’y ai compris et pourquoi je demande celle-ci » est plus crédible qu’un ' +
+          'candidat qui n’a jamais rien essayé.',
+      ),
+      e(
+        'Se réorienter tôt coûte moins cher que se réorienter tard, en temps comme en ' +
+          'argent. Le doute qu’on laisse mûrir jusqu’en juin réduit les options à ce qui ' +
+          'reste, au lieu de ce qui convient.',
+      ),
+      t('Le budget, qu’on oublie de refaire'),
+      p(
+        'Changer de formation change souvent de ville, donc de loyer, donc d’aide au ' +
+          'logement, donc de reste-à-vivre. Le calcul fait l’an dernier ne vaut plus, et le ' +
+          'refaire avant de choisir évite de remplacer une année difficile par une année ' +
+          'intenable.',
+      ),
+      p(
+        'Une réorientation vers une formation en alternance, en particulier, change ' +
+          'entièrement l’équation : frais de scolarité pris en charge et rémunération ' +
+          'perçue. C’est une piste qu’il vaut la peine de regarder avant de se limiter aux ' +
+          'formations classiques.',
+      ),
+      t('Ce qui ne doit pas décider à votre place'),
+      p(
+        'Le regard des autres, d’abord. Une réorientation se raconte mal au dîner de ' +
+          'famille et très bien dans un projet de formation motivé : ce sont deux publics ' +
+          'différents, et c’est le second qui compte pour la suite.',
+      ),
+      p(
+        'L’envie de ne pas décevoir, ensuite. Terminer une année qu’on sait inadaptée pour ' +
+          'ne rien avoir à annoncer revient à payer un an pour repousser une conversation ' +
+          'd’une heure.',
+      ),
+      p(
+        'Et la peur de recommencer, enfin. Une première année n’est pas un engagement sur ' +
+          'une vie : c’est une première marche, et les gens qui en changent sont nombreux, ' +
+          'y compris parmi ceux dont le parcours paraît tout tracé.',
+      ),
+      t('À qui en parler'),
+      p(
+        'Au service d’orientation de votre établissement, qui connaît les passerelles et ' +
+          'les délais. Au responsable de votre formation, qui peut proposer un aménagement. ' +
+          'Et, si l’année pèse, aux services de santé étudiante, qui proposent des ' +
+          'consultations gratuites. Ces interlocuteurs sont prévus pour cela, et ils ont vu ' +
+          'passer beaucoup d’étudiants dans votre situation.',
+      ),
+    ],
+  },
 ]
 
 /* --------------------------------------------------- écriture d'un article */
