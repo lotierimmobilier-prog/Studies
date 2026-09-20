@@ -11,6 +11,21 @@
 import communes from '../donnees/communes.json'
 import type { LoyerCommune, MontantSource } from '../../packages/budget-engine/src/types.ts'
 
+/**
+ * Racine de notre API, telle que le navigateur doit l'appeler.
+ *
+ * Le site est servi sous un SOUS-CHEMIN sur le VPS (« /kitetudiant/ »), et
+ * nginx n'expose l'API que sous ce même préfixe. Écrire « /api/… » en dur
+ * visait donc la racine du serveur, où il n'y a rien : en production, TOUS les
+ * appels revenaient en 404 — comptes, aide au logement, retours — alors que le
+ * serveur, lui, répondait parfaitement sur « /kitetudiant/api/… ».
+ *
+ * `import.meta.env.BASE_URL` vaut « / » en développement et « /kitetudiant/ »
+ * dans le build de production : la même expression donne donc le bon chemin
+ * dans les deux cas, sans rien à configurer.
+ */
+export const BASE_API = `${import.meta.env.BASE_URL}api`.replace(/\/{2,}/g, '/')
+
 const ESR =
   'https://data.enseignementsup-recherche.gouv.fr/api/explore/v2.1/catalog/datasets/fr-esr-parcoursup/records'
 
@@ -349,7 +364,7 @@ async function appelCompte(
 export function inscrire(
   email: string,
   motDePasse: string,
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<void> {
   return appelCompte('inscription', { email, motDePasse }, base, recuperer)
@@ -358,13 +373,13 @@ export function inscrire(
 export function connecter(
   email: string,
   motDePasse: string,
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<void> {
   return appelCompte('connexion', { email, motDePasse }, base, recuperer)
 }
 
-export async function deconnecter(base = '/api', recuperer: typeof fetch = fetch): Promise<void> {
+export async function deconnecter(base = BASE_API, recuperer: typeof fetch = fetch): Promise<void> {
   const jeton = jetonSession()
   oublierJeton()
   if (jeton === '') return
@@ -394,7 +409,7 @@ export type AideLogement =
  */
 export async function chercherAidesLogement(
   demandes: readonly DemandeAide[],
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<AideLogement[]> {
   if (demandes.length === 0) return []
@@ -460,7 +475,7 @@ export interface BulletinExtrait {
 export async function lireBulletin(
   fichierBase64: string,
   mediaType: string,
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<BulletinExtrait> {
   const reponse = await recuperer(`${base}/bulletin-scolaire`, {
@@ -509,7 +524,7 @@ export interface DepotRetour {
 
 export async function deposerRetour(
   retour: DepotRetour,
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<void> {
   const reponse = await recuperer(`${base}/retours`, {
@@ -526,7 +541,7 @@ export async function deposerRetour(
 /** Agrégats de l'année en cours, pour plusieurs formations d'un coup. */
 export async function chercherAgregatsRetours(
   codFormations: readonly string[],
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<Map<string, import('../../packages/retours/src/index.ts').Agregat>> {
   if (codFormations.length === 0) return new Map()
@@ -547,7 +562,7 @@ export async function chercherAgregatsRetours(
 
 export async function chercherArchiveRetours(
   codFormation: string,
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<import('../../packages/retours/src/index.ts').Agregat[]> {
   try {
@@ -589,7 +604,7 @@ export interface AvisLieuIndisponible {
 export async function chercherAvisLieu(
   etablissement: string,
   ville: string,
-  base = '/api',
+  base = BASE_API,
   recuperer: typeof fetch = fetch,
 ): Promise<AvisLieu | AvisLieuIndisponible> {
   const demande = { ref: 'lieu', etablissement, ville }

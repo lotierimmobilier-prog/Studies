@@ -35,11 +35,30 @@ export interface EtatSysteme {
   }
 }
 
-const CLE_JETON = 'kitetudiant.admin.jeton'
+import { BASE_API } from '../donnees.ts'
 
+const CLE_JETON = 'kitetudiant.admin.jeton'
+/** Session d'élève ordinaire, posée par le site (voir donnees.ts). */
+const CLE_SESSION_SITE = 'kitetudiant.session'
+
+/**
+ * Jeton à présenter à l'API d'administration.
+ *
+ * Deux origines possibles, dans cet ordre : le jeton d'exploitation saisi ici,
+ * puis, à défaut, la session du compte avec lequel on navigue déjà. Le serveur
+ * accepte la seconde si l'adresse figure dans ADMIN_EMAILS — c'est ce qui
+ * évite de ressaisir un secret de quarante caractères quand on est déjà
+ * connecté. Il tranche, pas nous : ici on se contente de proposer.
+ */
 export function lireJeton(): string {
   try {
-    return sessionStorage.getItem(CLE_JETON) ?? ''
+    const saisi = sessionStorage.getItem(CLE_JETON)
+    if (saisi) return saisi
+  } catch {
+    /* stockage refusé : on tente la session du site */
+  }
+  try {
+    return localStorage.getItem(CLE_SESSION_SITE) ?? ''
   } catch {
     return ''
   }
@@ -64,7 +83,7 @@ export class ErreurAdmin extends Error {
 }
 
 async function appeler<T>(chemin: string, options: RequestInit = {}): Promise<T> {
-  const reponse = await fetch(`/api/admin${chemin}`, {
+  const reponse = await fetch(`${BASE_API}/admin${chemin}`, {
     ...options,
     headers: {
       ...(options.headers ?? {}),

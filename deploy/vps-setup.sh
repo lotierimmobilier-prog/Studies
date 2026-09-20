@@ -29,6 +29,10 @@
 #   COMPTES_MASTER_KEY=...       # chiffre les comptes élèves (≥ 16 caractères).
 #                                #   Sans elle, l'inscription est impossible ET le
 #                                #   détail du résultat reste ouvert à tous.
+#   ADMIN_EMAILS=a@b.fr,c@d.fr   # comptes autorisés à ouvrir la console avec
+#                                #   leur propre session, sans ressaisir le jeton.
+#                                #   Plus commode et PLUS FAIBLE qu'ADMIN_TOKEN :
+#                                #   la console vaut alors un mot de passe.
 #
 # La console d'administration reste FERMÉE tant qu'ADMIN_TOKEN n'est pas
 # défini, et elle refuse de répondre hors HTTPS. Faire le certificat d'abord.
@@ -162,6 +166,10 @@ if [ -n "${MODERATION_TOKEN:-}" ]; then
   echo "MODERATION_TOKEN=${MODERATION_TOKEN}" >> "${APP_DIR}/.env"
   log "Jeton MODERATION_TOKEN enregistré (endpoint de modération protégé)."
 fi
+if [ -n "${ADMIN_EMAILS:-}" ]; then
+  echo "ADMIN_EMAILS=${ADMIN_EMAILS}" >> "${APP_DIR}/.env"
+  log "Comptes administrateurs : ${ADMIN_EMAILS}"
+fi
 if [ -n "${COMPTES_MASTER_KEY:-}" ]; then
   echo "COMPTES_MASTER_KEY=${COMPTES_MASTER_KEY}" >> "${APP_DIR}/.env"
   log "Comptes élèves activés : le détail du résultat demande une inscription."
@@ -185,7 +193,7 @@ fi
 chmod 600 "${APP_DIR}/.env"
 
 log "(Re)démarrage de l'API « ${PM2_NAME} » (port ${API_PORT}) via pm2…"
-ENV_VARS="PORT=${API_PORT} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-} GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-} MODERATION_TOKEN=${MODERATION_TOKEN:-} ADMIN_TOKEN=${ADMIN_TOKEN:-} ADMIN_MASTER_KEY=${ADMIN_MASTER_KEY:-} COMPTES_MASTER_KEY=${COMPTES_MASTER_KEY:-}"
+ENV_VARS="PORT=${API_PORT} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-} GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-} MODERATION_TOKEN=${MODERATION_TOKEN:-} ADMIN_TOKEN=${ADMIN_TOKEN:-} ADMIN_MASTER_KEY=${ADMIN_MASTER_KEY:-} COMPTES_MASTER_KEY=${COMPTES_MASTER_KEY:-} ADMIN_EMAILS=${ADMIN_EMAILS:-}"
 if pm2 describe "${PM2_NAME}" >/dev/null 2>&1; then
   env ${ENV_VARS} pm2 restart "${PM2_NAME}" --update-env
 else

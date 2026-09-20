@@ -7,10 +7,21 @@
  *      HTTP simple : y exposer une console enverrait le jeton et les clés en
  *      clair sur le réseau. Le code refuse plutôt que de faire confiance à
  *      l'exploitant.
- *   2. Un jeton d'administration venu de l'environnement, jamais du coffre :
- *      voler le fichier de secrets ne doit pas donner le moyen d'entrer.
- *   3. Un verrouillage après échecs répétés, pour qu'un jeton ne se devine pas
- *      à la force brute.
+ *   2. Une preuve d'identité, de l'une des deux façons ci-dessous.
+ *   3. Un verrouillage après échecs répétés, pour qu'un secret ne se devine
+ *      pas à la force brute.
+ *
+ * Deux façons d'entrer, et elles ne se valent pas :
+ *
+ *   - ADMIN_TOKEN, un secret d'au moins 24 caractères venu de l'environnement,
+ *     jamais du coffre : voler le fichier de secrets ne donne pas l'entrée ;
+ *   - une session d'un compte dont l'adresse figure dans ADMIN_EMAILS.
+ *
+ * La seconde est plus commode et PLUS FAIBLE : elle ramène la sécurité de la
+ * console à celle d'un mot de passe de dix caractères, là où le jeton en
+ * compte quarante. Le verrouillage après cinq échecs s'applique aux deux, et
+ * le jeton reste disponible comme voie de secours si un compte est compromis.
+ * ADMIN_EMAILS vide — le défaut — laisse le jeton seul maître.
  */
 
 import type { IncomingMessage } from 'node:http'
@@ -54,14 +65,37 @@ export class GardeAdmin {
     return transmis || req.socket.remoteAddress || 'inconnu'
   }
 
-  /** `null` quand l'accès est accordé ; sinon le refus à renvoyer tel quel. */
-  verifier(req: IncomingMessage): RefusAdmin | null {
+  /**
+   * Adresses autorisées à administrer avec leur compte. Lues à chaque appel
+   * pour qu'un changement d'environnement prenne effet au redémarrage sans
+   * dépendre d'un ordre d'initialisation.
+   */
+  private static adressesAdmin(): string[] {
+    return String(process.env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((a) => a.trim().toLowerCase())
+      .filter((a) => a.length > 0)
+  }
+
+  /**
+   * `null` quand l'accès est accordé ; sinon le refus à renvoyer tel quel.
+   *
+   * `emailDeSession` résout le porteur d'un jeton de session ; sans elle, seul
+   * ADMIN_TOKEN ouvre la porte.
+   */
+  async verifier(
+    req: IncomingMessage,
+    emailDeSession?: (jeton: string) => Promise<string | null>,
+  ): Promise<RefusAdmin | null> {
     const attendu = process.env.ADMIN_TOKEN
-    if (!attendu || attendu.length < 24) {
+    const admins = GardeAdmin.adressesAdmin()
+    const jetonUtilisable = typeof attendu === 'string' && attendu.length >= 24
+    const comptesUtilisables = admins.length > 0 && emailDeSession !== undefined
+    if (!jetonUtilisable && !comptesUtilisables) {
       return {
         code: 503,
         erreur:
-          'Console d’administration désactivée : définissez ADMIN_TOKEN (au moins 24 caractères) dans l’environnement du serveur.',
+          'Console d’administration désactivée : définissez ADMIN_TOKEN (au moins 24 caractères), ou ADMIN_EMAILS avec des comptes actifs.',
       }
     }
     if (!this.canalSur(req)) {
@@ -85,7 +119,18 @@ export class GardeAdmin {
 
     const entete = String(req.headers.authorization ?? '')
     const fourni = entete.startsWith('Bearer ') ? entete.slice(7) : ''
-    if (!fourni || !jetonValide(fourni, attendu)) {
+
+    let accorde = false
+    if (fourni.length > 0) {
+      if (jetonUtilisable && jetonValide(fourni, attendu as string)) {
+        accorde = true
+      } else if (comptesUtilisables) {
+        const email = await (emailDeSession as (j: string) => Promise<string | null>)(fourni)
+        accorde = email !== null && admins.includes(email.trim().toLowerCase())
+      }
+    }
+
+    if (!accorde) {
       const suivant: Compteur = {
         echecs: (compteur?.echecs ?? 0) + 1,
         verrouJusqua: compteur?.verrouJusqua ?? 0,
@@ -95,7 +140,10 @@ export class GardeAdmin {
         suivant.verrouJusqua = t + VERROU_MS
       }
       this.compteurs.set(client, suivant)
-      return { code: 401, erreur: 'Jeton d’administration invalide.' }
+      return {
+        code: 401,
+        erreur: 'Accès refusé : jeton d’administration invalide, ou compte non autorisé.',
+      }
     }
 
     this.compteurs.delete(client)
