@@ -572,6 +572,7 @@ export default function App() {
     return (
       <ListeArticles
         articles={articles}
+        onNaviguer={naviguer}
         onArticle={(s) => naviguer({ vue: 'article', slug: s })}
         onRetour={() => naviguer({ vue: 'accueil' })}
       />
@@ -586,6 +587,7 @@ export default function App() {
       return (
         <ListeArticles
           articles={articles}
+          onNaviguer={naviguer}
           onArticle={(s) => naviguer({ vue: 'article', slug: s })}
           onRetour={() => naviguer({ vue: 'accueil' })}
         />
@@ -594,6 +596,7 @@ export default function App() {
     return (
       <PageArticle
         article={article}
+        onNaviguer={naviguer}
         onBlog={() => naviguer({ vue: 'blog' })}
         onCommencer={() => {
           naviguer({ vue: 'accueil' })
@@ -607,6 +610,7 @@ export default function App() {
     return (
       <Collection
         collection={collection}
+        onNaviguer={naviguer}
         onRetour={() => setVue(resultats === null ? 'accueil' : 'parcours')}
         onImporter={(cartes) => {
           setCollection((actuelle) => {

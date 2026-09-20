@@ -20,7 +20,8 @@ import {
   type Bloc,
 } from '../../packages/articles/src/index.ts'
 import { Marque } from './marque.tsx'
-import { adresseComplete, cheminDe } from './routes.ts'
+import { adresseComplete, cheminDe, type Route } from './routes.ts'
+import { FilAriane } from './filAriane.tsx'
 
 /* --------------------------------------------------------- les métadonnées */
 
@@ -98,10 +99,12 @@ function dateLisible(iso: string): string {
 export function ListeArticles({
   articles,
   onArticle,
+  onNaviguer,
   onRetour,
 }: {
   articles: readonly Article[]
   onArticle: (slug: string) => void
+  onNaviguer: (route: Route) => void
   onRetour: () => void
 }) {
   useMetadonnees(
@@ -121,6 +124,14 @@ export function ListeArticles({
           Retour au site
         </button>
       </header>
+
+      <FilAriane
+        maillons={[
+          { libelle: 'Accueil', route: { vue: 'accueil' } },
+          { libelle: 'Le blog', route: null },
+        ]}
+        onNaviguer={onNaviguer}
+      />
 
       <section className="bloc">
         <h2>Bien gérer sa scolarité</h2>
@@ -163,10 +174,12 @@ export function ListeArticles({
 export function PageArticle({
   article,
   onBlog,
+  onNaviguer,
   onCommencer,
 }: {
   article: Article
   onBlog: () => void
+  onNaviguer: (route: Route) => void
   onCommencer: () => void
 }) {
   useMetadonnees(
@@ -185,6 +198,17 @@ export function PageArticle({
           Tous les articles
         </button>
       </header>
+
+      <FilAriane
+        maillons={[
+          { libelle: 'Accueil', route: { vue: 'accueil' } },
+          { libelle: 'Le blog', route: { vue: 'blog' } },
+          // Le titre de l'article ferme le fil : un fil qui s'arrête au parent
+          // oblige à deviner où l'on se trouve.
+          { libelle: article.titre, route: null },
+        ]}
+        onNaviguer={onNaviguer}
+      />
 
       <article className="article">
         <p className="article-pied">
