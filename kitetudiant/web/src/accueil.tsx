@@ -13,6 +13,17 @@
  *   autre affirmation, et une affirmation que nos données savent tenir ;
  * - règle 6, toute donnée affichée porte son millésime. Aucun chiffre de cette
  *   page n'est décoratif : ils viennent tous du jeu de communes versionné.
+ *
+ * ── Les photographies ────────────────────────────────────────────────────
+ *
+ * Trois, pas une de plus, et toutes décoratives : `alt` vide et `aria-hidden`,
+ * parce qu'elles ne portent aucune information que le texte ne donne déjà. Un
+ * lecteur d'écran les saute au lieu de les annoncer au milieu d'une phrase.
+ *
+ * Elles sont volontairement en bandeau bas — jamais en grande image pleine
+ * page. Ce site vaut par ses chiffres ; une photographie qui occupe l'écran
+ * repousse la première donnée utile sous la ligne de flottaison, et le cahier
+ * des charges fixe un premier résultat en moins de 90 secondes.
  */
 
 import {
@@ -40,6 +51,13 @@ import {
   SOURCE_CALENDRIER,
 } from './calendrier.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
+
+// Les photographies sont IMPORTÉES et non désignées par un chemin : Vite leur
+// applique la base de déploiement (le site est servi sous un sous-chemin) et
+// les embarque dans le paquet. Un chemin écrit en dur reviendrait en 404.
+import photoArrivee from './images/arrivee.webp'
+import photoInstallation from './images/installation.webp'
+import photoPremiersJours from './images/premiers-jours.webp'
 
 /** Surface du logement type servant à l'illustration. */
 const SURFACE = 25
@@ -346,11 +364,34 @@ export function Accueil({
       </header>
 
       <Hero onCommencer={onCommencer} />
+
+      <div className="illu-bande illu-bande-large">
+        <img
+          src={photoArrivee}
+          alt=""
+          aria-hidden="true"
+          width={1200}
+          height={462}
+          decoding="async"
+        />
+      </div>
+
       <Bandeau />
       <Piliers />
       <Comparaison />
 
       <section className="bloc" id="methode">
+        <div className="illu-bande">
+          <img
+            src={photoInstallation}
+            alt=""
+            aria-hidden="true"
+            width={760}
+            height={507}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
         <h2>Comment ça marche</h2>
         <ol className="etapes-accueil">
           <li>
@@ -432,6 +473,17 @@ export function Accueil({
       </section>
 
       <section className="bloc" id="blog">
+        <div className="illu-bande">
+          <img
+            src={photoPremiersJours}
+            alt=""
+            aria-hidden="true"
+            width={760}
+            height={507}
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
         <h2>Bien gérer sa scolarité</h2>
         <p className="bloc-intro">
           Ce qu’il faut comprendre de la procédure, comment monter un dossier qui tient,
