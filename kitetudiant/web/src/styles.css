@@ -744,3 +744,90 @@ input[type='range'] { width: 100%; min-height: 44px; }
   :root:not([data-theme='light']) .illu-photo { filter: brightness(0.82) saturate(0.9); }
 }
 :root[data-theme='dark'] .illu-photo { filter: brightness(0.82) saturate(0.9); }
+
+/* ------------------------------------------------------------- collection */
+/* Noms préfixés « carte-collec- » et « collec- » : « .carte » est déjà pris par
+   l'affichage d'une formation, et la feuille est partagée par toutes les vues
+   (cf. styles.test.ts). */
+
+.entete-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+/* Pastille d'accès à la collection. Volontairement discrète : elle ne doit pas
+   concurrencer « Commencer », qui reste l'action de la page. */
+.pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pastille:hover { border-color: var(--chaud); color: var(--chaud); }
+/* Sur un téléphone, le nombre suffit : le mot prend la place du bouton voisin. */
+.pastille-libelle { display: none; }
+
+.collec-grille { display: grid; gap: 0.6rem; margin-bottom: 1.25rem; }
+
+.collec-choix {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+/* La sélection passe par une ombre, jamais par « border-color » : celui-ci
+   repeindrait aussi le liseré du haut, qui porte la rareté. */
+.collec-choix-actif .carte-collec { box-shadow: 0 0 0 2px var(--accent); }
+
+.carte-collec {
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  border-top: 4px solid var(--gris);
+  background: var(--carte);
+  padding: 0.9rem 1rem 1rem;
+}
+/* La rareté se lit à la couleur du liseré. Elle vient du décile réel du loyer
+   parmi les communes couvertes, jamais d'un tirage (cf. collection.ts). */
+.carte-collec-rare { border-top-color: var(--chaud); }
+.carte-collec-peu-frequente { border-top-color: var(--accent); }
+.carte-collec-courante { border-top-color: var(--gris); }
+
+.carte-collec-rarete {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--doux);
+}
+.carte-collec-titre { margin: 0 0 0.2rem; font-size: 1.05rem; line-height: 1.25; }
+.carte-collec-valeur {
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.carte-collec-detail { margin: 0; color: var(--doux); font-size: 0.88rem; }
+.carte-collec-source { margin: 0.5rem 0 0; color: var(--doux); font-size: 0.72rem; overflow-wrap: anywhere; }
+.carte-collec-partage { width: 100%; }
+/* Le canvas sert à fabriquer l'image, pas à être regardé : hors flux, hors
+   écran, et sans « display: none » qui l'empêcherait de se dessiner. */
+.carte-collec-canvas { position: absolute; left: -9999px; width: 1px; height: 1px; }
+
+/* Le champ de fichier est remplacé par son label, stylé en bouton. */
+.collec-fichier { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+@media (min-width: 40rem) {
+  .pastille-libelle { display: inline; }
+  .collec-grille { grid-template-columns: repeat(2, 1fr); }
+}

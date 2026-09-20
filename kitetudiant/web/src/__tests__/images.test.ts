@@ -57,16 +57,37 @@ describe('les illustrations embarquées', () => {
     ).toBe(true)
   })
 
+  it('reconnaît un chemin fautif quand il y en a un', () => {
+    // Garde-fou : sans lui, un resserrement de l'expression régulière pourrait
+    // vider le test ci-dessous sans que rien ne le signale.
+    const fautif = (source: string): string[] =>
+      [...source.matchAll(/['"`]([^'"`\n]*\.(?:webp|png|jpe?g|avif|svg))['"`]/gi)]
+        .map((m) => m[1]!)
+        .filter((c) => !c.startsWith('./') && c.includes('/'))
+    expect(fautif(`const a = "/images/campus.webp"`)).toEqual(['/images/campus.webp'])
+    expect(fautif(`const b = "https://cdn.exemple.fr/x.png"`)).toEqual([
+      'https://cdn.exemple.fr/x.png',
+    ])
+    expect(fautif(`import c from './images/campus.webp'`)).toEqual([])
+    expect(fautif('const d = `kitetudiant-limoges.png`')).toEqual([])
+  })
+
   it('ne sont jamais désignées par un chemin écrit en dur', () => {
     const fautifs: string[] = []
     for (const [fichier, source] of CONTENUS) {
-      // Une chaîne littérale qui finit par une extension d'image et ne commence
-      // pas par « ./ » : soit une URL absolue du site (cassée sous un
-      // sous-chemin), soit une adresse chez un tiers (interdite, elle
-      // communiquerait l'adresse IP de l'élève).
+      // Une chaîne littérale qui ressemble à un CHEMIN d'image — elle contient
+      // une barre oblique — et qui ne commence pas par « ./ » : soit une URL
+      // absolue du site (cassée sous un sous-chemin), soit une adresse chez un
+      // tiers (interdite, elle communiquerait l'adresse IP de l'élève).
+      //
+      // La barre oblique est ce qui distingue un chemin d'un simple nom de
+      // fichier. Sans elle, ce test signalait le nom proposé au téléchargement
+      // d'une carte partagée (« kitetudiant-limoges.png ») : ce n'est pas une
+      // ressource à charger, rien ne part le chercher.
       for (const m of source.matchAll(/['"`]([^'"`\n]*\.(?:webp|png|jpe?g|avif|svg))['"`]/gi)) {
         const chemin = m[1]!
         if (chemin.startsWith('./')) continue
+        if (!chemin.includes('/')) continue
         const ligne = source.slice(0, m.index).split('\n').length
         fautifs.push(`${fichier.replace(`${SRC}/`, '')}:${ligne} → ${chemin}`)
       }

@@ -64,6 +64,33 @@ export function positionDe(codeInsee: string | null): { lat: number; lon: number
   return { lat: brut.lat, lon: brut.lon }
 }
 
+/**
+ * Surface du logement type servant à convertir un €/m² en loyer mensuel.
+ *
+ * Exportée plutôt que recopiée : la page d'accueil et la collection de cartes
+ * affichent le même loyer pour la même ville. Deux constantes séparées se
+ * seraient désaccordées au premier changement, et deux chiffres différents
+ * pour une même commune ruineraient la confiance que tout le site cherche.
+ */
+export const SURFACE_TYPE = 25
+
+/**
+ * Loyers centraux de toutes les communes couvertes, en €/m², triés croissant.
+ *
+ * Sert à situer une commune parmi les autres — savoir si son loyer est
+ * ordinaire ou extrême — sans exposer le jeu brut. Calculé au premier appel
+ * puis gardé : 1 246 communes, un tri, une seule fois.
+ */
+let loyersTries: readonly number[] | null = null
+export function loyersCentrauxTries(): readonly number[] {
+  if (loyersTries === null) {
+    loyersTries = Object.values(communes.communes)
+      .map((c) => (c as { central: number }).central)
+      .sort((a, b) => a - b)
+  }
+  return loyersTries
+}
+
 export interface CommunePositionnee {
   readonly codeInsee: string
   readonly nom: string

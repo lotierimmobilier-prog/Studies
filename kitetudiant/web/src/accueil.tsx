@@ -234,14 +234,33 @@ function Comparaison() {
 
 /* ----------------------------------------------------------------- la page */
 
-export function Accueil({ onCommencer }: { onCommencer: () => void }) {
+export function Accueil({
+  onCommencer,
+  onCollection,
+  cartes,
+}: {
+  onCommencer: () => void
+  onCollection: () => void
+  /** Nombre de cartes déjà gagnées. Zéro : la pastille ne s'affiche pas. */
+  cartes: number
+}) {
   return (
     <main className="app accueil">
       <header className="entete entete-accueil">
         <h1 className="marque">KITETUDIANT</h1>
-        <button type="button" className="entete-cta" onClick={onCommencer}>
-          Commencer
-        </button>
+        <div className="entete-actions">
+          {/* La collection n'apparaît qu'une fois la première carte gagnée :
+              pour un visiteur qui découvre le site, ce serait du bruit. */}
+          {cartes > 0 ? (
+            <button type="button" className="pastille" onClick={onCollection}>
+              <span aria-hidden="true">◆</span> {cartes}
+              <span className="pastille-libelle"> cartes</span>
+            </button>
+          ) : null}
+          <button type="button" className="entete-cta" onClick={onCommencer}>
+            Commencer
+          </button>
+        </div>
       </header>
 
       <Hero onCommencer={onCommencer} />

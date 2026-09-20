@@ -28,6 +28,16 @@ import {
   type AideLogement,
   type FiltreFormations,
 } from './donnees.ts'
+import {
+  ajouter,
+  cartesGagnees,
+  cartesDe,
+  chargerCollection,
+  enregistrerCollection,
+  idEtape,
+  type Obtention,
+} from './collection.ts'
+import { Collection } from './collection.tsx'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 import { Accueil } from './accueil.tsx'
 import { Compte } from './compte.tsx'
@@ -286,7 +296,7 @@ function Carte({
 }
 
 export default function App() {
-  const [vue, setVue] = useState<'accueil' | 'parcours'>('accueil')
+  const [vue, setVue] = useState<'accueil' | 'parcours' | 'collection'>('accueil')
   const [etape, setEtape] = useState(0)
   const [reponses, setReponses] = useState<Reponses>(REPONSES_PAR_DEFAUT)
   const [resultats, setResultats] = useState<ResultatFormation[] | null>(null)
@@ -306,6 +316,22 @@ export default function App() {
   const [position, setPosition] = useState<PositionEleve | null>(null)
   const [positionEnCours, setPositionEnCours] = useState(false)
   const [messagePosition, setMessagePosition] = useState<string | null>(null)
+  /**
+   * Cartes gagnées. Elles ne quittent jamais le navigateur : rien n'est envoyé
+   * au serveur, et aucune carte ne s'obtient en invitant quelqu'un (collection.ts).
+   */
+  const [collection, setCollection] = useState<Obtention[]>(() => chargerCollection())
+
+  const gagner = useCallback((ids: readonly string[]) => {
+    if (ids.length === 0) return
+    setCollection((actuelle) => {
+      const suivante = ajouter(actuelle, ids, new Date().toISOString().slice(0, 10))
+      if (suivante.length !== actuelle.length) enregistrerCollection(suivante)
+      return suivante
+    })
+  }, [])
+
+  const nombreCartes = cartesDe(collection).length
 
   const demanderPosition = useCallback(async () => {
     setPositionEnCours(true)
@@ -375,13 +401,31 @@ export default function App() {
       }
       const aujourdHui = new Date().toISOString().slice(0, 10)
       setRetours(await chercherAgregatsRetours(formations.map((f) => f.id)))
-      setResultats(trierParPertinence(calculerResultats(formations, reponses, parRef, aujourdHui)))
+      const calcules = trierParPertinence(
+        calculerResultats(formations, reponses, parRef, aujourdHui),
+      )
+      setResultats(calcules)
+      // Une carte de ville ne se gagne que si un reste-à-vivre a réellement été
+      // calculé : sans compte, l'aperçu ne chiffre rien et ne débloque rien.
+      gagner(
+        cartesGagnees({
+          communesChiffrees: calcules.flatMap((r) =>
+            r.parScenario.central.ravMensuel !== null && r.formation.codeInsee !== null
+              ? [r.formation.codeInsee]
+              : [],
+          ),
+          detailOuvert: false,
+          bulletinLu: reponses.notesImportees,
+          academieEleve: reponses.academie,
+          academiesRegardees: calcules.map((r) => r.formation.academie),
+        }),
+      )
     } catch (e) {
       setErreur((e as Error).message)
     } finally {
       setEnCours(false)
     }
-  }, [reponses])
+  }, [reponses, gagner])
 
   const derniere = etape === ETAPES.length - 1
   const etapeCourante = ETAPES[etape]
@@ -390,8 +434,34 @@ export default function App() {
     [resultats],
   )
 
+  if (vue === 'collection') {
+    return (
+      <Collection
+        collection={collection}
+        onRetour={() => setVue(resultats === null ? 'accueil' : 'parcours')}
+        onImporter={(cartes) => {
+          setCollection((actuelle) => {
+            const suivante = ajouter(
+              actuelle,
+              cartes.map((c) => c.id),
+              new Date().toISOString().slice(0, 10),
+            )
+            enregistrerCollection(suivante)
+            return suivante
+          })
+        }}
+      />
+    )
+  }
+
   if (vue === 'accueil' && resultats === null) {
-    return <Accueil onCommencer={() => setVue('parcours')} />
+    return (
+      <Accueil
+        onCommencer={() => setVue('parcours')}
+        onCollection={() => setVue('collection')}
+        cartes={nombreCartes}
+      />
+    )
   }
 
   if (formulaireCompte) {
@@ -421,6 +491,12 @@ export default function App() {
             <h1>KITETUDIANT</h1>
             <p className="baseline">Ce qu’il te restera pour vivre, vœu par vœu.</p>
           </div>
+          {nombreCartes > 0 ? (
+            <button type="button" className="pastille" onClick={() => setVue('collection')}>
+              <span aria-hidden="true">◆</span> {nombreCartes}
+              <span className="pastille-libelle"> cartes</span>
+            </button>
+          ) : null}
           {connecte ? (
             <button
               type="button"
@@ -479,7 +555,13 @@ export default function App() {
               ouvert={ouvert === r.formation.id}
               verrouille={verrou !== null}
               onInscrire={() => setFormulaireCompte(true)}
-              onOuvrir={() => setOuvert(ouvert === r.formation.id ? null : r.formation.id)}
+              onOuvrir={() => {
+                const ouvrir = ouvert !== r.formation.id
+                setOuvert(ouvrir ? r.formation.id : null)
+                // Seulement quand le budget est réellement chiffré : sans
+                // compte, le détail est verrouillé et rien n'a été lu.
+                if (ouvrir && verrou === null) gagner([idEtape('detail')])
+              }}
             />
           ))}
         </div>
