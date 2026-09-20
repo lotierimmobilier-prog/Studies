@@ -16,6 +16,7 @@ import {
   chercherAgregatsRetours,
   chercherAidesLogement,
   deconnecter,
+  sessionDepuisTicket,
   InscriptionRequise,
   jetonSession,
   positionDe,
@@ -322,7 +323,9 @@ function Carte({
 }
 
 export default function App() {
-  const [vue, setVue] = useState<'accueil' | 'parcours' | 'collection' | 'blog' | 'article'>(
+  const [vue, setVue] = useState<
+    'accueil' | 'parcours' | 'collection' | 'blog' | 'article' | 'connexion' | 'inscription'
+  >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
       // afficher cet article, pas l'accueil.
@@ -381,6 +384,16 @@ export default function App() {
   }, [ajoutes])
 
   /**
+   * Ferme la session. `deconnecter` oublie le jeton localement AVANT de
+   * prévenir le serveur, et n'échoue jamais : il ne reste qu'à rafraîchir
+   * l'affichage.
+   */
+  const seDeconnecter = useCallback(async () => {
+    await deconnecter()
+    setConnecte(false)
+  }, [])
+
+  /**
    * Change de vue ET d'adresse. Seules les vues publiques ont une adresse :
    * le parcours de questions n'en a pas, il n'aurait aucun sens partagé.
    */
@@ -389,6 +402,46 @@ export default function App() {
     setVue(route.vue)
     setSlug(route.vue === 'article' ? route.slug : null)
     window.scrollTo(0, 0)
+  }, [])
+
+  /**
+   * Le retour de Google.
+   *
+   * Le serveur nous renvoie avec un ticket dans l'adresse — il ne peut pas
+   * faire autrement : une redirection est une navigation ordinaire, sans
+   * en-tête « Authorization ». On l'échange immédiatement contre le vrai
+   * jeton, puis on efface le paramètre de la barre d'adresse avec
+   * `replaceState` : inutile de le laisser dans l'historique alors qu'il est
+   * déjà consommé.
+   */
+  useEffect(() => {
+    const parametres = new URLSearchParams(window.location.search)
+    const ticket = parametres.get('ticket')
+    const annulee = parametres.get('connexion') === 'annulee'
+    if (ticket === null && !annulee) return
+
+    const nettoyer = (): void => {
+      parametres.delete('ticket')
+      parametres.delete('connexion')
+      const reste = parametres.toString()
+      window.history.replaceState(
+        {},
+        '',
+        `${window.location.pathname}${reste === '' ? '' : `?${reste}`}`,
+      )
+    }
+
+    if (annulee) {
+      // L'élève a refusé l'autorisation chez Google. Ce n'est pas une erreur,
+      // c'est une décision : on le ramène sans message d'échec.
+      nettoyer()
+      return
+    }
+
+    void sessionDepuisTicket(ticket!)
+      .then(() => setConnecte(true))
+      .catch((e: unknown) => setErreur((e as Error).message))
+      .finally(nettoyer)
   }, [])
 
   // Le bouton « précédent » du navigateur doit fonctionner comme partout.
@@ -575,10 +628,47 @@ export default function App() {
       <Accueil
         onCommencer={() => setVue('parcours')}
         onCollection={() => setVue('collection')}
-        onBlog={() => naviguer({ vue: 'blog' })}
+        onNaviguer={naviguer}
         onArticle={(s) => naviguer({ vue: 'article', slug: s })}
+        onDeconnexion={() => void seDeconnecter()}
+        connecte={connecte}
         cartes={nombreCartes}
       />
+    )
+  }
+
+  // Connexion et inscription ont chacune leur adresse. Le composant est le
+  // même : seul le mode initial change, et l'utilisateur peut basculer de
+  // l'un à l'autre depuis le formulaire.
+  if (vue === 'connexion' || vue === 'inscription') {
+    return (
+      <main className="app">
+        <header className="entete entete-accueil">
+          <h1 className="marque">
+            <Marque />
+          </h1>
+          <button
+            type="button"
+            className="entete-lien"
+            onClick={() => naviguer({ vue: 'accueil' })}
+          >
+            Retour au site
+          </button>
+        </header>
+        <Compte
+          mode={vue === 'connexion' ? 'connexion' : 'inscription'}
+          message={
+            vue === 'connexion'
+              ? 'Retrouve tes simulations et le détail de chaque budget.'
+              : 'Ton compte te donne accès au détail de chaque budget.'
+          }
+          onOuvert={() => {
+            setConnecte(true)
+            naviguer({ vue: 'accueil' })
+          }}
+          onAbandon={() => naviguer({ vue: 'accueil' })}
+        />
+      </main>
     )
   }
 

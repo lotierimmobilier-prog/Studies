@@ -10,27 +10,57 @@
  * de terminale a le droit de savoir ce qu'il donne avant de le donner.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { CompteRefuse, connecter, inscrire } from './donnees.ts'
+import {
+  CompteRefuse,
+  connecter,
+  departGoogle,
+  inscrire,
+  moyensDeConnexion,
+} from './donnees.ts'
 
 type Mode = 'inscription' | 'connexion'
 
 export function Compte({
   message,
+  mode: modeInitial = 'inscription',
+  retour = 'Revenir à mes résultats sans compte',
   onOuvert,
   onAbandon,
 }: {
   /** Pourquoi on demande un compte, formulé par le serveur. */
   readonly message: string
+  /**
+   * Le mode d'ouverture. Il vient de l'adresse : /connexion ouvre sur la
+   * connexion, /inscription sur l'inscription. La bascule reste possible
+   * depuis le formulaire — quelqu'un qui se trompe de lien ne doit pas avoir
+   * à revenir en arrière.
+   */
+  readonly mode?: Mode
+  readonly retour?: string
   readonly onOuvert: () => void
   readonly onAbandon: () => void
 }) {
-  const [mode, setMode] = useState<Mode>('inscription')
+  const [mode, setMode] = useState<Mode>(modeInitial)
   const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [enCours, setEnCours] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
+  // La connexion Google dépend d'identifiants posés sur le serveur. On
+  // demande plutôt que de deviner : un bouton qui mène à un mur est pire
+  // qu'un bouton absent.
+  const [google, setGoogle] = useState(false)
+
+  useEffect(() => {
+    let vivant = true
+    void moyensDeConnexion().then((m) => {
+      if (vivant) setGoogle(m.google)
+    })
+    return () => {
+      vivant = false
+    }
+  }, [])
 
   async function envoyer(e: React.FormEvent): Promise<void> {
     e.preventDefault()
@@ -56,6 +86,23 @@ export function Compte({
         {mode === 'inscription' ? 'Crée ton compte' : 'Connecte-toi'}
       </h2>
       <p className="compte-pourquoi">{message}</p>
+
+      {google ? (
+        <div className="compte-google">
+          {/* Un LIEN, pas un bouton qui appellerait du JavaScript de Google.
+              Aucun script tiers n'est chargé sur ce site : Google n'apprend
+              l'existence d'un élève qu'au moment où celui-ci clique. Sur un
+              site qui s'adresse à des mineurs, la différence n'est pas
+              cosmétique. */}
+          <a className="secondaire compte-google-lien" href={departGoogle(window.location.pathname)}>
+            Continuer avec Google
+          </a>
+          <p className="note">
+            Google nous transmet ton adresse e-mail, rien d’autre — ni ton nom, ni ta photo.
+          </p>
+          <p className="compte-ou">ou</p>
+        </div>
+      ) : null}
 
       <form onSubmit={(e) => void envoyer(e)} className="compte-form">
         <div className="champ">
@@ -137,7 +184,7 @@ export function Compte({
       </div>
 
       <button type="button" className="lien compte-retour" onClick={onAbandon}>
-        Revenir à mes résultats sans compte
+        {retour}
       </button>
     </section>
   )

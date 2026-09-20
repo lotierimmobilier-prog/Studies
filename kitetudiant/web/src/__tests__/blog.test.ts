@@ -190,6 +190,17 @@ describe('les articles', () => {
     expect(MENTION_SOURCE).toMatch(/fixées chaque année par l’État|fixées chaque année par l'État/)
   })
 
+  it('font entre 600 et 900 mots', () => {
+    // Un article de 300 mots se lit bien mais ne se classe pas : il n'a pas la
+    // matière pour répondre à une recherche, et un moteur le traite comme une
+    // page d'appoint. La borne haute compte autant — au-delà, on dilue, et le
+    // lecteur décroche avant la partie utile.
+    const fautifs = ARTICLES.filter((a) => mots(a) < 600 || mots(a) > 900).map(
+      (a) => `${a.slug} : ${mots(a)} mots`,
+    )
+    expect(fautifs, 'Longueur visée : 600 à 900 mots, chapeau compris.').toEqual([])
+  })
+
   it('annoncent un temps de lecture cohérent avec leur longueur', () => {
     for (const a of ARTICLES) {
       expect(minutesDeLecture(a), a.slug).toBe(Math.max(1, Math.round(mots(a) / 200)))

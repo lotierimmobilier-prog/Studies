@@ -680,3 +680,64 @@ export async function chercherArticles(
   }
 }
 
+
+/* ------------------------------------------------------- connexion Google */
+
+/**
+ * Les moyens de connexion que ce serveur propose.
+ *
+ * On le demande plutôt que de le deviner : la connexion Google dépend
+ * d'identifiants posés dans l'environnement du serveur, et afficher un bouton
+ * qui mène à un mur est pire que de ne pas l'afficher du tout.
+ */
+export async function moyensDeConnexion(
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<{ readonly google: boolean }> {
+  try {
+    const reponse = await recuperer(`${base}/comptes/moi`)
+    if (!reponse.ok) return { google: false }
+    const corps = (await reponse.json()) as { google?: unknown }
+    return { google: corps.google === true }
+  } catch {
+    // Le serveur ne répond pas : on n'affiche pas de bouton, le formulaire
+    // par mot de passe reste disponible.
+    return { google: false }
+  }
+}
+
+/**
+ * L'adresse du départ vers Google.
+ *
+ * C'est un LIEN, pas un appel : aucun script de Google n'est chargé sur le
+ * site, donc Google n'apprend l'existence d'un élève qu'au moment où celui-ci
+ * clique. Sur un site qui s'adresse à des mineurs, la différence n'est pas
+ * cosmétique.
+ */
+export function departGoogle(retour: string, base = BASE_API): string {
+  return `${base}/comptes/google/debut?retour=${encodeURIComponent(retour)}`
+}
+
+/**
+ * Échange le ticket rapporté de Google contre le vrai jeton de session.
+ *
+ * Le ticket voyage dans l'adresse, donc dans l'historique et les journaux :
+ * il ne vit qu'une minute, ne sert qu'une fois, et ne donne accès à rien par
+ * lui-même. L'appelant efface ensuite le paramètre de la barre d'adresse.
+ */
+export async function sessionDepuisTicket(
+  ticket: string,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<void> {
+  const reponse = await recuperer(`${base}/comptes/google/session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ticket }),
+  })
+  const corps = (await reponse.json().catch(() => ({}))) as { jeton?: string; erreur?: string }
+  if (!reponse.ok || typeof corps.jeton !== 'string') {
+    throw new CompteRefuse(corps.erreur ?? 'Connexion Google impossible.')
+  }
+  poserJeton(corps.jeton)
+}

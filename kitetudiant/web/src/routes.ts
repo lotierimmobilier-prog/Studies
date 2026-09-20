@@ -25,6 +25,13 @@ export type Route =
   | { readonly vue: 'accueil' }
   | { readonly vue: 'blog' }
   | { readonly vue: 'article'; readonly slug: string }
+  // Connexion et inscription ont leur propre adresse plutôt qu'un simple état
+  // en mémoire : on veut pouvoir envoyer « le lien d'inscription » à
+  // quelqu'un, revenir en arrière après avoir ouvert le formulaire, et
+  // retomber sur la bonne page après un aller-retour vers un fournisseur
+  // d'identité externe.
+  | { readonly vue: 'connexion' }
+  | { readonly vue: 'inscription' }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -35,6 +42,10 @@ export function cheminDe(route: Route): string {
       return `${BASE}blog`
     case 'article':
       return `${BASE}blog/${route.slug}`
+    case 'connexion':
+      return `${BASE}connexion`
+    case 'inscription':
+      return `${BASE}inscription`
   }
 }
 
@@ -49,6 +60,8 @@ export function routeDuChemin(chemin: string): Route | null {
   const reste = chemin.slice(BASE.length).replace(/\/+$/, '')
   if (reste === '') return { vue: 'accueil' }
   if (reste === 'blog') return { vue: 'blog' }
+  if (reste === 'connexion') return { vue: 'connexion' }
+  if (reste === 'inscription') return { vue: 'inscription' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
   return null

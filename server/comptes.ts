@@ -348,6 +348,62 @@ export class DepotComptes {
     return this.ouvrirSession({ ...fichier, comptes }, index, maintenant)
   }
 
+  /**
+   * Ouvre une session à partir d'une adresse confirmée par un fournisseur
+   * d'identité externe, en créant le compte s'il n'existe pas encore.
+   *
+   * ── Deux points qui méritent d'être explicites ─────────────────────────
+   *
+   * 1. LE COMPTE CRÉÉ N'A PAS DE MOT DE PASSE UTILISABLE. On lui pose une
+   *    empreinte tirée d'un secret aléatoire que personne ne connaît, pas
+   *    même nous. Laisser un champ vide aurait été plus simple et beaucoup
+   *    plus dangereux : toute comparaison future avec une chaîne vide aurait
+   *    ouvert le compte.
+   *
+   * 2. UN COMPTE EXISTANT EST REJOINT, PAS DUPLIQUÉ. Si l'élève s'était
+   *    inscrit avec un mot de passe puis revient par le fournisseur, il
+   *    retrouve son compte. C'est ce que l'on attend, et c'est sûr à une
+   *    condition, vérifiée en amont : que le fournisseur ait confirmé que
+   *    l'adresse lui appartient. Sans cette confirmation, quiconque
+   *    déclarerait l'adresse d'un autre entrerait chez lui.
+   *
+   * Le compteur d'échecs n'est pas consulté : il protège la devinette de mot
+   * de passe, et il n'y a pas de mot de passe à deviner ici.
+   */
+  async ouvrirParFournisseur(
+    email: string,
+    maintenant: Date = new Date(),
+  ): Promise<SessionOuverte> {
+    this.exigerConfiguration()
+    const fichier = await this.charger(maintenant)
+    const index = await this.indexDe(email, fichier.sel)
+    const existant = fichier.comptes.find((c) => c.index === index)
+
+    if (existant !== undefined) {
+      const comptes = fichier.comptes.map((c) =>
+        c.index === index ? { ...c, vuLe: maintenant.toISOString() } : c,
+      )
+      return this.ouvrirSession({ ...fichier, comptes }, index, maintenant)
+    }
+
+    const selMotDePasse = randomBytes(16).toString('hex')
+    const compte: CompteStocke = {
+      index,
+      ...(await this.chiffrerEmail(email, fichier.sel)),
+      selMotDePasse,
+      // Un secret jetable, aussitôt oublié : le compte n'a pas de mot de
+      // passe, et aucune saisie ne pourra jamais correspondre.
+      empreinteMotDePasse: await this.empreinte(randomBytes(32).toString('hex'), selMotDePasse),
+      inscritLe: maintenant.toISOString(),
+      vuLe: maintenant.toISOString(),
+    }
+    return this.ouvrirSession(
+      { ...fichier, comptes: [...fichier.comptes, compte] },
+      index,
+      maintenant,
+    )
+  }
+
   /** Vrai si le jeton correspond à une session vivante. */
   async sessionValide(jeton: string, maintenant: Date = new Date()): Promise<boolean> {
     if (!this.configure || jeton.length === 0) return false
