@@ -935,14 +935,28 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .carte-actions { margin-top: 1rem; }
 .carte-deplier { width: 100%; }
 
+/* Ces liens mènent AILLEURS. Ils se présentent donc comme des pastilles
+   sortantes, pas comme du texte de la page : en petits liens gris au bas
+   d'une fiche, personne ne les voyait. */
 .carte-liens {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem 1rem;
+  gap: 0.4rem 0.5rem;
   margin: 0.75rem 0 0;
   font-size: 0.83rem;
 }
-.carte-liens a { color: var(--accent); }
+.carte-lien {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.carte-lien:hover { border-color: var(--accent); background: var(--accent); color: var(--fond); }
 
 /* Sur un téléphone étroit, trois colonnes écraseraient les montants : on passe
    à une seule, et chaque case garde son chiffre lisible. */
@@ -1485,6 +1499,228 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   line-height: 1.5;
   color: var(--doux);
 }
+
+/* ------------------------------------------------------- espace personnel */
+/* Préfixe « compte- » : la feuille est partagée par toutes les vues, et un
+   nom déjà pris ferait hériter cet écran d'une autre mise en page sans rien
+   casser visiblement (cf. styles.test.ts). */
+
+.bloc-compte {
+  margin: 0 0 2rem;
+  padding: 1.5rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.bloc-compte h2 { margin: 0 0 0.5rem; font-size: 1.15rem; font-weight: 600; }
+.bloc-compte h3 { margin: 0 0 0.5rem; font-size: 0.98rem; font-weight: 600; }
+
+/* Les faits : un libellé, une valeur, alignés en colonnes sur écran large.
+   Une liste de définitions et non un tableau : ce sont des paires, pas des
+   lignes d'un même relevé. */
+.compte-faits { margin: 0.5rem 0 0; display: grid; gap: 0.7rem; }
+.compte-fait { display: grid; gap: 0.1rem; }
+.compte-fait dt {
+  color: var(--doux);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.compte-fait dd { margin: 0; font-size: 0.98rem; overflow-wrap: anywhere; }
+
+/* Ce que le site NE sait pas. Détaché par un filet : ce n'est pas une note
+   de bas de page, c'est la moitié de la réponse. */
+.compte-rien {
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--trait);
+}
+.compte-rien ul { margin: 0 0 0.8rem; padding-left: 1.1rem; font-size: 0.92rem; color: var(--doux); }
+.compte-rien li { margin-bottom: 0.25rem; }
+
+/* « compte-mdp- » et non « compte-form » : ce dernier appartient déjà au
+   formulaire de connexion (ligne 581). Réutiliser son nom aurait fait hériter
+   cet écran de sa mise en page sans que rien ne le signale — c'est exactement
+   la faute que styles.test.ts est là pour attraper, et il l'a attrapée. */
+.compte-mdp { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 1rem; }
+.compte-mdp input {
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.7rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  color: var(--encre);
+  font: inherit;
+  min-height: 48px;
+}
+.compte-mdp input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.compte-mdp .principal { align-self: flex-start; padding-inline: 1.5rem; flex: 0 0 auto; }
+
+.compte-erreur {
+  margin: 0 0 0.8rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--orange);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  font-size: 0.9rem;
+}
+.compte-ok {
+  margin: 0 0 0.8rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--vert);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  font-size: 0.9rem;
+}
+
+/* L'effacement. Signalé par un filet, pas par une couleur criarde : c'est un
+   droit, pas un piège — mais il demande deux gestes. */
+.bloc-compte-effacer { border-left: 3px solid var(--orange); }
+.compte-confirme {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+.compte-confirme input { margin-top: 0.2rem; width: 18px; height: 18px; flex: 0 0 auto; }
+.compte-danger {
+  flex: 0 0 auto;
+  width: auto;
+  padding-inline: 1.5rem;
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.compte-danger:not([disabled]):hover { background: var(--orange); color: var(--fond); }
+.compte-danger[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* ------------------------------------------------- questions fréquentes */
+/* Une liste de définitions, pas une suite de paragraphes : la question et sa
+   réponse sont liées sémantiquement, et un lecteur d'écran l'annonce. */
+
+.questions {
+  margin: 2.5rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--trait);
+}
+.questions-titre {
+  margin: 0 0 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.questions-liste { margin: 0; }
+.questions-paire { margin: 0 0 1.4rem; }
+.questions-paire:last-child { margin-bottom: 0; }
+.questions-question {
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+/* La réponse est décalée et tenue par un filet : elle se lit comme un bloc
+   détachable, ce qu'elle est — c'est le morceau qu'un moteur reprendra seul. */
+.questions-reponse {
+  margin: 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ----------------------------------------------------- barre de classement */
+/* Préfixe « barre-tri- » : la feuille est partagée par toutes les vues, et un
+   nom déjà pris ferait hériter cette barre d'une autre mise en page sans rien
+   casser visiblement (cf. styles.test.ts). */
+
+.barre-tri {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.5rem;
+  margin: 0 0 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.barre-tri-groupe { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.barre-tri-titre {
+  color: var(--doux);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.barre-tri-boutons { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+.barre-tri-choix {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  /* 44 px de haut : la cible tactile minimale. La pastille reste fine à
+     l'œil grâce au remplissage, pas en rognant la zone cliquable. */
+  min-height: 44px;
+}
+.barre-tri-choix:hover { border-color: var(--accent); }
+/* L'état actif se lit à la couleur ET s'annonce par aria-pressed : la
+   couleur seule ne dit rien à qui ne la voit pas. */
+.barre-tri-choix[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+  font-weight: 600;
+}
+.barre-tri-compte { opacity: 0.7; font-variant-numeric: tabular-nums; }
+
+.barre-tri-select {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.85rem;
+  min-height: 44px;
+  max-width: 16rem;
+}
+
+/* Le compte des écartés prend toute la ligne : c'est la garantie que rien
+   n'a disparu, elle ne se range pas dans un coin. */
+.barre-tri-ecartes {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin: 0.2rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.85rem;
+}
+.barre-tri-tout {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.barre-tri-tout:hover { background: var(--accent); color: var(--fond); }
+.barre-tri-note { flex-basis: 100%; margin: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    GRAND ÉCRAN

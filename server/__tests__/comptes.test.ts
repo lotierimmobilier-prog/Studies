@@ -163,6 +163,171 @@ describe('sessions', () => {
   })
 })
 
+describe('espace personnel — profil', () => {
+  it('rend l’adresse et les dates du titulaire de la session', async () => {
+    const d = depot()
+    const { jeton } = await d.inscrire('Eleve@Exemple.fr', MDP)
+    const profil = await d.profil(jeton)
+    expect(profil?.email).toBe('eleve@exemple.fr')
+    expect(profil?.inscritLe).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+    expect(profil?.sessionExpireLe).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+  })
+
+  it('ne rend RIEN d’autre que ces quatre champs', async () => {
+    // Le contour exact de ce qui sort vers le navigateur. Ce test tombera le
+    // jour où quelqu'un ajoutera un champ au profil : c'est sa raison d'être.
+    // Les titulaires sont mineurs, et aucune donnée ne doit apparaître ici
+    // sans décision (règle 3 de CLAUDE.md).
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    expect(Object.keys((await d.profil(jeton))!).sort()).toEqual([
+      'email',
+      'inscritLe',
+      'sessionExpireLe',
+      'vuLe',
+    ])
+  })
+
+  it('refuse un jeton inconnu ou expiré', async () => {
+    const d = depot()
+    await d.inscrire('eleve@exemple.fr', MDP)
+    expect(await d.profil('jeton-inventé')).toBeNull()
+    expect(await d.profil('')).toBeNull()
+  })
+
+  it('ne rend plus rien une fois la session expirée', async () => {
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    const apres = new Date(Date.now() + (SESSION_JOURS + 1) * 86400_000)
+    expect(await d.profil(jeton, apres)).toBeNull()
+  })
+})
+
+describe('espace personnel — mot de passe', () => {
+  it('change le mot de passe quand l’ancien est juste', async () => {
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    await d.changerMotDePasse(jeton, MDP, 'un-nouveau-mot-de-passe')
+    await expect(d.connecter('eleve@exemple.fr', 'un-nouveau-mot-de-passe')).resolves.toBeTruthy()
+    await expect(d.connecter('eleve@exemple.fr', MDP)).rejects.toBeInstanceOf(IdentifiantsRefuses)
+  })
+
+  it('exige l’ancien mot de passe, même avec une session valide', async () => {
+    // Une session se vole ou s'emprunte — un téléphone laissé déverrouillé
+    // suffit. Sans cette vérification, celui qui la détient verrouillerait le
+    // compte pour son titulaire.
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    await expect(
+      d.changerMotDePasse(jeton, 'pas-le-bon', 'un-nouveau-mot-de-passe'),
+    ).rejects.toBeInstanceOf(IdentifiantsRefuses)
+    await expect(d.connecter('eleve@exemple.fr', MDP)).resolves.toBeTruthy()
+  })
+
+  it('refuse un nouveau mot de passe trop court, en le disant', async () => {
+    // Le nouveau est validé AVANT l'ancien : sinon un mot de passe trop court
+    // renverrait « identifiants refusés » et laisserait croire à une faute de
+    // frappe sur l'ancien.
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    await expect(d.changerMotDePasse(jeton, MDP, 'court')).rejects.toBeInstanceOf(
+      InscriptionInvalide,
+    )
+    await expect(d.changerMotDePasse(jeton, 'pas-le-bon', 'court')).rejects.toBeInstanceOf(
+      InscriptionInvalide,
+    )
+  })
+
+  it('fait tomber les AUTRES sessions, et garde celle-ci', async () => {
+    // C'est le geste qu'on attend d'un changement de mot de passe : si
+    // quelqu'un d'autre était connecté, il ne l'est plus — et l'élève n'est
+    // pas déconnecté par sa propre précaution.
+    const d = depot()
+    const premiere = await d.inscrire('eleve@exemple.fr', MDP)
+    const seconde = await d.connecter('eleve@exemple.fr', MDP)
+    await d.changerMotDePasse(seconde.jeton, MDP, 'un-nouveau-mot-de-passe')
+    expect(await d.sessionValide(seconde.jeton)).toBe(true)
+    expect(await d.sessionValide(premiere.jeton)).toBe(false)
+  })
+
+  it('tire un sel neuf, plutôt que de réutiliser l’ancien', async () => {
+    // Réutiliser le sel laisserait deux empreintes comparables dans les
+    // sauvegardes successives du fichier.
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    const selAvant = JSON.parse(await readFile(chemin, 'utf8')).comptes[0].selMotDePasse
+    await d.changerMotDePasse(jeton, MDP, 'un-nouveau-mot-de-passe')
+    const selApres = JSON.parse(await readFile(chemin, 'utf8')).comptes[0].selMotDePasse
+    expect(selApres).not.toBe(selAvant)
+  })
+
+  it('refuse sur une session inconnue', async () => {
+    const d = depot()
+    await d.inscrire('eleve@exemple.fr', MDP)
+    await expect(
+      d.changerMotDePasse('jeton-inventé', MDP, 'un-nouveau-mot-de-passe'),
+    ).rejects.toBeInstanceOf(IdentifiantsRefuses)
+  })
+
+  it('ne parle pas d’une adresse que l’élève n’a pas saisie', async () => {
+    // Le message ambigu de la connexion — « adresse OU mot de passe » —
+    // existe pour empêcher d'énumérer les comptes. Ici, la session identifie
+    // déjà le compte : il n'y a rien à énumérer, et cette ambiguïté enverrait
+    // l'élève chercher une faute de frappe dans un champ qui n'existe pas.
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    await expect(
+      d.changerMotDePasse(jeton, 'pas-le-bon', 'un-nouveau-mot-de-passe'),
+    ).rejects.toThrow(/mot de passe actuel/i)
+    await expect(
+      d.changerMotDePasse('jeton-inventé', MDP, 'un-nouveau-mot-de-passe'),
+    ).rejects.toThrow(/session/i)
+    // La connexion, elle, garde son message ambigu.
+    await expect(d.connecter('eleve@exemple.fr', 'pas-le-bon')).rejects.toThrow(
+      /Adresse ou mot de passe/i,
+    )
+  })
+})
+
+describe('espace personnel — effacement', () => {
+  it('efface le compte et toutes ses sessions', async () => {
+    const d = depot()
+    const premiere = await d.inscrire('eleve@exemple.fr', MDP)
+    const seconde = await d.connecter('eleve@exemple.fr', MDP)
+    expect(await d.supprimerCompte(seconde.jeton)).toBe(true)
+    expect(await d.sessionValide(premiere.jeton)).toBe(false)
+    expect(await d.sessionValide(seconde.jeton)).toBe(false)
+    expect((await d.etat()).comptes).toBe(0)
+  })
+
+  it('ne laisse aucune trace de l’adresse sur le disque', async () => {
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    const avant = await readFile(chemin, 'utf8')
+    const chiffre = JSON.parse(avant).comptes[0].emailChiffre
+    await d.supprimerCompte(jeton)
+    const apres = await readFile(chemin, 'utf8')
+    expect(apres).not.toContain(chiffre)
+    expect(JSON.parse(apres).comptes).toEqual([])
+  })
+
+  it('permet de se réinscrire avec la même adresse', async () => {
+    // Un effacement qui laisserait l'index derrière lui rendrait l'adresse
+    // définitivement inutilisable — une punition, pas un droit.
+    const d = depot()
+    const { jeton } = await d.inscrire('eleve@exemple.fr', MDP)
+    await d.supprimerCompte(jeton)
+    await expect(d.inscrire('eleve@exemple.fr', MDP)).resolves.toBeTruthy()
+  })
+
+  it('n’efface rien sur une session inconnue', async () => {
+    const d = depot()
+    await d.inscrire('eleve@exemple.fr', MDP)
+    expect(await d.supprimerCompte('jeton-inventé')).toBe(false)
+    expect((await d.etat()).comptes).toBe(1)
+  })
+})
+
 describe('conservation', () => {
   it('supprime les comptes dormants au-delà du délai', async () => {
     const t0 = new Date('2020-01-01T00:00:00Z')

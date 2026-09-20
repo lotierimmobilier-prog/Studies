@@ -32,6 +32,12 @@ export type Route =
   // d'identité externe.
   | { readonly vue: 'connexion' }
   | { readonly vue: 'inscription' }
+  // L'espace personnel a son adresse, comme le reste. Elle n'est pas plus
+  // secrète pour autant : c'est la session qui protège son contenu, pas
+  // l'ignorance du chemin. Un chemin « secret » se retrouve dans l'historique
+  // du navigateur, dans les journaux d'un serveur mandataire, dans un
+  // message copié-collé — il ne protège rien.
+  | { readonly vue: 'compte' }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -46,6 +52,8 @@ export function cheminDe(route: Route): string {
       return `${BASE}connexion`
     case 'inscription':
       return `${BASE}inscription`
+    case 'compte':
+      return `${BASE}mon-compte`
   }
 }
 
@@ -62,6 +70,7 @@ export function routeDuChemin(chemin: string): Route | null {
   if (reste === 'blog') return { vue: 'blog' }
   if (reste === 'connexion') return { vue: 'connexion' }
   if (reste === 'inscription') return { vue: 'inscription' }
+  if (reste === 'mon-compte') return { vue: 'compte' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
   return null

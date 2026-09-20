@@ -40,6 +40,41 @@ export type Bloc =
   /** Une mise en garde ou un point à retenir, détaché du fil du texte. */
   | { readonly type: 'encadre'; readonly texte: string }
 
+/**
+ * Une question que l'élève se pose vraiment, et sa réponse.
+ *
+ * ── Pourquoi ce champ existe ─────────────────────────────────────────────
+ *
+ * Un moteur génératif — l'aperçu IA de Google, ChatGPT, Perplexity — ne cite
+ * pas un article, il en cite un PASSAGE. Pour être citable, un passage doit
+ * répondre à une question posée, tenir debout sans son contexte, et se lire
+ * en quelques dizaines de mots. Un article bien écrit ne remplit pas
+ * spontanément ces trois conditions : il déroule un fil, et chaque paragraphe
+ * s'appuie sur le précédent.
+ *
+ * ── La contrainte qui compte ─────────────────────────────────────────────
+ *
+ * Une réponse ne dit RIEN que l'article ne dise déjà. Ce n'est pas une
+ * précaution de style : une question-réponse est précisément le morceau qu'un
+ * moteur reprendra hors de tout contexte, éventuellement sans lien. Y glisser
+ * une affirmation non vérifiée par le corps du texte, c'est publier une
+ * information dont plus personne ne peut remonter la source.
+ *
+ * Les mêmes interdits que le corps s'appliquent, et des tests les tiennent :
+ * aucun montant en euros (règle 1), aucune date précise de la session à
+ * venir (elle n'est pas publiée), aucune formule anxiogène.
+ */
+export interface QuestionReponse {
+  /** Formulée comme l'élève la pose, pas comme un sommaire la titrerait. */
+  readonly question: string
+  /**
+   * Autoportante : compréhensible seule, sans avoir lu ce qui précède. Entre
+   * quarante et quatre-vingts mots — au-delà, un moteur tronque au milieu
+   * d'une phrase.
+   */
+  readonly reponse: string
+}
+
 export interface Article {
   /** Identifiant dans l'URL. Minuscules, tirets, rien d'autre. */
   readonly slug: string
@@ -47,6 +82,8 @@ export interface Article {
   /** Résumé d'une ou deux phrases. Sert aussi de description pour les moteurs. */
   readonly chapeau: string
   readonly corps: readonly Bloc[]
+  /** Questions fréquentes, tirées du corps. Vide tant qu'aucune n'est écrite. */
+  readonly questions?: readonly QuestionReponse[]
   /** Date ISO de publication. */
   readonly publieLe: string
   /** Date ISO de dernière révision, ou null si jamais révisé. */
@@ -63,6 +100,26 @@ export const MENTION_SOURCE =
   'dates de la session à venir : celles-ci sont fixées chaque année par l’État et ' +
   'publiées sur parcoursup.gouv.fr. Ce n’est pas un texte officiel : en cas de doute, ' +
   'parcoursup.gouv.fr fait foi.'
+
+/**
+ * TOUT le texte d'un article, quel que soit le champ qui le porte.
+ *
+ * Les garde-fous de blog.test.ts — pas d'euro, pas de date précise, rien
+ * d'anxiogène — balayaient le corps et le chapeau. Le jour où les questions
+ * fréquentes ont été ajoutées, ils ont continué de passer au vert sur un
+ * champ qu'ils ne voyaient pas. D'où cette fonction : les tests lisent ici,
+ * et un champ de texte ajouté demain sans être recensé ici se voit
+ * immédiatement, parce qu'un test dédié compare cette liste aux clés de
+ * l'article.
+ */
+export function tousLesTextes(article: Article): string[] {
+  return [
+    article.titre,
+    article.chapeau,
+    ...article.corps.flatMap((b) => (b.type === 'liste' ? [...b.points] : [b.texte])),
+    ...(article.questions ?? []).flatMap((q) => [q.question, q.reponse]),
+  ]
+}
 
 /** Nombre de mots d'un article, corps compris. */
 export function mots(article: Article): number {
@@ -92,6 +149,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['parcoursup', 'orientation', 'post-bac', 'vœux'],
+    questions: [
+      {
+        question: 'Faut-il remplir un dossier par vœu sur Parcoursup ?',
+        reponse:
+          'Non. Vous remplissez un seul dossier — état civil, bulletins, résultats, activités — et chaque formation y puise ce qui l’intéresse. Seuls deux éléments sont propres à chaque vœu : le projet de formation motivé, et les pièces complémentaires que certaines filières demandent. Le gros du travail se fait donc une fois.',
+      },
+      {
+        question: 'Le classement de mes vœux influence-t-il les formations ?',
+        reponse:
+          'Non, et c’est pourquoi les vœux ne se classent pas au moment où on les formule. Les formations examinent votre dossier sans savoir à quel rang vous les placez, ni quels autres vœux vous avez formulés. Vous décidez quelles formations vous demandez et quelle proposition vous acceptez ; entre les deux, ce sont elles qui décident.',
+      },
+      {
+        question: 'Quelle est l’erreur la plus fréquente sur Parcoursup ?',
+        reponse:
+          'Ce n’est pas de mal choisir, c’est de laisser passer une date. Chaque année, des dossiers complets ne sont jamais examinés parce que les vœux n’ont pas été confirmés avant la clôture : le travail est fait, la candidature n’existe pas. Notez la date de confirmation, pas seulement celle de formulation.',
+      },
+    ],
     corps: [
       p(
         'Parcoursup n’est pas un concours. C’est un guichet : vous déposez un dossier, ' +
@@ -192,6 +266,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['vœux', 'sous-vœux', 'apprentissage', 'parcoursup'],
+    questions: [
+      {
+        question: 'Dix vœux, est-ce que cela veut dire dix formations ?',
+        reponse:
+          'Non. Certaines filières se demandent par groupe : vous formulez un vœu pour la filière, puis vous choisissez les établissements qui vous intéressent — ce sont les sous-vœux. Le vœu compte pour un, les sous-vœux ont leur propre plafond. Un candidat organisé couvre donc bien plus de dix portes d’entrée. Vérifiez le décompte sur la fiche.',
+      },
+      {
+        question: 'Les vœux en apprentissage comptent-ils dans les dix ?',
+        reponse:
+          'Non, ils s’ajoutent, à hauteur de dix. Ils suivent aussi un calendrier plus souple : on peut continuer à en formuler après la clôture de la phase principale, parce qu’une place en apprentissage dépend d’un employeur autant que d’une école. Être accepté par le centre de formation ne suffit pas, il faut un contrat.',
+      },
+      {
+        question: 'À quoi ressemble une liste de vœux solide ?',
+        reponse:
+          'Elle couvre trois cas : des formations où votre dossier est dans la moyenne de ceux qui sont admis, des formations plus ouvertes qui vous conviendraient vraiment, et une ou deux formations ambitieuses. Variez les types de formation et surtout la géographie, le levier le plus efficace et le moins utilisé. Ne gardez aucun vœu que vous refuseriez.',
+      },
+    ],
     corps: [
       p(
         'La règle de base est connue : dix vœux, sans avoir à les classer. Ce que l’on ' +
@@ -285,6 +376,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['confirmation', 'dossier', 'vœux', 'calendrier'],
+    questions: [
+      {
+        question: 'Quelle différence entre formuler un vœu et le confirmer ?',
+        reponse:
+          'Formuler ajoute le vœu à votre dossier ; confirmer le transmet aux formations. Ce sont deux gestes différents, séparés d’environ trois semaines. Un vœu formulé à temps mais non confirmé disparaît sans un mot : il donne l’impression d’exister, il n’existe pas encore. Chaque vœu se confirme séparément.',
+      },
+      {
+        question: 'Confirmer un vœu m’engage-t-il définitivement ?',
+        reponse:
+          'Non. Une fois le vœu confirmé, vous ne pouvez plus en changer le contenu — le projet motivé est transmis tel quel — mais vous pouvez encore y renoncer si vous changez d’avis. Confirmer tôt ne vous enferme donc pas : c’est l’inverse, cela vous laisse le temps de réfléchir sans l’épée de la date au-dessus de la tête.',
+      },
+      {
+        question: 'Que faire si la date de confirmation est passée ?',
+        reponse:
+          'Un vœu non confirmé ne se rattrape pas en phase principale, mais ce n’est pas la fin de l’année. La phase complémentaire rouvre des vœux à partir de juin sur les formations qui ont encore des places, et elle reste ouverte tout l’été. Une commission académique peut aussi être saisie par un candidat sans aucune proposition.',
+      },
+    ],
     corps: [
       p(
         'C’est la mécanique la plus coûteuse de la procédure, et la plus discrète. Un vœu ' +
@@ -377,6 +485,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['taux d’accès', 'attendus', 'fiche formation', 'statistiques'],
+    questions: [
+      {
+        question: 'Le taux d’accès est-il ma probabilité d’être pris ?',
+        reponse:
+          'Non. Il rapporte le nombre de candidats qui ont reçu une proposition au nombre de candidats qui ont postulé, l’année précédente : c’est une moyenne sur une population entière, pas une estimation sur votre dossier. Une formation à 30 % n’est pas une formation où vous avez 30 % de chances. Il sert à situer la tension, rien de plus.',
+      },
+      {
+        question: 'Que veulent dire les attendus d’une formation ?',
+        reponse:
+          'Ils décrivent le travail à venir plus qu’une condition d’entrée. « Savoir mobiliser des compétences mathématiques » ne veut pas dire « avoir 16 en maths » : cela veut dire que vous en ferez beaucoup. Lisez-les en vous demandant non pas si vous correspondez, mais si vous avez envie de passer trois ans à faire ça.',
+      },
+      {
+        question: 'Quelle partie d’une fiche de formation est la plus utile ?',
+        reponse:
+          'Les critères d’examen des vœux : ce que la commission regarde réellement, et avec quel poids. C’est la partie la moins lue de la fiche. Elle vous dit si ce sont les notes, la régularité, les appréciations ou le projet motivé qui pèsent le plus — donc où porter votre effort, et ce qu’il faut soigner dans votre texte.',
+      },
+    ],
     corps: [
       p(
         'Chaque formation publie une fiche. On la survole en général pour une seule ' +
@@ -464,6 +589,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['admission', 'oui si', 'liste d’attente', 'réponses'],
+    questions: [
+      {
+        question: 'Puis-je accepter une proposition et rester en attente ailleurs ?',
+        reponse:
+          'Oui, il faut simplement le dire explicitement au moment où vous répondez. C’est le geste le plus important de toute la procédure, et le plus souvent mal fait : accepter une proposition en conservant ses vœux en attente vous met à l’abri — vous avez une place, et la file continue d’avancer pour vous.',
+      },
+      {
+        question: 'Un « oui si » est-il une réponse au rabais ?',
+        reponse:
+          'Non. C’est un « oui » assorti d’un filet : année aménagée, modules de remise à niveau, tutorat. Les élèves qui l’acceptent réussissent souvent mieux que ceux qui entrent sans aide dans une filière trop exigeante pour eux. Le dispositif varie beaucoup d’un endroit à l’autre : demandez à la formation ce qu’il recouvre chez elle.',
+      },
+      {
+        question: 'Que faire si je suis refusé partout ?',
+        reponse:
+          'Un refus n’est pas un jugement sur vous : c’est le résultat d’un examen comparatif entre des centaines de dossiers, pour un nombre de places fixé d’avance. La phase complémentaire existe précisément pour cette situation et ouvre avant la fin de la phase principale. Une commission académique peut aussi être saisie depuis votre dossier.',
+      },
+    ],
     corps: [
       p(
         'À partir du début de la phase d’admission, votre dossier se met à bouger tout ' +
@@ -556,6 +698,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['phase complémentaire', 'places vacantes', 'réorientation'],
+    questions: [
+      {
+        question: 'La phase complémentaire est-elle réservée aux candidats sans proposition ?',
+        reponse:
+          'Non, elle est ouverte à presque tout le monde : un candidat sans aucune proposition, mais aussi un candidat qui a déjà accepté une place et voudrait mieux ou autrement, ou qui n’avait formulé aucun vœu en phase principale. Participer ne vous fait renoncer à rien : vos vœux en attente continuent de vivre en parallèle.',
+      },
+      {
+        question: 'Quand la phase complémentaire ouvre-t-elle ?',
+        reponse:
+          'En juin, alors que la phase principale bat encore son plein, et elle reste ouverte jusqu’en septembre. Les places bougent en continu : une formation complète un matin peut rouvrir le soir parce qu’un candidat s’est désisté. Revenir tous les deux ou trois jours vaut mieux que réfléchir longuement une seule fois.',
+      },
+      {
+        question: 'Si rien ne vient, faut-il changer de filière ?',
+        reponse:
+          'Élargissez d’abord la géographie, ensuite la filière, dans cet ordre. Accepter de partir à deux heures de chez soi ouvre beaucoup plus de portes que de se rabattre sur une filière qui ne vous intéresse pas — et une filière qui ne vous intéresse pas se quitte au bout d’un an.',
+      },
+    ],
     corps: [
       p(
         'On l’imagine comme une salle d’attente pour les candidats sans proposition. Elle ' +
@@ -648,6 +807,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['logement étudiant', 'budget', 'reste à vivre', 'ville'],
+    questions: [
+      {
+        question: 'Faut-il comparer les loyers entre les villes ?',
+        reponse:
+          'Non : comparez ce qu’il vous resterait une fois le loyer payé, les aides reçues, les charges réglées et le transport déduit. Deux villes peuvent afficher le même loyer et laisser des restes à vivre très différents, selon que vous êtes boursier, logé en résidence universitaire ou dans le privé, et selon la distance au campus.',
+      },
+      {
+        question: 'Une ville périphérique est-elle vraiment moins chère ?',
+        reponse:
+          'Pas toujours. Le loyer semble attractif, puis on ajoute l’abonnement de transport, une heure de trajet matin et soir, l’impossibilité de rentrer entre deux cours et les repas pris dehors. Le gain fond, et la fatigue reste. Un logement à quinze minutes à pied d’un campus vaut souvent mieux qu’un logement moins cher à quarante minutes de bus.',
+      },
+      {
+        question: 'Quand faut-il regarder le coût de la vie sur place ?',
+        reponse:
+          'Avant de formuler les vœux, pas après les réponses. En juin, le calcul est déjà fait : vous choisissez entre ce que vous avez demandé. Le vrai choix de ville se joue en février, au moment où vous décidez quelles portes vous ouvrez.',
+      },
+    ],
     corps: [
       p(
         'Deux formations identiques, deux villes différentes : l’écart de loyer pour un ' +
@@ -743,6 +919,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['bulletins', 'dossier scolaire', 'première', 'terminale'],
+    questions: [
+      {
+        question: 'Les formations regardent-elles la moyenne générale ?',
+        reponse:
+          'Pas en priorité. Elles lisent vos bulletins de première et de terminale matière par matière, avec les appréciations, et les matières de la filière visée passent devant : un 12 dans la matière centrale pèse plus qu’un 15 obtenu ailleurs. Elles voient aussi une fiche renseignée par votre lycée, avec un avis par matière.',
+      },
+      {
+        question: 'Une première année moyenne est-elle rattrapable ?',
+        reponse:
+          'Oui, parce que les jurys lisent des trajectoires. Trois trimestres à 11, 13 puis 15 racontent une autre histoire que 15, 13 puis 11, à moyenne égale. Les deux premiers trimestres de terminale comptent beaucoup : ce sont les derniers résultats complets dont disposent les commissions, et un sursaut au troisième arrive trop tard.',
+      },
+      {
+        question: 'Les appréciations des professeurs sont-elles vraiment lues ?',
+        reponse:
+          'Oui, et elles pèsent plus qu’on ne croit. Elles disent ce qu’une note ne dit pas : l’assiduité, l’attitude en classe, la fiabilité. Une appréciation sévère n’est pas irrattrapable, à une condition — qu’elle soit contredite par les suivantes. Une série « peut mieux faire » devenue « nets progrès » raconte ce qu’une commission espère lire.',
+      },
+    ],
     corps: [
       p(
         'Un dossier n’est pas une moyenne. C’est une série de signaux, et tous n’ont pas le ' +
@@ -835,6 +1028,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['lettre de motivation', 'projet motivé', 'candidature'],
+    questions: [
+      {
+        question: 'Que cherche le lecteur d’un projet de formation motivé ?',
+        reponse:
+          'Que vous sachiez ce qu’on fait dans cette formation — pas ce que le métier représente, ce que les études contiennent. Un lien concret entre ce que vous avez déjà fait et ce qui vous attend. Une raison de vouloir cette formation-là et pas la même ailleurs. Et que vous ayez lu les attendus publiés sur la fiche.',
+      },
+      {
+        question: 'Qu’est-ce qui dessert un projet de formation motivé ?',
+        reponse:
+          'La passion déclarée sans preuve, le copier-coller d’un vœu à l’autre qui se repère au premier coup d’œil, et l’exagération. S’y ajoutent le texte qui parle du métier plutôt que des études, et celui qui raconte un parcours scolaire que le lecteur a déjà sous les yeux. Mieux vaut un intérêt modeste et précis qu’une vocation inventée.',
+      },
+      {
+        question: 'Où trouver du concret à écrire ?',
+        reponse:
+          'Dans la maquette de la formation, publiée par l’établissement : les intitulés des unités d’enseignement de première année donnent de quoi écrire une phrase qu’aucun autre candidat n’écrira. Dans une journée portes ouvertes. Dans un stage, un job, une association — à condition de dire ce que vous y avez fait, pas seulement que vous y étiez.',
+      },
+    ],
     corps: [
       p(
         'C’est un texte court, propre à chaque vœu, lu par quelqu’un qui en lira des ' +
@@ -922,6 +1132,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['organisation', 'terminale', 'méthode de travail', 'révisions'],
+    questions: [
+      {
+        question: 'Quand faut-il s’occuper de son orientation en terminale ?',
+        reponse:
+          'L’automne sert à explorer sans enjeu : lire des fiches, parler aux professeurs, aller aux journées portes ouvertes, sans aucun formulaire à remplir. Janvier et février servent à formuler, mars à rédiger et confirmer — le seul moment vraiment chargé, et il tombe avant les épreuves. Deux heures par semaine en novembre valent dix heures en mars.',
+      },
+      {
+        question: 'Comment réviser efficacement en terminale ?',
+        reponse:
+          'Des séances courtes et régulières battent les week-ends de rattrapage : la mémoire fonctionne à la répétition, pas à l’intensité. Se tester vaut mieux que relire — fermer le cours et tenter de le restituer révèle ce qu’on ne sait pas. Espacez les reprises : le lendemain, une semaine après, un mois après.',
+      },
+      {
+        question: 'Comment tenir le mois de juin, entre épreuves et réponses ?',
+        reponse:
+          'Prévoyez un moment fixe dans la journée pour consulter votre dossier — le soir, une fois — plutôt que de le rafraîchir entre deux exercices. Le classement automatique des vœux en attente existe exactement pour ça : il répond à votre place pendant que vous composez, y compris pendant les épreuves.',
+      },
+    ],
     corps: [
       p(
         'L’année de terminale demande deux choses en même temps : réussir des épreuves et ' +
@@ -1009,6 +1236,23 @@ export const ARTICLES: readonly Article[] = [
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['bourse', 'CROUS', 'logement', 'DSE', 'CVEC'],
+    questions: [
+      {
+        question: 'Formuler des vœux déclenche-t-il une demande de bourse ?',
+        reponse:
+          'Non, et c’est le malentendu central. Ce sont deux procédures distinctes, sur deux sites, avec deux calendriers, et personne ne fera le lien à votre place. Beaucoup de familles découvrent en août qu’il fallait faire une demande au printemps ; les aides ne sont pas rétroactives.',
+      },
+      {
+        question: 'Faut-il attendre les résultats pour demander une bourse ou un logement ?',
+        reponse:
+          'Non. Le dossier social étudiant — la demande unique de bourse et de logement en résidence universitaire — se fait avant même de savoir où vous serez admis, et il se modifie ensuite. Les résidences s’attribuent au printemps : on postule sur les villes qu’on a demandées en vœux, quitte à renoncer ensuite.',
+      },
+      {
+        question: 'Faut-il demander une bourse même en doutant d’y avoir droit ?',
+        reponse:
+          'Oui. Le calcul dépend des revenus du foyer, du nombre d’enfants à charge et de la distance au lieu d’études : beaucoup de familles s’excluent elles-mêmes à tort. Une rupture familiale ou une baisse de revenus récente permettent par ailleurs un réexamen sur la situation actuelle — il faut le demander au service social du CROUS.',
+      },
+    ],
     corps: [
       p(
         'Beaucoup de familles découvrent en août qu’il fallait faire une demande au ' +

@@ -171,6 +171,40 @@ export function ListeArticles({
 
 /* ------------------------------------------------------------ un article */
 
+/**
+ * Les questions fréquentes, au bas de l'article.
+ *
+ * Elles ne répètent pas le texte par paresse : chacune est la réponse à une
+ * question posée, autoportante, lisible sans avoir lu ce qui précède. C'est
+ * ce qui les rend utiles à deux lecteurs très différents — celui qui arrive
+ * avec une question précise et fait défiler, et le moteur génératif qui ne
+ * cite jamais un article mais toujours un passage.
+ *
+ * De vraies balises `h3` dans une `section` étiquetée, et non une liste de
+ * `div` : c'est ce qui permet d'y naviguer d'un titre à l'autre au lecteur
+ * d'écran, et c'est aussi ce qui donne sa structure aux données que le
+ * pré-rendu déclare (kitetudiant/scripts/prerendre.ts).
+ */
+function Questions({ article }: { readonly article: Article }) {
+  const questions = article.questions ?? []
+  if (questions.length === 0) return null
+  return (
+    <section className="questions" aria-labelledby="questions-titre">
+      <h3 className="questions-titre" id="questions-titre">
+        Questions fréquentes
+      </h3>
+      <dl className="questions-liste">
+        {questions.map((q) => (
+          <div className="questions-paire" key={q.question}>
+            <dt className="questions-question">{q.question}</dt>
+            <dd className="questions-reponse">{q.reponse}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )
+}
+
 export function PageArticle({
   article,
   onBlog,
@@ -222,6 +256,8 @@ export function PageArticle({
         {article.corps.map((bloc, i) => (
           <Contenu bloc={bloc} key={`${bloc.type}-${i}`} />
         ))}
+
+        <Questions article={article} />
 
         <p className="article-source">{MENTION_SOURCE}</p>
 

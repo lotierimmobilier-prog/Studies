@@ -84,11 +84,19 @@ export class EmailDejaInscrit extends Error {
 }
 
 export class IdentifiantsRefuses extends Error {
-  constructor() {
-    // Message volontairement identique pour un e-mail inconnu et un mot de
-    // passe faux : dire lequel des deux est en cause permettrait d'énumérer
-    // les adresses inscrites.
-    super('Adresse ou mot de passe incorrect.')
+  /**
+   * À la CONNEXION, le message par défaut est volontairement ambigu : dire
+   * si c'est l'adresse ou le mot de passe qui est en cause permettrait
+   * d'énumérer les adresses inscrites.
+   *
+   * Ailleurs, cette ambiguïté n'a plus d'objet et devient nuisible. Sur un
+   * changement de mot de passe, la session identifie déjà le compte : il n'y
+   * a rien à énumérer, et « adresse ou mot de passe incorrect » désigne une
+   * adresse que l'élève n'a pas saisie. Il cherche alors une faute de frappe
+   * dans un champ qui n'existe pas.
+   */
+  constructor(raison = 'Adresse ou mot de passe incorrect.') {
+    super(raison)
     this.name = 'IdentifiantsRefuses'
   }
 }
@@ -127,6 +135,25 @@ interface FichierComptes {
 export interface SessionOuverte {
   readonly jeton: string
   readonly expireLe: string
+}
+
+/**
+ * Ce que le site sait d'un élève. Cette liste EST la réponse à « quelles sont
+ * mes coordonnées ? » : il n'y en a pas d'autres, et l'écran le dit.
+ *
+ * Pas de nom, pas de prénom, pas d'adresse postale, pas de téléphone, pas de
+ * date de naissance. Ce n'est pas un champ qu'on aurait oublié d'ajouter :
+ * la règle 3 de CLAUDE.md impose la minimisation parce que les titulaires
+ * sont MINEURS, et rien dans le calcul n'a besoin de ces données. Seule la
+ * commune sert à chiffrer un loyer, et elle reste dans le navigateur avec le
+ * reste des réponses.
+ */
+export interface ProfilCompte {
+  readonly email: string
+  readonly inscritLe: string
+  readonly vuLe: string
+  /** Fin de la session en cours. Au-delà, il faudra se reconnecter. */
+  readonly sessionExpireLe: string
 }
 
 export interface EtatComptes {
@@ -447,6 +474,130 @@ export class DepotComptes {
       ...fichier,
       sessions: fichier.sessions.filter((s) => s.empreinteJeton !== empreinte),
     })
+  }
+
+  /**
+   * Le profil du titulaire d'une session.
+   *
+   * L'adresse est déchiffrée ici et renvoyée au navigateur — contrairement à
+   * `emailDeSession`, qui sert à reconnaître un administrateur et ne sort
+   * jamais. C'est assumé : montrer à quelqu'un l'adresse sous laquelle il est
+   * inscrit est la seule façon qu'il ait de vérifier laquelle c'est, et il
+   * vient de prouver qu'il détient la session.
+   */
+  async profil(jeton: string, maintenant: Date = new Date()): Promise<ProfilCompte | null> {
+    if (!this.configure || jeton.length === 0) return null
+    const fichier = await this.charger(maintenant)
+    const empreinte = DepotComptes.empreinteJeton(jeton)
+    const session = fichier.sessions.find(
+      (s) => s.empreinteJeton === empreinte && s.expireLe > maintenant.toISOString(),
+    )
+    if (session === undefined) return null
+    const compte = fichier.comptes.find((c) => c.index === session.index)
+    if (compte === undefined) return null
+    try {
+      return {
+        email: await this.dechiffrerEmail(compte, fichier.sel),
+        inscritLe: compte.inscritLe,
+        vuLe: compte.vuLe,
+        sessionExpireLe: session.expireLe,
+      }
+    } catch {
+      // Secret maître changé depuis l'inscription : l'adresse est illisible.
+      return null
+    }
+  }
+
+  /**
+   * Change le mot de passe, l'ANCIEN à l'appui.
+   *
+   * Exiger l'ancien n'est pas une formalité : une session vole ou s'emprunte
+   * — un téléphone laissé déverrouillé suffit —, et sans cette vérification
+   * celui qui la détient verrouillerait le compte pour son titulaire.
+   *
+   * Toutes les AUTRES sessions tombent, et celle-ci seule survit. C'est le
+   * geste qu'on attend d'un changement de mot de passe : si quelqu'un d'autre
+   * était connecté, il ne l'est plus ; et l'élève qui vient de le changer
+   * n'est pas déconnecté par sa propre précaution.
+   */
+  async changerMotDePasse(
+    jeton: string,
+    ancien: string,
+    nouveau: string,
+    maintenant: Date = new Date(),
+  ): Promise<void> {
+    this.exigerConfiguration()
+    const fichier = await this.charger(maintenant)
+    const empreinte = DepotComptes.empreinteJeton(jeton)
+    const session = fichier.sessions.find(
+      (s) => s.empreinteJeton === empreinte && s.expireLe > maintenant.toISOString(),
+    )
+    const compte =
+      session === undefined
+        ? undefined
+        : fichier.comptes.find((c) => c.index === session.index)
+    if (session === undefined || compte === undefined) {
+      throw new IdentifiantsRefuses('Session expirée ou invalide. Reconnecte-toi.')
+    }
+
+    // Le nouveau mot de passe est validé AVANT de vérifier l'ancien : sinon,
+    // un mot de passe trop court renverrait « identifiants refusés » et
+    // laisserait croire à une erreur de saisie de l'ancien.
+    if (nouveau.length < MOT_DE_PASSE_MINIMUM) {
+      throw new InscriptionInvalide(
+        `Le nouveau mot de passe est trop court : ${MOT_DE_PASSE_MINIMUM} caractères au moins, ${nouveau.length} saisis.`,
+      )
+    }
+    if (nouveau.length > MOT_DE_PASSE_MAXIMUM) {
+      throw new InscriptionInvalide('Le nouveau mot de passe est trop long.')
+    }
+
+    const attendu = compte.empreinteMotDePasse
+    const obtenu = await this.empreinte(ancien, compte.selMotDePasse)
+    const bon =
+      obtenu.length === attendu.length &&
+      timingSafeEqual(Buffer.from(obtenu, 'hex'), Buffer.from(attendu, 'hex'))
+    if (!bon) throw new IdentifiantsRefuses('Ton mot de passe actuel n’est pas le bon.')
+
+    // Sel neuf : réutiliser l'ancien laisserait deux empreintes comparables
+    // dans les sauvegardes successives du fichier.
+    const selMotDePasse = randomBytes(16).toString('hex')
+    const empreinteMotDePasse = await this.empreinte(nouveau, selMotDePasse)
+    await this.enregistrer({
+      ...fichier,
+      comptes: fichier.comptes.map((c) =>
+        c.index === compte.index ? { ...c, selMotDePasse, empreinteMotDePasse } : c,
+      ),
+      sessions: fichier.sessions.filter(
+        (s) => s.index !== compte.index || s.empreinteJeton === empreinte,
+      ),
+    })
+  }
+
+  /**
+   * Efface le compte et toutes ses sessions.
+   *
+   * Sans ancien mot de passe : quelqu'un qui détient la session peut déjà
+   * tout voir, et exiger un secret pour PARTIR transformerait un droit en
+   * parcours d'obstacles. Le titulaire est mineur, l'effacement doit être
+   * plus facile que l'inscription, pas l'inverse.
+   *
+   * Rien ne survit côté serveur — ni adresse chiffrée, ni empreinte, ni
+   * index. Les réponses et les cartes, elles, n'y ont jamais été : elles
+   * vivent dans le navigateur, et l'écran dit comment les effacer.
+   */
+  async supprimerCompte(jeton: string, maintenant: Date = new Date()): Promise<boolean> {
+    if (!this.configure || jeton.length === 0) return false
+    const fichier = await this.charger(maintenant)
+    const empreinte = DepotComptes.empreinteJeton(jeton)
+    const session = fichier.sessions.find((s) => s.empreinteJeton === empreinte)
+    if (session === undefined) return false
+    await this.enregistrer({
+      ...fichier,
+      comptes: fichier.comptes.filter((c) => c.index !== session.index),
+      sessions: fichier.sessions.filter((s) => s.index !== session.index),
+    })
+    return true
   }
 
   async etat(maintenant: Date = new Date()): Promise<EtatComptes> {

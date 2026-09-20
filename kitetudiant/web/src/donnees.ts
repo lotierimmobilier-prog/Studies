@@ -130,6 +130,15 @@ export interface Formation {
   readonly lien: string | null
   readonly session: string
   readonly codeInsee: string | null
+  /**
+   * Statut de l'établissement, TEL QUE PUBLIÉ : « Public », « Privé sous
+   * contrat d'association », « Privé enseignement supérieur », « Privé hors
+   * contrat ». Quatre valeurs, relevées le 20/09/2026 sur le jeu du
+   * ministère. `null` quand le champ est absent — jamais « Public » par
+   * défaut : ce serait exactement la valeur de repli silencieuse que
+   * CLAUDE.md interdit, et elle tromperait sur le coût de la scolarité.
+   */
+  readonly statutEtablissement: string | null
   /** Statistiques publiées, telles quelles : aucune n'est recalculée. */
   readonly stats: StatsFormation
 }
@@ -151,6 +160,7 @@ interface EnregistrementEsr {
   readonly taux_acces_ens?: number
   readonly pct_bours?: number
   readonly lien_form_psup?: string
+  readonly contrat_etab?: string
   readonly session?: string
   readonly acc_bg?: number
   readonly acc_bt?: number
@@ -236,6 +246,7 @@ function convertir(e: EnregistrementEsr): Formation | null {
     lien: e.lien_form_psup ?? null,
     session: e.session ?? '',
     codeInsee: codeInseeDe(ville, dep),
+    statutEtablissement: e.contrat_etab ?? null,
     stats: {
       session: e.session ?? '',
       capacite: nombreOuNul(e.capa_fin),
@@ -416,6 +427,84 @@ export async function deconnecter(base = BASE_API, recuperer: typeof fetch = fet
     method: 'POST',
     headers: { Authorization: `Bearer ${jeton}` },
   }).catch(() => undefined)
+}
+
+/**
+ * Ce que le site sait de l'élève, et rien de plus.
+ *
+ * Quatre champs. Pas de nom, pas d'adresse postale, pas de téléphone : ce
+ * n'est pas un oubli, c'est la règle 3 de CLAUDE.md — les titulaires sont
+ * mineurs, et rien dans le calcul n'a besoin de ces données. L'écran de
+ * l'espace personnel le dit noir sur blanc, parce qu'une absence que
+ * personne n'explique se lit comme une fonctionnalité manquante.
+ */
+export interface ProfilCompte {
+  readonly email: string
+  readonly inscritLe: string
+  readonly vuLe: string
+  readonly sessionExpireLe: string
+}
+
+/** Le profil du titulaire de la session, ou `null` si elle n'est plus valide. */
+export async function profilCompte(
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<ProfilCompte | null> {
+  const jeton = jetonSession()
+  if (jeton === '') return null
+  const reponse = await recuperer(`${base}/comptes/profil`, {
+    headers: { Authorization: `Bearer ${jeton}` },
+  }).catch(() => null)
+  if (reponse === null || !reponse.ok) return null
+  return (await reponse.json().catch(() => null)) as ProfilCompte | null
+}
+
+/**
+ * Change le mot de passe. L'ancien est exigé par le serveur, et le message
+ * d'erreur qu'il renvoie est affiché TEL QUEL : il distingue « ancien mot de
+ * passe faux » de « nouveau trop court », ce que l'interface ne saurait pas
+ * deviner sans refaire la validation de son côté — et donc sans risquer d'en
+ * diverger.
+ */
+export async function changerMotDePasse(
+  ancien: string,
+  nouveau: string,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<void> {
+  const jeton = jetonSession()
+  if (jeton === '') throw new CompteRefuse('Tu n’es pas connecté.')
+  const reponse = await recuperer(`${base}/comptes/mot-de-passe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jeton}` },
+    body: JSON.stringify({ ancien, nouveau }),
+  })
+  if (!reponse.ok) {
+    const donnees = (await reponse.json().catch(() => ({}))) as { erreur?: string }
+    throw new CompteRefuse(donnees.erreur ?? `le service a répondu ${reponse.status}`)
+  }
+}
+
+/**
+ * Efface le compte. Le jeton local est oublié quoi qu'il arrive : rester
+ * « connecté » à un compte qui n'existe plus n'aurait aucun sens, et si
+ * l'appel a échoué, la reconnexion le dira.
+ */
+export async function supprimerCompte(
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<void> {
+  const jeton = jetonSession()
+  if (jeton === '') throw new CompteRefuse('Tu n’es pas connecté.')
+  const reponse = await recuperer(`${base}/comptes/moi`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${jeton}` },
+  })
+  oublierJeton()
+  if (!reponse.ok) {
+    const donnees = (await reponse.json().catch(() => ({}))) as { erreur?: string }
+    throw new CompteRefuse(donnees.erreur ?? `le service a répondu ${reponse.status}`)
+  }
 }
 
 export interface DemandeAide {

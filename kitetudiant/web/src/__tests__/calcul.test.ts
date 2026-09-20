@@ -38,9 +38,16 @@ const REPONSES: Reponses = {
   fraisInstallation: 800,
 }
 
-function formation(id: string, ville: string, dep: string, filiere = 'Licence'): Formation {
+function formation(
+  id: string,
+  ville: string,
+  dep: string,
+  filiere = 'Licence',
+  statutEtablissement: string | null = 'Public',
+): Formation {
   return {
     id,
+    statutEtablissement,
     libelle: `${filiere} de test`,
     etablissement: 'Établissement de test',
     ville,
