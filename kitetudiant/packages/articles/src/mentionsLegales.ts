@@ -168,6 +168,17 @@ export const DONNEES: SectionLegale = {
       'appréciations n’est pas conservé : seuls les nombres et la synthèse reviennent ' +
       'dans votre navigateur. Déposer un bulletin est facultatif — les moyennes ' +
       'peuvent être saisies à la main, et rien n’est alors transmis à personne.',
+    'Le dépôt d’un bulletin est facultatif et demande un accord explicite : avant le ' +
+      'premier dépôt, l’écran indique ce qui est envoyé, à qui, ce qui revient et ce qui ' +
+      'n’est pas conservé, et rien n’est transmis tant que cet accord n’est pas donné. ' +
+      'L’accord est enregistré avec sa date et la version du texte accepté ; si ce texte ' +
+      'change, il est redemandé.',
+    'Le dépôt est par ailleurs refusé en dessous de 15 ans, âge auquel un mineur peut ' +
+      'consentir seul au traitement de ses données (article 45 de la loi Informatique et ' +
+      'Libertés). En dessous, il faudrait l’accord d’un titulaire de l’autorité parentale, ' +
+      'que nous n’avons pas les moyens de recueillir de façon vérifiable : nous préférons ' +
+      'refuser le dépôt plutôt que d’en faire semblant. La saisie des moyennes à la main ' +
+      'reste ouverte à tous et n’envoie rien.',
     'Sous-traitants : Anthropic (lecture des bulletins et assistance rédactionnelle), ' +
       'France Travail (comptage et affichage d’offres d’emploi, sans aucune donnée ' +
       'vous concernant), l’IGN via data.geopf.fr (fonds de carte), et Google si vous ' +

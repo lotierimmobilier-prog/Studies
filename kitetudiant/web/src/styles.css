@@ -795,6 +795,26 @@ input[type='range'] { width: 100%; min-height: 44px; }
    encadré rouge sur un site qui s'adresse à des lycéens crée l'inquiétude
    que CLAUDE.md interdit, alors qu'il s'agit seulement de dire d'où
    viennent les chiffres. */
+/* ------------------------------------------------ consentement bulletin */
+/* Encadré, parce qu'on demande une décision — pas une note de bas de page.
+   En tons neutres : « ne pas écrire de texte anxiogène » (CLAUDE.md), et
+   il s'agit d'informer, pas d'alarmer. */
+.consentement {
+  padding: 1.1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.consentement h3 { margin: 0 0 0.6rem; font-size: 1rem; font-weight: 600; }
+.consentement ul { margin: 0 0 1rem; padding-left: 1.15rem; }
+.consentement li { margin-bottom: 0.45rem; color: var(--doux); }
+.consentement p { margin: 0 0 0.6rem; }
+.consentement p:last-child { margin-bottom: 0; }
+/* Le refus n'est pas une erreur de l'élève : même encadré, pas de rouge. */
+.consentement-refus { border-left: 3px solid var(--trait); }
+
 .budget-avertissement {
   margin: 0;
   padding: 0.7rem 0.9rem;

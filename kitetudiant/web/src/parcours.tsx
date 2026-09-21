@@ -30,6 +30,13 @@ import {
 } from './budgetSimple.ts'
 import type { Reponses } from './calcul.ts'
 import { lireBulletin } from './donnees.ts'
+import {
+  AGE_MINIMUM,
+  TEXTE_CONSENTEMENT,
+  assezAge,
+  consentementDonne,
+  poserConsentement,
+} from './consentementBulletin.ts'
 import { MonLycee } from './monLycee.tsx'
 import { OPTIONS, SPECIALITES } from './specialites.ts'
 import { moyennesCumulees, progressionConstatee, type BulletinDepose } from './calcul.ts'
@@ -314,6 +321,9 @@ function dernierLu(bulletins: Reponses['bulletins']): number {
 export function Question({ etape, reponses, academies, onChange }: Props) {
   const [lecture, setLecture] = useState<'repos' | 'en_cours' | 'erreur'>('repos')
   const [messageLecture, setMessageLecture] = useState<string | null>(null)
+  /* Lu une seule fois au montage : le consentement ne change pas tout seul,
+     et le relire à chaque rendu toucherait le stockage pour rien. */
+  const [accord, setAccord] = useState(() => consentementDonne() !== null)
 
   /** Un fichier lu et converti en bulletin déposé, ou une erreur. */
   async function lireUnBulletin(
@@ -478,38 +488,79 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
     const moyenne = moyenneGenerale(reponses.notes)
     return (
       <div className="choix">
-        <label className="depot">
-          <input
-            type="file"
-            accept="application/pdf,image/png,image/jpeg"
-            /* Plusieurs d'un coup : trois trimestres se sélectionnent
-               ensemble dans le sélecteur de fichiers, plutôt qu'en trois
-               allers-retours. */
-            multiple
-            onChange={(e) => {
-              const fichiers = [...(e.target.files ?? [])]
-              /* Le champ est vidé APRÈS lecture. Sans cela, redéposer le
-                 MÊME fichier ne déclenche rien : la valeur du champ n'a pas
-                 changé, donc « change » ne se produit pas. Le défaut est
-                 invisible — on clique, on choisit, et il ne se passe rien. */
-              e.target.value = ''
-              void importerBulletins(fichiers)
-            }}
-          />
-          <span>
-            {lecture === 'en_cours'
-              ? 'Lecture en cours…'
-              : reponses.bulletins.length === 0
-                ? 'Importer un ou plusieurs bulletins (PDF ou photo)'
-                : 'Ajouter d’autres bulletins'}
-          </span>
-        </label>
-        <p className="note">
-          Tu peux en déposer plusieurs à la fois — un par trimestre. Les moyennes se
-          cumulent, et ta progression devient visible. Seules les moyennes et trois
-          indicateurs chiffrés sont extraits ; le texte des appréciations n’est jamais
-          conservé.
-        </p>
+        {/* Trois états, dans cet ordre de priorité : trop jeune pour
+            décider, pas encore d'accord, accord donné.
+
+            Le dépôt envoie le bulletin à notre serveur puis à l'API Claude.
+            Ça ne se fait ni en silence ni sans l'âge de le décider — voir
+            web/src/consentementBulletin.ts. */}
+        {!assezAge(reponses.anneeNaissance) ? (
+          <div className="consentement consentement-refus">
+            <p>
+              Le dépôt de bulletin demande d’avoir <strong>{AGE_MINIMUM} ans</strong> : c’est
+              l’âge à partir duquel on décide seul de ce qu’on fait de ses données. En
+              dessous, il faudrait l’accord d’un parent, et nous n’avons pas de quoi le
+              recueillir sérieusement — alors nous ne faisons pas semblant.
+            </p>
+            <p className="note">
+              Saisis tes moyennes juste en dessous : le résultat est le même, et rien ne
+              quitte ton appareil. Si tu as bien {AGE_MINIMUM} ans ou plus, corrige ton
+              année de naissance à l’étape précédente.
+            </p>
+          </div>
+        ) : !accord ? (
+          <div className="consentement">
+            <h3>{TEXTE_CONSENTEMENT.titre}</h3>
+            <ul>
+              {TEXTE_CONSENTEMENT.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              className="principal"
+              onClick={() => {
+                poserConsentement()
+                setAccord(true)
+              }}
+            >
+              {TEXTE_CONSENTEMENT.case}
+            </button>
+          </div>
+        ) : (
+          <>
+            <label className="depot">
+              <input
+                type="file"
+                accept="application/pdf,image/png,image/jpeg"
+                /* Plusieurs d'un coup : trois trimestres se sélectionnent
+                   ensemble dans le sélecteur de fichiers, plutôt qu'en trois
+                   allers-retours. */
+                multiple
+                onChange={(e) => {
+                  const fichiers = [...(e.target.files ?? [])]
+                  /* Le champ est vidé APRÈS lecture. Sans cela, redéposer le
+                     MÊME fichier ne déclenche rien : la valeur du champ n'a pas
+                     changé, donc « change » ne se produit pas. Le défaut est
+                     invisible — on clique, on choisit, et il ne se passe rien. */
+                  e.target.value = ''
+                  void importerBulletins(fichiers)
+                }}
+              />
+              <span>
+                {lecture === 'en_cours'
+                  ? 'Lecture en cours…'
+                  : reponses.bulletins.length === 0
+                    ? 'Importer un ou plusieurs bulletins (PDF ou photo)'
+                    : 'Ajouter d’autres bulletins'}
+              </span>
+            </label>
+            <p className="note">
+              Tu peux en déposer plusieurs à la fois — un par trimestre. Les moyennes se
+              cumulent, et ta progression devient visible.
+            </p>
+          </>
+        )}
         {messageLecture ? (
           <p className={lecture === 'erreur' ? 'erreur' : 'note'}>{messageLecture}</p>
         ) : null}
