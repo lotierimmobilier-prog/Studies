@@ -54,6 +54,7 @@ import {
   SOURCE_CALENDRIER,
 } from './calendrier.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
+import { dateLisible } from './dates.ts'
 
 // Les photographies sont IMPORTÉES et non désignées par un chemin : Vite leur
 // applique la base de déploiement (le site est servi sous un sous-chemin) et
@@ -83,13 +84,6 @@ function eurosParM2(v: number): string {
  */
 function nomLisible(nom: string): string {
   return nom.replace(/\s+Arrondissement$/i, '')
-}
-
-/** Date ISO du fichier de données, écrite en toutes lettres. */
-function dateLisible(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 /* ------------------------------------------------------------------ hero */

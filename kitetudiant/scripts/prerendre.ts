@@ -26,6 +26,9 @@ import {
   ACCUEIL_TITRE_ONGLET,
   ACCUEIL_TITRE_PAGE,
 } from '../packages/articles/src/accueil.ts'
+/* Le même module que l'application, pour que la page livrée et la page
+   rendue affichent la même date. Il n'importe rien du navigateur. */
+import { dateLisible } from '../web/src/dates.ts'
 
 const RACINE = resolve(import.meta.dirname, '..', '..')
 const SORTIE = join(RACINE, 'dist-kitetudiant')
@@ -57,6 +60,29 @@ function corpsEnHtml(article: Article): string {
     }
   })
   return morceaux.join('\n      ')
+}
+
+/**
+ * La ligne de date d'un article, telle que l'application l'écrit.
+ *
+ * Elle affichait la date ISO brute — « 2025-09-01 » — là où l'application
+ * écrit « 1 septembre 2025 ». Deux versions de la même page qui ne disent
+ * pas la même chose, et la version livrée aux robots était la moins
+ * lisible des deux. La date de révision manquait aussi : `dateModified`
+ * était dans les données structurées, mais invisible à l'écran, si bien
+ * qu'un article revu passait pour jamais relu.
+ *
+ * L'attribut `datetime` garde la forme machine : c'est son rôle.
+ */
+function dateDeLArticle(article: Article): string {
+  const revu =
+    article.revuLe !== null
+      ? ` · revu le <time datetime="${article.revuLe}">${echapper(dateLisible(article.revuLe))}</time>`
+      : ''
+  return (
+    `<p><time datetime="${article.publieLe}">` +
+    `${echapper(dateLisible(article.publieLe))}</time>${revu}</p>`
+  )
 }
 
 /**
@@ -293,7 +319,7 @@ for (const article of ARTICLES) {
     <main>
       <article>
       <h1>${echapper(article.titre)}</h1>
-      <p><time datetime="${article.publieLe}">${article.publieLe}</time></p>
+      ${dateDeLArticle(article)}
       <p>${echapper(article.chapeau)}</p>
       ${corpsEnHtml(article)}${questionsHtml}
       <p>${echapper(MENTION_SOURCE)}</p>

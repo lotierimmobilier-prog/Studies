@@ -23,6 +23,7 @@ import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { FilAriane } from './filAriane.tsx'
 import { chercherArticles } from '../../packages/articles/src/recherche.ts'
 import { useMetadonnees } from './metadonnees.ts'
+import { dateLisible } from './dates.ts'
 
 /* ------------------------------------------------------------- les blocs */
 
@@ -46,17 +47,6 @@ function Contenu({ bloc }: { bloc: Bloc }) {
 }
 
 /* ------------------------------------------------------------- la liste */
-
-function dateLisible(iso: string): string {
-  const d = new Date(`${iso}T12:00:00Z`)
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  })
-}
 
 export function ListeArticles({
   articles,
@@ -178,19 +168,26 @@ export function ListeArticles({
  * avec une question précise et fait défiler, et le moteur génératif qui ne
  * cite jamais un article mais toujours un passage.
  *
- * De vraies balises `h3` dans une `section` étiquetée, et non une liste de
+ * De vraies balises dans une `section` étiquetée, et non une liste de
  * `div` : c'est ce qui permet d'y naviguer d'un titre à l'autre au lecteur
  * d'écran, et c'est aussi ce qui donne sa structure aux données que le
  * pré-rendu déclare (kitetudiant/scripts/prerendre.ts).
+ *
+ * `h2`, et non `h3` : les titres de section de l'article sont des `h2`, et
+ * la FAQ est leur pair, pas la sous-partie du dernier d'entre eux. En `h3`
+ * elle se rangeait sous la dernière section quel qu'en soit le sujet — ce
+ * que lit un lecteur d'écran qui parcourt le plan de la page, et ce que lit
+ * un moteur. Le pré-rendu écrivait déjà `h2` : les deux versions de la même
+ * page annonçaient deux plans différents.
  */
 function Questions({ article }: { readonly article: Article }) {
   const questions = article.questions ?? []
   if (questions.length === 0) return null
   return (
     <section className="questions" aria-labelledby="questions-titre">
-      <h3 className="questions-titre" id="questions-titre">
+      <h2 className="questions-titre" id="questions-titre">
         Questions fréquentes
-      </h3>
+      </h2>
       <dl className="questions-liste">
         {questions.map((q) => (
           <div className="questions-paire" key={q.question}>
