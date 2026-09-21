@@ -38,10 +38,30 @@
 export interface Partenaire {
   readonly nom: string
   readonly lien: string
-  /** La mention de rémunération, affichée partout où le lien apparaît. */
-  readonly remuneration: string
+  /**
+   * La mention de rémunération, affichée partout où le lien apparaît —
+   * ou `null` quand le lien ne nous rapporte RIEN.
+   *
+   * La distinction n'est pas cosmétique. Deux logos côte à côte se lisent
+   * comme deux partenariats de même nature ; si un seul est rémunéré, il
+   * faut le dire, sans quoi on laisse croire que l'autre l'est aussi — ou
+   * pire, que ni l'un ni l'autre ne l'est.
+   */
+  readonly remuneration: string | null
   /** Ce que le partenaire fait réellement, sans promesse chiffrée. */
   readonly quoi: string
+}
+
+/**
+ * Les attributs d'un lien, selon qu'il rapporte ou non.
+ *
+ * `sponsored` déclare un lien payant. Le poser sur un lien qui ne l'est pas
+ * serait faux dans l'autre sens : on annoncerait à un moteur un contrat
+ * commercial qui n'existe pas, et on s'interdirait de le citer un jour comme
+ * une vraie recommandation.
+ */
+export function relDe(p: Partenaire): string {
+  return p.remuneration === null ? 'noopener noreferrer' : REL_PARTENAIRE
 }
 
 /**
@@ -66,6 +86,33 @@ export const PAPERNEST: Partenaire = {
   quoi:
     'Il compare les offres d’électricité, de gaz, d’assurance habitation, de mobile et ' +
     'd’internet, puis s’occupe des démarches et de la résiliation de l’ancien contrat.',
+}
+
+/**
+ * leboncoin — les annonces de logement.
+ *
+ * ── Pourquoi il est ici, et pourquoi il n'est PAS un partenaire ──────────
+ *
+ * C'est là qu'une grande partie des locations étudiantes sont publiées, et
+ * la recherche de logement est le premier obstacle concret d'une rentrée —
+ * avant même les contrats. Le citer rend le bloc utile plutôt que
+ * simplement commercial.
+ *
+ * Mais aucun accord ne nous lie à leboncoin et ce lien ne nous rapporte
+ * rien : `remuneration` vaut donc `null`, il ne porte pas `sponsored`, et
+ * l'écran dit lequel des deux liens est payé.
+ *
+ * Le jour où un accord existerait, il suffira de renseigner
+ * `remuneration` : le `rel` suit, et `partenaires.test.ts` exigera la
+ * mention à l'écran.
+ */
+export const LEBONCOIN: Partenaire = {
+  nom: 'leboncoin',
+  lien: 'https://www.leboncoin.fr/recherche?category=10',
+  remuneration: null,
+  quoi:
+    'Une grande partie des locations étudiantes y sont publiées, souvent par des ' +
+    'particuliers et sans frais d’agence.',
 }
 
 /**

@@ -124,6 +124,14 @@ describe('la déclaration du lien rémunéré', () => {
   it('rappelle la majorité', () => {
     expect(texte).toMatch(/majorité|représentant légal|annulable/i)
   })
+
+  it('distingue le lien payé de celui qui ne l’est pas', () => {
+    /* La page porte deux logos. Déclarer « un seul lien commercial » sans
+       dire lequel des deux l'est laisserait le lecteur deviner — et deviner
+       de travers dans un sens comme dans l'autre. */
+    expect(texte).toMatch(/leboncoin/i)
+    expect(texte).toMatch(/n’est PAS rémunéré|pas rémunéré/i)
+  })
 })
 
 describe('la section données décrit le code, pas les intentions', () => {

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 
-import { PAPERNEST, REL_PARTENAIRE } from '../partenaires.ts'
+import { LEBONCOIN, PAPERNEST, REL_PARTENAIRE, relDe } from '../partenaires.ts'
 
 /**
  * Un lien rémunéré ne se pose jamais sans sa mention.
@@ -72,6 +72,8 @@ describe('le lien partenaire est toujours déclaré comme tel', () => {
     // et diraient « tout va bien » de rien du tout.
     const poseurs = sources().filter((f) => readFileSync(f, 'utf8').includes('PAPERNEST.lien'))
     expect(poseurs.length).toBeGreaterThan(0)
+    const logement = sources().filter((f) => readFileSync(f, 'utf8').includes('LEBONCOIN.lien'))
+    expect(logement.length).toBeGreaterThan(0)
   })
 })
 
@@ -111,9 +113,57 @@ describe('les attributs du lien', () => {
     expect(REL_PARTENAIRE).toContain('noreferrer')
   })
 
-  it('l’écran emploie bien ces attributs, pas les siens', () => {
+  it('l’écran dérive le rel du partenaire, au lieu de l’écrire', () => {
+    // Écrit à la main, il serait juste le jour où on l'écrit et faux le jour
+    // où un lien change de nature.
     const accueil = readFileSync(resolve(SRC, 'accueil.tsx'), 'utf8')
-    expect(accueil).toContain('rel={REL_PARTENAIRE}')
+    expect(accueil).toContain('rel={relDe(')
+    expect(accueil).not.toMatch(/rel="sponsored/)
+  })
+})
+
+/**
+ * Un lien qui ne rapporte rien ne se déclare pas payé.
+ *
+ * ── Pourquoi c'est une faute symétrique ──────────────────────────────────
+ *
+ * Poser `sponsored` sur un lien gratuit est faux dans l'autre sens : on
+ * annonce à un moteur un contrat commercial qui n'existe pas, et on
+ * s'interdit de citer un jour ce service comme une vraie recommandation.
+ *
+ * Et à l'écran, deux logos côte à côte se lisent comme deux partenariats de
+ * même nature. Si un seul est rémunéré, le taire laisse croire que l'autre
+ * l'est aussi — ou pire, que ni l'un ni l'autre ne l'est.
+ */
+describe('leboncoin n’est pas présenté comme un partenariat payé', () => {
+  it('ne nous rapporte rien, et le dit dans le code', () => {
+    expect(LEBONCOIN.remuneration).toBeNull()
+  })
+
+  it('son lien ne porte pas « sponsored »', () => {
+    expect(relDe(LEBONCOIN)).not.toContain('sponsored')
+    expect(relDe(LEBONCOIN)).toContain('noopener')
+    expect(relDe(LEBONCOIN)).toContain('noreferrer')
+  })
+
+  it('celui de papernest, si', () => {
+    expect(relDe(PAPERNEST)).toBe(REL_PARTENAIRE)
+    expect(relDe(PAPERNEST)).toContain('sponsored')
+  })
+
+  it('l’écran dit lequel des deux est payé et lequel ne l’est pas', () => {
+    const accueil = readFileSync(resolve(SRC, 'accueil.tsx'), 'utf8')
+    expect(accueil).toContain('PAPERNEST.remuneration')
+    expect(accueil, 'rien ne dit que leboncoin ne nous rapporte rien').toMatch(
+      /ne nous rapporte rien/,
+    )
+  })
+
+  it('ne promet pas plus que ce que leboncoin fait', () => {
+    // Pas de « trouve ton logement en un clic » : on ne maîtrise ni les
+    // annonces, ni leur disponibilité.
+    expect(LEBONCOIN.quoi).not.toMatch(/\d[\d  ]*(€|euros?\b)/i)
+    expect(LEBONCOIN.quoi).not.toMatch(/garanti|assuré|en un clic|trouve(ras)? forcément/i)
   })
 })
 
