@@ -32,8 +32,25 @@ ICI="$(cd "$(dirname "$0")" && pwd)"
 IMPORT="${IMPORT_DIR:-$(cd "$ICI/../.." && pwd)/data/import}"
 PSQL=(psql -v ON_ERROR_STOP=1 -q "${PGURL:?PGURL doit être défini}")
 
+# Le message nommait « preparer.py » sans dire d'où le lancer, ni qu'une
+# étape le précède. Sur un serveur fraîchement installé, `data/brut` est vide
+# et preparer.py échoue à son tour : on enchaîne deux erreurs avant de
+# comprendre qu'il manque le téléchargement. Vécu le 21/09/2026.
+RACINE="$(cd "$ICI/../.." && cd .. && pwd)"
 for f in commune etablissement formation stat_admission indicateur_logement; do
-  [ -f "$IMPORT/$f.csv" ] || { echo "$IMPORT/$f.csv absent : lance preparer.py" >&2; exit 1; }
+  [ -f "$IMPORT/$f.csv" ] && continue
+  cat >&2 <<AIDE
+$IMPORT/$f.csv est absent : les données de référence n'ont pas été préparées.
+
+Deux étapes avant celle-ci, depuis ${RACINE} :
+
+    python3 kitetudiant/scripts/exploration/telecharger.py   # ~185 Mo
+    python3 kitetudiant/scripts/import/preparer.py
+
+Puis relance cette commande. Tant qu'elles n'ont pas tourné, la table des
+formations est vide et aucun élève ne peut enregistrer un vœu.
+AIDE
+  exit 1
 done
 
 echo "Chargement depuis $IMPORT"

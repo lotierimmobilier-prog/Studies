@@ -259,6 +259,21 @@ echo "     sudo -u postgres psql -d ${BASE} -c '\\dn'        # les schémas cré
 echo "     curl -s localhost/api/voeux                      # ne doit plus rendre 503"
 echo
 echo "   Le .env est en 0600 : le mot de passe de la base n'y est lisible que par root."
-echo "   Charger les données de référence (formations, communes, loyers) :"
-echo "     PGURL=\"\$(sed -n 's/^DATABASE_URL=//p' ${APP_DIR}/.env)\" \\"
-echo "       bash ${MIGRATIONS}/charger.sh"
+echo
+# Ces trois lignes ne sont pas décoratives : tant qu'elles n'ont pas tourné,
+# `reference.formation` est vide et AUCUN élève ne peut enregistrer un vœu.
+# La base répond, les migrations sont appliquées, la console est verte — et
+# le site est cassé. Ce message ne nommait que la troisième commande, ce qui
+# a coûté une panne en production le 21/09/2026 : on cherchait pourquoi une
+# formation précise manquait, alors qu'il n'y en avait aucune.
+echo "   ⚠  LES DONNÉES DE RÉFÉRENCE NE SONT PAS ENCORE CHARGÉES."
+echo "      Sans elles, aucun vœu n'est enregistrable. Trois étapes, dans cet ordre :"
+echo
+echo "        cd ${SRC_DIR}"
+echo "        python3 kitetudiant/scripts/exploration/telecharger.py   # ~185 Mo"
+echo "        python3 kitetudiant/scripts/import/preparer.py"
+echo "        PGURL=\"\$(sed -n 's/^DATABASE_URL=//p' ${APP_DIR}/.env)\" \\"
+echo "          bash ${MIGRATIONS}/charger.sh"
+echo
+echo "      Puis vérifier dans la console d'administration : les compteurs de"
+echo "      reference.formation, etablissement et commune doivent être non nuls."
