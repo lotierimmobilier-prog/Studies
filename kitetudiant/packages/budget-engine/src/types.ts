@@ -14,7 +14,7 @@ export interface MontantSource {
 }
 
 export const POSTES_DEPENSE = [
-  'loyer_net',
+  'loyer',
   'transport',
   'alimentation',
   'frais_divers',
@@ -23,6 +23,7 @@ export const POSTES_DEPENSE = [
 ] as const
 
 export const POSTES_RESSOURCE = [
+  'aide_logement',
   'contribution_familiale',
   'job_etudiant',
   'bourse_crous',

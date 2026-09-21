@@ -77,28 +77,19 @@ function depuisBareme(
 // ---------------------------------------------------------------- dépenses
 
 /**
- * Loyer charges comprises du logement type, moins l'APL simulée.
+ * Loyer d'un scénario, ou la raison de son absence.
  *
- * L'indicateur de loyers est un loyer d'annonce, charges comprises, pour un
- * bien loué vide : les deux hypothèses voyagent avec le montant. Le scénario
- * choisit la borne de l'intervalle de prédiction publié.
+ * Sert aux deux lignes du logement : le loyer payé et l'aide qui vient dessus.
+ * Elles partagent exactement la même base, donc elles la calculent une fois.
  */
-export function ligneLoyerNet(voeu: VoeuBudget, scenario: Scenario): LigneBudget {
+function loyerDuScenario(
+  voeu: VoeuBudget,
+  scenario: Scenario,
+): { montant: number; hypothese: string; source: string; millesime: string } | string {
   if (voeu.loyer === null) {
-    return manquant(
-      'loyer_net',
-      'depense',
-      voeu.codeInsee === null
-        ? 'Commune non résolue : aucun indicateur de loyer ne peut être rattaché à cette formation.'
-        : `Aucun indicateur de loyer pour la commune ${voeu.codeInsee}.`,
-    )
-  }
-  if (voeu.aplMensuelle === null) {
-    return manquant(
-      'loyer_net',
-      'depense',
-      'APL non simulée. Le loyer net exige une simulation OpenFisca : aucune approximation n’est admise.',
-    )
+    return voeu.codeInsee === null
+      ? 'Commune non résolue : aucun indicateur de loyer ne peut être rattaché à cette formation.'
+      : `Aucun indicateur de loyer pour la commune ${voeu.codeInsee}.`
   }
   const euroParM2 =
     scenario === 'optimiste'
@@ -112,18 +103,64 @@ export function ligneLoyerNet(voeu: VoeuBudget, scenario: Scenario): LigneBudget
       : scenario === 'prudent'
         ? 'borne haute'
         : 'valeur centrale'
-  const brut = euroParM2 * voeu.surfaceHypotheseM2
-  const net = brut - voeu.aplMensuelle.montant
-  return mensuel('loyer_net', 'depense', {
-    montant: Math.max(net, 0),
-    source: `${voeu.loyer.source} ; APL : ${voeu.aplMensuelle.source}`,
-    millesime: `${voeu.loyer.millesime} / ${voeu.aplMensuelle.millesime}`,
+  return {
+    montant: euroParM2 * voeu.surfaceHypotheseM2,
+    source: voeu.loyer.source,
+    millesime: voeu.loyer.millesime,
     hypothese:
       `${eurosAuCentime(euroParM2)}/m² (${borne} de l’intervalle de prédiction, ` +
-      `estimation « ${voeu.loyer.qualite} ») ` +
-      `× ${voeu.surfaceHypotheseM2} m², loyer d’annonce charges comprises pour un bien loué vide, ` +
-      `moins ${eurosAuCentime(voeu.aplMensuelle.montant)} d’APL` +
-      (net < 0 ? ' ; APL supérieure au loyer, le poste est ramené à 0 €' : ''),
+      `estimation « ${voeu.loyer.qualite} ») × ${voeu.surfaceHypotheseM2} m², ` +
+      `loyer d’annonce charges comprises pour un bien loué vide`,
+  }
+}
+
+/**
+ * Le loyer que l'élève paie, charges comprises. BRUT : l'aide au logement est
+ * une ligne de ressource à part.
+ *
+ * Les deux étaient fondus en un seul poste « loyer net », et le montant qui
+ * s'affichait — 128 € pour un studio à 311 € — ne correspondait à rien de ce
+ * qu'on paie. Le reste-à-vivre est identique : c'est la même soustraction,
+ * écrite là où elle se lit.
+ */
+export function ligneLoyer(voeu: VoeuBudget, scenario: Scenario): LigneBudget {
+  const base = loyerDuScenario(voeu, scenario)
+  if (typeof base === 'string') return manquant('loyer', 'depense', base)
+  return mensuel('loyer', 'depense', {
+    montant: base.montant,
+    source: base.source,
+    millesime: base.millesime,
+    hypothese: base.hypothese,
+  })
+}
+
+/**
+ * Aide personnalisée au logement, simulée sur le loyer du même scénario.
+ *
+ * Plafonnée au loyer : la CAF ne verse jamais plus que ce qui est dû au
+ * bailleur, et sans ce plafond une aide supérieure au loyer rendrait le
+ * logement rentable, ce qui n'arrive pas.
+ */
+export function ligneAideLogement(voeu: VoeuBudget, scenario: Scenario): LigneBudget {
+  const base = loyerDuScenario(voeu, scenario)
+  if (typeof base === 'string') return manquant('aide_logement', 'ressource', base)
+  if (voeu.aplMensuelle === null) {
+    return manquant(
+      'aide_logement',
+      'ressource',
+      'APL non simulée. Le reste-à-vivre exige une simulation OpenFisca : aucune approximation n’est admise.',
+    )
+  }
+  const plafonnee = Math.min(voeu.aplMensuelle.montant, base.montant)
+  return mensuel('aide_logement', 'ressource', {
+    montant: plafonnee,
+    source: voeu.aplMensuelle.source,
+    millesime: voeu.aplMensuelle.millesime,
+    hypothese:
+      voeu.aplMensuelle.hypothese +
+      (plafonnee < voeu.aplMensuelle.montant
+        ? ` ; aide ramenée au loyer de ${eurosAuCentime(base.montant)}, qu’elle dépassait`
+        : ''),
   })
 }
 

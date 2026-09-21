@@ -57,7 +57,7 @@ import { ARTICLES, type Article } from '../../packages/articles/src/index.ts'
 import { ListeArticles, PageArticle } from './blog.tsx'
 import { cheminDe, routeDuChemin, type Route } from './routes.ts'
 import { euros, eurosPrecis } from './nombres.ts'
-import { affiniteCourte, affiniteNote, chancesCourtes } from './libelles.ts'
+import { affiniteCourte, affiniteNote, chancesCourtes, LIBELLES_POSTE } from './libelles.ts'
 import { ETAPES, Question, REPONSES_PAR_DEFAUT } from './parcours.tsx'
 import { Accueil } from './accueil.tsx'
 import { Compte } from './compte.tsx'
@@ -106,8 +106,20 @@ function Admission({ resultat }: { resultat: ResultatFormation }) {
   )
 }
 
+/**
+ * Une ligne du budget.
+ *
+ * Trois choses, dans cet ordre : ce que c'est, combien, et — seulement si on
+ * le demande — d'où ça sort. Les quatre lignes grises de provenance étaient
+ * jusqu'ici dépliées sous chaque poste : douze postes, douze pavés, et le
+ * chiffre disparaissait dedans.
+ *
+ * La règle 6 de CLAUDE.md tient : la source et le millésime restent attachés
+ * au montant, dans le même élément, à un clic. Ils ne sont pas supprimés, ils
+ * ne sont plus au-dessus de ce qu'ils expliquent.
+ */
 function Ligne({ ligne }: { ligne: LigneBudget }) {
-  const nom = ligne.poste.replace(/_/g, ' ')
+  const { nom, quoi } = LIBELLES_POSTE[ligne.poste]
   if (ligne.statut === 'calcule') {
     return (
       <li className={ligne.sens === 'depense' ? 'ligne depense' : 'ligne ressource'}>
@@ -115,9 +127,14 @@ function Ligne({ ligne }: { ligne: LigneBudget }) {
         <span className="ligne-montant">
           {ligne.sens === 'depense' ? '−' : '+'} {eurosPrecis(ligne.mensualise)}
         </span>
-        <span className="ligne-source">
-          {ligne.valeur.hypothese} — <em>{ligne.valeur.source}</em> (millésime {ligne.valeur.millesime})
-        </span>
+        <span className="ligne-quoi">{quoi}</span>
+        <details className="ligne-provenance">
+          <summary>D’où vient ce chiffre</summary>
+          <p>
+            {ligne.valeur.hypothese}.<br />
+            <em>{ligne.valeur.source}</em> (millésime {ligne.valeur.millesime})
+          </p>
+        </details>
       </li>
     )
   }
@@ -127,8 +144,60 @@ function Ligne({ ligne }: { ligne: LigneBudget }) {
       <span className="ligne-montant">
         {ligne.statut === 'manquant' ? 'donnée manquante' : 'sans objet'}
       </span>
-      <span className="ligne-source">{ligne.raison}</span>
+      <span className="ligne-quoi">{ligne.raison}</span>
     </li>
+  )
+}
+
+/**
+ * Le budget du mois, poste par poste.
+ *
+ * Les postes « sans objet » — les aides auxquelles l'élève n'a pas droit —
+ * sont repliés. Ils occupaient quatre lignes sur douze, toujours les mêmes,
+ * et poussaient le total hors de l'écran. Ils ne sont pas retirés : la règle 4
+ * vaut pour les vœux, mais le principe est le même, rien ne disparaît. Ils
+ * sont derrière un titre qui dit combien il y en a, et pourquoi.
+ */
+function Budget({ lignes, rav }: { lignes: readonly LigneBudget[]; rav: number | null }) {
+  const retenues = lignes.filter((l) => l.statut !== 'sans_objet')
+  const ecartees = lignes.filter((l) => l.statut === 'sans_objet')
+  return (
+    <>
+      <h4>Ce que ça te coûte, chaque mois</h4>
+      <ul className="lignes">
+        {retenues.map((l) => (
+          <Ligne key={l.poste} ligne={l} />
+        ))}
+      </ul>
+
+      {rav !== null ? (
+        <p className={`bilan ${rav < 0 ? 'manque' : 'reste'}`}>
+          <span className="bilan-nom">
+            {rav < 0 ? 'Il te manque, chaque mois' : 'Il te reste, chaque mois'}
+          </span>
+          <span className="bilan-euros">{eurosPrecis(Math.abs(rav))}</span>
+          <span className="bilan-note">
+            {rav < 0
+              ? 'C’est le montant à trouver — famille, bourse, job plus long — avant de dire oui. Ce n’est pas un refus.'
+              : 'Une fois le loyer, les courses et l’inscription payés.'}
+          </span>
+        </p>
+      ) : null}
+
+      {ecartees.length > 0 ? (
+        <details className="lignes-ecartees">
+          <summary>
+            {ecartees.length} aide{ecartees.length > 1 ? 's' : ''} qui ne te concerne
+            {ecartees.length > 1 ? 'nt' : ''} pas ici
+          </summary>
+          <ul className="lignes">
+            {ecartees.map((l) => (
+              <Ligne key={l.poste} ligne={l} />
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </>
   )
 }
 
@@ -221,47 +290,52 @@ function Carte({
 
   return (
     <article className={`carte ${verdict.classe}`} id={ancreDe(formation.id)} ref={ref}>
-      <div className="carte-tete">
-        <h3 className="carte-titre">{formation.libelle}</h3>
-        <span className={`verdict ${verdict.classe}`}>{verdict.texte}</span>
-      </div>
-
-      <p className="carte-lieu">
-        <Epingle />
-        <span>
-          {formation.etablissement} · {formation.ville} ({formation.departement})
-        </span>
-      </p>
-      <PastilleNote avis={avis} />
-
-      {/* Trois cases de même taille : aucune ne domine, aucune ne s'additionne. */}
-      <div className="trio">
-        <div className="trio-case">
-          <span className="trio-titre">Tes chances</span>
-          <span className="trio-valeur">{chancesCourtes(resultat.admissibilite)}</span>
-          <span className="trio-note">d’avoir une proposition</span>
+      {/* Le titre, le lieu et le reste-à-vivre sur une seule ligne : c'est ce
+          qu'on lit d'abord, et le chiffre a plus de force en grand à droite
+          qu'enfermé dans la troisième d'une rangée de cases. */}
+      <div className="bandeau-tete">
+        <div>
+          <h3 className="carte-titre">{formation.libelle}</h3>
+          <p className="carte-lieu">
+            <Epingle />
+            <span>
+              {formation.etablissement} · {formation.ville} ({formation.departement})
+            </span>
+          </p>
+          <PastilleNote avis={avis} />
         </div>
-        <div className="trio-case">
-          <span className="trio-titre">Ce qui te ressemble</span>
-          <span className="trio-valeur">{affiniteCourte(resultat.affinite)}</span>
-          <span className="trio-note">{affiniteNote(resultat.affinite)}</span>
-        </div>
-        <div className={`trio-case trio-reste ${verdict.classe}`}>
-          <span className="trio-titre">Il te restera</span>
-          <span className="trio-valeur">{resteTexte}</span>
-          <span className="trio-note">
+        {/* Le verdict reste écrit, pas seulement coloré : une couleur seule
+            ne se lit ni en noir et blanc, ni par un lecteur d'écran, ni par
+            les 8 % de garçons qui confondent le rouge et le vert. */}
+        <p className={`bandeau-cle ${verdict.classe}`}>
+          <span className={`verdict ${verdict.classe}`}>{verdict.texte}</span>
+          <span className="bandeau-cle-valeur">{resteTexte}</span>
+          <span className="bandeau-cle-note">
             {central.ravMensuel === null ? 'pour vivre, chaque mois' : 'par mois pour vivre'}
           </span>
-        </div>
+        </p>
       </div>
 
-      {central.ravMensuel !== null ? (
-        <p className="fourchette">
-          Entre {euros(resultat.parScenario.prudent.ravMensuel ?? 0)} et{' '}
-          {euros(resultat.parScenario.optimiste.ravMensuel ?? 0)} selon le scénario de loyer
-          et de job.
-        </p>
-      ) : null}
+      {/* Les trois lectures restent trois, de même graisse, et rien ne les
+          additionne — règle 5 de CLAUDE.md. Elles n'ont simplement plus
+          besoin d'un cadre chacune pour se distinguer. */}
+      <ul className="bandeau-mesures">
+        <li>
+          <b>{chancesCourtes(resultat.admissibilite)}</b> <span>d’avoir une proposition</span>
+        </li>
+        <li>
+          <b>{affiniteCourte(resultat.affinite)}</b> <span>{affiniteNote(resultat.affinite)}</span>
+        </li>
+        {central.ravMensuel !== null ? (
+          <li>
+            <b>
+              {euros(resultat.parScenario.prudent.ravMensuel ?? 0)} à{' '}
+              {euros(resultat.parScenario.optimiste.ravMensuel ?? 0)}
+            </b>{' '}
+            <span>selon le loyer et le job</span>
+          </li>
+        ) : null}
+      </ul>
 
       <ResumeRetours agregat={retours} />
 
@@ -440,12 +514,7 @@ function Carte({
             </div>
           ) : null}
 
-          <h4>Ton budget mensuel</h4>
-          <ul className="lignes">
-            {central.lignes.map((l) => (
-              <Ligne key={l.poste} ligne={l} />
-            ))}
-          </ul>
+          <Budget lignes={central.lignes} rav={central.ravMensuel} />
 
           {jumeaux.length > 0 ? (
             <div className="jumeaux">

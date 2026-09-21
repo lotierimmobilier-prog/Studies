@@ -172,7 +172,7 @@ describe('résultats', () => {
     const [resultat] = calculerResultats([f], REPONSES, sansAide, LE_JOUR)
     if (!resultat) throw new Error('résultat attendu')
     expect(resultat.parScenario.central.ravMensuel).toBeNull()
-    expect(resultat.parScenario.central.postesManquants).toContain('loyer_net')
+    expect(resultat.parScenario.central.postesManquants).toContain('aide_logement')
     expect(resultat.raisonAide).toBe('OpenFisca injoignable')
   })
 

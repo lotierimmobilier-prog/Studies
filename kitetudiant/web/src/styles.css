@@ -261,14 +261,14 @@ a.principal {
 .carte.orange { border-left-color: var(--orange); }
 .carte.rouge { border-left-color: var(--rouge); }
 
-.verdict { flex: 0 0 auto; font-size: 0.78rem; font-weight: 800; white-space: nowrap; }
+.verdict { display: block; font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
 .verdict.vert { color: var(--vert); }
 .verdict.orange { color: var(--orange); }
 .verdict.rouge { color: var(--rouge); }
 .verdict.gris { color: var(--gris); }
 
 .etab { margin: 0; color: var(--doux); font-size: 0.9rem; }
-.fourchette, .admission { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
+.admission { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
 .avertissement { margin: 0.5rem 0 0; font-size: 0.82rem; color: var(--orange); }
 
 .lien {
@@ -286,14 +286,99 @@ a.principal {
 
 /* ---------------------------------------------------------------- détail */
 .detail { margin-top: 1rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
-.lignes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
-.ligne { display: grid; grid-template-columns: 1fr auto; gap: 0.15rem 0.75rem; font-size: 0.9rem; }
-.ligne-poste { text-transform: capitalize; }
-.ligne-montant { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
-.ligne-source { grid-column: 1 / -1; color: var(--doux); font-size: 0.78rem; overflow-wrap: anywhere; }
+/* Le budget du mois. Un trait fin entre les postes plutôt qu'un espacement :
+   on lit une addition, et une addition s'aligne. */
+.lignes { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.ligne {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.75rem;
+  align-items: baseline;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--trait);
+  font-size: 0.9rem;
+}
+.ligne-poste { font-family: var(--titres); font-weight: 600; }
+.ligne-montant {
+  font-family: var(--titres);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.ligne-quoi { grid-column: 1 / -1; color: var(--doux); font-size: 0.8rem; line-height: 1.4; }
 .ligne.ressource .ligne-montant { color: var(--vert); }
-.ligne.manquante .ligne-montant { color: var(--rouge); font-weight: 600; }
+.ligne.manquante .ligne-montant { color: var(--rouge); font-weight: 800; }
 .ligne.sans-objet .ligne-montant { color: var(--doux); font-weight: 400; }
+
+/* La provenance : repliée, mais attachée à son montant, dans la même ligne.
+   Règle 6 — la source et le millésime ne quittent jamais le chiffre. */
+.ligne-provenance { grid-column: 1 / -1; margin-top: 0.3rem; }
+.ligne-provenance summary {
+  display: inline-block;
+  cursor: pointer;
+  list-style: none;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.78rem;
+  min-height: 24px;
+}
+.ligne-provenance summary::-webkit-details-marker { display: none; }
+.ligne-provenance summary::before { content: '▸ '; font-size: 0.72em; }
+.ligne-provenance[open] summary::before { content: '▾ '; }
+.ligne-provenance summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ligne-provenance p {
+  margin: 0.35rem 0 0;
+  color: var(--doux);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* Le total. Il ferme l'addition, donc il en a le poids — mais il garde la
+   couleur du verdict, jamais une autre. */
+.bilan {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.75rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  border-top: 2px solid var(--encre);
+  border-radius: 0 0 var(--rayon) var(--rayon);
+  background: var(--fond);
+}
+.bilan-nom { font-family: var(--titres); font-weight: 800; font-size: 0.95rem; }
+.bilan-euros {
+  font-family: var(--titres);
+  font-weight: 800;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bilan.manque .bilan-euros { color: var(--rouge); }
+.bilan.reste .bilan-euros { color: var(--vert); }
+.bilan-note {
+  grid-column: 1 / -1;
+  margin-top: 0.2rem;
+  color: var(--doux);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+/* Les aides sans objet. Repliées, mais comptées dans le titre : on sait
+   combien il y en a sans avoir à ouvrir. */
+.lignes-ecartees { margin-top: 0.9rem; }
+.lignes-ecartees > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-height: 32px;
+  padding: 0.25rem 0;
+}
+.lignes-ecartees > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .jumeaux { margin-top: 1.2rem; }
 .jumeaux h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
@@ -483,6 +568,17 @@ input[type='range'] { width: 100%; min-height: 44px; }
 }
 .cta-secondaire:hover { border-color: var(--accent); color: var(--accent); }
 .hero-mentions { margin: 0.9rem 0 0; color: var(--doux); font-size: 0.82rem; text-align: center; }
+
+/* La promesse : ce que le site fait, et qu'il ne coûte rien. Elle se lit avant
+   les mentions, donc elle est un cran plus grande qu'elles, et un cran plus
+   petite que le texte du titre. */
+.hero-gratuit {
+  margin: 1rem 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--encre);
+}
+.hero-gratuit strong { font-family: var(--titres); font-weight: 800; }
 
 /* -------------------------------------------------------------- bandeau */
 .bandeau {
@@ -1077,20 +1173,12 @@ input[type='range'] { width: 100%; min-height: 44px; }
    même poids, jamais fondues en une note. D'où l'absence de médaille, de score
    global et de hiérarchie visuelle entre deux fiches. */
 
-.carte-tete {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.35rem 0.75rem;
-  /* Le verdict ne se coupe pas — « Pas finançable en l'état » fait 166 px — et
-     un titre flex ne descend pas sous la largeur de son mot le plus long tant
-     qu'on ne lui donne pas « min-width: 0 ». Sans ces deux règles, la fiche
-     dépassait de 4 px à 390 px de large. Constaté au navigateur le 20/09/2026. */
-  flex-wrap: wrap;
-}
 .carte-titre {
   margin: 0;
-  flex: 1 1 11rem;
+  /* Un titre ne descend pas sous la largeur de son mot le plus long tant qu'on
+     ne lui donne pas « min-width: 0 » : sans cette règle, « Formation
+     d'ingénieur » faisait dépasser la fiche de 4 px à 390 px de large.
+     Constaté au navigateur le 20/09/2026. */
   min-width: 0;
   overflow-wrap: anywhere;
   font-size: 1.1rem;
@@ -1123,47 +1211,52 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .etoiles { color: var(--vif); letter-spacing: 0.05em; }
 .etoiles-vides { opacity: 0.28; }
 
-/* Les trois cases. Même largeur, même graisse : aucune ne domine. */
-.trio {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.5rem;
-  margin: 0.9rem 0 0;
-}
-.trio-case {
+/* Les trois lectures, sans cadre.
+   Elles vivaient dans trois boîtes, dans une boîte : sur une liste de dix
+   résultats cela faisait trente cadres, et l'œil ne savait plus lequel lire.
+   Ici elles sont typographiques — un chiffre, un mot — et c'est le blanc qui
+   les sépare. Aucune note globale : elles restent trois, côte à côte, de même
+   graisse, et rien ne les additionne. */
+.bandeau-tete {
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.6rem 0.65rem;
-  border: 1px solid var(--trait);
-  border-radius: 10px;
-  background: var(--fond);
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.1rem;
 }
-.trio-titre {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--doux);
-}
-.trio-valeur {
+.bandeau-tete > div:first-child { min-width: 0; }
+.bandeau-cle { text-align: right; white-space: nowrap; flex: 0 0 auto; }
+.bandeau-cle-valeur {
+  display: block;
   font-family: var(--titres);
-  font-size: 1.1rem;
+  font-size: 1.65rem;
   font-weight: 800;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+  line-height: 1;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
-.trio-note { font-size: 0.7rem; color: var(--doux); line-height: 1.3; }
+/* Seul le reste-à-vivre porte la couleur du verdict : c'est le seul des trois
+   axes sur lequel le site se prononce. */
+.bandeau-cle.vert .bandeau-cle-valeur { color: var(--vert); }
+.bandeau-cle.orange .bandeau-cle-valeur { color: var(--orange); }
+.bandeau-cle.rouge .bandeau-cle-valeur { color: var(--rouge); }
+.bandeau-cle.gris .bandeau-cle-valeur { color: var(--doux); font-size: 1.05rem; }
+.bandeau-cle-note { font-size: 0.72rem; color: var(--doux); line-height: 1.3; }
 
-/* Seule la case du reste-à-vivre porte la couleur du verdict : c'est le seul
-   des trois axes sur lequel le site se prononce. */
-.trio-reste.vert { border-color: var(--vert); }
-.trio-reste.orange { border-color: var(--orange); }
-.trio-reste.rouge { border-color: var(--rouge); }
-.trio-reste.vert .trio-valeur { color: var(--vert); }
-.trio-reste.orange .trio-valeur { color: var(--orange); }
-.trio-reste.rouge .trio-valeur { color: var(--rouge); }
-.trio-reste.gris .trio-valeur { color: var(--doux); font-size: 0.95rem; }
+.bandeau-mesures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.6rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+}
+.bandeau-mesures b {
+  font-family: var(--titres);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.bandeau-mesures span { color: var(--doux); }
 
 .carte-actions { margin-top: 1rem; }
 .carte-deplier { width: 100%; }
@@ -1195,12 +1288,12 @@ input[type='range'] { width: 100%; min-height: 44px; }
    ligne feraient trois taches, et la rangée cesserait de se lire d'un coup. */
 .carte-lien .illu-picto { width: 16px; height: 16px; flex: 0 0 auto; stroke: currentColor; }
 
-/* Sur un téléphone étroit, trois colonnes écraseraient les montants : on passe
-   à une seule, et chaque case garde son chiffre lisible. */
+/* Sur un téléphone étroit, le reste-à-vivre passe sous le titre plutôt que de
+   lui disputer la largeur : un intitulé de formation fait souvent deux lignes. */
 @media (max-width: 26rem) {
-  .trio { grid-template-columns: 1fr; }
-  .trio-case { flex-direction: row; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
-  .trio-note { display: none; }
+  .bandeau-tete { flex-direction: column; gap: 0.6rem; }
+  .bandeau-cle { text-align: left; }
+  .bandeau-mesures { gap: 0.25rem 1.1rem; font-size: 0.84rem; }
 }
 
 /* ------------------------------------------------------------------- logo */

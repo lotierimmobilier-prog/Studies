@@ -124,11 +124,25 @@ describe('la note de l’adresse n’entre dans aucun calcul', () => {
 describe('la fiche garde les trois réponses séparées', () => {
   const app = readFileSync(resolve(SRC, 'App.tsx'), 'utf8')
 
-  it('affiche exactement trois cases', () => {
-    // Une seule expression : deux motifs séparés comptaient deux fois la case
-    // au nom composé (`trio-case trio-reste …`).
-    const cases = app.match(/className=\{?["`]trio-case\b/g) ?? []
-    expect(cases).toHaveLength(3)
+  it('affiche trois lectures, et le reste-à-vivre en est une', () => {
+    /* Les trois vivaient dans trois cases identiques ; elles sont maintenant
+       typographiques — deux mesures dans la liste, le reste-à-vivre en gros à
+       droite. Le nombre de cadres a changé, pas la règle : ce sont toujours
+       trois lectures distinctes, et aucune n'est la somme des autres. */
+    const bloc = /<ul className="bandeau-mesures">[\s\S]*?<\/ul>/.exec(app)
+    expect(bloc, 'la rangée des mesures a disparu').not.toBeNull()
+    expect(bloc![0]).toContain('chancesCourtes')
+    expect(bloc![0]).toContain('affiniteCourte')
+    // Le troisième axe, lui, est la clé du bandeau.
+    expect(app).toMatch(/<span className="bandeau-cle-valeur">\{resteTexte\}<\/span>/)
+  })
+
+  it('ne mêle jamais les chances et l’affinité dans un même chiffre', () => {
+    /* Les deux valeurs ne se rencontrent que côte à côte dans le JSX. Une
+       expression qui les combinerait — moyenne, produit, addition — serait la
+       faute que la règle 5 vise, et elle passerait inaperçue. */
+    expect(app).not.toMatch(/chancesCourtes\([^)]*\)\s*[+*/-]/)
+    expect(app).not.toMatch(/affinite\.score\s*[+*/-]\s*\w*(bas|haut|taux)/i)
   })
 
   it('ne calcule aucune note globale à partir des trois', () => {

@@ -42,6 +42,7 @@ import {
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
 import { ACCUEIL_QUESTIONS, ACCUEIL_TITRE_PAGE } from '../../packages/articles/src/accueil.ts'
 import { ARTICLES } from '../../packages/articles/src/index.ts'
+import { Compteur } from './compteur.tsx'
 import { cheminDe, type Route } from './routes.ts'
 import {
   AVERTISSEMENT,
@@ -53,7 +54,7 @@ import {
   SESSION_VISEE,
   SOURCE_CALENDRIER,
 } from './calendrier.ts'
-import { euros, eurosPrecis, nombre } from './nombres.ts'
+import { euros, eurosPrecis } from './nombres.ts'
 import { dateLisible } from './dates.ts'
 import { LEBONCOIN, PAPERNEST, relDe } from './partenaires.ts'
 
@@ -132,6 +133,14 @@ function Hero({
 
           Les mentions ne sont plus collées au point médian : « A · B · C »
           se lit comme une étiquette de gabarit. Une phrase se lit. */}
+      {/* Ce que le site est, et ce qu'il coûte. Les deux manquaient : on
+          comprenait qu'il classait des formations, pas qu'il sert aussi à
+          tenir le quotidien une fois sur place — ni qu'il est gratuit. */}
+      <p className="hero-gratuit">
+        <strong>Gratuit</strong>, pour optimiser tes études <em>et</em> ton quotidien
+        d’étudiant : le choix des vœux, mais aussi le logement, le budget et les aides
+        auxquelles tu as droit.
+      </p>
       <p className="hero-mentions">
         Sept questions, un aperçu sans compte, et aucune note enregistrée.{' '}
         <a href="#methode">Comment ça marche</a>
@@ -145,20 +154,24 @@ function Hero({
 function Bandeau() {
   return (
     <section className="bandeau" aria-label="En bref">
+      {/* Les chiffres défilent jusqu'à leur valeur quand la bande arrive à
+          l'écran. C'est de la décoration : le chiffre est connu d'avance, il
+          ne change pas, et qui a demandé « moins d'animations » le voit posé
+          d'emblée. Le zéro ne défile pas — il n'y aurait rien à parcourir. */}
       <div className="bandeau-item">
-        <span className="bandeau-chiffre">{nombre(NOMBRE_COMMUNES_AVEC_LOYER)}</span>
+        <Compteur cible={NOMBRE_COMMUNES_AVEC_LOYER} />
         <span className="bandeau-libelle">
           communes dont le loyer est connu, millésime {MILLESIME_LOYERS}
         </span>
       </div>
       <div className="bandeau-item">
-        <span className="bandeau-chiffre">3</span>
+        <Compteur cible={3} />
         <span className="bandeau-libelle">
           critères tenus séparés, jamais résumés en une note unique
         </span>
       </div>
       <div className="bandeau-item">
-        <span className="bandeau-chiffre">0</span>
+        <Compteur cible={0} />
         <span className="bandeau-libelle">
           montant inventé : chaque euro porte sa source et sa date
         </span>
