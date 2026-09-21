@@ -29,6 +29,8 @@
  * des charges fixe un premier résultat en moins de 90 secondes.
  */
 
+import { useState } from 'react'
+
 import {
   GENERE_LE,
   loyerDe,
@@ -42,6 +44,7 @@ import {
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
 import { ACCUEIL_QUESTIONS, ACCUEIL_TITRE_PAGE } from '../../packages/articles/src/accueil.ts'
 import { ARTICLES } from '../../packages/articles/src/index.ts'
+import { lireAnneeNaissance, publicDe, type Public } from './age.ts'
 import { Compteur } from './compteur.tsx'
 import { cheminDe, type Route } from './routes.ts'
 import {
@@ -368,6 +371,12 @@ export function Accueil({
   onNaviguer: (route: Route) => void
   onArticle: (slug: string) => void
 }) {
+  /* Qui lit cette page ? Lu une fois, au premier rendu.
+     `createRoot` et non `hydrateRoot` (main.tsx) : lire le stockage ici ne
+     risque aucune discordance d'hydratation, et l'état de départ est le bon
+     dès la première image — un mineur ne voit donc jamais clignoter le
+     contenu destiné aux majeurs. */
+  const [lecteur] = useState<Public>(() => publicDe(lireAnneeNaissance()))
   return (
     <main className="app accueil">
       {/* L'accroche et sa photographie forment UNE zone, pas deux blocs
@@ -555,26 +564,54 @@ export function Accueil({
             </a>
           </article>
 
-          <article className="partenaire-etape">
-            <img
-              className="partenaire-logo"
-              src={logoPapernest}
-              alt={PAPERNEST.nom}
-              width={467}
-              height={88}
-            />
-            <h3>2. Ouvrir les contrats</h3>
-            <p>{PAPERNEST.quoi}</p>
-            <a
-              className="secondaire"
-              href={PAPERNEST.lien}
-              target="_blank"
-              rel={relDe(PAPERNEST)}
-            >
-              Comparer mes contrats
-              <span aria-hidden="true"> ↗</span>
-            </a>
-          </article>
+          {/* Le lien rémunéré ne s'affiche pas pour quelqu'un dont on sait
+              qu'il est mineur.
+
+              Ce n'est pas de la prudence excessive : un contrat d'énergie
+              signé par un mineur est annulable, donc le lui proposer, c'est
+              lui proposer une démarche qui ne tiendra pas — et se faire payer
+              pour ça. L'information, elle, reste : ce qu'il faut préparer, et
+              avec qui.
+
+              La porte vaut ce que vaut une année déclarative, c'est-à-dire
+              pas grand-chose face à quelqu'un qui veut passer. C'est pourquoi
+              ce qui reste affiché est honnête dans les deux cas. */}
+          {lecteur === 'mineur' ? (
+            <article className="partenaire-etape">
+              <h3>2. Ouvrir les contrats</h3>
+              <p>
+                Électricité, gaz, internet, assurance habitation : tout cela se signe à
+                dix-huit ans, ou par un parent. Un contrat signé avant ne tient pas
+                juridiquement, donc rien ne sert de le préparer seul.
+              </p>
+              <p className="note">
+                Ce qu’il y a à faire dès maintenant : lister ce qu’il faudra ouvrir, et
+                en parler à la maison. On te remontrera les comparateurs quand tu
+                pourras signer.
+              </p>
+            </article>
+          ) : (
+            <article className="partenaire-etape">
+              <img
+                className="partenaire-logo"
+                src={logoPapernest}
+                alt={PAPERNEST.nom}
+                width={467}
+                height={88}
+              />
+              <h3>2. Ouvrir les contrats</h3>
+              <p>{PAPERNEST.quoi}</p>
+              <a
+                className="secondaire"
+                href={PAPERNEST.lien}
+                target="_blank"
+                rel={relDe(PAPERNEST)}
+              >
+                Comparer mes contrats
+                <span aria-hidden="true"> ↗</span>
+              </a>
+            </article>
+          )}
         </div>
 
         {/* La mention dit lequel des deux liens est payé, et lequel ne l'est
@@ -584,7 +621,9 @@ export function Accueil({
             Elle est AVANT rien du tout — elle est sous les deux boutons,
             parce qu'ici il y a deux chemins et qu'une mention posée avant
             l'un seulement se lirait comme ne concernant que celui-là. */}
-        <p className="note partenaire-mention">{PAPERNEST.remuneration}</p>
+        {lecteur === 'mineur' ? null : (
+          <p className="note partenaire-mention">{PAPERNEST.remuneration}</p>
+        )}
         <p className="note">
           Le lien vers {LEBONCOIN.nom}, lui, ne nous rapporte rien : aucun accord ne
           nous lie, il est là parce qu’il est utile.
@@ -592,10 +631,15 @@ export function Accueil({
 
         {/* Dit parce que c'est vrai, et parce que le public de ce site a
             souvent dix-sept ans : un bail comme un contrat d'énergie signé
-            par un mineur est annulable, ce qui n'aide personne. */}
+            par un mineur est annulable, ce qui n'aide personne.
+
+            Adressée quand on sait à qui on parle, générale sinon. « Si tu n'y
+            es pas encore » à quelqu'un dont on sait qu'il n'y est pas encore
+            se lit comme une formule, et une formule ne prévient personne. */}
         <p className="note">
-          Un bail et un contrat d’énergie se signent à 18 ans, ou par un parent. Si tu
-          n’y es pas encore, c’est une démarche à préparer avec eux — pas à faire seul.
+          {lecteur === 'mineur'
+            ? 'Tu n’as pas encore dix-huit ans : un bail et un contrat d’énergie se signent avec un parent. C’est une démarche à préparer avec eux, et le moment de la préparer, c’est maintenant.'
+            : 'Un bail et un contrat d’énergie se signent à 18 ans, ou par un parent. Si tu n’y es pas encore, c’est une démarche à préparer avec eux — pas à faire seul.'}
         </p>
       </section>
 

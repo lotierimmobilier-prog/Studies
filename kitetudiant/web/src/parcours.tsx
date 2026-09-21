@@ -28,6 +28,7 @@ import {
   trainDeVieCourant,
   valeursDe,
 } from './budgetSimple.ts'
+import { ecrireAnneeNaissance } from './age.ts'
 import type { Reponses } from './calcul.ts'
 import { lireBulletin } from './donnees.ts'
 import {
@@ -427,6 +428,28 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
     ]
     return (
       <div className="choix">
+        {/* L'année de naissance AVANT le bac, et non après.
+            Elle décide de trois choses : le montant de l'APL, si le dépôt de
+            bulletin est permis (quinze ans), et si les écrans qui parlent de
+            contrats s'adressent à quelqu'un qui peut signer seul. Une réponse
+            dont dépend le reste se pose en premier. */}
+        <Champ
+          label="Ton année de naissance"
+          valeur={reponses.anneeNaissance}
+          min={1990}
+          max={new Date().getFullYear()}
+          onChange={(anneeNaissance) => {
+            onChange({ anneeNaissance })
+            // Gardée pour les écrans hors parcours — la lettre de motivation,
+            // les pages qui parlent de bail ou de contrat. Elle ne quitte pas
+            // ce navigateur : voir age.ts.
+            ecrireAnneeNaissance(anneeNaissance)
+          }}
+        />
+        <p className="note">
+          L’année seule suffit à calculer tes droits. On ne te demande ni ton nom,
+          ni ta date de naissance complète.
+        </p>
         {bacs.map((b) => (
           <button
             key={b.cle}
@@ -437,17 +460,6 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
             {b.texte}
           </button>
         ))}
-        <Champ
-          label="Ton année de naissance"
-          valeur={reponses.anneeNaissance}
-          min={1990}
-          max={new Date().getFullYear()}
-          onChange={(anneeNaissance) => onChange({ anneeNaissance })}
-        />
-        <p className="note">
-          L’année seule suffit à calculer tes droits. On ne te demande ni ton nom,
-          ni ta date de naissance complète.
-        </p>
 
         {/* Les spécialités ne servent qu'au bac général : les proposer à un
             bachelier technologique ou professionnel lui ferait remplir un
