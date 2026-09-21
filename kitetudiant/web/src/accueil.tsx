@@ -100,7 +100,11 @@ function Hero({
 }) {
   return (
     <section className="hero">
-      <p className="hero-sur">Orientation post-bac · Parcoursup</p>
+      {/* Le sur-titre « ORIENTATION POST-BAC · PARCOURSUP » est parti.
+          Des capitales espacées au-dessus d'un titre, avec un point médian
+          pour coller deux mots-clés, c'est le tic visuel le plus
+          reconnaissable des pages fabriquées à la chaîne — et il ne disait
+          rien que le titre ne dise déjà, puisque « Parcoursup » y figure. */}
       <h1 className="promesse">{ACCUEIL_TITRE_PAGE}</h1>
       <p className="hero-texte">
         Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet,
@@ -120,12 +124,17 @@ function Hero({
         <button type="button" className="cta-secondaire" onClick={onChercher}>
           Tu sais déjà où aller ?
         </button>
-        <a className="cta-secondaire" href="#methode">
-          Comment ça marche
-        </a>
       </div>
+      {/* « Comment ça marche » est descendu dans la ligne de mentions : trois
+          boutons côte à côte n'avaient pas trois niveaux d'importance, et le
+          troisième passait à la ligne tout seul — ce qui se lit comme un
+          accident plutôt que comme un choix.
+
+          Les mentions ne sont plus collées au point médian : « A · B · C »
+          se lit comme une étiquette de gabarit. Une phrase se lit. */}
       <p className="hero-mentions">
-        Sept questions · aperçu sans compte · aucune note enregistrée
+        Sept questions, un aperçu sans compte, et aucune note enregistrée.{' '}
+        <a href="#methode">Comment ça marche</a>
       </p>
     </section>
   )

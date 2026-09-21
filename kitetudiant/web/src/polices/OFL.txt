@@ -1,4 +1,17 @@
-Copyright 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins)
+Les deux familles servies par ce site sont sous SIL Open Font License 1.1.
+La licence exige que ces mentions accompagnent les fichiers : les voici.
+
+Copyright 2022 The Bricolage Grotesque Project Authors
+(https://github.com/ateliertriay/bricolage)
+
+Copyright 2014-2023 Adobe (http://www.adobe.com/), with Reserved Font Name
+'Source'. Source is a trademark of Adobe in the United States and/or other
+countries.
+
+Les fichiers livrés sont des SOUS-ENSEMBLES : chaque famille a été figée à
+une graisse et une taille optique, puis réduite aux caractères dont ce site
+a besoin. La licence l'autorise expressément, et les fichiers modifiés
+restent sous la même licence.
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
