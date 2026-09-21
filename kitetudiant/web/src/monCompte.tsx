@@ -44,6 +44,7 @@ import { chargerCollection, villesDe } from './collection.ts'
 import { LIBELLES_MATIERE } from '../../packages/profil-scolaire/src/index.ts'
 import type { Reponses } from './calcul.ts'
 import { CHEMIN_CONSOLE_ADMIN, type Route } from './routes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 
 /**
  * Le bac, tel qu'on le dit. La clé technique — « general » — est ce que le
@@ -410,6 +411,12 @@ export function MonCompte({
   /** Appelé après un effacement : la session n'existe plus. */
   readonly onDeconnexion: () => void
 }) {
+  useMetadonnees({
+    titre: 'Mon compte — KitEtudiant.fr',
+    description: 'Tes coordonnées, ton mot de passe, et ce que le site garde de toi.',
+    prive: true,
+  })
+
   const [profil, setProfil] = useState<ProfilCompte | null>(null)
   const [charge, setCharge] = useState(false)
 

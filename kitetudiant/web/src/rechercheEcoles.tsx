@@ -32,7 +32,8 @@ import { liensLogement } from './logement.ts'
 import { nombre } from './nombres.ts'
 import { secteurDe } from './tri.ts'
 import { THEMES, motsDuTheme } from './themes.ts'
-import { cheminDe, type Route } from './routes.ts'
+import { adresseComplete, cheminDe, type Route } from './routes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 
 function Resultat({
   formation,
@@ -122,6 +123,18 @@ export function RechercheEcoles({
   /** Bascule vers le parcours en sept questions. */
   readonly onCommencer: () => void
 }) {
+  /* Cette page se présentait aux moteurs avec le titre ET la description de
+     l'accueil — un doublon strict. C'est pourtant elle qui répond à
+     « qu'est-ce qu'il y a comme écoles à Limoges ? », la question qu'on
+     tape vraiment. */
+  useMetadonnees({
+    titre: 'Chercher une formation, ville par ville — KitEtudiant.fr',
+    description:
+      'Tape une ville et vois les formations qui s’y trouvent : établissement, nombre ' +
+      'de places et taux d’accès publié par le ministère. Avec, pour chacune, ce que ' +
+      'coûte un logement sur place.',
+    canonique: adresseComplete({ vue: 'recherche' }),
+  })
   /* Les critères vivent dans l'adresse, pas seulement en mémoire.
    *
    * Deux raisons, et la seconde est la plus importante :

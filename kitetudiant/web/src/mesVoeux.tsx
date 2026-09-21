@@ -38,6 +38,7 @@ import {
   type Voeu,
 } from './donnees.ts'
 import { cheminDe, type Route } from './routes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 
 /** Comme Parcoursup. Le serveur et la base le vérifient aussi. */
 const VOEUX_MAX = 10
@@ -212,6 +213,11 @@ export function MesVoeux({
   readonly connecte: boolean
   readonly onNaviguer: (route: Route) => void
 }) {
+  useMetadonnees({
+    titre: 'Mes vœux — KitEtudiant.fr',
+    description: 'Ta liste de travail : les formations que tu envisages, dans ton ordre.',
+    prive: true,
+  })
   const [voeux, setVoeux] = useState<readonly Voeu[]>([])
   const [etat, setEtat] = useState<Etat>('charge')
   const [message, setMessage] = useState<string | null>(null)

@@ -38,6 +38,7 @@ import { liensLogement } from './logement.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { themesDuLibelle } from './themes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 import {
   EmploiIndisponible,
   chercherEmploi,
@@ -793,22 +794,30 @@ export function PageFormation({
 
   // Titre et lien canonique : sans eux, toutes les fiches partagent le titre
   // de l'accueil, et un moteur les voit comme une seule page.
-  useEffect(() => {
-    const precedent = document.title
-    if (formation !== null) {
-      document.title = `${formation.libelle} — ${formation.etablissement} | KitEtudiant.fr`
-      let lien = document.head.querySelector('link[rel="canonical"]')
-      if (lien === null) {
-        lien = document.createElement('link')
-        lien.setAttribute('rel', 'canonical')
-        document.head.append(lien)
-      }
-      lien.setAttribute('href', adresseComplete({ vue: 'formation', code }))
-    }
-    return () => {
-      document.title = precedent
-    }
-  }, [formation, code])
+  /* Le titre porte la VILLE, et la description existe.
+     
+     Le titre ne disait que l'intitulé et l'établissement. Or « BUT
+     informatique Toulouse » est la forme que les élèves tapent : sans la
+     ville, la fiche ne répond à aucune recherche. Et faute de description,
+     toutes les fiches du site héritaient de celle de l'accueil — des
+     milliers de pages présentées aux moteurs avec le même résumé.
+     
+     Tant que la formation n'est pas chargée, on ne pose RIEN : un titre
+     provisoire du genre « Chargement » est ce qu'un robot pressé garderait. */
+  useMetadonnees(
+    formation === null
+      ? { titre: document.title, description: '' }
+      : {
+          titre:
+            `${formation.libelle} à ${formation.ville} — ${formation.etablissement} : ` +
+            `places, taux d’accès, coût de la vie | KitEtudiant.fr`,
+          description:
+            `Combien de places, quel taux d’accès, d’où venaient les admis, et ce que ` +
+            `coûte un logement à ${formation.ville}. Chiffres publiés par le ministère` +
+            `${formation.session ? `, session ${formation.session}` : ''}.`,
+          canonique: adresseComplete({ vue: 'formation', code }),
+        },
+  )
 
   return (
     <main className="app">

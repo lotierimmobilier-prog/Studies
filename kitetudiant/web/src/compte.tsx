@@ -12,6 +12,8 @@
 
 import { useEffect, useState } from 'react'
 
+import { useMetadonnees } from './metadonnees.ts'
+
 import {
   CompteRefuse,
   connecter,
@@ -43,6 +45,19 @@ export function Compte({
   readonly onAbandon: () => void
 }) {
   const [mode, setMode] = useState<Mode>(modeInitial)
+  /* Le titre suit le mode : /connexion et /inscription sont deux adresses,
+     et le même titre sur les deux les rendrait indistinguables dans un
+     historique de navigation comme dans un index. */
+  useMetadonnees({
+    titre:
+      mode === 'connexion'
+        ? 'Se connecter — KitEtudiant.fr'
+        : 'Créer un compte — KitEtudiant.fr',
+    description:
+      'Un compte sert à retrouver ta liste de vœux d’un appareil à l’autre. ' +
+      'Une adresse, un mot de passe, rien d’autre.',
+    prive: true,
+  })
   const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [enCours, setEnCours] = useState(false)

@@ -11,7 +11,7 @@
  * pages, lui, se fait au moment du build (scripts/prerendre.mjs).
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import {
   MENTION_SOURCE,
@@ -22,45 +22,7 @@ import {
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { FilAriane } from './filAriane.tsx'
 import { chercherArticles } from '../../packages/articles/src/recherche.ts'
-
-/* --------------------------------------------------------- les métadonnées */
-
-/** Pose ou remplace une balise `meta`/`link` de l'en-tête du document. */
-function poser(selecteur: string, creer: () => Element, appliquer: (e: Element) => void): void {
-  let element = document.head.querySelector(selecteur)
-  if (element === null) {
-    element = creer()
-    document.head.append(element)
-  }
-  appliquer(element)
-}
-
-/**
- * Met à jour ce qu'un moteur de recherche et un réseau social liront.
- *
- * Sans cela, tous les articles partageraient le titre et la description de la
- * page d'accueil : dix pages identiques aux yeux d'un moteur, donc dix pages
- * qui ne se classent sur rien.
- */
-function useMetadonnees(titre: string, description: string, canonique: string): void {
-  useEffect(() => {
-    const precedent = document.title
-    document.title = titre
-    poser('meta[name="description"]', () => {
-      const m = document.createElement('meta')
-      m.setAttribute('name', 'description')
-      return m
-    }, (e) => e.setAttribute('content', description))
-    poser('link[rel="canonical"]', () => {
-      const l = document.createElement('link')
-      l.setAttribute('rel', 'canonical')
-      return l
-    }, (e) => e.setAttribute('href', canonique))
-    return () => {
-      document.title = precedent
-    }
-  }, [titre, description, canonique])
-}
+import { useMetadonnees } from './metadonnees.ts'
 
 /* ------------------------------------------------------------- les blocs */
 
@@ -108,12 +70,13 @@ export function ListeArticles({
   const [requete, setRequete] = useState('')
   const trouvailles = useMemo(() => chercherArticles(articles, requete), [articles, requete])
 
-  useMetadonnees(
-    'Bien gérer sa scolarité — le blog de KitEtudiant.fr',
-    'Comprendre Parcoursup, monter son dossier, choisir sa ville et tenir son budget : ' +
+  useMetadonnees({
+    titre: 'Bien gérer sa scolarité — le blog de KitEtudiant.fr',
+    description:
+      'Comprendre Parcoursup, monter son dossier, choisir sa ville et tenir son budget : ' +
       'des articles courts et vérifiables pour les lycéens et leurs familles.',
-    adresseComplete({ vue: 'blog' }),
-  )
+    canonique: adresseComplete({ vue: 'blog' }),
+  })
 
   return (
     <main className="app app-large">
@@ -249,11 +212,11 @@ export function PageArticle({
   onNaviguer: (route: Route) => void
   onCommencer: () => void
 }) {
-  useMetadonnees(
-    `${article.titre} — KitEtudiant.fr`,
-    article.chapeau,
-    adresseComplete({ vue: 'article', slug: article.slug }),
-  )
+  useMetadonnees({
+    titre: `${article.titre} — KitEtudiant.fr`,
+    description: article.chapeau,
+    canonique: adresseComplete({ vue: 'article', slug: article.slug }),
+  })
 
   return (
     <main className="app">

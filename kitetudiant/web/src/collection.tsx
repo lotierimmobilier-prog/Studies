@@ -32,6 +32,7 @@ import { NOMBRE_COMMUNES_AVEC_LOYER } from './donnees.ts'
 import { nombre } from './nombres.ts'
 import { FilAriane } from './filAriane.tsx'
 import type { Route } from './routes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 
 /* ------------------------------------------------------------ une carte */
 
@@ -237,6 +238,11 @@ export function Collection({
   onNaviguer: (route: Route) => void
   onImporter: (cartes: Obtention[]) => void
 }) {
+  useMetadonnees({
+    titre: 'Mes cartes de villes — KitEtudiant.fr',
+    description: 'Les cartes de villes que tu as gagnées en explorant tes options.',
+    prive: true,
+  })
   const cartes = cartesDe(collection)
   const { recompenses, villes } = separerCartes(cartes)
   const totalRecompenses = recompensesPossibles()

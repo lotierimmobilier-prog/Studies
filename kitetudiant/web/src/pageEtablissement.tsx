@@ -25,6 +25,7 @@ import { FilAriane } from './filAriane.tsx'
 import { nombre } from './nombres.ts'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { libelleDuTheme, specialitesDesLibelles } from './themes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 import { lienOffresFranceTravail } from '../../packages/metiers/src/index.ts'
 import {
   chercherDebouches,
@@ -246,22 +247,19 @@ export function PageEtablissement({
   const premiere = formations[0]
   const nom = premiere?.etablissement ?? uai
 
-  useEffect(() => {
-    const precedent = document.title
-    if (premiere !== undefined) {
-      document.title = `${nom} — ses formations | KitEtudiant.fr`
-      let lien = document.head.querySelector('link[rel="canonical"]')
-      if (lien === null) {
-        lien = document.createElement('link')
-        lien.setAttribute('rel', 'canonical')
-        document.head.append(lien)
-      }
-      lien.setAttribute('href', adresseComplete({ vue: 'etablissement', uai }))
-    }
-    return () => {
-      document.title = precedent
-    }
-  }, [premiere, nom, uai])
+  /* Même correction que sur la fiche de formation : la ville dans le titre,
+     et une description propre au lieu de celle de l'accueil. */
+  useMetadonnees(
+    premiere === undefined
+      ? { titre: document.title, description: '' }
+      : {
+          titre: `${nom} (${premiere.ville}) — toutes ses formations sur Parcoursup | KitEtudiant.fr`,
+          description:
+            `Les ${formations.length} formations de ${nom} publiées sur Parcoursup : ` +
+            `places, taux d’accès, sélectivité, et le coût de la vie à ${premiere.ville}.`,
+          canonique: adresseComplete({ vue: 'etablissement', uai }),
+        },
+  )
 
   return (
     <main className="app app-large">
