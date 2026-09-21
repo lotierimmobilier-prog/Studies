@@ -162,6 +162,20 @@ const clientEmploi = new ClientEmploi(coffre)
 const THEMES_MAX = 5
 
 /**
+ * Rayon de recherche des annonces, en kilomètres.
+ *
+ * Trente : la distance qu'on accepte de faire tous les jours pour aller
+ * travailler, et celle qui fait d'une annonce un débouché plausible plutôt
+ * qu'une curiosité. Fixé ici plutôt que laissé au navigateur — chaque valeur
+ * distincte est une entrée de cache de plus, et personne n'a besoin de
+ * régler ce rayon au kilomètre près.
+ */
+const DISTANCE_OFFRES_KM = 30
+
+/** Annonces rendues. Six remplit une grille de deux ou trois colonnes. */
+const OFFRES_MAX = 6
+
+/**
  * Ce qu'on dit à l'élève quand la base ne répond pas.
  *
  * Jamais le message du pilote : « getaddrinfo ENOTFOUND … » ne veut rien dire
@@ -545,6 +559,61 @@ async function demarrer(): Promise<void> {
               ...c,
               lien: lienOffres(c.libelle, region),
             })),
+          })
+        } catch (e) {
+          if (e instanceof EmploiNonConfigure) {
+            return envoyerJson(res, 503, { erreur: e.message })
+          }
+          return envoyerJson(res, 502, {
+            erreur: 'France Travail n’a pas répondu. Réessaie dans un moment.',
+          })
+        }
+      }
+
+      /* KITETUDIANT — les annonces elles-mêmes, près d'un lieu.
+         
+         D15 disait « le compteur, pas les annonces », parce qu'une offre est
+         pourvue en quelques jours. Le motif reste vrai et dicte la forme :
+         cache d'une heure au lieu de six, date de mise à jour sur chaque
+         carte, et lien vers l'annonce d'origine — c'est là qu'on voit qu'un
+         poste est pris.
+         
+         `commune` peut venir de l'école affichée OU de la commune que
+         l'élève a saisie dans son parcours. Dans le second cas elle traverse
+         ce serveur sans y être écrite : ni journal, ni base. Le seul usage
+         qui en est fait est le paramètre passé à France Travail. */
+      if (url.pathname === '/api/emploi/offres' && req.method === 'GET') {
+        const infos = themeMetiers(url.searchParams.get('theme') ?? '')
+        if (infos === null || infos.domaines.length === 0) {
+          return envoyerJson(res, 400, { erreur: 'Thème inconnu.' })
+        }
+        // Validée avant tout : un code INSEE est cinq caractères, et la Corse
+        // en met deux de lettres (2A, 2B). Tout le reste est refusé plutôt
+        // que transmis tel quel à France Travail.
+        const brute = url.searchParams.get('commune')
+        const commune = brute !== null && /^[0-9]{2}[0-9AB][0-9]{2}$/i.test(brute)
+          ? brute.toUpperCase()
+          : null
+        if (!(await clientEmploi.configure())) {
+          return envoyerJson(res, 503, { erreur: new EmploiNonConfigure().message })
+        }
+        try {
+          const offres = await clientEmploi.offres(
+            infos.domaines,
+            commune,
+            DISTANCE_OFFRES_KM,
+            OFFRES_MAX,
+          )
+          return envoyerJson(res, 200, {
+            theme: infos.cle,
+            // Ce qu'on a VRAIMENT interrogé : l'écran doit pouvoir dire
+            // « autour de l'école » ou « partout en France », sans le
+            // deviner d'après ce qu'il avait demandé.
+            autour: commune,
+            distanceKm: commune === null ? null : DISTANCE_OFFRES_KM,
+            source: SOURCE_EMPLOI,
+            releveLe: new Date().toISOString(),
+            offres,
           })
         } catch (e) {
           if (e instanceof EmploiNonConfigure) {

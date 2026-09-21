@@ -16,9 +16,11 @@
  */
 
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 import { nombre } from '../../kitetudiant/packages/budget-engine/src/nombres.ts'
-import { ClientEmploi, EmploiNonConfigure, lienOffres } from '../emploi.ts'
+import { salaireMinimum, ClientEmploi, EmploiNonConfigure, lienOffres } from '../emploi.ts'
 import type { Coffre } from '../secrets.ts'
 
 const SECRET = 'cle-secrete-tres-confidentielle'
@@ -255,5 +257,90 @@ describe('éprouver la connexion depuis la console', () => {
     const client = new ClientEmploi(coffre(), recuperer)
     const r = await client.essayer()
     expect(JSON.stringify(r)).not.toContain(SECRET)
+  })
+})
+
+describe('le salaire minimum est LU, jamais estimé', () => {
+  /* La règle 1 de CLAUDE.md interdit tout montant qui ne remonte pas à une
+     source. Ici rien n'est calculé : le chiffre est celui que l'employeur a
+     publié, et cette fonction ne fait que le détacher du texte.
+     
+     Les formes ci-dessous sont RELEVÉES sur 150 offres réelles du domaine
+     M18 le 21/09/2026 — pas imaginées. La fonction en a lu 101 sur 101. */
+
+  it('lit les quatre formes publiées par France Travail', () => {
+    expect(salaireMinimum('Annuel de 24000.00 Euros à 28000.00 Euros')).toEqual({
+      montant: 24000,
+      periode: 'an',
+    })
+    expect(salaireMinimum('Annuel de 32000.0 Euros - Selon compétences et profil')).toEqual({
+      montant: 32000,
+      periode: 'an',
+    })
+    expect(salaireMinimum('Mensuel de 2450.0 Euros - Voiture, téléphone,')).toEqual({
+      montant: 2450,
+      periode: 'mois',
+    })
+    expect(salaireMinimum('Horaire de 12.5 Euros')).toEqual({ montant: 12.5, periode: 'heure' })
+  })
+
+  it('retient le PLANCHER d’une fourchette, pas le plafond', () => {
+    /* Annoncer le haut ferait passer une possibilité pour une promesse.
+       Le bas est ce que l'employeur s'engage à verser. */
+    expect(salaireMinimum('Annuel de 65000.0 Euros à 73000.0 Euros')?.montant).toBe(65000)
+    expect(salaireMinimum('Horaire de 13.0 Euros à 14.0 Euros')?.montant).toBe(13)
+  })
+
+  it('rend null plutôt qu’un montant approché', () => {
+    // Un libellé non reconnu ne devient PAS une estimation : la carte dira
+    // « salaire non publié », ce qui est vrai.
+    expect(salaireMinimum('Rémunération au minimum conventionnel applicable')).toBeNull()
+    expect(salaireMinimum('Selon profil')).toBeNull()
+    expect(salaireMinimum('')).toBeNull()
+    expect(salaireMinimum(null)).toBeNull()
+    expect(salaireMinimum(undefined)).toBeNull()
+    expect(salaireMinimum(42 as unknown as string)).toBeNull()
+  })
+
+  it('refuse un montant qui n’en est pas un', () => {
+    // Un champ mal rempli afficherait « à partir de 0 € par an ».
+    expect(salaireMinimum('Annuel de 0 Euros')).toBeNull()
+    expect(salaireMinimum('Annuel de -5 Euros')).toBeNull()
+    // Une période inconnue n'est pas devinée.
+    expect(salaireMinimum('Cadeau de 20000 Euros')).toBeNull()
+    expect(salaireMinimum('Trimestriel de 6000 Euros')).toBeNull()
+  })
+
+  it('accepte la virgule décimale et la casse de l’API', () => {
+    expect(salaireMinimum('Mensuel de 2450,50 Euros')?.montant).toBe(2450.5)
+    expect(salaireMinimum('ANNUEL DE 30000 EUROS')?.periode).toBe('an')
+  })
+})
+
+describe('les annonces vieillissent plus vite que les compteurs', () => {
+  const SOURCE = readFileSync(resolve(import.meta.dirname, '..', 'emploi.ts'), 'utf8')
+
+  it('ont leur propre cache, bien plus court', () => {
+    /* D15 disait « le compteur, pas les annonces » : une offre est pourvue
+       en quelques jours. Garder une liste six heures comme un compteur
+       montrerait des postes pris. */
+    expect(SOURCE).toContain('const CACHE_OFFRES_MINUTES = 60')
+    expect(SOURCE).toContain('CACHE_OFFRES_MINUTES * 60_000')
+    // Et les deux caches restent distincts.
+    expect(SOURCE).toContain('private readonly annonces = new Map')
+  })
+
+  it('écartent une annonce sans lien, sans lieu ou sans intitulé', () => {
+    // Une carte sans lien est un cul-de-sac : c'est le lien qui montre
+    // qu'un poste est pourvu.
+    expect(SOURCE).toContain('if (!id || !intitule || !lieu || !url) return null')
+  })
+
+  it('interrogent les domaines un par un', () => {
+    /* Vérifié contre l'API le 21/09/2026 : « domaine=M18&domaine=A12 » rend
+       cinquante offres, toutes M18. Le second est ignoré EN SILENCE — la
+       requête réussit, et on croirait couvrir les deux. */
+    expect(SOURCE).toContain('for (const domaine of retenus)')
+    expect(SOURCE).toContain('const DOMAINES_PAR_ECHANTILLON = 3')
   })
 })

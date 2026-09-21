@@ -541,6 +541,99 @@ export async function chercherDebouches(
   return corps as DebouchesEtablissement
 }
 
+/** Le salaire plancher publié par l'employeur, jamais une estimation. */
+export interface SalaireMinimum {
+  readonly montant: number
+  readonly periode: 'an' | 'mois' | 'heure'
+}
+
+export interface Offre {
+  readonly id: string
+  readonly intitule: string
+  /** Tel que publié : « 76 - ROUEN ». */
+  readonly lieu: string
+  readonly contrat: string | null
+  readonly salaireMin: SalaireMinimum | null
+  readonly url: string
+  readonly actualiseeLe: string
+}
+
+export interface OffresProches {
+  readonly theme: string
+  /** Le code INSEE réellement interrogé, ou `null` pour la France entière. */
+  readonly autour: string | null
+  readonly distanceKm: number | null
+  readonly source: string
+  readonly releveLe: string
+  readonly offres: readonly Offre[]
+}
+
+/**
+ * Les annonces d'un thème, autour d'une commune.
+ *
+ * `commune` peut être celle de l'école ou celle que l'élève a saisie dans son
+ * parcours. Dans le second cas, elle traverse notre serveur sans y être
+ * écrite : elle ne sert qu'à filtrer la requête envoyée à France Travail.
+ */
+export async function chercherOffres(
+  theme: string,
+  commune: string | null,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<OffresProches> {
+  const p = new URLSearchParams({ theme })
+  if (commune !== null) p.set('commune', commune)
+  const reponse = await recuperer(`${base}/emploi/offres?${p.toString()}`)
+  const corps = (await reponse.json().catch(() => ({}))) as OffresProches | { erreur?: string }
+  if (reponse.status === 503) {
+    throw new EmploiIndisponible(
+      ('erreur' in corps && corps.erreur) || 'Offres d’emploi indisponibles.',
+    )
+  }
+  if (!reponse.ok) {
+    throw new Error(('erreur' in corps && corps.erreur) || `Erreur ${reponse.status}`)
+  }
+  return corps as OffresProches
+}
+
+/**
+ * Le code INSEE d'une commune saisie à la main, ou `null`.
+ *
+ * ── Pourquoi elle refuse plus souvent qu'elle n'accepte ──────────────────
+ *
+ * La table ne porte que les 1 246 communes dont le loyer est publié : un
+ * élève d'un village n'y figure pas, et c'est normal. Elle contient aussi
+ * sept noms portés par deux communes — Valence, Saint-Denis, Sainte-Marie…
+ *
+ * Dans les deux cas on rend `null`. Choisir au hasard entre Valence dans la
+ * Drôme et Valence en Tarn-et-Garonne placerait l'élève à six cents
+ * kilomètres de chez lui sans que rien ne le signale.
+ */
+export function communeDuNom(nom: string): string | null {
+  const cherche = normaliserNom(nom)
+  if (cherche === '') return null
+  const table = communes.communes as Record<string, { nom?: string }>
+  const trouves: string[] = []
+  for (const [insee, valeur] of Object.entries(table)) {
+    if (normaliserNom(valeur.nom ?? '') === cherche) {
+      trouves.push(insee)
+      // Deux suffisent à savoir que c'est ambigu.
+      if (trouves.length > 1) return null
+    }
+  }
+  return trouves[0] ?? null
+}
+
+/** Minuscules, sans accent, ponctuation réduite à des espaces. */
+function normaliserNom(valeur: string): string {
+  return valeur
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+}
+
 /* -------------------------------------------------------------------- vœux */
 
 export interface Voeu {

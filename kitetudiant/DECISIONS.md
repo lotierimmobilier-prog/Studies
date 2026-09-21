@@ -402,7 +402,10 @@ deviennent la plupart de ces diplômés.
 
 ## D15 — Le compteur, pas les annonces
 
-**Tranché le 20/09/2026.**
+**Tranché le 20/09/2026. RÉVISÉ le 21/09/2026 — voir D20.**
+
+> Les annonces sont désormais affichées, mais le motif ci-dessous n'a pas été
+> écarté : il dicte la forme sous laquelle elles le sont.
 
 On affiche le **nombre** d'offres et un lien vers la recherche France Travail.
 Pas les annonces elles-mêmes : une offre est pourvue en quelques jours, et une
@@ -597,6 +600,77 @@ Le lien vers France Travail est défini une seule fois, dans
 navigateur pour les spécialités d'une école. Deux constructions de la même URL
 divergeraient au premier changement de leur site, et personne ne s'en
 apercevrait avant qu'un lien ne mène nulle part.
+
+---
+
+## D20 — Les annonces, mais datées, situées et liées
+
+**Tranché le 21/09/2026. Révise D15.**
+
+D15 disait « le compteur, pas les annonces », pour une raison juste : une
+offre est pourvue en quelques jours, et une annonce périmée sur un site
+d'orientation trompe plus qu'elle n'informe.
+
+Cette raison ne disparaît pas parce qu'on affiche les annonces. Elle dicte
+comment :
+
+- le serveur ne garde une liste qu'**une heure**, contre six pour les
+  compteurs ;
+- chaque carte porte l'**âge** de son annonce (« mise à jour il y a 2 jours ») ;
+- chaque carte est un **lien** vers l'annonce d'origine — seul endroit où
+  l'on voit qu'un poste est pris ;
+- la mise en garde vient **avant** les cartes : une annonce qu'on lit avant
+  d'avoir su qu'elle peut être pourvue a déjà fait son effet.
+
+### Le salaire est lu, jamais estimé
+
+Relevé sur 150 offres réelles du domaine M18 : **deux tiers publient un
+montant**, toujours sous la même forme — « Annuel de N Euros à N Euros »,
+« Mensuel de N Euros », « Horaire de N Euros ». Le parseur en a lu **101 sur
+101**.
+
+C'est le **plancher** de la fourchette qui s'affiche : annoncer le plafond
+ferait passer une possibilité pour une promesse. Un libellé non reconnu ne
+devient pas un montant approché — la carte écrit « salaire non publié », ce
+qui est vrai. La règle 1 de `CLAUDE.md` l'exige : aucun euro sans source.
+
+### La proximité d'abord
+
+`commune` + `distance` filtrent autour d'un code INSEE, sur **30 km** : la
+distance qu'on accepte de faire tous les jours, et celle qui fait d'une
+annonce un débouché plausible plutôt qu'une curiosité.
+
+Le lieu par défaut est celui de **l'école** — la fiche parle d'une formation.
+Quand l'élève a saisi sa commune au parcours, un second bouton propose
+« près de chez moi ». Vérifié : depuis l'INSA de Rouen avec Limoges pour
+commune, la liste passe des annonces du 76 à celles du 87.
+
+Sa commune traverse notre serveur **sans y être écrite** : ni journal, ni
+base. Elle ne sert qu'à filtrer la requête envoyée à France Travail.
+
+La résolution du nom refuse plus souvent qu'elle n'accepte. La table ne porte
+que les 1 246 communes dont le loyer est publié, et sept noms y sont portés
+par deux communes. Dans les deux cas : `null`, et pas de bouton. Choisir entre
+Valence dans la Drôme et Valence en Tarn-et-Garonne placerait l'élève à six
+cents kilomètres de chez lui sans que rien ne le signale.
+
+### Un appel par domaine, et c'est mesuré
+
+`domaine` répété dans l'URL n'est **pas** un OU. Vérifié :
+`domaine=M18&domaine=A12` rend cinquante offres, **toutes M18**. Le second est
+ignoré en silence — le pire des cas, puisque la requête réussit et qu'on
+croirait couvrir les deux. Les domaines sont donc interrogés un par un, en
+série, et plafonnés à trois.
+
+Mesuré : 1 709 ms au premier appel, **10 ms** ensuite.
+
+### Ce qui reste hors de portée
+
+La commune de l'élève n'est pas persistée — les réponses du parcours vivent
+en mémoire. Le bouton « près de chez moi » n'apparaît donc qu'après le
+parcours, dans la même session. Le rendre durable supposerait d'écrire cette
+commune dans le navigateur, ce qui touche au modèle de D1 et n'a pas été
+tranché.
 
 ---
 

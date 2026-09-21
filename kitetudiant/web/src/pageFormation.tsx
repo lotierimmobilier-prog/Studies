@@ -29,7 +29,7 @@
  * propose le parcours.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { CarteALaDemande } from './carte.tsx'
 import { BoutonVoeu } from './mesVoeux.tsx'
@@ -41,6 +41,8 @@ import { themesDuLibelle } from './themes.ts'
 import {
   EmploiIndisponible,
   chercherEmploi,
+  chercherOffres,
+  communeDuNom,
   formationParCode,
   loyerDe,
   nomCommune,
@@ -48,6 +50,8 @@ import {
   SURFACE_TYPE,
   type Formation,
   type OffresParMetier,
+  type OffresProches,
+  type SalaireMinimum,
 } from './donnees.ts'
 
 type Onglet = 'admission' | 'vivre' | 'apres'
@@ -486,7 +490,219 @@ function Emploi({ formation }: { readonly formation: Formation }) {
  * pourquoi il est vide dit quelque chose de vrai sur les données publiques —
  * et évite qu'on aille chercher ailleurs un chiffre qui n'existe nulle part.
  */
-function Apres({ formation }: { readonly formation: Formation }) {
+/**
+ * Les annonces elles-mêmes, près de l'école ou près de chez soi.
+ *
+ * ── D15 disait l'inverse, et son motif tient toujours ────────────────────
+ *
+ * « Le compteur, pas les annonces » : une offre est pourvue en quelques
+ * jours, et une annonce périmée sur un site d'orientation trompe plus
+ * qu'elle n'informe. Ce motif ne s'efface pas, il dicte la forme :
+ *
+ *   - le serveur ne garde une liste qu'une heure, au lieu de six pour les
+ *     compteurs ;
+ *   - chaque carte porte l'âge de son annonce ;
+ *   - chaque carte est un lien vers l'annonce d'origine, seul endroit où
+ *     l'on voit qu'un poste est pris.
+ *
+ * ── Le salaire est LU, jamais estimé ─────────────────────────────────────
+ *
+ * Deux tiers des annonces publient un montant. Quand il est là, c'est le
+ * plancher de la fourchette qui s'affiche — ce que l'employeur s'engage à
+ * verser. Quand il n'y est pas, la carte le dit ; elle n'approche rien, ce
+ * que la règle 1 de CLAUDE.md interdit.
+ */
+
+/** Ce que l'annonce a d'âge, en clair. */
+function ageLisible(iso: string, maintenant = Date.now()): string | null {
+  const t = Date.parse(iso)
+  if (Number.isNaN(t)) return null
+  const jours = Math.floor((maintenant - t) / 86_400_000)
+  if (jours < 0) return null
+  if (jours === 0) return 'aujourd’hui'
+  if (jours === 1) return 'hier'
+  if (jours < 31) return `il y a ${nombre(jours)} jours`
+  const mois = Math.floor(jours / 30)
+  return mois <= 1 ? 'il y a un mois' : `il y a ${nombre(mois)} mois`
+}
+
+/** Le salaire plancher, écrit comme on le dit. */
+function salaireLisible(s: SalaireMinimum): string {
+  const suffixe =
+    s.periode === 'an' ? 'par an' : s.periode === 'mois' ? 'par mois' : 'de l’heure'
+  // Un taux horaire porte ses centimes ; un salaire annuel ne les porte pas.
+  const montant = s.periode === 'heure' ? eurosPrecis(s.montant) : euros(s.montant)
+  return `${montant} ${suffixe}`
+}
+
+function Annonces({
+  formation,
+  villeEleve,
+}: {
+  readonly formation: Formation
+  /** La commune saisie dans le parcours. Vide si l'élève ne l'a pas remplie. */
+  readonly villeEleve: string
+}) {
+  const theme = themesDuLibelle(formation.libelle)[0] ?? null
+  const communeEleve = useMemo(() => communeDuNom(villeEleve), [villeEleve])
+  // Le choix ne s'offre que s'il change quelque chose : proposer « près de
+  // chez moi » à quelqu'un qui habite la ville de l'école, c'est proposer
+  // deux fois la même liste.
+  const choixPossible = communeEleve !== null && communeEleve !== formation.codeInsee
+
+  const [ou, setOu] = useState<'ecole' | 'moi'>('ecole')
+  const commune = ou === 'moi' && communeEleve !== null ? communeEleve : formation.codeInsee
+
+  const [donnees, setDonnees] = useState<OffresProches | null>(null)
+  const [etat, setEtat] = useState<'charge' | 'prete' | 'indisponible' | 'erreur' | 'aucun'>(
+    'charge',
+  )
+
+  useEffect(() => {
+    if (theme === null) {
+      setEtat('aucun')
+      return
+    }
+    let vivant = true
+    setEtat('charge')
+    chercherOffres(theme, commune)
+      .then((d) => {
+        if (!vivant) return
+        setDonnees(d)
+        setEtat('prete')
+      })
+      .catch((e: unknown) => {
+        if (!vivant) return
+        setEtat(e instanceof EmploiIndisponible ? 'indisponible' : 'erreur')
+      })
+    return () => {
+      vivant = false
+    }
+  }, [theme, commune])
+
+  // Aucun thème reconnu : on se tait, plutôt que de proposer des annonces
+  // sans rapport avec la formation.
+  if (etat === 'aucun') return null
+
+  const bascule = choixPossible ? (
+    <div className="annonces-ou" role="group" aria-label="Autour de quel lieu chercher">
+      <button
+        type="button"
+        className={ou === 'ecole' ? 'annonces-choix actif' : 'annonces-choix'}
+        aria-pressed={ou === 'ecole'}
+        onClick={() => setOu('ecole')}
+      >
+        Près de l’école
+      </button>
+      <button
+        type="button"
+        className={ou === 'moi' ? 'annonces-choix actif' : 'annonces-choix'}
+        aria-pressed={ou === 'moi'}
+        onClick={() => setOu('moi')}
+      >
+        Près de chez moi
+      </button>
+    </div>
+  ) : null
+
+  if (etat === 'charge') {
+    return (
+      <>
+        <h4 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h4>
+        {bascule}
+        <p className="note" role="status" aria-live="polite">
+          Recherche des annonces…
+        </p>
+      </>
+    )
+  }
+
+  if (etat === 'indisponible' || etat === 'erreur' || donnees === null) {
+    return (
+      <>
+        <h4 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h4>
+        <p className="note">
+          Les annonces ne sont pas disponibles pour l’instant.
+        </p>
+      </>
+    )
+  }
+
+  const lieuDit = ou === 'moi' ? 'de chez toi' : `de ${formation.ville}`
+
+  return (
+    <>
+      <h4 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h4>
+      {bascule}
+
+      {donnees.offres.length === 0 ? (
+        /* Zéro annonce à trente kilomètres n'est pas un verdict sur le
+           métier : c'est une photo d'un bassin d'emploi, un jour donné, dans
+           un rayon étroit. La phrase le dit, et renvoie vers plus large. */
+        <p className="note">
+          Aucune annonce de ce secteur à moins de {nombre(donnees.distanceKm ?? 30)} km{' '}
+          {lieuDit} en ce moment. Le rayon est étroit : le même secteur peut recruter à
+          quelques dizaines de kilomètres de là.
+        </p>
+      ) : (
+        <>
+          {/* La mise en garde AVANT les cartes : une annonce qu'on lit avant
+              d'avoir su qu'elle peut être pourvue a déjà fait son effet. */}
+          <p className="note">
+            Un échantillon d’annonces à moins de {nombre(donnees.distanceKm ?? 30)} km{' '}
+            {lieuDit}, dans les métiers vers lesquels cette formation mène. Une offre se
+            pourvoit vite : celles-ci peuvent déjà être prises, et le lien mène à
+            l’annonce d’origine, qui fait foi.
+          </p>
+
+          <ul className="annonces">
+            {donnees.offres.map((o) => {
+              const age = ageLisible(o.actualiseeLe)
+              return (
+                <li key={o.id} className="annonce">
+                  <a
+                    className="annonce-titre"
+                    href={o.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {o.intitule}
+                    <span aria-hidden="true"> ↗</span>
+                  </a>
+                  <p className="annonce-lieu">{o.lieu}</p>
+                  <p className="annonce-salaire">
+                    {o.salaireMin === null ? (
+                      <span className="note">Salaire non publié</span>
+                    ) : (
+                      <>
+                        <span className="note">À partir de </span>
+                        <strong>{salaireLisible(o.salaireMin)}</strong>
+                      </>
+                    )}
+                  </p>
+                  <p className="annonce-pied note">
+                    {o.contrat ?? 'Contrat non précisé'}
+                    {age === null ? '' : ` · mise à jour ${age}`}
+                  </p>
+                </li>
+              )
+            })}
+          </ul>
+        </>
+      )}
+
+      <p className="fiche-source">{donnees.source}</p>
+    </>
+  )
+}
+
+function Apres({
+  formation,
+  villeEleve,
+}: {
+  readonly formation: Formation
+  readonly villeEleve: string
+}) {
   return (
     <>
       <p>
@@ -508,6 +724,8 @@ function Apres({ formation }: { readonly formation: Formation }) {
         </li>
       </ul>
       <Emploi formation={formation} />
+
+      <Annonces formation={formation} villeEleve={villeEleve} />
 
       <h4 className="fiche-sous-titre">Où trouver les débouchés</h4>
       <p>
@@ -534,11 +752,18 @@ function Apres({ formation }: { readonly formation: Formation }) {
 export function PageFormation({
   code,
   connecte,
+  villeEleve = '',
   onNaviguer,
   onCommencer,
 }: {
   readonly code: string
   readonly connecte: boolean
+  /**
+   * La commune saisie au parcours, pour chercher des annonces près de chez
+   * l'élève. Vide par défaut : une fiche ouverte par son adresse, sans avoir
+   * répondu aux questions, n'a rien à en dire — et ne doit pas inventer.
+   */
+  readonly villeEleve?: string
   readonly onNaviguer: (route: Route) => void
   readonly onCommencer: () => void
 }) {
@@ -701,7 +926,9 @@ export function PageFormation({
             {onglet === 'vivre' ? (
               <VivreIci formation={formation} onCommencer={onCommencer} />
             ) : null}
-            {onglet === 'apres' ? <Apres formation={formation} /> : null}
+            {onglet === 'apres' ? (
+              <Apres formation={formation} villeEleve={villeEleve} />
+            ) : null}
           </div>
 
           {formation.lien !== null ? (

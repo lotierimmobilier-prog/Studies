@@ -838,6 +838,7 @@ export default function App() {
       <PageFormation
         code={adresse.code}
         connecte={connecte}
+        villeEleve={reponses.villeResidence}
         onNaviguer={naviguer}
         onCommencer={() => {
           setVue('parcours')

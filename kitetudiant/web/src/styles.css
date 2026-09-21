@@ -3234,3 +3234,106 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     text-align: right;
   }
 }
+
+/* ══════════════════════════════ les annonces d'emploi, en cartes
+ *
+ * Une colonne sur téléphone, deux à partir de 34 rem, trois à partir de
+ * 62 rem. Les seuils sont ceux des CARTES, pas ceux du site : une annonce
+ * porte un intitulé de métier, souvent long, et trois colonnes sous 62 rem
+ * le coupent en quatre lignes.
+ *
+ * `auto-fit` n'est pas employé ici : avec une seule annonce, il l'étirerait
+ * sur toute la largeur, et une carte pleine largeur ne se lit plus comme un
+ * élément d'une liste.
+ */
+.annonces {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.annonce {
+  display: flex;
+  flex-direction: column;
+  /* Le pied colle en bas quelle que soit la hauteur du titre : sans cela,
+     les contrats et les dates dansent d'une carte à l'autre. */
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.annonce-titre {
+  color: var(--encre);
+  font-family: var(--titres);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+}
+.annonce-titre:hover,
+.annonce-titre:focus-visible {
+  text-decoration: underline;
+}
+.annonce-lieu {
+  margin: 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+}
+.annonce-salaire {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+}
+.annonce-salaire strong {
+  font-family: var(--titres);
+  /* Chiffres à chasse fixe : les montants se comparent d'une carte à
+     l'autre, et sans cela les colonnes dansent. */
+  font-variant-numeric: tabular-nums;
+}
+.annonce-pied {
+  margin: auto 0 0;
+  padding-top: 0.4rem;
+  font-size: 0.78rem;
+}
+
+/* Le choix du lieu. Deux boutons, l'actif marqué autrement que par la
+   couleur seule — `aria-pressed` le porte pour qui ne la voit pas. */
+.annonces-ou {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+}
+.annonces-choix {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.annonces-choix:hover {
+  color: var(--encre);
+}
+.annonces-choix.actif {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+  font-weight: 600;
+}
+
+@media (min-width: 34rem) {
+  .annonces {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 62rem) {
+  .annonces {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

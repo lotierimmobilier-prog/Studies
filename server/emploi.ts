@@ -95,6 +95,7 @@ export class ClientEmploi {
   private jeton: Jeton | null = null
   private referentiel: Metier[] | null = null
   private readonly comptes = new Map<string, { valeur: number | null; jusqua: number }>()
+  private readonly annonces = new Map<string, { valeur: Offre[]; jusqua: number }>()
 
   constructor(
     private readonly coffre: Coffre,
@@ -279,6 +280,82 @@ export class ClientEmploi {
    * contre près de deux cents s'il fallait passer par les métiers. C'est ce
    * qui rend le chiffre de tête abordable à chaque visite.
    */
+  /**
+   * Un échantillon d'annonces, au plus près du lieu demandé.
+   *
+   * ── Pourquoi un appel par domaine ────────────────────────────────────
+   *
+   * `domaine` répété dans l'URL n'est PAS un OU : vérifié le 21/09/2026,
+   * « domaine=M18&domaine=A12 » rend cinquante offres, toutes M18. Le
+   * second est ignoré en silence — le pire des cas, puisque la requête
+   * réussit et qu'on croirait couvrir les deux.
+   *
+   * On interroge donc les domaines un par un, en série comme les
+   * comptages, et on s'arrête à trois : un thème en compte jusqu'à six, et
+   * personne ne lit trente annonces sur une fiche de formation.
+   *
+   * ── La proximité ─────────────────────────────────────────────────────
+   *
+   * `commune` + `distance` filtrent autour d'un code INSEE. Sans commune,
+   * on rend la France entière : c'est moins utile, mais honnête — plutôt
+   * que de centrer sur Paris faute de mieux.
+   */
+  async offres(
+    domaines: readonly string[],
+    commune: string | null,
+    distanceKm: number,
+    combien: number,
+  ): Promise<Offre[]> {
+    const retenus = domaines.slice(0, DOMAINES_PAR_ECHANTILLON)
+    const cle = `${retenus.join('+')}|${commune ?? 'fr'}|${distanceKm}`
+    const enCache = this.annonces.get(cle)
+    if (enCache !== undefined && enCache.jusqua > this.maintenant()) {
+      return enCache.valeur.slice(0, combien)
+    }
+
+    // On demande un peu plus que nécessaire à chaque domaine : des annonces
+    // se perdent au tri — sans lien, sans lieu — et il en faut assez pour
+    // que la fusion ait le choix.
+    const parDomaine = Math.max(2, Math.ceil(combien / retenus.length) + 2)
+    const vues = new Map<string, Offre>()
+    for (const domaine of retenus) {
+      const params = new URLSearchParams({ domaine, range: `0-${parDomaine - 1}` })
+      if (commune !== null) {
+        params.set('commune', commune)
+        params.set('distance', String(distanceKm))
+      }
+      try {
+        const reponse = await this.recuperer(`${API}/offres/search?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${await this.jetonValide()}` },
+        })
+        // 204 : aucune offre dans ce domaine à cet endroit. Ce n'est pas une
+        // panne, et les autres domaines ont peut-être quelque chose.
+        if (reponse.status === 204) continue
+        if (!reponse.ok && reponse.status !== 206) continue
+        const corps = (await reponse.json()) as { resultats?: OffreBrute[] }
+        for (const brute of corps.resultats ?? []) {
+          const offre = lireOffre(brute)
+          // Une même annonce peut relever de deux domaines du thème.
+          if (offre !== null && !vues.has(offre.id)) vues.set(offre.id, offre)
+        }
+      } catch {
+        // Réseau ou quota : ce domaine ne rendra rien, les autres peuvent.
+        continue
+      }
+    }
+
+    // La plus fraîche d'abord : sur des annonces qui se périment en quelques
+    // jours, l'âge est le premier critère de pertinence.
+    const triees = [...vues.values()].sort((a, b) =>
+      b.actualiseeLe.localeCompare(a.actualiseeLe),
+    )
+    this.annonces.set(cle, {
+      valeur: triees,
+      jusqua: this.maintenant() + CACHE_OFFRES_MINUTES * 60_000,
+    })
+    return triees.slice(0, combien)
+  }
+
   async totaux(domaines: readonly string[], region: string | null): Promise<TotalDomaine[]> {
     const resultats: TotalDomaine[] = []
     for (const domaine of domaines) {
@@ -289,6 +366,117 @@ export class ClientEmploi {
       })
     }
     return resultats
+  }
+}
+
+/* ─────────────────────────────────────────────── les annonces elles-mêmes
+
+   D15 avait tranché l'inverse : le compteur, pas les annonces. Le motif
+   était juste — une offre est pourvue en quelques jours, et une annonce
+   périmée sur un site d'orientation trompe plus qu'elle n'informe.
+
+   Ce motif ne disparaît pas parce qu'on affiche les annonces : il dicte
+   comment. D'où un cache d'UNE heure et non six, la date de mise à jour
+   portée par chaque annonce, et un lien vers l'offre d'origine sur chaque
+   carte — c'est là, et seulement là, qu'on voit qu'un poste est pourvu. */
+
+/** Durée de vie d'une liste d'annonces. Bien plus courte que les compteurs. */
+const CACHE_OFFRES_MINUTES = 60
+
+/** Combien de domaines d'un thème on interroge pour composer un échantillon. */
+const DOMAINES_PAR_ECHANTILLON = 3
+
+export interface SalaireMinimum {
+  readonly montant: number
+  readonly periode: 'an' | 'mois' | 'heure'
+}
+
+export interface Offre {
+  readonly id: string
+  readonly intitule: string
+  /** Tel que publié : « 76 - ROUEN ». */
+  readonly lieu: string
+  readonly contrat: string | null
+  readonly salaireMin: SalaireMinimum | null
+  readonly url: string
+  readonly actualiseeLe: string
+}
+
+const PERIODES: Readonly<Record<string, SalaireMinimum['periode']>> = {
+  annuel: 'an',
+  mensuel: 'mois',
+  horaire: 'heure',
+}
+
+/**
+ * Le salaire MINIMUM publié, lu dans le libellé de France Travail.
+ *
+ * ── Pourquoi une lecture, et pas une estimation ──────────────────────────
+ *
+ * La règle 1 de CLAUDE.md interdit tout montant qui ne remonte pas à une
+ * source. Ici, rien n'est estimé : le chiffre est celui que l'employeur a
+ * publié, et cette fonction ne fait que le détacher du texte qui l'entoure.
+ * Un libellé qu'elle ne reconnaît pas ne devient PAS un montant approché —
+ * il devient `null`, et la carte dit « salaire non publié ».
+ *
+ * ── Les formes réellement rencontrées ────────────────────────────────────
+ *
+ * Relevé sur 150 offres du domaine M18 le 21/09/2026 : deux tiers portent un
+ * libellé, et il commence toujours par la période puis le premier montant.
+ *
+ *     Annuel de 24000.00 Euros à 28000.00 Euros
+ *     Annuel de 32000.0 Euros - Selon compétences et profil
+ *     Mensuel de 2450.0 Euros - Voiture, téléphone,
+ *     Horaire de 12.5 Euros
+ *
+ * C'est le PREMIER montant qui est retenu : dans une fourchette, c'est le
+ * plancher — ce que l'employeur s'engage à verser. Annoncer le haut de la
+ * fourchette ferait passer une possibilité pour une promesse.
+ */
+export function salaireMinimum(libelle: string | null | undefined): SalaireMinimum | null {
+  if (typeof libelle !== 'string') return null
+  const m = /^\s*(Annuel|Mensuel|Horaire)\s+de\s+([0-9]+(?:[.,][0-9]+)?)\s*Euros/i.exec(libelle)
+  if (m === null) return null
+  const periode = PERIODES[m[1]!.toLowerCase()]
+  const montant = Number(m[2]!.replace(',', '.'))
+  // Un zéro ou un négatif n'est pas un salaire : c'est un champ mal rempli,
+  // et l'afficher donnerait « à partir de 0 € ».
+  if (periode === undefined || !Number.isFinite(montant) || montant <= 0) return null
+  return { montant, periode }
+}
+
+/** Ce que l'API rend, réduit à ce qu'on en lit. */
+interface OffreBrute {
+  readonly id?: string
+  readonly intitule?: string
+  readonly dateActualisation?: string
+  readonly dateCreation?: string
+  readonly typeContratLibelle?: string
+  readonly lieuTravail?: { readonly libelle?: string }
+  readonly salaire?: { readonly libelle?: string }
+  readonly origineOffre?: { readonly urlOrigine?: string }
+}
+
+/**
+ * Une annonce utilisable, ou `null`.
+ *
+ * Sans identifiant, sans intitulé, sans lieu ou sans lien, la carte serait
+ * un cadre vide ou un cul-de-sac. Mieux vaut une annonce de moins.
+ */
+function lireOffre(brute: OffreBrute): Offre | null {
+  const id = brute.id
+  const intitule = brute.intitule
+  const lieu = brute.lieuTravail?.libelle
+  const url = brute.origineOffre?.urlOrigine
+  if (!id || !intitule || !lieu || !url) return null
+  return {
+    id,
+    intitule,
+    lieu,
+    contrat: brute.typeContratLibelle ?? null,
+    salaireMin: salaireMinimum(brute.salaire?.libelle),
+    url,
+    actualiseeLe: brute.dateActualisation ?? brute.dateCreation ?? '',
   }
 }
 
