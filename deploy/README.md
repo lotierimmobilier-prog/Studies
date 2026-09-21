@@ -168,7 +168,20 @@ et un mot de passe déjà posé n'est jamais régénéré — une rotation silen
 casserait l'API sans rien dire.
 
 La base est **locale** et n'écoute que la machine : aucun port de base de
-données n'est exposé au réseau. Le script le vérifie plutôt que de le supposer.
+données n'est exposé au réseau. Le script ne se contente pas de le vérifier —
+il **s'arrête** si `listen_addresses` a été desserré, avant d'avoir rien créé.
+Un avertissement défile et « Terminé. » s'affiche quelques lignes plus bas ;
+une base de comptes de mineurs ne doit pas se créer sur un serveur qui écoute
+l'Internet parce que personne n'a lu la ligne du milieu.
+
+Il s'arrête de même si **PostGIS** n'a pas pu s'installer, plutôt que de migrer
+en mode dégradé. Ce mode remplace les colonnes géographiques par du texte, et
+`appliquer.sh` ne rejoue jamais une migration déjà enregistrée — il compare les
+noms, pas ce mode. Une panne passagère d'`apt-get` figerait donc le schéma en
+texte pour toujours, carte et recherches par distance mortes sans message.
+
+Les deux blocages s'assument explicitement, s'il le faut :
+`ECOUTE_LARGE_ASSUMEE=1` et `SANS_POSTGIS=1`.
 
 Le disque n'est pas chiffré. Ce sont les données **identifiantes** qui le
 sont, par l'application, avant d'arriver en base — c'est ce qu'exige la règle 3

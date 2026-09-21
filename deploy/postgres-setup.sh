@@ -77,6 +77,12 @@ else
   log "PostgreSQL déjà installé."
 fi
 
+# Démarré AVANT la première requête : tout ce qui suit — version, PostGIS,
+# listen_addresses — passe par psql. L'installation par apt démarre le service
+# d'elle-même, mais on ne le suppose pas : le script doit aussi se relancer sur
+# une machine où quelqu'un l'a arrêté.
+systemctl enable --now postgresql >/dev/null 2>&1 || systemctl enable --now postgresql
+
 # La version est LUE, jamais supposée : le nom du paquet PostGIS la porte
 # (postgresql-16-postgis-3), et une version écrite en dur ici cesserait de
 # s'installer à la prochaine version de la distribution — sans autre symptôme
@@ -88,16 +94,41 @@ if ! sudo -u postgres psql -tAc \
   "select 1 from pg_available_extensions where name = 'postgis'" | grep -q 1; then
   log "Installation de PostGIS…"
   export DEBIAN_FRONTEND=noninteractive
-  apt-get install -y "postgresql-${VERSION}-postgis-3" || {
-    avert "PostGIS n'a pas pu être installé. Les migrations passeront en mode"
-    avert "dégradé : types géographiques remplacés par du texte. La carte et"
-    avert "les recherches par distance ne fonctionneront pas."
-  }
+  apt-get install -y "postgresql-${VERSION}-postgis-3" || true
 else
   log "PostGIS déjà disponible."
 fi
 
-systemctl enable --now postgresql >/dev/null 2>&1 || systemctl enable --now postgresql
+# PostGIS absent = on NE MIGRE PAS. Le mode dégradé d'appliquer.sh remplace
+# les colonnes géographiques par du texte et les index GiST par des B-tree ; il
+# existe pour les postes de développement où PostGIS ne s'installe pas.
+#
+# Sur une base de production, il est un piège à sens unique : appliquer.sh
+# enregistre la migration dans public.migration et, au passage suivant, la
+# SAUTE — il compare les noms, jamais la colonne « degrade ». Une panne
+# passagère d'apt-get au premier lancement fige donc le schéma en texte pour
+# toujours, et la carte comme les recherches par distance restent mortes sans
+# qu'aucun message ne le rappelle.
+#
+# Mieux vaut ne rien migrer et le dire.
+if ! sudo -u postgres psql -tAc \
+  "select 1 from pg_available_extensions where name = 'postgis'" | grep -q 1; then
+  avert "PostGIS n'est pas disponible."
+  echo
+  echo "  Rien n'a été migré, et c'est volontaire : migrer sans PostGIS fige le"
+  echo "  schéma en mode dégradé — colonnes géographiques en texte — et les"
+  echo "  migrations déjà enregistrées ne seront pas rejouées une fois PostGIS"
+  echo "  installé. La carte et les recherches par distance resteraient mortes."
+  echo
+  echo "  Réessaie l'installation :"
+  echo "    apt-get update && apt-get install -y postgresql-${VERSION}-postgis-3"
+  echo
+  echo "  Si ce serveur doit se passer de carte et de recherche par distance,"
+  echo "  dis-le explicitement — c'est un choix définitif pour cette base :"
+  echo "    SANS_POSTGIS=1 bash \$0"
+  [ "${SANS_POSTGIS:-0}" = "1" ] || exit 1
+  avert "SANS_POSTGIS=1 : migration en mode dégradé, définitivement."
+fi
 
 # ------------------------------------------------- la base n'écoute que nous
 # Vérifié plutôt que supposé : quelqu'un a pu desserrer listen_addresses pour
@@ -109,10 +140,24 @@ case "${ECOUTE}" in
     log "La base n'écoute que la machine (listen_addresses = ${ECOUTE:-vide})."
     ;;
   *)
+    # On S'ARRÊTE, on n'avertit pas. Un avertissement défile, « Terminé. »
+    # s'affiche trois lignes plus bas, et la base de comptes de mineurs vient
+    # d'être créée sur un serveur qui écoute l'Internet. Le contrôle est posé
+    # AVANT la création du rôle et de la base : rien n'existe encore.
     avert "listen_addresses vaut « ${ECOUTE} » : la base écoute au-delà de cette"
     avert "machine. L'API tourne sur le même serveur et n'en a pas besoin."
-    avert "Remets-le à « localhost » dans /etc/postgresql/${VERSION}/main/postgresql.conf,"
-    avert "puis « systemctl restart postgresql »."
+    echo
+    echo "  Rien n'a été créé. Pour corriger :"
+    echo "    sed -i \"s/^listen_addresses.*/listen_addresses = 'localhost'/\" \\"
+    echo "      /etc/postgresql/${VERSION}/main/postgresql.conf"
+    echo "    systemctl restart postgresql"
+    echo
+    echo "  Si cette écoute est voulue — une autre machine se connecte à ce"
+    echo "  serveur — c'est à toi de garantir pg_hba.conf et le pare-feu, et"
+    echo "  il faut le dire explicitement :"
+    echo "    ECOUTE_LARGE_ASSUMEE=1 bash \$0"
+    [ "${ECOUTE_LARGE_ASSUMEE:-0}" = "1" ] || exit 1
+    avert "ECOUTE_LARGE_ASSUMEE=1 : on continue, sous ta responsabilité."
     ;;
 esac
 
@@ -159,8 +204,7 @@ fi
 # PostGIS s'installe en superutilisateur, une fois, dans la base cible. Posée
 # ici, la ligne « CREATE EXTENSION IF NOT EXISTS postgis » de la migration 001
 # devient un non-événement et n'exige plus aucun privilège.
-if sudo -u postgres psql -tAc \
-  "select 1 from pg_available_extensions where name = 'postgis'" | grep -q 1; then
+if [ "${SANS_POSTGIS:-0}" != "1" ]; then
   sudo -u postgres psql -v ON_ERROR_STOP=1 -d "${BASE}" \
     -c "CREATE EXTENSION IF NOT EXISTS postgis" >/dev/null
   log "Extension PostGIS active dans ${BASE}."

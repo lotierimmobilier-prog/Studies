@@ -404,11 +404,47 @@ describe('l’installation de PostgreSQL', () => {
     expect(PG).toContain('chmod 600 "${APP_DIR}/.env"')
   })
 
-  it('vérifie que la base n’écoute pas au-delà de la machine', () => {
+  it('S’ARRÊTE si la base écoute au-delà de la machine', () => {
     /* Le défaut de Debian est « localhost », mais quelqu'un a pu le desserrer
-       pour se connecter depuis son poste et l'oublier. Une base de comptes de
-       mineurs ouverte sur l'Internet ne doit pas dépendre d'un souvenir. */
+       pour se connecter depuis son poste et l'oublier.
+
+       Avertir ne suffit pas : l'avertissement défile, « Terminé. » s'affiche
+       quelques lignes plus bas, et la base de comptes de mineurs vient d'être
+       créée sur un serveur qui écoute l'Internet. Le script sort en erreur, à
+       moins qu'on ne l'ait explicitement assumé. */
     expect(PG).toContain('show listen_addresses')
+    expect(PG).toContain('[ "${ECOUTE_LARGE_ASSUMEE:-0}" = "1" ] || exit 1')
+  })
+
+  it('S’ARRÊTE si PostGIS manque, plutôt que de migrer en mode dégradé', () => {
+    /* appliquer.sh compare les NOMS, jamais la colonne « degrade » : une
+       migration passée en mode dégradé n'est plus jamais rejouée. Une panne
+       passagère d'apt-get figerait donc le schéma de production en texte pour
+       toujours, carte et recherches par distance mortes sans message. */
+    expect(PG).toContain('[ "${SANS_POSTGIS:-0}" = "1" ] || exit 1')
+  })
+
+  it('pose ses deux gardes AVANT de créer quoi que ce soit', () => {
+    // Un garde posé après la création ne garde plus rien.
+    const gardePostgis = PG.indexOf('SANS_POSTGIS:-0')
+    const gardeEcoute = PG.indexOf('ECOUTE_LARGE_ASSUMEE:-0')
+    const creation = PG.indexOf('CREATE ROLE ${BASE}')
+    const migration = PG.indexOf('appliquer.sh"')
+    expect(gardePostgis).toBeGreaterThan(-1)
+    expect(gardeEcoute).toBeGreaterThan(-1)
+    expect(gardePostgis).toBeLessThan(creation)
+    expect(gardeEcoute).toBeLessThan(creation)
+    expect(creation).toBeLessThan(migration)
+  })
+
+  it('démarre PostgreSQL avant de l’interroger', () => {
+    // Version, PostGIS et listen_addresses passent tous par psql. Le service
+    // doit tourner avant la première requête, y compris sur une machine où
+    // quelqu'un l'a arrêté.
+    const demarrage = PG.indexOf('systemctl enable --now postgresql')
+    const premiereRequete = PG.indexOf('psql --version')
+    expect(demarrage).toBeGreaterThan(-1)
+    expect(demarrage).toBeLessThan(premiereRequete)
   })
 
   it('lit la version de PostgreSQL au lieu de la supposer', () => {
@@ -417,5 +453,34 @@ describe('l’installation de PostgreSQL', () => {
     // distribution, sans autre symptôme qu'un mode dégradé silencieux.
     expect(PG).toContain('VERSION="$(psql --version |')
     expect(PG).toContain('"postgresql-${VERSION}-postgis-3"')
+  })
+})
+
+describe('une migration dégradée cesse d’être silencieuse', () => {
+  const APPLIQUER = readFileSync(
+    resolve(RACINE, 'kitetudiant/db/migrations/appliquer.sh'),
+    'utf8',
+  )
+
+  it('rappelle les migrations appliquées sans PostGIS, une fois PostGIS là', () => {
+    /* La boucle saute sur le nom seul : « select count(*) … where nom = … ».
+       La colonne « degrade » était donc écrite puis jamais relue, et le
+       passage suivant annonçait « Migrations à jour » sur un schéma resté en
+       texte. Reproduit contre un vrai PostgreSQL 16 : sans ce rappel, rien ne
+       distingue une base saine d'une base définitivement dégradée. */
+    expect(APPLIQUER).toContain('select count(*) from public.migration where degrade')
+    expect(APPLIQUER).toContain('migration(s) ont été appliquées SANS')
+  })
+
+  it('ne le rappelle pas pendant un passage lui-même dégradé', () => {
+    // Sinon un poste de développement sans PostGIS afficherait l'alerte à
+    // chaque lancement, et une alerte permanente n'est plus une alerte.
+    expect(APPLIQUER).toContain('[ "$DEGRADEES" != "0" ] && [ "$DEGRADE" = false ]')
+  })
+
+  it('ne prétend pas réparer', () => {
+    // Rejouer une migration sur une base qui porte des données est une
+    // décision, pas un effet de bord de script.
+    expect(APPLIQUER).toContain("c'est une migration à écrire")
   })
 })
