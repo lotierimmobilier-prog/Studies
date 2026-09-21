@@ -402,7 +402,10 @@ deviennent la plupart de ces diplômés.
 
 ## D15 — Le compteur, pas les annonces
 
-**Tranché le 20/09/2026.**
+**Tranché le 20/09/2026. RÉVISÉ le 21/09/2026 — voir D20.**
+
+> Les annonces sont désormais affichées, mais le motif ci-dessous n'a pas été
+> écarté : il dicte la forme sous laquelle elles le sont.
 
 On affiche le **nombre** d'offres et un lien vers la recherche France Travail.
 Pas les annonces elles-mêmes : une offre est pourvue en quelques jours, et une
@@ -537,6 +540,137 @@ suit. Deux chiffres pour une seule mesure divergeraient au premier réglage.
 
 Vérifié au navigateur de 320 à 1920 px, dans les deux états de connexion : ni
 débordement horizontal, ni chevauchement, ni texte coupé.
+
+---
+
+## D19 — Les débouchés d'une école : ses spécialités, pas ses diplômés
+
+**Tranché le 21/09/2026.**
+
+La fiche d'école montre désormais, au-dessus de la liste des formations, vers
+quels secteurs mènent ses spécialités et combien d'annonces y sont ouvertes.
+L'onglet « Après » d'une fiche de **formation** faisait déjà cela pour un seul
+intitulé ; c'est la même mécanique à l'échelle de l'établissement.
+
+### Ce que ces chiffres ne sont pas, et la page le dit
+
+Ce ne sont **pas** les débouchés des diplômés de cette école. Personne ne
+publie le devenir des sortants formation par formation, et nous ne
+l'inventerons pas. Ce sont les annonces ouvertes aujourd'hui dans les secteurs
+vers lesquels ces spécialités mènent — un ordre de grandeur sur un bassin
+d'emploi. Un chiffre posé à côté d'un nom d'école se lit comme une promesse ;
+la phrase qui l'en empêche vient **avant** les chiffres, pas après.
+
+Le rapprochement spécialité → métiers reste le nôtre, pas celui de Parcoursup.
+
+### Le classement est celui de l'école, jamais celui des chiffres
+
+Les spécialités sont rangées par **nombre de formations** que l'école y
+propose. Mesuré sur l'Université de Limoges : « Sciences » sort en tête avec
+1 342 offres en France, devant « Santé et soin » qui en compte 49 632. Sans
+une phrase pour l'expliquer, ce voisinage se lirait comme un classement des
+débouchés — soit exactement l'inverse du vrai.
+
+À poids égal, l'ordre de la table tranche. Un tri instable donnerait deux
+classements pour la même école d'un chargement à l'autre, donc deux jeux de
+chiffres différents puisque seules cinq spécialités sont comptées.
+
+### Cinq spécialités au plus, et l'écran le dit
+
+Chaque domaine ROME coûte un appel par échelle, le quota est de dix par
+seconde, et les seize thèmes couvrent quarante-sept domaines. Mesuré contre
+la vraie API : cinq spécialités neuves prennent **5,3 s**, les seize en
+prendraient près de dix. On en compte donc cinq, et la page écrit combien
+elle en tait — une liste tronquée en silence laisse croire que l'école ne
+fait que ça.
+
+Le cache de six heures est partagé entre toutes les écoles : le même appel
+retombe de **2 262 ms à 10 ms**. Les domaines communs à plusieurs spécialités
+ne sont comptés qu'une fois.
+
+### Une route à part, et pourquoi
+
+`/api/emploi/etablissement` ne rend que les totaux par spécialité, là où
+`/api/emploi` traite un thème et échantillonne ses métiers. Demander
+l'échantillon de chaque spécialité d'une université coûterait une seconde par
+spécialité, pour une liste que personne ne lirait.
+
+Le lien vers France Travail est défini une seule fois, dans
+`packages/metiers` : le serveur s'en sert pour les métiers d'une formation, le
+navigateur pour les spécialités d'une école. Deux constructions de la même URL
+divergeraient au premier changement de leur site, et personne ne s'en
+apercevrait avant qu'un lien ne mène nulle part.
+
+---
+
+## D20 — Les annonces, mais datées, situées et liées
+
+**Tranché le 21/09/2026. Révise D15.**
+
+D15 disait « le compteur, pas les annonces », pour une raison juste : une
+offre est pourvue en quelques jours, et une annonce périmée sur un site
+d'orientation trompe plus qu'elle n'informe.
+
+Cette raison ne disparaît pas parce qu'on affiche les annonces. Elle dicte
+comment :
+
+- le serveur ne garde une liste qu'**une heure**, contre six pour les
+  compteurs ;
+- chaque carte porte l'**âge** de son annonce (« mise à jour il y a 2 jours ») ;
+- chaque carte est un **lien** vers l'annonce d'origine — seul endroit où
+  l'on voit qu'un poste est pris ;
+- la mise en garde vient **avant** les cartes : une annonce qu'on lit avant
+  d'avoir su qu'elle peut être pourvue a déjà fait son effet.
+
+### Le salaire est lu, jamais estimé
+
+Relevé sur 150 offres réelles du domaine M18 : **deux tiers publient un
+montant**, toujours sous la même forme — « Annuel de N Euros à N Euros »,
+« Mensuel de N Euros », « Horaire de N Euros ». Le parseur en a lu **101 sur
+101**.
+
+C'est le **plancher** de la fourchette qui s'affiche : annoncer le plafond
+ferait passer une possibilité pour une promesse. Un libellé non reconnu ne
+devient pas un montant approché — la carte écrit « salaire non publié », ce
+qui est vrai. La règle 1 de `CLAUDE.md` l'exige : aucun euro sans source.
+
+### La proximité d'abord
+
+`commune` + `distance` filtrent autour d'un code INSEE, sur **30 km** : la
+distance qu'on accepte de faire tous les jours, et celle qui fait d'une
+annonce un débouché plausible plutôt qu'une curiosité.
+
+Le lieu par défaut est celui de **l'école** — la fiche parle d'une formation.
+Quand l'élève a saisi sa commune au parcours, un second bouton propose
+« près de chez moi ». Vérifié : depuis l'INSA de Rouen avec Limoges pour
+commune, la liste passe des annonces du 76 à celles du 87.
+
+Sa commune traverse notre serveur **sans y être écrite** : ni journal, ni
+base. Elle ne sert qu'à filtrer la requête envoyée à France Travail.
+
+La résolution du nom refuse plus souvent qu'elle n'accepte. La table ne porte
+que les 1 246 communes dont le loyer est publié, et sept noms y sont portés
+par deux communes. Dans les deux cas : `null`, et pas de bouton. Choisir entre
+Valence dans la Drôme et Valence en Tarn-et-Garonne placerait l'élève à six
+cents kilomètres de chez lui sans que rien ne le signale.
+
+### Un appel par domaine, et c'est mesuré
+
+`domaine` répété dans l'URL n'est **pas** un OU. Vérifié :
+`domaine=M18&domaine=A12` rend cinquante offres, **toutes M18**. Le second est
+ignoré en silence — le pire des cas, puisque la requête réussit et qu'on
+croirait couvrir les deux. Les domaines sont donc interrogés un par un, en
+série, et plafonnés à trois.
+
+Mesuré : 1 709 ms au premier appel, **10 ms** ensuite.
+
+### Ce qui reste hors de portée
+
+La commune de l'élève n'est pas persistée — les réponses du parcours vivent
+en mémoire. Le bouton « près de chez moi » n'apparaît donc qu'après le
+parcours, dans la même session. Le rendre durable supposerait d'écrire cette
+commune dans le navigateur, ce qui touche au modèle de D1 et n'a pas été
+tranché.
 
 ---
 

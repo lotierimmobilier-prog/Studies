@@ -29,7 +29,7 @@
  * propose le parcours.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { CarteALaDemande } from './carte.tsx'
 import { BoutonVoeu } from './mesVoeux.tsx'
@@ -38,9 +38,12 @@ import { liensLogement } from './logement.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { themesDuLibelle } from './themes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 import {
   EmploiIndisponible,
   chercherEmploi,
+  chercherOffres,
+  communeDuNom,
   formationParCode,
   loyerDe,
   nomCommune,
@@ -48,6 +51,8 @@ import {
   SURFACE_TYPE,
   type Formation,
   type OffresParMetier,
+  type OffresProches,
+  type SalaireMinimum,
 } from './donnees.ts'
 
 type Onglet = 'admission' | 'vivre' | 'apres'
@@ -134,7 +139,7 @@ function Mentions({ formation }: { readonly formation: Formation }) {
   if (total === 0) return null
   return (
     <>
-      <h4 className="fiche-sous-titre">Les mentions qu’avaient les admis</h4>
+      <h2 className="fiche-sous-titre">Les mentions qu’avaient les admis</h2>
       <ul className="mentions">
         {parts.map((p) => {
           const part = Math.round((100 * (p.valeur ?? 0)) / total)
@@ -161,6 +166,47 @@ function Mentions({ formation }: { readonly formation: Formation }) {
 
 /* --------------------------------------------------------- les onglets */
 
+/**
+ * Où se trouve l'école, sur une carte.
+ *
+ * Le même repère sert aux deux onglets : « Admission », pour situer l'école
+ * avant même de penser au logement, et « Vivre ici », pour la replacer dans
+ * sa ville. Construire le point deux fois finirait par donner deux positions
+ * différentes pour la même école.
+ *
+ * Rien n'est demandé à l'IGN tant qu'on n'a pas cliqué — `CarteALaDemande`
+ * s'en charge — donc une seconde carte sur la fiche ne coûte rien à qui ne
+ * l'ouvre pas.
+ */
+function OuEstLEcole({
+  formation,
+  libelleBouton,
+}: {
+  readonly formation: Formation
+  readonly libelleBouton: string
+}) {
+  if (formation.coordonnees === null) {
+    return (
+      <p className="note">
+        La position de cette formation n’est pas publiée : la carte ne s’affiche pas.
+      </p>
+    )
+  }
+  return (
+    <CarteALaDemande
+      libelleBouton={libelleBouton}
+      points={[
+        {
+          cle: formation.id,
+          lat: formation.coordonnees.lat,
+          lon: formation.coordonnees.lon,
+          libelle: `${formation.etablissement} — ${formation.ville}`,
+        },
+      ]}
+    />
+  )
+}
+
 function Admission({ formation }: { readonly formation: Formation }) {
   const s = formation.stats
   return (
@@ -177,7 +223,7 @@ function Admission({ formation }: { readonly formation: Formation }) {
         <Donnee libelle="Admis boursiers" valeur={s.admisBoursiers} />
       </div>
 
-      <h4 className="fiche-sous-titre">D’où venaient les admis</h4>
+      <h2 className="fiche-sous-titre">D’où venaient les admis</h2>
       <div className="donnees">
         <Donnee libelle="Bac général" valeur={s.admisBacGeneral} />
         <Donnee libelle="Bac technologique" valeur={s.admisBacTechno} />
@@ -186,6 +232,16 @@ function Admission({ formation }: { readonly formation: Formation }) {
       </div>
 
       <Mentions formation={formation} />
+
+      {/* Où est l'école, tout en bas : un taux d'accès ne dit rien du trajet
+          qu'il faudra faire tous les jours, et la ville seule ne suffit pas à
+          se le représenter. Ici pour SITUER — le logement et le coût de la
+          vie restent l'affaire de « Vivre ici ». */}
+      <h2 className="fiche-sous-titre">Où se trouve cette école</h2>
+      <p className="note">
+        {formation.etablissement} — {formation.ville} ({formation.departement}).
+      </p>
+      <OuEstLEcole formation={formation} libelleBouton="Voir l’école sur la carte" />
 
       <p className="fiche-source">
         {SOURCE_PARCOURSUP} — session {formation.session || 'non précisée'}.
@@ -251,7 +307,7 @@ function VivreIci({
         </button>
       </div>
 
-      <h4 className="fiche-sous-titre">Se loger sur place</h4>
+      <h2 className="fiche-sous-titre">Se loger sur place</h2>
       <ul className="liens-logement">
         {liensLogement(formation.ville).map((lien) => (
           <li key={lien.cle}>
@@ -263,22 +319,7 @@ function VivreIci({
         ))}
       </ul>
 
-      {formation.coordonnees !== null ? (
-        <CarteALaDemande
-          points={[
-            {
-              cle: formation.id,
-              lat: formation.coordonnees.lat,
-              lon: formation.coordonnees.lon,
-              libelle: `${formation.etablissement} — ${formation.ville}`,
-            },
-          ]}
-        />
-      ) : (
-        <p className="note">
-          La position de cette formation n’est pas publiée : la carte ne s’affiche pas.
-        </p>
-      )}
+      <OuEstLEcole formation={formation} libelleBouton="Voir sur la carte" />
     </>
   )
 }
@@ -395,7 +436,7 @@ function Emploi({ formation }: { readonly formation: Formation }) {
   const { total, metiers, region } = offres
   return (
     <>
-      <h4 className="fiche-sous-titre">Les offres d’emploi de ce domaine</h4>
+      <h2 className="fiche-sous-titre">Les offres d’emploi de ce domaine</h2>
 
       <div className="donnees">
         <Donnee libelle="Offres en France" valeur={total.enFrance} />
@@ -450,7 +491,219 @@ function Emploi({ formation }: { readonly formation: Formation }) {
  * pourquoi il est vide dit quelque chose de vrai sur les données publiques —
  * et évite qu'on aille chercher ailleurs un chiffre qui n'existe nulle part.
  */
-function Apres({ formation }: { readonly formation: Formation }) {
+/**
+ * Les annonces elles-mêmes, près de l'école ou près de chez soi.
+ *
+ * ── D15 disait l'inverse, et son motif tient toujours ────────────────────
+ *
+ * « Le compteur, pas les annonces » : une offre est pourvue en quelques
+ * jours, et une annonce périmée sur un site d'orientation trompe plus
+ * qu'elle n'informe. Ce motif ne s'efface pas, il dicte la forme :
+ *
+ *   - le serveur ne garde une liste qu'une heure, au lieu de six pour les
+ *     compteurs ;
+ *   - chaque carte porte l'âge de son annonce ;
+ *   - chaque carte est un lien vers l'annonce d'origine, seul endroit où
+ *     l'on voit qu'un poste est pris.
+ *
+ * ── Le salaire est LU, jamais estimé ─────────────────────────────────────
+ *
+ * Deux tiers des annonces publient un montant. Quand il est là, c'est le
+ * plancher de la fourchette qui s'affiche — ce que l'employeur s'engage à
+ * verser. Quand il n'y est pas, la carte le dit ; elle n'approche rien, ce
+ * que la règle 1 de CLAUDE.md interdit.
+ */
+
+/** Ce que l'annonce a d'âge, en clair. */
+function ageLisible(iso: string, maintenant = Date.now()): string | null {
+  const t = Date.parse(iso)
+  if (Number.isNaN(t)) return null
+  const jours = Math.floor((maintenant - t) / 86_400_000)
+  if (jours < 0) return null
+  if (jours === 0) return 'aujourd’hui'
+  if (jours === 1) return 'hier'
+  if (jours < 31) return `il y a ${nombre(jours)} jours`
+  const mois = Math.floor(jours / 30)
+  return mois <= 1 ? 'il y a un mois' : `il y a ${nombre(mois)} mois`
+}
+
+/** Le salaire plancher, écrit comme on le dit. */
+function salaireLisible(s: SalaireMinimum): string {
+  const suffixe =
+    s.periode === 'an' ? 'par an' : s.periode === 'mois' ? 'par mois' : 'de l’heure'
+  // Un taux horaire porte ses centimes ; un salaire annuel ne les porte pas.
+  const montant = s.periode === 'heure' ? eurosPrecis(s.montant) : euros(s.montant)
+  return `${montant} ${suffixe}`
+}
+
+function Annonces({
+  formation,
+  villeEleve,
+}: {
+  readonly formation: Formation
+  /** La commune saisie dans le parcours. Vide si l'élève ne l'a pas remplie. */
+  readonly villeEleve: string
+}) {
+  const theme = themesDuLibelle(formation.libelle)[0] ?? null
+  const communeEleve = useMemo(() => communeDuNom(villeEleve), [villeEleve])
+  // Le choix ne s'offre que s'il change quelque chose : proposer « près de
+  // chez moi » à quelqu'un qui habite la ville de l'école, c'est proposer
+  // deux fois la même liste.
+  const choixPossible = communeEleve !== null && communeEleve !== formation.codeInsee
+
+  const [ou, setOu] = useState<'ecole' | 'moi'>('ecole')
+  const commune = ou === 'moi' && communeEleve !== null ? communeEleve : formation.codeInsee
+
+  const [donnees, setDonnees] = useState<OffresProches | null>(null)
+  const [etat, setEtat] = useState<'charge' | 'prete' | 'indisponible' | 'erreur' | 'aucun'>(
+    'charge',
+  )
+
+  useEffect(() => {
+    if (theme === null) {
+      setEtat('aucun')
+      return
+    }
+    let vivant = true
+    setEtat('charge')
+    chercherOffres(theme, commune)
+      .then((d) => {
+        if (!vivant) return
+        setDonnees(d)
+        setEtat('prete')
+      })
+      .catch((e: unknown) => {
+        if (!vivant) return
+        setEtat(e instanceof EmploiIndisponible ? 'indisponible' : 'erreur')
+      })
+    return () => {
+      vivant = false
+    }
+  }, [theme, commune])
+
+  // Aucun thème reconnu : on se tait, plutôt que de proposer des annonces
+  // sans rapport avec la formation.
+  if (etat === 'aucun') return null
+
+  const bascule = choixPossible ? (
+    <div className="annonces-ou" role="group" aria-label="Autour de quel lieu chercher">
+      <button
+        type="button"
+        className={ou === 'ecole' ? 'annonces-choix actif' : 'annonces-choix'}
+        aria-pressed={ou === 'ecole'}
+        onClick={() => setOu('ecole')}
+      >
+        Près de l’école
+      </button>
+      <button
+        type="button"
+        className={ou === 'moi' ? 'annonces-choix actif' : 'annonces-choix'}
+        aria-pressed={ou === 'moi'}
+        onClick={() => setOu('moi')}
+      >
+        Près de chez moi
+      </button>
+    </div>
+  ) : null
+
+  if (etat === 'charge') {
+    return (
+      <>
+        <h2 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h2>
+        {bascule}
+        <p className="note" role="status" aria-live="polite">
+          Recherche des annonces…
+        </p>
+      </>
+    )
+  }
+
+  if (etat === 'indisponible' || etat === 'erreur' || donnees === null) {
+    return (
+      <>
+        <h2 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h2>
+        <p className="note">
+          Les annonces ne sont pas disponibles pour l’instant.
+        </p>
+      </>
+    )
+  }
+
+  const lieuDit = ou === 'moi' ? 'de chez toi' : `de ${formation.ville}`
+
+  return (
+    <>
+      <h2 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h2>
+      {bascule}
+
+      {donnees.offres.length === 0 ? (
+        /* Zéro annonce à trente kilomètres n'est pas un verdict sur le
+           métier : c'est une photo d'un bassin d'emploi, un jour donné, dans
+           un rayon étroit. La phrase le dit, et renvoie vers plus large. */
+        <p className="note">
+          Aucune annonce de ce secteur à moins de {nombre(donnees.distanceKm ?? 30)} km{' '}
+          {lieuDit} en ce moment. Le rayon est étroit : le même secteur peut recruter à
+          quelques dizaines de kilomètres de là.
+        </p>
+      ) : (
+        <>
+          {/* La mise en garde AVANT les cartes : une annonce qu'on lit avant
+              d'avoir su qu'elle peut être pourvue a déjà fait son effet. */}
+          <p className="note">
+            Un échantillon d’annonces à moins de {nombre(donnees.distanceKm ?? 30)} km{' '}
+            {lieuDit}, dans les métiers vers lesquels cette formation mène. Une offre se
+            pourvoit vite : celles-ci peuvent déjà être prises, et le lien mène à
+            l’annonce d’origine, qui fait foi.
+          </p>
+
+          <ul className="annonces">
+            {donnees.offres.map((o) => {
+              const age = ageLisible(o.actualiseeLe)
+              return (
+                <li key={o.id} className="annonce">
+                  <a
+                    className="annonce-titre"
+                    href={o.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {o.intitule}
+                    <span aria-hidden="true"> ↗</span>
+                  </a>
+                  <p className="annonce-lieu">{o.lieu}</p>
+                  <p className="annonce-salaire">
+                    {o.salaireMin === null ? (
+                      <span className="note">Salaire non publié</span>
+                    ) : (
+                      <>
+                        <span className="note">À partir de </span>
+                        <strong>{salaireLisible(o.salaireMin)}</strong>
+                      </>
+                    )}
+                  </p>
+                  <p className="annonce-pied note">
+                    {o.contrat ?? 'Contrat non précisé'}
+                    {age === null ? '' : ` · mise à jour ${age}`}
+                  </p>
+                </li>
+              )
+            })}
+          </ul>
+        </>
+      )}
+
+      <p className="fiche-source">{donnees.source}</p>
+    </>
+  )
+}
+
+function Apres({
+  formation,
+  villeEleve,
+}: {
+  readonly formation: Formation
+  readonly villeEleve: string
+}) {
   return (
     <>
       <p>
@@ -459,7 +712,7 @@ function Apres({ formation }: { readonly formation: Formation }) {
         insertion. Ces chiffres existent pour certains diplômes, mais pas formation par
         formation, et nous ne les inventerons pas.
       </p>
-      <h4 className="fiche-sous-titre">Ce qu’on peut dire quand même</h4>
+      <h2 className="fiche-sous-titre">Ce qu’on peut dire quand même</h2>
       <ul className="article-liste">
         <li>
           Cette formation est classée « {formation.filiere || 'non précisée'} » par le
@@ -467,13 +720,15 @@ function Apres({ formation }: { readonly formation: Formation }) {
         </li>
         <li>
           {formation.stats.selective
-            ? 'Elle est sélective : le dossier est examiné, et le rang d’appel compte.'
-            : 'Elle n’est pas sélective : les candidats du secteur sont prioritaires, et le rang d’appel joue moins.'}
+            ? 'Elle est sélective : le dossier est examiné, et ta place dans la file d’attente — le « rang d’appel » — décide du moment où une proposition t’arrive.'
+            : 'Elle n’est pas sélective : les candidats de l’académie sont prioritaires, et la place dans la file d’attente pèse moins.'}
         </li>
       </ul>
       <Emploi formation={formation} />
 
-      <h4 className="fiche-sous-titre">Où trouver les débouchés</h4>
+      <Annonces formation={formation} villeEleve={villeEleve} />
+
+      <h2 className="fiche-sous-titre">Où trouver les débouchés</h2>
       <p>
         L’Onisep publie des fiches de débouchés par diplôme. Nous ne reprenons pas leur
         contenu ici : leur licence impose un partage à l’identique, qui engagerait tout ce
@@ -498,11 +753,18 @@ function Apres({ formation }: { readonly formation: Formation }) {
 export function PageFormation({
   code,
   connecte,
+  villeEleve = '',
   onNaviguer,
   onCommencer,
 }: {
   readonly code: string
   readonly connecte: boolean
+  /**
+   * La commune saisie au parcours, pour chercher des annonces près de chez
+   * l'élève. Vide par défaut : une fiche ouverte par son adresse, sans avoir
+   * répondu aux questions, n'a rien à en dire — et ne doit pas inventer.
+   */
+  readonly villeEleve?: string
   readonly onNaviguer: (route: Route) => void
   readonly onCommencer: () => void
 }) {
@@ -532,22 +794,30 @@ export function PageFormation({
 
   // Titre et lien canonique : sans eux, toutes les fiches partagent le titre
   // de l'accueil, et un moteur les voit comme une seule page.
-  useEffect(() => {
-    const precedent = document.title
-    if (formation !== null) {
-      document.title = `${formation.libelle} — ${formation.etablissement} | KitEtudiant.fr`
-      let lien = document.head.querySelector('link[rel="canonical"]')
-      if (lien === null) {
-        lien = document.createElement('link')
-        lien.setAttribute('rel', 'canonical')
-        document.head.append(lien)
-      }
-      lien.setAttribute('href', adresseComplete({ vue: 'formation', code }))
-    }
-    return () => {
-      document.title = precedent
-    }
-  }, [formation, code])
+  /* Le titre porte la VILLE, et la description existe.
+     
+     Le titre ne disait que l'intitulé et l'établissement. Or « BUT
+     informatique Toulouse » est la forme que les élèves tapent : sans la
+     ville, la fiche ne répond à aucune recherche. Et faute de description,
+     toutes les fiches du site héritaient de celle de l'accueil — des
+     milliers de pages présentées aux moteurs avec le même résumé.
+     
+     Tant que la formation n'est pas chargée, on ne pose RIEN : un titre
+     provisoire du genre « Chargement » est ce qu'un robot pressé garderait. */
+  useMetadonnees(
+    formation === null
+      ? { titre: document.title, description: '' }
+      : {
+          titre:
+            `${formation.libelle} à ${formation.ville} — ${formation.etablissement} : ` +
+            `places, taux d’accès, coût de la vie | KitEtudiant.fr`,
+          description:
+            `Combien de places, quel taux d’accès, d’où venaient les admis, et ce que ` +
+            `coûte un logement à ${formation.ville}. Chiffres publiés par le ministère` +
+            `${formation.session ? `, session ${formation.session}` : ''}.`,
+          canonique: adresseComplete({ vue: 'formation', code }),
+        },
+  )
 
   return (
     <main className="app">
@@ -665,7 +935,9 @@ export function PageFormation({
             {onglet === 'vivre' ? (
               <VivreIci formation={formation} onCommencer={onCommencer} />
             ) : null}
-            {onglet === 'apres' ? <Apres formation={formation} /> : null}
+            {onglet === 'apres' ? (
+              <Apres formation={formation} villeEleve={villeEleve} />
+            ) : null}
           </div>
 
           {formation.lien !== null ? (

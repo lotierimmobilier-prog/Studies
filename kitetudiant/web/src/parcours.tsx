@@ -743,6 +743,21 @@ export function Question({ etape, reponses, academies, onChange }: Props) {
 
   return (
     <div className="budget">
+      {/* Cette phrase manquait, et son absence rendait un commentaire de
+          budgetSimple.ts FAUX : il affirmait que « le libellé le dit ».
+          Aucun libellé ne le disait. Or c'est exactement ce que la règle 6
+          exige — toute donnée affichée porte son millésime et sa provenance.
+          Les montants des barèmes (loyer, bourse, CVEC, APL) la portent,
+          chacun sur sa ligne ; ceux-ci n'en ont pas, parce qu'ils n'en ont
+          pas : ce sont des ordres de grandeur, et il faut le dire plutôt
+          que de les laisser passer pour des chiffres officiels. */}
+      <p className="budget-avertissement">
+        Les montants proposés ici sont des <strong>ordres de grandeur</strong>, pas
+        des barèmes officiels : ils servent de point de départ et comptent comme
+        des dépenses que tu déclares. Les aides et les loyers, eux, viennent de
+        sources datées — chacune est nommée sur sa ligne dans le résultat.
+      </p>
+
       <div className="budget-question">
         <p className="champ-label">Tes parents peuvent-ils t’aider financièrement ?</p>
         <div className="choix">

@@ -15,9 +15,17 @@
  * détail.
  *
  * Les montants sont des ordres de grandeur déclaratifs, pas des barèmes : ils
- * ne prétendent pas venir d'une source officielle, et le libellé le dit. Ils
+ * ne prétendent pas venir d'une source officielle, et l'étape le dit en
+ * toutes lettres (`.budget-avertissement`, dans web/src/parcours.tsx). Ils
  * n'entrent dans le reste-à-vivre que comme des dépenses déclarées par
  * l'élève, exactement comme s'il les avait tapées.
+ *
+ * Ce commentaire a longtemps affirmé que « le libellé le dit » alors
+ * qu'aucun libellé ne le disait : les treize options affichaient leurs
+ * montants sans jamais préciser qu'ils n'étaient pas des barèmes. Un
+ * commentaire qui décrit une garantie absente est pire qu'un silence, parce
+ * qu'il empêche de la chercher. `budgetSimple.test.ts` vérifie désormais la
+ * phrase à l'écran, pas ici.
  */
 
 /** Ce qu'un choix de train de vie fixe, en euros par mois sauf mention. */

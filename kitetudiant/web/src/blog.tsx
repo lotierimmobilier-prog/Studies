@@ -11,7 +11,7 @@
  * pages, lui, se fait au moment du build (scripts/prerendre.mjs).
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import {
   MENTION_SOURCE,
@@ -22,45 +22,8 @@ import {
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
 import { FilAriane } from './filAriane.tsx'
 import { chercherArticles } from '../../packages/articles/src/recherche.ts'
-
-/* --------------------------------------------------------- les métadonnées */
-
-/** Pose ou remplace une balise `meta`/`link` de l'en-tête du document. */
-function poser(selecteur: string, creer: () => Element, appliquer: (e: Element) => void): void {
-  let element = document.head.querySelector(selecteur)
-  if (element === null) {
-    element = creer()
-    document.head.append(element)
-  }
-  appliquer(element)
-}
-
-/**
- * Met à jour ce qu'un moteur de recherche et un réseau social liront.
- *
- * Sans cela, tous les articles partageraient le titre et la description de la
- * page d'accueil : dix pages identiques aux yeux d'un moteur, donc dix pages
- * qui ne se classent sur rien.
- */
-function useMetadonnees(titre: string, description: string, canonique: string): void {
-  useEffect(() => {
-    const precedent = document.title
-    document.title = titre
-    poser('meta[name="description"]', () => {
-      const m = document.createElement('meta')
-      m.setAttribute('name', 'description')
-      return m
-    }, (e) => e.setAttribute('content', description))
-    poser('link[rel="canonical"]', () => {
-      const l = document.createElement('link')
-      l.setAttribute('rel', 'canonical')
-      return l
-    }, (e) => e.setAttribute('href', canonique))
-    return () => {
-      document.title = precedent
-    }
-  }, [titre, description, canonique])
-}
+import { useMetadonnees } from './metadonnees.ts'
+import { dateLisible } from './dates.ts'
 
 /* ------------------------------------------------------------- les blocs */
 
@@ -85,17 +48,6 @@ function Contenu({ bloc }: { bloc: Bloc }) {
 
 /* ------------------------------------------------------------- la liste */
 
-function dateLisible(iso: string): string {
-  const d = new Date(`${iso}T12:00:00Z`)
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  })
-}
-
 export function ListeArticles({
   articles,
   onArticle,
@@ -108,12 +60,13 @@ export function ListeArticles({
   const [requete, setRequete] = useState('')
   const trouvailles = useMemo(() => chercherArticles(articles, requete), [articles, requete])
 
-  useMetadonnees(
-    'Bien gérer sa scolarité — le blog de KitEtudiant.fr',
-    'Comprendre Parcoursup, monter son dossier, choisir sa ville et tenir son budget : ' +
+  useMetadonnees({
+    titre: 'Bien gérer sa scolarité — le blog de KitEtudiant.fr',
+    description:
+      'Comprendre Parcoursup, monter son dossier, choisir sa ville et tenir son budget : ' +
       'des articles courts et vérifiables pour les lycéens et leurs familles.',
-    adresseComplete({ vue: 'blog' }),
-  )
+    canonique: adresseComplete({ vue: 'blog' }),
+  })
 
   return (
     <main className="app app-large">
@@ -215,19 +168,26 @@ export function ListeArticles({
  * avec une question précise et fait défiler, et le moteur génératif qui ne
  * cite jamais un article mais toujours un passage.
  *
- * De vraies balises `h3` dans une `section` étiquetée, et non une liste de
+ * De vraies balises dans une `section` étiquetée, et non une liste de
  * `div` : c'est ce qui permet d'y naviguer d'un titre à l'autre au lecteur
  * d'écran, et c'est aussi ce qui donne sa structure aux données que le
  * pré-rendu déclare (kitetudiant/scripts/prerendre.ts).
+ *
+ * `h2`, et non `h3` : les titres de section de l'article sont des `h2`, et
+ * la FAQ est leur pair, pas la sous-partie du dernier d'entre eux. En `h3`
+ * elle se rangeait sous la dernière section quel qu'en soit le sujet — ce
+ * que lit un lecteur d'écran qui parcourt le plan de la page, et ce que lit
+ * un moteur. Le pré-rendu écrivait déjà `h2` : les deux versions de la même
+ * page annonçaient deux plans différents.
  */
 function Questions({ article }: { readonly article: Article }) {
   const questions = article.questions ?? []
   if (questions.length === 0) return null
   return (
     <section className="questions" aria-labelledby="questions-titre">
-      <h3 className="questions-titre" id="questions-titre">
+      <h2 className="questions-titre" id="questions-titre">
         Questions fréquentes
-      </h3>
+      </h2>
       <dl className="questions-liste">
         {questions.map((q) => (
           <div className="questions-paire" key={q.question}>
@@ -249,11 +209,11 @@ export function PageArticle({
   onNaviguer: (route: Route) => void
   onCommencer: () => void
 }) {
-  useMetadonnees(
-    `${article.titre} — KitEtudiant.fr`,
-    article.chapeau,
-    adresseComplete({ vue: 'article', slug: article.slug }),
-  )
+  useMetadonnees({
+    titre: `${article.titre} — KitEtudiant.fr`,
+    description: article.chapeau,
+    canonique: adresseComplete({ vue: 'article', slug: article.slug }),
+  })
 
   return (
     <main className="app">

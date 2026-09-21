@@ -118,6 +118,17 @@ export const THEMES: readonly Theme[] = [
   },
 ]
 
+/**
+ * Le libellé d'un thème, ou la clé elle-même si elle n'en désigne aucun.
+ *
+ * La clé — « sante », « batiment » — est ce que le serveur manipule ;
+ * l'afficher telle quelle donnerait à l'élève le sentiment de lire un journal
+ * de débogage plutôt que sa propre fiche.
+ */
+export function libelleDuTheme(cle: string): string {
+  return THEMES.find((t) => t.cle === cle)?.libelle ?? cle
+}
+
 /** Les mots d'un thème, ou une liste vide si la clé n'en désigne aucun. */
 export function motsDuTheme(cle: string): readonly string[] {
   return THEMES.find((t) => t.cle === cle)?.mots ?? []
@@ -158,4 +169,31 @@ function normaliserMots(valeur: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim()
+}
+
+/**
+ * Les spécialités d'un établissement, de la plus enseignée à la moins.
+ *
+ * Le rang vient du NOMBRE DE FORMATIONS de chaque thème, pas de l'ordre dans
+ * lequel le ministère les publie : une école qui propose huit licences de
+ * droit et une de sport est une école de droit, quel que soit cet ordre.
+ *
+ * Ce rang décide aussi de ce qui sera compté quand le serveur plafonne le
+ * nombre de spécialités — mieux vaut alors compter ce que l'école fait
+ * vraiment que les cinq premières venues.
+ *
+ * À égalité, l'ordre de `THEMES` tranche. Un tri instable donnerait deux
+ * pages différentes pour la même école d'un chargement à l'autre.
+ */
+export function specialitesDesLibelles(libelles: readonly string[]): string[] {
+  const poids = new Map<string, number>()
+  for (const libelle of libelles) {
+    for (const cle of themesDuLibelle(libelle)) {
+      poids.set(cle, (poids.get(cle) ?? 0) + 1)
+    }
+  }
+  const rang = new Map(THEMES.map((th, i) => [th.cle, i]))
+  return [...poids.entries()]
+    .sort((a, b) => b[1] - a[1] || (rang.get(a[0]) ?? 0) - (rang.get(b[0]) ?? 0))
+    .map(([cle]) => cle)
 }

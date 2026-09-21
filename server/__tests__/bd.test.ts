@@ -19,8 +19,10 @@
  */
 
 import { afterEach, describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
-import { bd, configuree, etat, fermer } from '../bd.ts'
+import { bd, configuree, etat, fermer, panneDeConnexion } from '../bd.ts'
 
 const ORIGINE = process.env.DATABASE_URL
 
@@ -118,5 +120,77 @@ surUneVraieBase('sur une instance réelle', () => {
       select count(*)::int as n from public.migration
     `
     expect(reste?.n).toBeGreaterThan(0)
+  })
+})
+
+describe('une panne de base ne remonte jamais telle quelle à l’élève', () => {
+  /* Constaté en production le 21/09/2026 : DATABASE_URL contenait des points
+     de suspension — recopiés d'un exemple — et la fiche d'une formation
+     affichait « getaddrinfo ENOTFOUND %E2%80%A6 » sous le bouton
+     « Enregistrer dans mes vœux ».
+     
+     Deux fautes en une : le message ne veut rien dire pour un lycéen, et il
+     porte le nom de l'hôte que nous avons configuré. */
+
+  it('reconnaît les pannes de CONNEXION', () => {
+    for (const code of [
+      'ECONNREFUSED',
+      'ENOTFOUND',
+      'ETIMEDOUT',
+      'CONNECT_TIMEOUT',
+      '28P01',
+      '3D000',
+      '57P03',
+    ]) {
+      expect(panneDeConnexion(Object.assign(new Error('peu importe'), { code }))).toBe(true)
+    }
+  })
+
+  it('ne déguise PAS une faute de requête en panne passagère', () => {
+    /* Une contrainte violée est un défaut de notre code : le dire
+       « momentanément indisponible » ferait réessayer l'élève indéfiniment,
+       et nous cacherait le bogue. */
+    for (const code of ['23503', '23505', '42P01', '22001']) {
+      expect(panneDeConnexion(Object.assign(new Error('x'), { code }))).toBe(false)
+    }
+    expect(panneDeConnexion(new Error('sans code'))).toBe(false)
+    expect(panneDeConnexion(null)).toBe(false)
+    expect(panneDeConnexion('ENOTFOUND')).toBe(false)
+  })
+
+  it('partage sa table avec le libellé de la console', () => {
+    // Deux listes divergeraient, et la seconde laisserait alors passer vers
+    // l'élève une erreur que la première sait nommer.
+    const source = readFileSync(resolve(import.meta.dirname, '..', 'bd.ts'), 'utf8')
+    expect(source.match(/const PANNES/g)).toHaveLength(1)
+    expect(source).toContain('code in PANNES')
+  })
+})
+
+describe('les routes de vœux traduisent la panne', () => {
+  const INDEX = readFileSync(resolve(import.meta.dirname, '..', 'index.ts'), 'utf8')
+
+  it('répondent 503 avec un texte lisible, aux deux endroits', () => {
+    // La session d'abord, la liste ensuite : la panne peut surgir aux deux.
+    expect(INDEX.match(/panneDeConnexion\(e\)/g)).toHaveLength(2)
+    expect(INDEX.match(/erreur: BASE_EN_PANNE/g)).toHaveLength(2)
+  })
+
+  it('n’écrivent le vrai motif que dans le journal', () => {
+    // Le code de panne sert à l'exploitant, jamais au visiteur.
+    expect(INDEX).toContain("console.error('Base injoignable (session) :'")
+    expect(INDEX).toContain("console.error('Base injoignable (vœux) :'")
+    // Et le message rendu ne contient aucun code ni aucun hôte.
+    const message = /const BASE_EN_PANNE = '([^']+)'/.exec(INDEX)?.[1] ?? ''
+    expect(message).not.toMatch(/ENOTFOUND|ECONNREFUSED|postgres:|getaddrinfo/)
+    expect(message.length).toBeGreaterThan(20)
+  })
+
+  it('distinguent « pas configurée » de « ne répond pas »', () => {
+    /* Une base absente ne se répare pas par l'élève et ne se réparera pas en
+       réessayant ; une base injoignable, si. Les deux messages doivent
+       rester différents. */
+    expect(INDEX).toContain('n’est pas encore activé sur ce serveur')
+    expect(INDEX).toContain('momentanément indisponible')
   })
 })

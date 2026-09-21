@@ -111,3 +111,92 @@ describe('chaque écran porte un titre de niveau un', () => {
     expect(suspects, 'écrans non vérifiés').toEqual([])
   })
 })
+
+describe('la hiérarchie des titres ne saute pas de niveau', () => {
+  /* `titres.test.ts` comptait les h1 et rien d'autre. La fiche de formation
+     passait donc de h1 à h4 — deux niveaux sautés, sur la page la plus
+     nombreuse du site — sans que rien ne le signale.
+     
+     Un lecteur d'écran annonce « titre de niveau 4 » après un titre de
+     niveau 1 : l'auditeur en déduit qu'il a manqué deux sections. */
+
+  function niveaux(source: string): number[] {
+    // Les commentaires de code citent parfois des balises : on ne lit que le
+    // JSX rendu.
+    const sansCommentaires = source
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/^\s*\/\/.*$/gm, ' ')
+    return [...sansCommentaires.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]))
+  }
+
+  for (const fichier of ECRANS.map((e) => e.fichier)) {
+    it(`${fichier} n’enjambe aucun niveau`, () => {
+      const source = readFileSync(resolve(import.meta.dirname, '..', fichier), 'utf8')
+      const vus = niveaux(source)
+      if (vus.length === 0) return
+      /* On ne vérifie pas l'ORDRE d'apparition dans le fichier — un composant
+         défini avant son appelant fausserait la lecture — mais l'ensemble des
+         niveaux employés : un h4 sans aucun h3 dans le même écran est un saut,
+         quel que soit l'ordre du code. */
+      const presents = new Set(vus)
+      for (const n of presents) {
+        if (n === 1) continue
+        expect(
+          presents.has(n - 1),
+          `${fichier} emploie un h${n} sans aucun h${n - 1} : la hiérarchie saute`,
+        ).toBe(true)
+      }
+    })
+  }
+})
+
+/**
+ * Une page, un nom.
+ *
+ * ── Ce que ce test aurait évité ──────────────────────────────────────────
+ *
+ * La page des cartes en portait quatre à la fois :
+ *
+ *   - « Mes cartes » dans la barre de navigation ;
+ *   - « Ta collection » dans le fil d'Ariane ;
+ *   - « Tes cartes » dans le `h1` ;
+ *   - « Mes cartes de villes » dans l'onglet.
+ *
+ * Quatre noms pour une adresse, c'est quatre pages pour qui la cherche dans
+ * son historique, et c'est un fil d'Ariane qui ne nomme pas la page où il
+ * s'arrête. « Mes vœux » — l'autre page personnelle — en portait un seul,
+ * le même partout : c'est la convention, et elle suit l'adresse.
+ */
+describe('les pages personnelles portent le même nom partout', () => {
+  const PAGES: readonly {
+    readonly fichier: string
+    readonly nom: string
+    readonly cle: string
+  }[] = [
+    { fichier: 'collection.tsx', nom: 'Mes cartes', cle: 'collection' },
+    { fichier: 'mesVoeux.tsx', nom: 'Mes vœux', cle: 'voeux' },
+  ]
+
+  const NAV = readFileSync(resolve(SRC, 'navigation.tsx'), 'utf8')
+
+  it.each(PAGES)('« $nom » : fil d’Ariane, h1 et onglet concordent', ({ fichier, nom }) => {
+    const source = readFileSync(resolve(SRC, fichier), 'utf8')
+    expect(source, `${fichier} : le fil d’Ariane ne dit pas « ${nom} »`).toContain(
+      `{ libelle: '${nom}', route: null }`,
+    )
+    expect(source, `${fichier} : le h1 ne dit pas « ${nom} »`).toMatch(
+      new RegExp(`<h1[^>]*>${nom}</h1>`),
+    )
+    expect(source, `${fichier} : l’onglet ne commence pas par « ${nom} »`).toContain(
+      `titre: '${nom} — KitEtudiant.fr'`,
+    )
+  })
+
+  it('la barre de navigation emploie le même nom', () => {
+    for (const { nom } of PAGES) {
+      // Le libellé des cartes porte un compteur — « Mes cartes (3) » — d'où
+      // la recherche du nom seul plutôt que de la ligne entière.
+      expect(NAV, `la navigation ne dit pas « ${nom} »`).toContain(`'${nom}`)
+    }
+  })
+})

@@ -27,6 +27,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
+import { communeLisible } from '../communes.ts'
 import {
   chercherStatistiques,
   telechargerReleves,
@@ -214,7 +215,19 @@ export function Statistiques() {
             <Serie titre="Jusqu’où ils peuvent aller" valeurs={r.parMobilite} />
             <Serie titre="Académie" valeurs={r.parAcademie} />
             <Serie titre="Filière demandée" valeurs={r.parFiliere} />
-            <Serie titre="Communes les plus simulées" valeurs={r.communes} />
+            {/* Les communes sont relevées par leur code INSEE — c'est la clé
+                pivot du projet, et elle ne bouge pas quand un nom change. Mais
+                « 87085 » ne dit rien à qui lit un tableau : on le remplace ici
+                par « Limoges (87) », le département tranchant les homonymes.
+                Le code brut reste affiché quand la table ne connaît pas la
+                commune : c'est alors la seule information dont on dispose. */}
+            <Serie
+              titre="Communes les plus simulées"
+              valeurs={r.communes.map((c) => ({
+                valeur: communeLisible(c.valeur),
+                nombre: c.nombre,
+              }))}
+            />
           </div>
         </>
       )}

@@ -124,7 +124,7 @@ export const PHASES: readonly Phase[] = [
         reference: '2026-04-01',
         titre: 'Dernier jour pour compléter son dossier et confirmer ses vœux',
         detail:
-          'Un vœu non confirmé est perdu, même s’il a été formulé à temps. C’est la ' +
+          'Sans confirmation, un vœu formulé n’est transmis à aucune formation. C’est la ' +
           'date que l’on oublie le plus souvent.',
       },
     ],

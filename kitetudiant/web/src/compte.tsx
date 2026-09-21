@@ -12,6 +12,8 @@
 
 import { useEffect, useState } from 'react'
 
+import { useMetadonnees } from './metadonnees.ts'
+
 import {
   CompteRefuse,
   connecter,
@@ -43,6 +45,19 @@ export function Compte({
   readonly onAbandon: () => void
 }) {
   const [mode, setMode] = useState<Mode>(modeInitial)
+  /* Le titre suit le mode : /connexion et /inscription sont deux adresses,
+     et le même titre sur les deux les rendrait indistinguables dans un
+     historique de navigation comme dans un index. */
+  useMetadonnees({
+    titre:
+      mode === 'connexion'
+        ? 'Se connecter — KitEtudiant.fr'
+        : 'Créer un compte — KitEtudiant.fr',
+    description:
+      'Un compte sert à retrouver ta liste de vœux d’un appareil à l’autre. ' +
+      'Une adresse, un mot de passe, rien d’autre.',
+    prive: true,
+  })
   const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [enCours, setEnCours] = useState(false)
@@ -167,15 +182,25 @@ export function Compte({
       </p>
 
       <div className="compte-confiance">
-        <h3>Ce qu’on garde, et ce qu’on ne garde pas</h3>
+        <h2>Ce qu’on garde, et ce qu’on ne garde pas</h2>
         <ul>
           <li>
             <strong>Gardé :</strong> ton adresse e-mail, chiffrée, et ton mot de passe sous
             forme d’empreinte. Rien d’autre.
           </li>
           <li>
-            <strong>Pas gardé :</strong> tes notes, tes bulletins, tes vœux, tes réponses au
+            <strong>Pas gardé :</strong> tes notes, tes bulletins, tes réponses au
             questionnaire. Ils restent dans ce navigateur et ne sont jamais envoyés.
+          </li>
+          {/* Cette ligne manquait, et son absence rendait la précédente FAUSSE.
+              D1 a fait monter la liste de vœux au serveur — c'est ce qui permet
+              de la retrouver d'un appareil à l'autre — mais le texte continuait
+              de promettre l'inverse, à des mineurs, au moment précis où on leur
+              demande de créer un compte. */}
+          <li>
+            <strong>Gardé aussi, si tu le demandes :</strong> ta liste de vœux. Un code
+            de formation et son rang, rien d’autre — ni note, ni montant, ni commentaire.
+            C’est ce qui te permet de la retrouver d’un téléphone à l’autre.
           </li>
           <li>
             <strong>Jamais :</strong> aucune revente, aucune publicité, aucun traceur.

@@ -78,8 +78,12 @@ const ACADEMIES = [
 
 const VERDICTS: Record<Soutenabilite, { texte: string; classe: string }> = {
   soutenable: { texte: 'Finançable', classe: 'vert' },
-  tendu: { texte: 'Tendu', classe: 'orange' },
-  non_financable: { texte: 'Pas finançable en l’état', classe: 'rouge' },
+  // Le libellé désigne le BUDGET, jamais la personne ni la formation.
+  // « Pas finançable » en trois mots rouges se lit comme une porte fermée,
+  // alors que la règle 4 garantit qu'aucun vœu n'est retiré — et que « en
+  // l'état » signalait justement que l'état peut changer.
+  tendu: { texte: 'Budget tendu', classe: 'orange' },
+  non_financable: { texte: 'Budget à revoir', classe: 'rouge' },
   indeterminable: { texte: 'Reste-à-vivre non calculable', classe: 'gris' },
 }
 
@@ -838,6 +842,7 @@ export default function App() {
       <PageFormation
         code={adresse.code}
         connecte={connecte}
+        villeEleve={reponses.villeResidence}
         onNaviguer={naviguer}
         onCommencer={() => {
           setVue('parcours')
@@ -1008,9 +1013,13 @@ export default function App() {
             <button type="button" className="principal" onClick={() => setFormulaireCompte(true)}>
               Créer mon compte — une adresse, un mot de passe
             </button>
+            {/* « Aucun vœu n'est enregistré » était faux depuis D1, et c'est
+                ici que ça comptait le plus : juste sous le bouton qui crée le
+                compte. Une promesse de confidentialité fausse au moment du
+                consentement ne se rattrape pas ailleurs. */}
             <p className="note">
-              Aucune note, aucun vœu, aucun bulletin n’est enregistré. Seulement ton adresse,
-              chiffrée.
+              Aucune note, aucun bulletin n’est enregistré. Ton adresse, chiffrée — et ta
+              liste de vœux si tu en construis une : un code de formation et son rang.
             </p>
           </section>
         ) : null}

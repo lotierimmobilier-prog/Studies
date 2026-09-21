@@ -723,6 +723,22 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .budget-montant { display: block; margin-top: 0.25rem; color: var(--doux); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
 .budget-resume { display: block; margin-top: 0.15rem; color: var(--doux); font-size: 0.84rem; }
 
+/* Discret mais lisible : c'est une mise au point, pas une alerte. Un
+   encadré rouge sur un site qui s'adresse à des lycéens crée l'inquiétude
+   que CLAUDE.md interdit, alors qu'il s'agit seulement de dire d'où
+   viennent les chiffres. */
+.budget-avertissement {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--carte);
+  border-left: 3px solid var(--trait);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+.budget-avertissement strong { color: var(--encre); }
+
 .budget-total {
   margin: 0;
   padding: 0.85rem 1rem;
@@ -2072,6 +2088,17 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 /* Une liste de définitions, pas une suite de paragraphes : la question et sa
    réponse sont liées sémantiquement, et un lecteur d'écran l'annonce. */
 
+/* La FAQ de l'accueil reprend la présentation de celle des articles
+   (.questions-liste, .questions-paire) : deux mises en forme pour deux
+   listes de questions donneraient l'impression de deux sites. Seul
+   l'espacement du bloc change, l'accueil étant une suite de sections. */
+.accueil-questions {
+  margin: 0;
+  padding: 2rem 0 0;
+  border-top: 1px solid var(--trait);
+}
+.accueil-questions h2 { margin: 0 0 1.25rem; }
+
 .questions {
   margin: 2.5rem 0 0;
   padding-top: 1.5rem;
@@ -3164,4 +3191,176 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   gap: 0.15rem;
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--trait);
+}
+
+/* ═══════════════════════════════ les débouchés d'une école, par spécialité
+ *
+ * Une ligne par spécialité : son nom à gauche, ses compteurs à droite. En
+ * dessous de 40 rem les deux passent l'un sous l'autre — deux nombres et un
+ * intitulé de secteur ne tiennent pas côte à côte sur un téléphone.
+ *
+ * Les chiffres sont alignés à droite et non centrés : on les compare d'une
+ * ligne à l'autre, et un alignement flottant rend cette comparaison pénible.
+ */
+.specialites {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.specialite {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--trait);
+}
+.specialite:last-child {
+  border-bottom: 1px solid var(--trait);
+}
+.specialite-tete {
+  min-width: 0;
+}
+.specialite-titre {
+  color: var(--encre);
+  font-family: var(--titres);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.specialite-titre:hover,
+.specialite-titre:focus-visible {
+  text-decoration: underline;
+}
+.specialite-tete .note {
+  margin: 0.2rem 0 0;
+}
+.specialite-chiffres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.5rem;
+}
+.specialite-chiffre strong {
+  font-family: var(--titres);
+  font-size: 1.15rem;
+  /* Chiffres à chasse fixe : sans cela, « 1 246 » et « 9 600 » n'ont pas la
+     même largeur et les colonnes dansent d'une ligne à l'autre. */
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 40rem) {
+  .specialite {
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .specialite-chiffres {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+
+/* ══════════════════════════════ les annonces d'emploi, en cartes
+ *
+ * Une colonne sur téléphone, deux à partir de 34 rem, trois à partir de
+ * 62 rem. Les seuils sont ceux des CARTES, pas ceux du site : une annonce
+ * porte un intitulé de métier, souvent long, et trois colonnes sous 62 rem
+ * le coupent en quatre lignes.
+ *
+ * `auto-fit` n'est pas employé ici : avec une seule annonce, il l'étirerait
+ * sur toute la largeur, et une carte pleine largeur ne se lit plus comme un
+ * élément d'une liste.
+ */
+.annonces {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.annonce {
+  display: flex;
+  flex-direction: column;
+  /* Le pied colle en bas quelle que soit la hauteur du titre : sans cela,
+     les contrats et les dates dansent d'une carte à l'autre. */
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.annonce-titre {
+  color: var(--encre);
+  font-family: var(--titres);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+}
+.annonce-titre:hover,
+.annonce-titre:focus-visible {
+  text-decoration: underline;
+}
+.annonce-lieu {
+  margin: 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+}
+.annonce-salaire {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+}
+.annonce-salaire strong {
+  font-family: var(--titres);
+  /* Chiffres à chasse fixe : les montants se comparent d'une carte à
+     l'autre, et sans cela les colonnes dansent. */
+  font-variant-numeric: tabular-nums;
+}
+.annonce-pied {
+  margin: auto 0 0;
+  padding-top: 0.4rem;
+  font-size: 0.78rem;
+}
+
+/* Le choix du lieu. Deux boutons, l'actif marqué autrement que par la
+   couleur seule — `aria-pressed` le porte pour qui ne la voit pas. */
+.annonces-ou {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+}
+.annonces-choix {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.annonces-choix:hover {
+  color: var(--encre);
+}
+.annonces-choix.actif {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+  font-weight: 600;
+}
+
+@media (min-width: 34rem) {
+  .annonces {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 62rem) {
+  .annonces {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }

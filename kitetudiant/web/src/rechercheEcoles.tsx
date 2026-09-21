@@ -32,7 +32,8 @@ import { liensLogement } from './logement.ts'
 import { nombre } from './nombres.ts'
 import { secteurDe } from './tri.ts'
 import { THEMES, motsDuTheme } from './themes.ts'
-import { cheminDe, type Route } from './routes.ts'
+import { adresseComplete, cheminDe, type Route } from './routes.ts'
+import { useMetadonnees } from './metadonnees.ts'
 
 function Resultat({
   formation,
@@ -122,6 +123,18 @@ export function RechercheEcoles({
   /** Bascule vers le parcours en sept questions. */
   readonly onCommencer: () => void
 }) {
+  /* Cette page se présentait aux moteurs avec le titre ET la description de
+     l'accueil — un doublon strict. C'est pourtant elle qui répond à
+     « qu'est-ce qu'il y a comme écoles à Limoges ? », la question qu'on
+     tape vraiment. */
+  useMetadonnees({
+    titre: 'Chercher une formation, ville par ville — KitEtudiant.fr',
+    description:
+      'Tape une ville et vois les formations qui s’y trouvent : établissement, nombre ' +
+      'de places et taux d’accès publié par le ministère. Avec, pour chacune, ce que ' +
+      'coûte un logement sur place.',
+    canonique: adresseComplete({ vue: 'recherche' }),
+  })
   /* Les critères vivent dans l'adresse, pas seulement en mémoire.
    *
    * Deux raisons, et la seconde est la plus importante :
@@ -220,10 +233,15 @@ export function RechercheEcoles({
         onNaviguer={onNaviguer}
       />
 
-      <h1 className="article-titre">Tu sais déjà où tu veux aller ?</h1>
+      {/* « Tu sais déjà où tu veux aller ? » vient du bouton de l'accueil.
+          C'est une bonne PORTE, et un mauvais titre de page : aucun mot qu'on
+          tape, et il contredisait le fil d'Ariane juste au-dessus comme
+          l'entrée de navigation, qui disent tous deux « chercher ». */}
+      <h1 className="article-titre">Chercher une formation, ville par ville</h1>
       <p className="bloc-intro">
-        Tape une ville, et regarde ce qui s’y trouve. Les formations, leurs établissements
-        et leurs taux d’accès publiés — directement depuis l’open data du ministère.
+        Tape une ville. Tu verras les formations qui s’y trouvent, leur établissement,
+        leur nombre de places et leur taux d’accès publié — la part des candidats qui ont
+        reçu une proposition l’an dernier. Directement depuis l’open data du ministère.
       </p>
 
       <form
@@ -318,7 +336,7 @@ export function RechercheEcoles({
                   après : un élève qui fait défiler jusqu'en bas a déjà cru
                   que le site ne calculait rien. */}
               <div className="ecoles-rappel">
-                <h3>Il manque le plus important</h3>
+                <h2>Ce que cette liste ne dit pas encore</h2>
                 <p>
                   Cette liste ne dit pas ce qu’il te <strong>restera pour vivre</strong> dans
                   chacune de ces villes. Ce montant dépend de ta bourse, de ton logement et

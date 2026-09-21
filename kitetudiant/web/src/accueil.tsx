@@ -9,11 +9,11 @@
  *
  * - règle 5, les trois scores restent séparés, jamais de note globale unique.
  *   On ne promet donc nulle part « la meilleure école » dans l'absolu, ce qui
- *   supposerait un classement entre établissements. Le titre parle de « la
- *   meilleure SOLUTION pour l'année prochaine » — une décision propre à
- *   quelqu'un, pas un palmarès — et le sous-titre en borne aussitôt le
- *   périmètre : études, logement, budget, aides. Promettre plus large que ce
- *   que les données couvrent serait une promesse qu'on ne tient pas ;
+ *   supposerait un classement entre établissements. Le titre nomme deux des
+ *   trois angles — les chances, le reste-à-vivre — et le sous-titre les
+ *   énonce tous les trois : nommer n'est pas fondre. Il dit aussi « vœux » et
+ *   « Parcoursup », les mots qu'un lycéen tape, que le titre précédent
+ *   rejetait dans un sur-titre en petits caractères, hors du h1 ;
  * - règle 6, toute donnée affichée porte son millésime. Aucun chiffre de cette
  *   page n'est décoratif : ils viennent tous du jeu de communes versionné.
  *
@@ -40,6 +40,7 @@ import {
   TYPOLOGIE_LOYERS,
 } from './donnees.ts'
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
+import { ACCUEIL_QUESTIONS, ACCUEIL_TITRE_PAGE } from '../../packages/articles/src/accueil.ts'
 import { ARTICLES } from '../../packages/articles/src/index.ts'
 import { cheminDe, type Route } from './routes.ts'
 import {
@@ -53,6 +54,7 @@ import {
   SOURCE_CALENDRIER,
 } from './calendrier.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
+import { dateLisible } from './dates.ts'
 
 // Les photographies sont IMPORTÉES et non désignées par un chemin : Vite leur
 // applique la base de déploiement (le site est servi sous un sous-chemin) et
@@ -84,13 +86,6 @@ function nomLisible(nom: string): string {
   return nom.replace(/\s+Arrondissement$/i, '')
 }
 
-/** Date ISO du fichier de données, écrite en toutes lettres. */
-function dateLisible(iso: string): string {
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return iso
-  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-}
-
 /* ------------------------------------------------------------------ hero */
 
 function Hero({
@@ -103,7 +98,7 @@ function Hero({
   return (
     <section className="hero">
       <p className="hero-sur">Orientation post-bac · Parcoursup</p>
-      <h1 className="promesse">Trouve la meilleure solution pour l’année prochaine.</h1>
+      <h1 className="promesse">{ACCUEIL_TITRE_PAGE}</h1>
       <p className="hero-texte">
         Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet,
         au même endroit, avec des chiffres datés et leur source. Chaque formation est
@@ -183,7 +178,7 @@ const PILIERS: readonly { readonly titre: string; readonly question: string; rea
     titre: 'Ce qu’il te restera',
     question: 'Est-ce que je pourrai y vivre ?',
     texte:
-      'Loyer de la ville, aide au logement, bourse, CVEC, repas : le reste-à-vivre mensuel, ligne par ligne. C’est ce qu’aucun autre outil d’orientation ne te dit.',
+      'Loyer de la ville, aide au logement, bourse, contribution de vie étudiante (CVEC), repas : le reste-à-vivre, c’est-à-dire ce qu’il te reste chaque mois une fois tout payé. Ligne par ligne. C’est ce qu’aucun autre outil d’orientation ne te dit.',
   },
 ]
 
@@ -459,16 +454,32 @@ export function Accueil({
 
       <section className="bloc">
         <h2>D’où viennent les chiffres</h2>
+        {/* La règle 6 veut un millésime sur toute donnée affichée. Deux lignes
+            d'ici l'annonçaient sans le donner — « barèmes officiels datés »
+            sans aucune date, « calculée par OpenFisca » sans version.
+            
+            Il n'existe pas de millésime unique à citer : chaque barème porte
+            le sien, résolu au moment du calcul, et chaque formation porte sa
+            session. Écrire une année globale serait inventer. On dit donc OÙ
+            la date se trouve — et elle s'y trouve vraiment. */}
         <ul className="sources">
-          <li>Formations et statistiques d’admission : {SOURCE_PARCOURSUP}.</li>
+          <li>
+            Formations et statistiques d’admission : {SOURCE_PARCOURSUP}. La session la
+            plus récente publiée par le ministère ; chaque fiche de formation porte la
+            sienne, en bas de page.
+          </li>
           <li>
             Loyers : {SOURCE_LOYERS}, typologie « {TYPOLOGIE_LOYERS} », millésime{' '}
             {MILLESIME_LOYERS}.
           </li>
-          <li>Aide au logement : calculée par OpenFisca France.</li>
           <li>
-            Bourses, aide au mérite, CVEC, tarif du restaurant universitaire : barèmes
-            officiels datés, rattachés à leur arrêté.
+            Aide au logement : calculée par OpenFisca France. Le barème employé est daté
+            sur la ligne « aide au logement » de chaque résultat.
+          </li>
+          <li>
+            Bourses, aide au mérite, contribution de vie étudiante (CVEC), tarif du
+            restaurant universitaire : barèmes officiels. Chacun porte son millésime et
+            son arrêté sur la ligne où son montant apparaît.
           </li>
           <li>Jeu de communes assemblé le {dateLisible(GENERE_LE)}.</li>
         </ul>
@@ -516,8 +527,25 @@ export function Accueil({
         </div>
       </section>
 
+      {/* Les questions AVANT l'appel à l'action finale : celles qui retiennent
+          quelqu'un — « est-ce que c'est le site officiel ? », « est-ce que mes
+          vœux partent ? » — doivent trouver leur réponse avant le bouton, pas
+          après. Les textes vivent dans packages/articles pour que le pré-rendu
+          écrive exactement les mêmes (scripts/prerendre.ts). */}
+      <section className="accueil-questions" aria-labelledby="accueil-questions-titre">
+        <h2 id="accueil-questions-titre">Les questions qu’on nous pose</h2>
+        <dl className="questions-liste">
+          {ACCUEIL_QUESTIONS.map((q) => (
+            <div className="questions-paire" key={q.question}>
+              <dt className="questions-question">{q.question}</dt>
+              <dd className="questions-reponse">{q.reponse}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
       <section className="cta-final">
-        <h2>Tes vœux se décident maintenant.</h2>
+        <h2>Commence par regarder ce que ça coûte.</h2>
         <p>
           Sept questions, et tu sauras lesquels tu peux tenir jusqu’au diplôme.
         </p>

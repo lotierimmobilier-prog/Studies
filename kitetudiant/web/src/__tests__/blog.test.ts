@@ -214,3 +214,75 @@ describe('les articles', () => {
     }
   })
 })
+
+/**
+ * Le site tutoie. Les quinze articles vouvoyaient.
+ *
+ * ── Ce qui s'est passé ───────────────────────────────────────────────────
+ *
+ * Tous les écrans s'adressent à l'élève au tutoiement — « Tes vœux »,
+ * « Crée ton compte », « Voir ce qu'il me restera pour vivre ». Les
+ * articles, écrits plus tard, vouvoyaient : 265 pronoms et déterminants,
+ * 183 formes verbales, sur les quinze.
+ *
+ * Ce n'est pas une question de goût. Le site s'adresse à des mineurs
+ * (règle 3 de CLAUDE.md) ; changer de registre entre l'outil et le texte
+ * qui l'explique donne l'impression de deux sites cousus ensemble, et
+ * c'est le genre de détail qui fait douter du reste.
+ *
+ * ── Pourquoi un test, et pas seulement une relecture ─────────────────────
+ *
+ * Les articles sont modifiables depuis la console d'administration, et un
+ * article ajouté dans six mois sera écrit par quelqu'un qui n'aura pas lu
+ * ce commentaire. Le registre se vérifie mécaniquement : autant le faire.
+ */
+describe('les articles tutoient, comme le reste du site', () => {
+  /* `vous`, `votre`, `vos`, et le possessif `le vôtre` — le seul qui ne se
+     devine pas depuis les trois premiers. Pas de `-ez` ici : « chez »,
+     « assez », « cherchez » ne se distinguent pas par une expression
+     régulière, et un test qui crie au loup finit ignoré. */
+  const VOUVOIEMENT = /\b(vous|votre|vos|vôtres?)\b/i
+
+  it.each(ARTICLES.map((a) => [a.slug, a] as const))(
+    '« %s » n’emploie ni « vous » ni « votre »',
+    (_slug, article) => {
+      for (const texte of tousLesTextes(article)) {
+        const trouve = VOUVOIEMENT.exec(texte)
+        expect(
+          trouve,
+          trouve === null
+            ? ''
+            : `« ${trouve[0]} » dans : « ${texte.slice(Math.max(0, trouve.index - 60), trouve.index + 60)} »`,
+        ).toBeNull()
+      }
+    },
+  )
+
+  it('le tutoiement est bien présent, et pas seulement le vouvoiement absent', () => {
+    /* Le pendant positif. Un article écrit à la troisième personne — « le
+       candidat doit », « il faut » — passerait le test précédent sans
+       tutoyer personne, et c'est une autre façon de tenir le lecteur à
+       distance. */
+    for (const article of ARTICLES) {
+      const entier = tousLesTextes(article).join(' ')
+      expect(
+        entier,
+        `« ${article.slug} » ne s’adresse jamais à l’élève`,
+      ).toMatch(/\b(tu|ton|ta|tes|te|t’|toi)\b/i)
+    }
+  })
+
+  it('le slug de l’article « bulletins » reste tel qu’il est publié', () => {
+    /* Sa conversion l'avait emporté aussi — les tirets font frontière de
+       mot — et une adresse publiée ne se renomme pas : le lien casse,
+       l'indexation acquise est perdue, et la carte de partage
+       `partage/…-vos-bulletins.png` ne correspond plus.
+       
+       Conséquence assumée : l'adresse dit « vos » et le titre dit « tes ».
+       Le jour où ça vaudra la peine, il faudra un nouveau slug ET une
+       redirection depuis l'ancien, pas un renommage sec. */
+    expect(ARTICLES.map((a) => a.slug)).toContain(
+      'ce-qui-compte-vraiment-dans-vos-bulletins',
+    )
+  })
+})
