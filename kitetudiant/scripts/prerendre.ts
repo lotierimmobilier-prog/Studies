@@ -691,6 +691,18 @@ Ces chiffres sont comptés dans les données au moment du build, pas recopiés
 - Il **ne publie pas les dates** de la session à venir tant que l'État ne
   les a pas fixées. Les articles parlent en mois, jamais en jours.
 
+## Comment le site est financé
+
+Une page propose un partenaire — papernest — pour comparer énergie,
+assurance habitation, mobile et internet. Ce lien est rémunéré : le service
+est gratuit pour l'utilisateur, et c'est le partenaire qui paie le site en
+cas de souscription. C'est le seul lien commercial du site.
+
+Aucun montant d'économie n'est annoncé, et le reste du site n'en dépend
+pas : les calculs, les statistiques d'admission et les articles sont
+identiques qu'on clique ou non. Aucun script tiers n'est chargé, donc le
+partenaire n'apprend rien d'un visiteur tant que celui-ci ne clique pas.
+
 ## Articles
 
 ${ARTICLES.map((a) => `- [${a.titre}](${ORIGINE}${BASE}blog/${a.slug}) : ${a.chapeau}`).join('\n')}

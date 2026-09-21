@@ -486,6 +486,24 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .bloc-intro { margin: 0 0 1.1rem; color: var(--doux); font-size: 0.92rem; }
 .bloc-chute { margin: 1.25rem 0 0; font-size: 0.95rem; }
 
+/* ------------------------------------------------------- bloc partenaire */
+/* Encadré, parce qu'il doit se distinguer du reste de la page : c'est le
+   seul endroit du site qui mène vers un service rémunéré, et le lecteur a
+   le droit de voir d'un coup d'œil qu'il change de registre. Encadré et
+   pas coloré — une bannière publicitaire est exactement ce qu'on ne veut
+   pas être. */
+.partenaire {
+  padding: 1.25rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.partenaire p { font-size: 0.92rem; line-height: 1.6; }
+/* La mention de rémunération n'est pas une note de bas de page : elle se lit
+   avant le bouton, donc elle en a la largeur et l'espacement. */
+.partenaire-mention { margin: 1rem 0; }
+.partenaire .cta-groupe { margin-top: 1rem; }
+
 /* ----------------------------------------------------------- trois piliers */
 .piliers-grille { display: grid; gap: 0.75rem; }
 .pilier {
