@@ -139,7 +139,7 @@ function Mentions({ formation }: { readonly formation: Formation }) {
   if (total === 0) return null
   return (
     <>
-      <h4 className="fiche-sous-titre">Les mentions qu’avaient les admis</h4>
+      <h2 className="fiche-sous-titre">Les mentions qu’avaient les admis</h2>
       <ul className="mentions">
         {parts.map((p) => {
           const part = Math.round((100 * (p.valeur ?? 0)) / total)
@@ -223,7 +223,7 @@ function Admission({ formation }: { readonly formation: Formation }) {
         <Donnee libelle="Admis boursiers" valeur={s.admisBoursiers} />
       </div>
 
-      <h4 className="fiche-sous-titre">D’où venaient les admis</h4>
+      <h2 className="fiche-sous-titre">D’où venaient les admis</h2>
       <div className="donnees">
         <Donnee libelle="Bac général" valeur={s.admisBacGeneral} />
         <Donnee libelle="Bac technologique" valeur={s.admisBacTechno} />
@@ -237,7 +237,7 @@ function Admission({ formation }: { readonly formation: Formation }) {
           qu'il faudra faire tous les jours, et la ville seule ne suffit pas à
           se le représenter. Ici pour SITUER — le logement et le coût de la
           vie restent l'affaire de « Vivre ici ». */}
-      <h4 className="fiche-sous-titre">Où se trouve cette école</h4>
+      <h2 className="fiche-sous-titre">Où se trouve cette école</h2>
       <p className="note">
         {formation.etablissement} — {formation.ville} ({formation.departement}).
       </p>
@@ -307,7 +307,7 @@ function VivreIci({
         </button>
       </div>
 
-      <h4 className="fiche-sous-titre">Se loger sur place</h4>
+      <h2 className="fiche-sous-titre">Se loger sur place</h2>
       <ul className="liens-logement">
         {liensLogement(formation.ville).map((lien) => (
           <li key={lien.cle}>
@@ -436,7 +436,7 @@ function Emploi({ formation }: { readonly formation: Formation }) {
   const { total, metiers, region } = offres
   return (
     <>
-      <h4 className="fiche-sous-titre">Les offres d’emploi de ce domaine</h4>
+      <h2 className="fiche-sous-titre">Les offres d’emploi de ce domaine</h2>
 
       <div className="donnees">
         <Donnee libelle="Offres en France" valeur={total.enFrance} />
@@ -609,7 +609,7 @@ function Annonces({
   if (etat === 'charge') {
     return (
       <>
-        <h4 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h4>
+        <h2 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h2>
         {bascule}
         <p className="note" role="status" aria-live="polite">
           Recherche des annonces…
@@ -621,7 +621,7 @@ function Annonces({
   if (etat === 'indisponible' || etat === 'erreur' || donnees === null) {
     return (
       <>
-        <h4 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h4>
+        <h2 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h2>
         <p className="note">
           Les annonces ne sont pas disponibles pour l’instant.
         </p>
@@ -633,7 +633,7 @@ function Annonces({
 
   return (
     <>
-      <h4 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h4>
+      <h2 className="fiche-sous-titre">Des annonces ouvertes en ce moment</h2>
       {bascule}
 
       {donnees.offres.length === 0 ? (
@@ -712,7 +712,7 @@ function Apres({
         insertion. Ces chiffres existent pour certains diplômes, mais pas formation par
         formation, et nous ne les inventerons pas.
       </p>
-      <h4 className="fiche-sous-titre">Ce qu’on peut dire quand même</h4>
+      <h2 className="fiche-sous-titre">Ce qu’on peut dire quand même</h2>
       <ul className="article-liste">
         <li>
           Cette formation est classée « {formation.filiere || 'non précisée'} » par le
@@ -720,15 +720,15 @@ function Apres({
         </li>
         <li>
           {formation.stats.selective
-            ? 'Elle est sélective : le dossier est examiné, et le rang d’appel compte.'
-            : 'Elle n’est pas sélective : les candidats du secteur sont prioritaires, et le rang d’appel joue moins.'}
+            ? 'Elle est sélective : le dossier est examiné, et ta place dans la file d’attente — le « rang d’appel » — décide du moment où une proposition t’arrive.'
+            : 'Elle n’est pas sélective : les candidats de l’académie sont prioritaires, et la place dans la file d’attente pèse moins.'}
         </li>
       </ul>
       <Emploi formation={formation} />
 
       <Annonces formation={formation} villeEleve={villeEleve} />
 
-      <h4 className="fiche-sous-titre">Où trouver les débouchés</h4>
+      <h2 className="fiche-sous-titre">Où trouver les débouchés</h2>
       <p>
         L’Onisep publie des fiches de débouchés par diplôme. Nous ne reprenons pas leur
         contenu ici : leur licence impose un partage à l’identique, qui engagerait tout ce

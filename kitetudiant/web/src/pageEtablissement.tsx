@@ -295,7 +295,7 @@ export function PageEtablissement({
 
         {etat === 'prete' && formations.length === 0 ? (
           <>
-            <h3>Aucune formation publiée sous ce code</h3>
+            <h2>Aucune formation publiée sous ce code</h2>
             <p>
               Le code UAI <code>{uai}</code> n’apparaît pas dans la session publiée par le
               ministère. L’établissement existe peut-être, mais il ne recrute pas par

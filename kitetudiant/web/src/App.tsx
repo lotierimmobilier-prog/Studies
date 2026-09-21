@@ -78,8 +78,12 @@ const ACADEMIES = [
 
 const VERDICTS: Record<Soutenabilite, { texte: string; classe: string }> = {
   soutenable: { texte: 'Finançable', classe: 'vert' },
-  tendu: { texte: 'Tendu', classe: 'orange' },
-  non_financable: { texte: 'Pas finançable en l’état', classe: 'rouge' },
+  // Le libellé désigne le BUDGET, jamais la personne ni la formation.
+  // « Pas finançable » en trois mots rouges se lit comme une porte fermée,
+  // alors que la règle 4 garantit qu'aucun vœu n'est retiré — et que « en
+  // l'état » signalait justement que l'état peut changer.
+  tendu: { texte: 'Budget tendu', classe: 'orange' },
+  non_financable: { texte: 'Budget à revoir', classe: 'rouge' },
   indeterminable: { texte: 'Reste-à-vivre non calculable', classe: 'gris' },
 }
 

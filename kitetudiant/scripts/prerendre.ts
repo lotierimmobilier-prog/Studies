@@ -21,6 +21,11 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 
 import { ARTICLES, MENTION_SOURCE, type Article } from '../packages/articles/src/index.ts'
+import {
+  ACCUEIL_DESCRIPTION,
+  ACCUEIL_TITRE_ONGLET,
+  ACCUEIL_TITRE_PAGE,
+} from '../packages/articles/src/accueil.ts'
 
 const RACINE = resolve(import.meta.dirname, '..', '..')
 const SORTIE = join(RACINE, 'dist-kitetudiant')
@@ -342,10 +347,8 @@ ecrire(
 // complète ici plutôt que d'écrire une adresse absolue en dur dans index.html,
 // qui deviendrait fausse le jour où la base de déploiement change.
 const accueilCanonique = `${ORIGINE}${BASE}`
-const accueilTitre = 'KitEtudiant.fr — trouve la meilleure solution pour l’année prochaine'
-const accueilDescription =
-  'Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet, ' +
-  'au même endroit, avec des chiffres datés et leur source.'
+const accueilTitre = ACCUEIL_TITRE_ONGLET
+const accueilDescription = ACCUEIL_DESCRIPTION
 /**
  * Le corps de l'accueil, posé dans la coquille.
  *
@@ -376,7 +379,7 @@ function corpsAccueil(): string {
   ]
   return [
     '<main>',
-    `<h1>${echapper('Trouve la meilleure solution pour l’année prochaine.')}</h1>`,
+    `<h1>${echapper(ACCUEIL_TITRE_PAGE)}</h1>`,
     `<p>${echapper(accueilDescription)}</p>`,
     '<nav aria-label="Aller à l’essentiel"><ul>',
     ...liens.map((l) => `<li><a href="${echapper(l.url)}">${echapper(l.texte)}</a></li>`),

@@ -111,3 +111,41 @@ describe('chaque écran porte un titre de niveau un', () => {
     expect(suspects, 'écrans non vérifiés').toEqual([])
   })
 })
+
+describe('la hiérarchie des titres ne saute pas de niveau', () => {
+  /* `titres.test.ts` comptait les h1 et rien d'autre. La fiche de formation
+     passait donc de h1 à h4 — deux niveaux sautés, sur la page la plus
+     nombreuse du site — sans que rien ne le signale.
+     
+     Un lecteur d'écran annonce « titre de niveau 4 » après un titre de
+     niveau 1 : l'auditeur en déduit qu'il a manqué deux sections. */
+
+  function niveaux(source: string): number[] {
+    // Les commentaires de code citent parfois des balises : on ne lit que le
+    // JSX rendu.
+    const sansCommentaires = source
+      .replace(/\/\*[\s\S]*?\*\//g, ' ')
+      .replace(/^\s*\/\/.*$/gm, ' ')
+    return [...sansCommentaires.matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]))
+  }
+
+  for (const fichier of ECRANS.map((e) => e.fichier)) {
+    it(`${fichier} n’enjambe aucun niveau`, () => {
+      const source = readFileSync(resolve(import.meta.dirname, '..', fichier), 'utf8')
+      const vus = niveaux(source)
+      if (vus.length === 0) return
+      /* On ne vérifie pas l'ORDRE d'apparition dans le fichier — un composant
+         défini avant son appelant fausserait la lecture — mais l'ensemble des
+         niveaux employés : un h4 sans aucun h3 dans le même écran est un saut,
+         quel que soit l'ordre du code. */
+      const presents = new Set(vus)
+      for (const n of presents) {
+        if (n === 1) continue
+        expect(
+          presents.has(n - 1),
+          `${fichier} emploie un h${n} sans aucun h${n - 1} : la hiérarchie saute`,
+        ).toBe(true)
+      }
+    })
+  }
+})

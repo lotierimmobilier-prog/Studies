@@ -182,7 +182,7 @@ export function Compte({
       </p>
 
       <div className="compte-confiance">
-        <h3>Ce qu’on garde, et ce qu’on ne garde pas</h3>
+        <h2>Ce qu’on garde, et ce qu’on ne garde pas</h2>
         <ul>
           <li>
             <strong>Gardé :</strong> ton adresse e-mail, chiffrée, et ton mot de passe sous
