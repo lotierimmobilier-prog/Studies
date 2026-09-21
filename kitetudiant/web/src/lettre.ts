@@ -55,6 +55,66 @@ export function assembler(reponses: Reponses, questions: readonly Question[] = Q
   return parties.join('\n\n')
 }
 
+/* ------------------------------------------------------- pré-remplissage */
+
+/**
+ * La seule réponse que le site peut pré-remplir : l'intitulé du vœu.
+ *
+ * ── Pourquoi celle-là, et aucune autre ──────────────────────────────────
+ *
+ * Ce n'est pas de la rédaction, c'est une DONNÉE. L'intitulé exact de la
+ * formation et le nom de l'établissement viennent de l'open data Parcoursup,
+ * et la fiche du ministère les réclame nommément : « le bon intitulé de la
+ * formation », « BUT si vous parlez du diplôme et non pas IUT ». C'est
+ * justement là que les candidats se trompent, en recopiant un nom approximatif
+ * lu sur un site d'école.
+ *
+ * Les cinq autres questions portent sur ce qui l'intéresse, ce qu'il a fait,
+ * ce qu'il projette. Aucune donnée ne répond à ça, et une phrase proposée
+ * serait une phrase écrite à sa place — ce que la fiche interdit et ce que
+ * tout ce module refuse.
+ *
+ * Le texte rendu est une amorce factuelle, pas une phrase finie : l'élève la
+ * complète et la réécrit. Elle n'est posée que sur un champ VIDE, jamais
+ * par-dessus ce qu'il a tapé.
+ */
+export function amorceFormation(libelle: string, etablissement: string): string {
+  const nom = libelle.trim()
+  if (nom === '') return ''
+  const ou = etablissement.trim()
+  /* Une virgule, pas une préposition.
+     « à ${ou} » donnait « à Université de Bordeaux » : l'open data publie les
+     noms sans article, et deviner lequel va devant chacun — l'IUT, la faculté,
+     les INSA — se trompe une fois sur trois. Une apposition se lit dans tous
+     les cas, et l'élève en fera sa phrase : c'est une amorce, pas un texte. */
+  return ou === '' ? nom : `${nom}, ${ou}`
+}
+
+/** La clé de la seule question pré-remplissable. Nommée, pour être testée. */
+export const QUESTION_PREREMPLIE = 'demande'
+
+/**
+ * Les réponses, l'amorce posée si et seulement si la question est vide.
+ *
+ * Ne touche jamais à une réponse existante : quelqu'un qui revient sur son
+ * brouillon retrouve ses mots, pas les nôtres.
+ */
+export function avecAmorce(reponses: Reponses, amorce: string): Reponses {
+  if (amorce === '' || (reponses[QUESTION_PREREMPLIE] ?? '').trim() !== '') return reponses
+  return { ...reponses, [QUESTION_PREREMPLIE]: amorce }
+}
+
+/** Combien de questions ont reçu une réponse. Pour dire où on en est. */
+export function avancement(
+  reponses: Reponses,
+  questions: readonly Question[] = QUESTIONS,
+): { readonly remplies: number; readonly total: number } {
+  return {
+    remplies: questions.filter((q) => (reponses[q.cle] ?? '').trim() !== '').length,
+    total: questions.length,
+  }
+}
+
 /* ------------------------------------------------------------- longueur */
 
 /**
@@ -221,6 +281,31 @@ export function relire(
   }
 
   return remarques
+}
+
+/* ------------------------------------------------- l'échec de chargement */
+
+/**
+ * Ce qu'on dit à l'élève quand ses vœux n'arrivent pas.
+ *
+ * `null` veut dire « rien à dire » : sans compte, la liste vide EST la
+ * réponse, et afficher une panne à un visiteur serait lui annoncer un problème
+ * qui n'existe pas.
+ *
+ * Tout le reste se dit. Le premier jet avalait toutes les erreurs — la panne
+ * de l'API se présentait alors exactement comme « tu n'as aucun vœu », et
+ * l'élève cherchait ses vœux ailleurs pendant que le serveur était à terre.
+ * Une donnée manquante s'affiche comme manquante (CLAUDE.md).
+ *
+ * Cette fonction existe à part du composant pour être tenue par un test :
+ * un `catch` qui redeviendrait muet ne se verrait pas autrement.
+ */
+export function messageDeChargement(erreur: unknown): string | null {
+  if (erreur instanceof Error && erreur.name === 'InscriptionRequise') return null
+  return (
+    'Tes vœux n’ont pas pu être chargés. Tu peux écrire ton brouillon quand même : ' +
+    'il sera gardé, et tu pourras le rattacher à un vœu plus tard.'
+  )
 }
 
 /* ----------------------------------------------------------- persistance */
