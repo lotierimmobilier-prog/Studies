@@ -1,51 +1,77 @@
 /* ------------------------------------------------------------------ polices
- * Poppins, la famille du logo, servie DEPUIS CE SITE.
+ * Deux familles, servies DEPUIS CE SITE.
  *
  * Passer par fonts.googleapis.com aurait envoyé l'adresse IP de chaque élève
  * à Google à chaque visite, ce que la page d'accueil promet justement de ne
- * pas faire. Les fichiers sont donc embarqués : trois graisses, sous-ensemble
- * latin uniquement — il couvre U+0000-00FF, donc é, à, è, ç, ainsi que œ et
- * l'euro. 24 Ko en tout.
+ * pas faire.
  *
- * Licence SIL Open Font 1.1 (Indian Type Foundry, Jonny Pinhorn, Ninad Kale) ;
- * le texte de la licence accompagne les fichiers, comme elle l'exige.
+ * ── Pourquoi celles-ci ───────────────────────────────────────────────────
  *
- * Elle sert aux TITRES, aux chiffres et aux boutons — là où la page doit
- * ressembler au logo. Le texte courant reste sur la police du système :
- * Poppins est géométrique et large, très bien en grand, fatigante sur un
- * paragraphe lu au téléphone.
+ * Le site tournait sur Poppins pour les titres et la pile système pour le
+ * texte. Poppins est l'une des familles les plus employées du web, et
+ * « ui-sans-serif » n'est pas un choix : c'est l'absence de choix. Deux
+ * familles très répandues donnaient une page qui pouvait appartenir à
+ * n'importe qui.
+ *
+ *   Bricolage Grotesque — les titres. Une grotesque contemporaine, un peu
+ *   irrégulière, qui a du caractère en grand sans crier.
+ *
+ *   Source Serif 4 — le texte courant. Un serif de document. Le métier de
+ *   ce site est de rendre lisible une décision administrative et financière ;
+ *   le registre du relevé lui va mieux qu'une sans-serif d'interface, et un
+ *   serif se lit mieux sur un paragraphe long.
+ *
+ * ── Le poids ─────────────────────────────────────────────────────────────
+ *
+ * Les fichiers de Google sont des polices VARIABLES : 330 Ko pour les
+ * quatre graisses, quatorze fois Poppins. Inacceptable sur le réseau mobile
+ * d'un lycéen. Chacune est donc figée à sa graisse et à sa taille optique,
+ * puis sous-ensemblée sur exactement la plage ci-dessous : 72 Ko en tout.
+ *
+ * Licences SIL Open Font 1.1, accompagnées de leur texte comme elles
+ * l'exigent.
  *
  * « swap » : le texte s'affiche tout de suite dans la police du système et
- * bascule quand Poppins arrive. Jamais de page blanche en attendant. *
- * `unicode-range` n'est pas un détail : sans lui, Poppins est réclamée pour
- * TOUS les caractères, y compris l'espace fine insécable (U+202F) que
+ * bascule à l'arrivée. Jamais de page blanche en attendant.
+ *
+ * `unicode-range` n'est pas un détail, et la plage est reprise telle quelle
+ * de l'ancien réglage : sans elle, la police est réclamée pour TOUS les
+ * caractères, y compris l'espace fine insécable (U+202F) que
  * « toLocaleString('fr-FR') » place dans « 1 246 » — et qui disparaissait,
- * donnant « 1246 ». La plage ci-dessous dit exactement ce que Poppins sait
- * rendre ; tout le reste retombe sur la police du système, qui, elle, sait.
- * Constaté au navigateur le 20/09/2026.
+ * donnant « 1246 ». Elle dit exactement ce que ces polices savent rendre ;
+ * tout le reste retombe sur celle du système, qui, elle, sait.
+ * Constaté au navigateur le 20/09/2026, vérifié à nouveau le 21.
  */
 @font-face {
-  font-family: 'Poppins';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('./polices/poppins-400.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
-}
-@font-face {
-  font-family: 'Poppins';
+  font-family: 'Bricolage Grotesque';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('./polices/poppins-600.woff2') format('woff2');
+  src: url('./polices/bricolage-600.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
 }
 @font-face {
-  font-family: 'Poppins';
+  font-family: 'Bricolage Grotesque';
   font-style: normal;
-  font-weight: 700;
+  font-weight: 800;
   font-display: swap;
-  src: url('./polices/poppins-700.woff2') format('woff2');
+  src: url('./polices/bricolage-800.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./polices/source-serif-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./polices/source-serif-600.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
 }
 
@@ -70,7 +96,7 @@
  */
 
 :root {
-  --fond: #f7f9fa;
+  --fond: #fbfaf7;
   --encre: #17222e;
   --doux: #546475;
   --trait: #dce2e8;
@@ -83,7 +109,8 @@
   /* Accent vif, purement décoratif : jamais utilisé pour un verdict. */
   --vif: #1b8184;
   --rayon: 10px;
-  --titres: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+  --titres: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --texte: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -122,7 +149,7 @@ body {
   margin: 0;
   background: var(--fond);
   color: var(--encre);
-  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--texte);
   /* 1.6 plutôt que 1.5 : le texte respire, ce qui compte plus que la taille
      pour qu'une page paraisse posée. */
   line-height: 1.6;
@@ -234,7 +261,7 @@ a.principal {
 .carte.orange { border-left-color: var(--orange); }
 .carte.rouge { border-left-color: var(--rouge); }
 
-.verdict { flex: 0 0 auto; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+.verdict { flex: 0 0 auto; font-size: 0.78rem; font-weight: 800; white-space: nowrap; }
 .verdict.vert { color: var(--vert); }
 .verdict.orange { color: var(--orange); }
 .verdict.rouge { color: var(--rouge); }
@@ -420,7 +447,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   margin: 0 0 0.75rem;
   color: var(--accent);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.07em;
 }
@@ -429,8 +456,12 @@ input[type='range'] { width: 100%; min-height: 44px; }
   font-size: 1.8rem;
   line-height: 1.2;
   letter-spacing: -0.015em;
-  /* 700 et non 800 : au-delà, un titre crie. */
-  font-weight: 700;
+  /* 800, la graisse haute de Bricolage. La note d'avant disait « 700 et non
+     800 : au-delà, un titre crie » — c'était vrai de Poppins, géométrique et
+     très large en gras. Bricolage est plus étroite et moins contrastée : son
+     800 tient là où le 800 de Poppins hurlait. Vérifié à l'écran avant de
+     changer la note. */
+  font-weight: 800;
 }
 .promesse em { font-style: italic; color: var(--accent); }
 .hero-texte { margin: 0 0 1.75rem; color: var(--doux); font-size: 1.02rem; max-width: 34rem; }
@@ -473,7 +504,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .bandeau-chiffre {
   font-family: var(--titres);
   font-size: 1.4rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
@@ -595,7 +626,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   padding: 0.85rem 1rem;
 }
 .comparaison-ville { font-weight: 600; }
-.comparaison-montant { font-family: var(--titres); font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.comparaison-montant { font-family: var(--titres); font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .comparaison-m2 { grid-column: 1 / -1; color: var(--doux); font-size: 0.8rem; }
 
 .etapes-accueil { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
@@ -720,7 +751,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .choix-valeur {
   margin: 0 0 0.35rem;
   font-size: 1.35rem;
-  font-weight: 700;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 /* Un libellé officiel de formation peut faire deux cents caractères. Affiché
@@ -795,6 +826,26 @@ input[type='range'] { width: 100%; min-height: 44px; }
    encadré rouge sur un site qui s'adresse à des lycéens crée l'inquiétude
    que CLAUDE.md interdit, alors qu'il s'agit seulement de dire d'où
    viennent les chiffres. */
+/* ------------------------------------------------ consentement bulletin */
+/* Encadré, parce qu'on demande une décision — pas une note de bas de page.
+   En tons neutres : « ne pas écrire de texte anxiogène » (CLAUDE.md), et
+   il s'agit d'informer, pas d'alarmer. */
+.consentement {
+  padding: 1.1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.consentement h3 { margin: 0 0 0.6rem; font-size: 1rem; font-weight: 600; }
+.consentement ul { margin: 0 0 1rem; padding-left: 1.15rem; }
+.consentement li { margin-bottom: 0.45rem; color: var(--doux); }
+.consentement p { margin: 0 0 0.6rem; }
+.consentement p:last-child { margin-bottom: 0; }
+/* Le refus n'est pas une erreur de l'élève : même encadré, pas de rouge. */
+.consentement-refus { border-left: 3px solid var(--trait); }
+
 .budget-avertissement {
   margin: 0;
   padding: 0.7rem 0.9rem;
@@ -923,7 +974,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   font-family: var(--titres);
   margin: 0 0 0.4rem;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
 }
 .carte-collec-detail { margin: 0; color: var(--doux); font-size: 0.88rem; }
@@ -988,7 +1039,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
   font-size: 0.82rem;
   color: var(--doux);
 }
-.pastille-note-valeur { font-weight: 700; color: var(--encre); font-variant-numeric: tabular-nums; }
+.pastille-note-valeur { font-weight: 800; color: var(--encre); font-variant-numeric: tabular-nums; }
 .etoiles { color: var(--vif); letter-spacing: 0.05em; }
 .etoiles-vides { opacity: 0.28; }
 
@@ -1017,7 +1068,7 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .trio-valeur {
   font-family: var(--titres);
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
@@ -1896,7 +1947,7 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   margin: 0 0 0.4rem;
   font-family: var(--titres);
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--accent);
@@ -1904,7 +1955,7 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 .chargement-titre {
   margin: 0 0 1.5rem;
   font-size: 1.35rem;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1.25;
 }

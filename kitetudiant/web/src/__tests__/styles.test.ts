@@ -94,15 +94,38 @@ describe('feuille de style', () => {
     ).toEqual([])
   })
 
-  it('déclare toutes les graisses de Poppins qu’elle utilise', () => {
-    // Une graisse déclarée mais jamais utilisée, c'est du poids livré pour
-    // rien ; une graisse utilisée mais non déclarée est synthétisée par le
-    // navigateur : le rendu s'épaissit grossièrement, et cela ne se voit sur
-    // aucun test unitaire.
+  it('déclare exactement les graisses qu’elle utilise', () => {
+    /* Une graisse déclarée mais jamais utilisée, c'est du poids livré pour
+       rien ; une graisse utilisée mais non déclarée est synthétisée par le
+       navigateur : le rendu s'épaissit grossièrement, et cela ne se voit sur
+       aucun test unitaire.
+
+       Ce test comparait la liste déclarée à ['400','600','700'], écrite en
+       dur pour Poppins. Figée, elle ne disait plus rien le jour du changement
+       de famille : elle a bien échoué, mais sur le mauvais motif — et elle
+       aurait laissé passer l'inverse, une graisse utilisée sans être
+       déclarée, tant que la liste restait juste.
+
+       Elle compare maintenant les deux ensembles réels. Au passage du
+       changement de famille, c'est ce qui a révélé onze règles restées en
+       700 alors que plus aucune police ne le déclarait. */
     const declarees = new Set(
       [...CSS.matchAll(/@font-face \{[^}]*font-weight:\s*(\d+)[^}]*\}/g)].map((m) => m[1]),
     )
-    expect(declarees).toEqual(new Set(['400', '600', '700']))
+    const utilisees = new Set(
+      [...CSS.replace(/@font-face \{[^}]*\}/g, ' ').matchAll(/font-weight:\s*(\d+)/g)].map(
+        (m) => m[1],
+      ),
+    )
+    expect(
+      [...utilisees].filter((g) => !declarees.has(g)),
+      'graisses employées mais non déclarées : le navigateur les synthétisera ' +
+        'en faux gras, ce qui ne se voit sur aucun autre test',
+    ).toEqual([])
+    expect(
+      [...declarees].filter((g) => !utilisees.has(g)),
+      'graisses déclarées mais jamais employées : du poids téléchargé pour rien',
+    ).toEqual([])
   })
 
   it('reconnaît bien un doublon quand il y en a un', () => {
