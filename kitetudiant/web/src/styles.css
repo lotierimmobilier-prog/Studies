@@ -3644,3 +3644,127 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ------------------------------------------ l'atelier de lettre de motivation */
+/* Une page où l'on écrit. Elle est donc plus étroite que les autres — une
+   ligne de quatre-vingts caractères se relit, une ligne de cent-vingt non —
+   et les champs y sont hauts : on y tape des phrases, pas des mots. */
+.lettre { max-width: 44rem; }
+.lettre h2 { font-size: 1.5rem; margin: 0 0 0.4rem; }
+.lettre-chapeau { margin: 0 0 1.2rem; color: var(--doux); }
+.lettre-chapeau strong { color: var(--encre); }
+.lettre-titre { margin: 2rem 0 0.5rem; font-size: 1.05rem; }
+
+/* La phrase du ministère sur les IA. Citée, donc présentée comme une citation
+   — avec sa source visible, et non fondue dans notre propre texte. */
+.lettre-avertissement {
+  margin: 0 0 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border-left: 3px solid var(--orange);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+}
+.lettre-avertissement p { margin: 0; font-size: 0.92rem; line-height: 1.55; }
+.lettre-avertissement cite {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  font-style: normal;
+  color: var(--doux);
+}
+
+.lettre-voeu, .lettre-identite { margin: 0 0 1.1rem; }
+.lettre-voeu .note, .lettre-identite .note { margin-top: 0.35rem; }
+
+.lettre-ifsi {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  margin: 0 0 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.lettre-ifsi input { margin-top: 0.25rem; flex: 0 0 auto; }
+.lettre-ifsi-detail {
+  margin: 0 0 1.2rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.lettre-ifsi-detail h3 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+.lettre-ifsi-detail ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--doux); }
+
+/* Les questions. Numérotées : elles suivent le plan que la fiche recommande,
+   et leur ordre est celui du texte final. */
+.lettre-questions { margin: 0; padding: 0 0 0 1.4rem; }
+.lettre-question { margin: 0 0 1.4rem; padding-left: 0.3rem; }
+.lettre-champ, .lettre-texte {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+.lettre-champ:focus-visible, .lettre-texte:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.lettre-pistes { margin-top: 0.4rem; }
+.lettre-pistes summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.3rem 0;
+}
+.lettre-pistes ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; }
+
+.lettre-compteur { margin: 0.5rem 0 0; font-size: 0.88rem; color: var(--doux); }
+.lettre-compteur strong { font-family: var(--titres); font-variant-numeric: tabular-nums; }
+.lettre-compteur.depasse { color: var(--rouge); }
+.lettre-compteur.depasse strong { color: var(--rouge); }
+.lettre-desync { margin-top: 0.5rem; }
+
+/* Ce que Jean-Paul a vérifié. Deux niveaux seulement : ce qui empêche de
+   recopier dans Parcoursup, et ce qui mérite un coup d'œil. Pas de troisième
+   couleur — trois niveaux ne se distinguent plus. */
+.lettre-remarques { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.lettre-remarque {
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.45rem;
+  border-left: 3px solid var(--trait);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.lettre-remarque.bloquant { border-left-color: var(--rouge); }
+.lettre-remarque.conseil { border-left-color: var(--orange); }
+.lettre-ok { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--doux); }
+
+.lettre-relecture { margin: 0.5rem 0 0.8rem; padding-left: 1.2rem; font-size: 0.92rem; }
+.lettre-relecture li { margin-bottom: 0.3rem; }
+
+.lettre-aides { margin-top: 2rem; }
+.lettre-aides > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 0;
+}
+.lettre-aide { margin-top: 1rem; }
+.lettre-aide h4 { margin: 0 0 0.3rem; font-size: 0.9rem; }
+.lettre-aide ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--doux); }
+.lettre-aide strong { color: var(--encre); }
+
+.lettre-source { margin-top: 2rem; font-size: 0.8rem; color: var(--doux); line-height: 1.5; }

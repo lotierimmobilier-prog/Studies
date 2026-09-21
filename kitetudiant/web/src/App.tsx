@@ -49,6 +49,7 @@ import { PageFormation } from './pageFormation.tsx'
 import { PageEtablissement } from './pageEtablissement.tsx'
 import { MonCompte } from './monCompte.tsx'
 import { MentionsLegales } from './mentionsLegales.tsx'
+import { AtelierLettre } from './lettre.tsx'
 import { Cle, Epingle, Etoile, Fiche, Loupe, Residence, Toit } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
 import { moyenneGenerale } from '../../packages/profil-scolaire/src/index.ts'
@@ -558,6 +559,7 @@ export default function App() {
     | 'etablissement'
     | 'voeux'
     | 'mentions'
+    | 'lettre'
   >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
@@ -960,6 +962,10 @@ export default function App() {
 
   if (vue === 'mentions') {
     return coque(<MentionsLegales onNaviguer={naviguer} />)
+  }
+
+  if (vue === 'lettre') {
+    return coque(<AtelierLettre connecte={connecte} />)
   }
 
   if (vue === 'recherche') {

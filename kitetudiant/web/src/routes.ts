@@ -65,6 +65,10 @@ export type Route =
      chercher pour savoir qui édite un site, et une page légale qu'un moteur
      ne trouve pas ne remplit pas son office. */
   | { readonly vue: 'mentions' }
+  /* L'atelier de lettre de motivation. Adresse propre, comme le reste : c'est
+     une page qu'on rouvre sur plusieurs semaines, entre deux versions du
+     brouillon, et qu'un professeur principal peut vouloir donner à sa classe. */
+  | { readonly vue: 'lettre' }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -93,6 +97,8 @@ export function cheminDe(route: Route): string {
       return `${BASE}mes-voeux`
     case 'mentions':
       return `${BASE}mentions-legales`
+    case 'lettre':
+      return `${BASE}lettre-de-motivation`
   }
 }
 
@@ -126,6 +132,7 @@ export function routeDuChemin(chemin: string): Route | null {
   if (reste === 'mes-cartes') return { vue: 'collection' }
   if (reste === 'mes-voeux') return { vue: 'voeux' }
   if (reste === 'mentions-legales') return { vue: 'mentions' }
+  if (reste === 'lettre-de-motivation') return { vue: 'lettre' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
   const formation = /^formation\/(.+)$/.exec(reste)

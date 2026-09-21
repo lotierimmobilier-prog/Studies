@@ -184,6 +184,29 @@ export function Carnet() {
 }
 
 /**
+ * Plume — écrire sa lettre de motivation.
+ *
+ * Une plume et non un stylo : le stylo est déjà l'icône universelle de
+ * « modifier », et l'entrée du menu mène à un atelier d'écriture, pas à un
+ * champ de formulaire. Le trait suit le même dessin au trait que les autres
+ * pictos — 24 × 24, `strokeWidth` 1,8, la couleur héritée.
+ */
+export function Plume() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path
+        d="M20 4c-6.5 0-11 3.4-11 9a7.6 7.6 0 0 0 .7 3.3C12.6 15.4 16.4 12.4 18 9c-.8 3.9-4 7.4-8 9.1"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M9.7 16.3 4.5 21.5" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/**
  * Double chevron — replier ou déplier le rail de navigation.
  *
  * Il pointe toujours vers la gauche ; c'est le CSS qui le retourne quand le

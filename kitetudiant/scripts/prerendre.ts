@@ -441,6 +441,7 @@ const accueilDescription = ACCUEIL_DESCRIPTION
 function corpsAccueil(): string {
   const liens = [
     { url: `${BASE}chercher-une-ecole`, texte: 'Chercher une école' },
+    { url: `${BASE}lettre-de-motivation`, texte: 'Rédiger sa lettre de motivation Parcoursup' },
     { url: `${BASE}mentions-legales`, texte: 'Mentions légales et données personnelles' },
     { url: `${BASE}blog`, texte: 'Le blog : Parcoursup, budget et logement' },
     ...ARTICLES.slice(0, 6).map((a) => ({
@@ -566,6 +567,10 @@ const adresses = [
      au plan et sans lien depuis l'accueil livrée, elle n'était atteignable
      par aucun robot. */
   { url: `${ORIGINE}${BASE}chercher-une-ecole`, le: ARTICLES[0]?.publieLe, priorite: '0.8' },
+  /* L'atelier de lettre de motivation. Priorité haute : « lettre de motivation
+     Parcoursup » est une des questions que les lycéens posent le plus, et la
+     page répond avec la fiche du ministère plutôt qu'avec un modèle à recopier. */
+  { url: `${ORIGINE}${BASE}lettre-de-motivation`, le: ARTICLES[0]?.publieLe, priorite: '0.8' },
   /* Les mentions légales sont au plan, et à dessein : c'est la page qu'on
      cherche pour savoir qui édite un site, et une page légale introuvable
      ne remplit pas son office. Priorité basse — elle doit être trouvable,
@@ -719,6 +724,10 @@ ${ARTICLES.map((a) => `- [${a.titre}](${ORIGINE}${BASE}blog/${a.slug}) : ${a.cha
   reste-à-vivre et la méthode.
 - [Chercher une école](${ORIGINE}${BASE}chercher-une-ecole) : recherche par
   ville, par domaine ou par nom d'établissement.
+- [Lettre de motivation](${ORIGINE}${BASE}lettre-de-motivation) : les questions
+  de la fiche du ministère, un compteur de caractères et une relecture
+  automatique. Le site n'écrit aucune phrase à la place du candidat — la fiche
+  officielle déconseille expressément les IA génératives pour cet exercice.
 - [Blog](${ORIGINE}${BASE}blog) : la liste des articles.
 - [Mentions légales](${ORIGINE}${BASE}mentions-legales) : éditeur, hébergeur,
   données personnelles, liens rémunérés et sources de données.
