@@ -272,15 +272,23 @@ function Carte({
       ))}
       {resultat.raisonAide ? <p className="avertissement">{resultat.raisonAide}</p> : null}
 
+      {/* Même allure que les volets ci-dessous : ce sont trois choses qui
+          s'ouvrent au clic, et rien ne justifiait que celle-ci occupe un
+          gros bloc pleine largeur sur chacune des quarante cartes. Elle
+          reste en tête et en encre pleine, parce qu'elle est la plus
+          utile — mais elle ne pèse plus une ligne de plus que les autres.
+
+          Bouton et non `details` : l'ouverture est tenue par la liste, qui
+          décide ce qui reste ouvert. `aria-expanded` dit l'état. */}
       <div className="carte-actions">
         {verrouille ? (
-          <button type="button" className="secondaire carte-deplier" onClick={onInscrire}>
+          <button type="button" className="carte-volet-bouton" onClick={onInscrire}>
             Créer mon compte pour voir le budget
           </button>
         ) : (
           <button
             type="button"
-            className="secondaire carte-deplier"
+            className={`carte-volet-bouton${ouvert ? ' est-ouvert' : ''}`}
             onClick={onOuvrir}
             aria-expanded={ouvert}
           >
@@ -302,6 +310,24 @@ function Carte({
           libellés courts : « Fiche Parcoursup de la formation » et
           « Chercher le site de l'école » remplissaient une ligne à eux deux.
           Le titre complet reste au survol et pour un lecteur d'écran. */}
+      {/* Replié par défaut.
+
+          Chaque carte portait, toujours dépliés : la fourchette, les
+          retours, le bouton budget, quatre liens, un titre de logement et
+          deux liens de plus. Sur une liste de dix formations, cela fait
+          quatre-vingts lignes qui se ressemblent, et comparer deux cartes
+          demandait de faire défiler l'écran entre les deux.
+
+          Ce qui reste visible est ce qui sert à COMPARER : le titre, le
+          lieu, le verdict, les trois lectures, la fourchette. Le reste ne
+          s'ouvre que sur une carte qu'on a déjà retenue.
+
+          `details` natif plutôt qu'un état React : il s'ouvre au clavier,
+          se lit correctement par un lecteur d'écran, fonctionne sans
+          JavaScript, et se trouve à la recherche dans la page sur les
+          navigateurs récents. */}
+      <details className="carte-volet">
+        <summary>Liens, fiche officielle et logement</summary>
       <p className="carte-liens">
         {/* La fiche détaillée du site, en PREMIER — avant la fiche officielle
             de Parcoursup. Elle a une adresse propre, donc elle s'envoie, se
@@ -385,6 +411,7 @@ function Carte({
           </a>
         ))}
       </p>
+      </details>
 
       {ouvert ? (
         <div className="detail">

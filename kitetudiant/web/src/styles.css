@@ -826,6 +826,86 @@ input[type='range'] { width: 100%; min-height: 44px; }
    encadré rouge sur un site qui s'adresse à des lycéens crée l'inquiétude
    que CLAUDE.md interdit, alors qu'il s'agit seulement de dire d'où
    viennent les chiffres. */
+/* ------------------------------------------------------ volets de carte */
+/* Une carte de résultat doit se comparer d'un coup d'œil à celle du dessus.
+   Tout ce qui ne sert pas à comparer — les liens, le logement — vit derrière
+   un volet, et ne coûte qu'une ligne tant qu'on ne l'ouvre pas. */
+.carte-volet { margin-top: 0.7rem; }
+.carte-volet > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--doux);
+  cursor: pointer;
+  list-style: none;
+  border-radius: 6px;
+}
+/* Le triangle par défaut diffère d'un navigateur à l'autre : on pose le
+   nôtre, qui pivote à l'ouverture. */
+.carte-volet > summary::-webkit-details-marker { display: none; }
+.carte-volet > summary::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease;
+  flex: 0 0 auto;
+}
+.carte-volet[open] > summary::before { transform: rotate(90deg); }
+.carte-volet > summary:hover { color: var(--encre); }
+/* Le focus doit se voir : c'est la seule façon de savoir où l'on est au
+   clavier, et ces volets sont maintenant le chemin vers tous les liens. */
+.carte-volet > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.carte-volet > summary .illu-picto { width: 15px; height: 15px; stroke: currentColor; }
+.carte-volet .carte-liens { margin-top: 0.3rem; }
+/* Le bouton du budget partage l'allure du volet, en plus appuyé : c'est la
+   même geste — un clic qui ouvre — et il occupait jusqu'ici un bloc pleine
+   largeur sur chacune des quarante cartes. */
+.carte-volet-bouton {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.45rem 0.1rem;
+  margin-top: 0.7rem;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--encre);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.carte-volet-bouton::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease;
+  flex: 0 0 auto;
+}
+.carte-volet-bouton.est-ouvert::before { transform: rotate(90deg); }
+.carte-volet-bouton:hover { color: var(--accent); }
+.carte-volet-bouton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .carte-volet-bouton::before { transition: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .carte-volet > summary::before { transition: none; }
+}
+
 /* ------------------------------------------------ consentement bulletin */
 /* Encadré, parce qu'on demande une décision — pas une note de bas de page.
    En tons neutres : « ne pas écrire de texte anxiogène » (CLAUDE.md), et
