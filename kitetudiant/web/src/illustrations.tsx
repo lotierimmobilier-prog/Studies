@@ -182,3 +182,25 @@ export function Carnet() {
     </svg>
   )
 }
+
+/**
+ * Double chevron — replier ou déplier le rail de navigation.
+ *
+ * Il pointe toujours vers la gauche ; c'est le CSS qui le retourne quand le
+ * rail est replié. Deux dessins pour un seul geste divergeraient, et un
+ * chevron qui ne tourne pas laisse croire que le bouton fait toujours la
+ * même chose.
+ */
+export function Chevrons() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path
+        d="M13.5 7.5 9 12l4.5 4.5M18.5 7.5 14 12l4.5 4.5"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}

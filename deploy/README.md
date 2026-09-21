@@ -61,6 +61,20 @@ PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
 
 ### `AUTO_MAJ=1` — la mise en ligne devient automatique
 
+`AUTO_MAJ` **n'a pas de valeur par défaut**, et c'est voulu. Un paramètre qu'on
+ne passe pas ne décide rien : le script reconduit l'état déjà en place, lu sur
+systemd. Relancer la commande à la main pour pousser un correctif ne coupe donc
+pas la mise en ligne automatique.
+
+Pour l'arrêter, il faut le dire : `AUTO_MAJ=0`. Le minuteur est alors désactivé
+sans être supprimé, ce qui reste réversible et visible.
+
+> Ce n'était pas le cas jusqu'au 21/09/2026 : `AUTO_MAJ` valait zéro par défaut
+> et coupait le minuteur au passage. Une mise en ligne manuelle a ainsi laissé
+> quatre fusions hors ligne pendant neuf heures, sur un site qui répondait
+> normalement. Des tests exécutent désormais la décision, faux `systemctl` à
+> l'appui, au lieu de relire le script.
+
 Avec ce drapeau, le script installe un minuteur systemd sur le VPS. Toutes les
 cinq minutes, le VPS regarde si `main` a bougé ; si oui, il se redéploie tout
 seul. **Vous ne relancez plus jamais la commande à la main.**
@@ -129,6 +143,57 @@ Une adresse listée ici voit en plus, dans son espace personnel, une section
 « Administration » avec un lien vers la console. Ce lien ne donne aucun droit :
 il évite seulement de retenir l'adresse `…/admin.html`. Un visiteur ordinaire
 ne le voit pas, mais la console reste gardée côté serveur pour tout le monde.
+
+## La base de données
+
+`vps-setup.sh` n'installe pas PostgreSQL, et n'applique aucune migration.
+C'est délibéré : le script tourne toutes les cinq minutes derrière le minuteur
+de mise en ligne, et une migration lancée par un minuteur sur une base de
+production est une migration que personne n'a décidé de lancer.
+
+Sans `DATABASE_URL`, l'API fonctionne — comptes dans le fichier chiffré,
+formations chez le ministère. Seuls **les vœux** exigent la base : sans elle,
+« Enregistrer dans mes vœux » répond « pas encore activé sur ce serveur ».
+
+Pour la poser, une fois, en root :
+
+```bash
+bash /opt/kitetudiant-src/deploy/postgres-setup.sh
+```
+
+Le script installe PostgreSQL et PostGIS, crée le rôle et la base, tire un mot
+de passe, applique les cinq migrations, écrit `DATABASE_URL` dans le `.env` et
+relance l'API. Il est **idempotent** : relancé, il ne refait que ce qui manque,
+et un mot de passe déjà posé n'est jamais régénéré — une rotation silencieuse
+casserait l'API sans rien dire.
+
+La base est **locale** et n'écoute que la machine : aucun port de base de
+données n'est exposé au réseau. Le script ne se contente pas de le vérifier —
+il **s'arrête** si `listen_addresses` a été desserré, avant d'avoir rien créé.
+Un avertissement défile et « Terminé. » s'affiche quelques lignes plus bas ;
+une base de comptes de mineurs ne doit pas se créer sur un serveur qui écoute
+l'Internet parce que personne n'a lu la ligne du milieu.
+
+Il s'arrête de même si **PostGIS** n'a pas pu s'installer, plutôt que de migrer
+en mode dégradé. Ce mode remplace les colonnes géographiques par du texte, et
+`appliquer.sh` ne rejoue jamais une migration déjà enregistrée — il compare les
+noms, pas ce mode. Une panne passagère d'`apt-get` figerait donc le schéma en
+texte pour toujours, carte et recherches par distance mortes sans message.
+
+Les deux blocages s'assument explicitement, s'il le faut :
+`ECOUTE_LARGE_ASSUMEE=1` et `SANS_POSTGIS=1`.
+
+Le disque n'est pas chiffré. Ce sont les données **identifiantes** qui le
+sont, par l'application, avant d'arriver en base — c'est ce qu'exige la règle 3
+de `CLAUDE.md` pour des comptes de mineurs. Le reste est de la donnée
+publique : formations, établissements, communes, loyers.
+
+Charger ensuite les données de référence (facultatif, et distinct) :
+
+```bash
+PGURL="$(sed -n 's/^DATABASE_URL=//p' /opt/kitetudiant/.env)" \
+  bash /opt/kitetudiant-src/kitetudiant/db/migrations/charger.sh
+```
 
 `COMPTES_MASTER_KEY` (≥ 16) chiffre les comptes élèves : c'est elle qui active
 l'inscription. **Sans elle, personne ne peut s'inscrire et le détail du résultat

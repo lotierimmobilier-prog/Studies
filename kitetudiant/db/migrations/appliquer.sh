@@ -53,4 +53,27 @@ done
 
 echo "Migrations à jour."
 [ "$DEGRADE" = true ] && echo "Rappel : mode dégradé, les types PostGIS n'ont pas été vérifiés."
+
+# Une migration dégradée n'est JAMAIS rejouée : la boucle ci-dessus compare les
+# noms, pas la colonne « degrade ». Le schéma reste donc en texte même une fois
+# PostGIS installé — et plus rien ne le signale, puisque le passage suivant
+# annonce « Migrations à jour ».
+#
+# Ce rappel referme ce silence. Il ne répare pas : rejouer une migration sur
+# une base qui porte déjà des données demande une décision, pas un script.
+DEGRADEES="$("${PSQL[@]}" -tAc 'select count(*) from public.migration where degrade')"
+if [ "$DEGRADEES" != "0" ] && [ "$DEGRADE" = false ]; then
+  echo
+  echo "/!\ PostGIS est là, mais ${DEGRADEES} migration(s) ont été appliquées SANS."
+  "${PSQL[@]}" -tAc \
+    "select '      - ' || nom || ' (le ' || to_char(applique_le, 'DD/MM/YYYY') || ')'
+       from public.migration where degrade order by nom"
+  echo
+  echo "    Leurs colonnes géographiques sont du TEXTE et leurs index des B-tree."
+  echo "    La carte et les recherches par distance ne fonctionneront pas."
+  echo "    Elles ne seront pas rejouées : ce script compare les noms, pas ce mode."
+  echo
+  echo "    Sur une base encore vide, le plus sûr est de la recréer."
+  echo "    Sur une base qui porte des données, c'est une migration à écrire."
+fi
 exit 0

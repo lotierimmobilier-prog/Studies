@@ -1,53 +1,66 @@
 /**
- * La barre de navigation du site.
+ * La navigation du site.
  *
- * ── Pourquoi elle remplace les en-têtes de page ──────────────────────────
+ * ── Deux sites dans un seul ──────────────────────────────────────────────
  *
- * Chaque écran portait jusqu'ici son propre en-tête : le logo, et UN bouton
- * choisi par l'écran — « Retour au site », « Tous les articles », « Chercher
- * une école ». Ce bouton changeait de page en page, ce qui veut dire que
- * depuis n'importe où, une seule destination était atteignable, et jamais la
- * même. Pour aller du blog à la recherche d'écoles, il fallait passer par
- * l'accueil.
+ * Un visiteur qui découvre KitEtudiant et un élève connecté qui compare ses
+ * vœux ne font pas la même chose, et n'ont pas besoin de la même navigation.
  *
- * Une barre permanente règle ça : toutes les destinations, tout le temps, au
- * même endroit, et l'écran courant est signalé.
+ * Le visiteur lit : l'accueil, un article, une fiche de formation. Il navigue
+ * peu et veut de la largeur pour le texte. Il a donc une BARRE EN HAUT, comme
+ * n'importe quel site qu'on découvre, avec « Se connecter » bien visible au
+ * bout.
  *
- * ── Deux formes, un seul composant ───────────────────────────────────────
+ * L'élève connecté travaille : il fait des allers-retours entre la recherche,
+ * ses vœux et ses cartes. Il a donc un RAIL À GAUCHE, comme une application,
+ * où la destination courante reste sous les yeux. Et parce qu'une carte ou un
+ * tableau de loyers réclament de la largeur, ce rail se replie sur ses icônes.
  *
- * Au-dessus de 1024 px, un rail vertical à gauche. En dessous, une barre
- * fixée en bas de l'écran — là où se trouve le pouce, et là où toutes les
- * applications mobiles la mettent. Un rail latéral sur un téléphone mange la
- * moitié de la largeur ; une barre en haut se fait recouvrir par le clavier
- * et par les barres du navigateur.
+ * ── Ce que le repli fait, et ne fait pas ─────────────────────────────────
  *
- * C'est la même liste dans les deux cas, dans le même ordre. Deux listes
- * différentes selon la taille de l'écran finissent toujours par diverger.
+ * Replié, le rail passe de 15 rem à 4 rem : les mots disparaissent, les icônes
+ * restent, et l'écran courant reste signalé. On ne perd jamais la navigation
+ * de vue — c'est ce qui distingue ce repli d'un menu caché derrière un bouton.
+ *
+ * L'état est retenu dans le navigateur. Quelqu'un qui replie le rail le fait
+ * pour gagner de la place sur une tâche, pas pour un seul écran, et le voir
+ * revenir à chaque page serait un tic.
+ *
+ * ── Le téléphone ne suit aucune des deux formes ──────────────────────────
+ *
+ * En dessous de 1024 px, un rail latéral mangerait la moitié de l'écran. Un
+ * élève connecté garde donc la BARRE DU BAS : elle est à portée de pouce, la
+ * destination courante y est visible, et chaque déplacement coûte un geste.
+ * Un tiroir en coûterait deux — ouvrir, choisir — à chaque fois.
+ *
+ * Le visiteur, lui, garde sa barre en haut, qui passe simplement sur deux
+ * rangées : la marque et « Se connecter », puis les destinations en dessous.
+ * Rien n'est masqué derrière un bouton « Menu » : cinq destinations tiennent,
+ * et un menu qu'il faut ouvrir pour savoir ce qu'il contient ne s'explore pas.
  *
  * ── Ce qui n'y figure pas ────────────────────────────────────────────────
  *
- * Rien qui n'existe pas encore. Une entrée « Mes vœux » grisée en attendant
- * son écran serait une promesse ; on l'ajoutera avec l'écran (jalon MVP1-G).
- *
- * « Mes cartes » n'apparaît qu'une fois la première gagnée : pour un visiteur
- * qui découvre le site, ce serait du bruit.
+ * Rien qui n'existe pas encore. Une entrée grisée en attendant son écran
+ * serait une promesse.
  */
 
-import { Boussole, Carnet, Etoile, Fiche, Loupe, Toit } from './illustrations.tsx'
+import { useEffect, useState } from 'react'
+
+import { Boussole, Carnet, Chevrons, Etoile, Fiche, Loupe, Toit } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
-import { cheminDe, type Route } from './routes.ts'
+import { cheminDe, CHEMIN_TOQUE, type Route } from './routes.ts'
 
 /**
- * Une entrée de la barre.
+ * Une entrée de navigation.
  *
  * Toutes ont une adresse, sans exception : une destination sans adresse ne se
  * partage pas, ne se met pas en favori, et le bouton « précédent » ne la
- * retrouve pas. C'était le cas de la collection jusqu'ici.
+ * retrouve pas.
  */
 interface Entree {
   readonly cle: string
   readonly libelle: string
-  /** Libellé court, pour la barre du bas où la place manque. */
+  /** Libellé court, là où la place manque — barre du bas, barre du haut. */
   readonly court: string
   readonly icone: React.ReactNode
   readonly route: Route
@@ -58,14 +71,50 @@ interface Entree {
 export interface Navigation {
   readonly vue: string
   readonly connecte: boolean
-  /** Nombre de cartes gagnées. Zéro : l'entrée ne s'affiche pas. */
+  /** Nombre de cartes gagnées. Zéro : l'entrée s'affiche quand même. */
   readonly cartes: number
   readonly onNaviguer: (route: Route) => void
   readonly onDeconnexion: () => void
 }
 
-function entrees(nav: Navigation): Entree[] {
-  const liste: Entree[] = [
+/* ------------------------------------------------------- l'état du repli */
+
+const CLE_REPLI = 'kitetudiant.rail.replie'
+
+/**
+ * Le rail était-il replié la dernière fois ?
+ *
+ * Déplié par défaut : quelqu'un qui n'a jamais touché au bouton doit voir les
+ * libellés. Un stockage refusé — navigation privée, cookies bloqués — donne
+ * la même réponse que « jamais replié », ce qui est le bon comportement.
+ */
+function lireRepli(): boolean {
+  try {
+    return window.localStorage.getItem(CLE_REPLI) === '1'
+  } catch {
+    return false
+  }
+}
+
+function ecrireRepli(replie: boolean): void {
+  try {
+    window.localStorage.setItem(CLE_REPLI, replie ? '1' : '0')
+  } catch {
+    // Stockage refusé : le choix ne survivra pas au rechargement, c'est tout.
+  }
+}
+
+/* ------------------------------------------------------- la liste unique */
+
+/**
+ * Les destinations, dans l'ordre. La même liste pour les deux formes.
+ *
+ * Deux listes qui diffèrent selon l'état de connexion ou la taille de l'écran
+ * finissent toujours par diverger : une destination ajoutée d'un côté et pas
+ * de l'autre devient invisible pour la moitié des gens.
+ */
+function destinations(nav: Navigation): Entree[] {
+  return [
     {
       cle: 'accueil',
       libelle: 'Accueil',
@@ -100,73 +149,79 @@ function entrees(nav: Navigation): Entree[] {
       route: { vue: 'blog' },
       actif: ['blog', 'article'],
     },
+    /* L'entrée reste visible même à zéro carte.
+     *
+     * Elle ne l'était pas : on ne découvrait la collection qu'en ayant déjà
+     * gagné quelque chose, donc par hasard. Une entrée cachée derrière la
+     * chose qu'elle sert à découvrir ne se découvre jamais. */
+    {
+      cle: 'collection',
+      libelle: nav.cartes > 0 ? `Mes cartes (${nav.cartes})` : 'Mes cartes',
+      court: 'Cartes',
+      icone: <Etoile />,
+      route: { vue: 'collection' },
+      actif: ['collection'],
+    },
   ]
-
-  /* L'entrée reste visible même à zéro carte.
-   *
-   * Elle ne l'était pas : on ne découvrait la collection qu'en ayant déjà
-   * gagné quelque chose, donc par hasard. Une entrée cachée derrière la
-   * chose qu'elle sert à découvrir ne se découvre jamais — et la page, quand
-   * elle est vide, dit maintenant comment on gagne une carte. */
-  liste.push({
-    cle: 'collection',
-    libelle: nav.cartes > 0 ? `Mes cartes (${nav.cartes})` : 'Mes cartes',
-    court: 'Cartes',
-    icone: <Etoile />,
-    route: { vue: 'collection' },
-    actif: ['collection'],
-  })
-
-  liste.push(
-    nav.connecte
-      ? {
-          cle: 'compte',
-          libelle: 'Mon espace',
-          court: 'Espace',
-          icone: <Fiche />,
-          route: { vue: 'compte' },
-          actif: ['compte'],
-        }
-      : {
-          cle: 'connexion',
-          libelle: 'Se connecter',
-          court: 'Connexion',
-          icone: <Fiche />,
-          route: { vue: 'connexion' },
-          actif: ['connexion', 'inscription'],
-        },
-  )
-
-  return liste
 }
+
+/** L'entrée de compte : l'espace personnel, ou l'invitation à se connecter. */
+function entreeCompte(connecte: boolean): Entree {
+  return connecte
+    ? {
+        cle: 'compte',
+        libelle: 'Mon espace',
+        court: 'Espace',
+        icone: <Fiche />,
+        route: { vue: 'compte' },
+        actif: ['compte'],
+      }
+    : {
+        cle: 'connexion',
+        libelle: 'Se connecter',
+        court: 'Connexion',
+        icone: <Fiche />,
+        route: { vue: 'connexion' },
+        actif: ['connexion', 'inscription'],
+      }
+}
+
+/* ------------------------------------------------------------- les liens */
 
 function Lien({
   entree,
   courant,
+  base,
   onNaviguer,
 }: {
   readonly entree: Entree
   readonly courant: boolean
+  /** Classe de base : « rail-lien » dans le rail, « haut-lien » en haut. */
+  readonly base: string
   readonly onNaviguer: (route: Route) => void
 }) {
-  const classe = courant ? 'rail-lien rail-lien-courant' : 'rail-lien'
   /* `aria-current="page"` et non une simple couleur : sans lui, un lecteur
      d'écran lit cinq destinations identiques et n'a aucun moyen de savoir
      laquelle est celle où l'on se trouve.
-  
+
      `aria-label` porte TOUJOURS le libellé long, alors que le texte visible
-     se réduit à « Écoles » ou « Blog » sur téléphone. Sans cela, le nom
-     accessible d'une même destination changerait avec la largeur de
-     l'écran — et « Écoles », lu seul, ne dit pas ce qu'on y fait. */
+     se réduit à « Écoles » ou « Blog » — et disparaît complètement quand le
+     rail est replié. Sans cela, le nom accessible d'une même destination
+     changerait avec la largeur de l'écran, et « Écoles », lu seul, ne dit pas
+     ce qu'on y fait.
+
+     `title` porte le même libellé : c'est la seule façon de retrouver le nom
+     d'une icône à la souris, une fois le rail replié. */
   const marque = {
     'aria-label': entree.libelle,
+    title: entree.libelle,
     ...(courant ? { 'aria-current': 'page' as const } : {}),
   }
 
   const route = entree.route
   return (
     <a
-      className={classe}
+      className={courant ? `${base} ${base}-courant` : base}
       href={cheminDe(route)}
       {...marque}
       onClick={(ev) => {
@@ -189,15 +244,25 @@ function Lien({
  *
  * Un lien vers la page où l'on se trouve n'a nulle part où mener, et un
  * lecteur d'écran l'annonce quand même comme une destination.
+ *
+ * `compacte` rend la toque seule : le bandeau du nom fait 665 × 96, il ne
+ * tient pas dans un rail replié à 4 rem.
  */
 function MarqueBarre({
   surAccueil,
+  compacte = false,
   onNaviguer,
 }: {
   readonly surAccueil: boolean
+  readonly compacte?: boolean
   readonly onNaviguer: (route: Route) => void
 }) {
-  if (surAccueil) return <Marque />
+  const dessin = compacte ? (
+    <img className="rail-toque" src={CHEMIN_TOQUE} alt="KitEtudiant.fr" width={30} height={30} />
+  ) : (
+    <Marque />
+  )
+  if (surAccueil) return dessin
   return (
     <a
       className="marque-lien"
@@ -209,34 +274,124 @@ function MarqueBarre({
         onNaviguer({ vue: 'accueil' })
       }}
     >
-      <Marque />
+      {dessin}
     </a>
   )
 }
 
-export function BarreNavigation(nav: Navigation) {
-  const liste = entrees(nav)
+/* ------------------------------------------------- le visiteur : en haut */
+
+/**
+ * La barre du visiteur.
+ *
+ * Une rangée sur grand écran — marque, destinations, « Se connecter ». Deux
+ * rangées sur téléphone, la seconde portant les destinations. C'est le CSS
+ * qui décide du passage à la ligne : le balisage est le même dans les deux
+ * cas, donc il n'y a rien à maintenir en double.
+ */
+function BarreVisiteur(nav: Navigation) {
+  const liste = destinations(nav)
+  const compte = entreeCompte(false)
+  return (
+    <header className="barre-haut">
+      <div className="barre-haut-marque">
+        <MarqueBarre surAccueil={nav.vue === 'accueil'} onNaviguer={nav.onNaviguer} />
+      </div>
+
+      <nav className="barre-haut-nav" aria-label="Navigation du site">
+        <ul className="barre-haut-liste">
+          {liste.map((e) => (
+            <li key={e.cle}>
+              <Lien
+                entree={e}
+                base="haut-lien"
+                courant={e.actif.includes(nav.vue)}
+                onNaviguer={nav.onNaviguer}
+              />
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {/* « Se connecter » sort de la liste et devient un bouton.
+          C'est la seule action de la barre ; la noyer entre cinq destinations
+          reviendrait à dire qu'ouvrir un compte est aussi anodin que lire un
+          article. */}
+      <a
+        className={
+          compte.actif.includes(nav.vue) ? 'barre-haut-compte courant' : 'barre-haut-compte'
+        }
+        href={cheminDe(compte.route)}
+        {...(compte.actif.includes(nav.vue) ? { 'aria-current': 'page' as const } : {})}
+        onClick={(ev) => {
+          if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return
+          ev.preventDefault()
+          nav.onNaviguer(compte.route)
+        }}
+      >
+        Se connecter
+      </a>
+    </header>
+  )
+}
+
+/* ------------------------------------------- l'élève connecté : sur le côté */
+
+/**
+ * Le rail de l'élève connecté, repliable.
+ *
+ * Le même balisage sert de rail à gauche au-dessus de 1024 px et de barre en
+ * bas en dessous : c'est le CSS qui bascule. Le bouton de repli n'a de sens
+ * que dans la première forme, et le CSS le masque dans la seconde.
+ */
+function RailApplication(nav: Navigation) {
+  const [replie, setReplie] = useState(lireRepli)
+  useEffect(() => {
+    ecrireRepli(replie)
+  }, [replie])
+
+  const liste = [...destinations(nav), entreeCompte(true)]
   const surAccueil = nav.vue === 'accueil'
+
   return (
     <>
-      {/* Sur téléphone, la marque ne peut pas tenir dans la barre du bas : elle
-          y prendrait la largeur d'une destination sans en être une. Elle a donc
-          son propre bandeau en haut, qui disparaît sur grand écran où le rail
-          la porte déjà. Sans ce bandeau, le logo n'apparaîtrait nulle part sur
-          un téléphone. */}
+      {/* Sur téléphone, la marque ne peut pas tenir dans la barre du bas :
+          elle y prendrait la largeur d'une destination sans en être une. Elle
+          a donc son propre bandeau en haut, qui disparaît sur grand écran où
+          le rail la porte déjà. */}
       <header className="barre-marque">
         <MarqueBarre surAccueil={surAccueil} onNaviguer={nav.onNaviguer} />
       </header>
 
-      <nav className="rail" aria-label="Navigation du site">
-        <div className="rail-marque">
-          <MarqueBarre surAccueil={surAccueil} onNaviguer={nav.onNaviguer} />
+      <nav className={replie ? 'rail rail-replie' : 'rail'} aria-label="Navigation du site">
+        <div className="rail-tete">
+          <div className="rail-marque">
+            <MarqueBarre surAccueil={surAccueil} compacte={replie} onNaviguer={nav.onNaviguer} />
+          </div>
+          {/* `aria-expanded` porte l'état, et le libellé dit le GESTE à venir,
+              pas l'état courant : un bouton nommé « Replié » laisse deviner
+              s'il décrit ce qui est ou ce qui arrivera. */}
+          <button
+            type="button"
+            className="rail-bascule"
+            aria-expanded={!replie}
+            aria-label={replie ? 'Déplier le menu' : 'Replier le menu'}
+            title={replie ? 'Déplier le menu' : 'Replier le menu'}
+            onClick={() => setReplie(!replie)}
+          >
+            <Chevrons />
+          </button>
         </div>
 
         <ul className="rail-liste">
           {liste.map((e) => (
             <li key={e.cle}>
-              <Lien entree={e} courant={e.actif.includes(nav.vue)} onNaviguer={nav.onNaviguer} />
+              <Lien
+                entree={e}
+                base="rail-lien"
+                courant={e.actif.includes(nav.vue)}
+                onNaviguer={nav.onNaviguer}
+              />
             </li>
           ))}
         </ul>
@@ -245,13 +400,22 @@ export function BarreNavigation(nav: Navigation) {
             du bas d'un téléphone : c'est une action, pas une destination, et
             une action irréversible posée d'un doigt à côté des onglets se
             déclenche par accident. Sur téléphone, elle vit dans « Mon
-            espace », qui est la page faite pour ça. */}
-        {nav.connecte ? (
-          <button type="button" className="rail-deconnexion" onClick={nav.onDeconnexion}>
-            Se déconnecter
-          </button>
-        ) : null}
+            espace », qui est la page faite pour ça — et c'est aussi ce qui se
+            passe quand le rail est replié : « Se déconnecter » est le seul
+            libellé qui ne se remplace pas honnêtement par une icône, aucun
+            pictogramme ne distinguant « sortir » de « supprimer ». */}
+        <button
+          type="button"
+          className="rail-deconnexion"
+          onClick={nav.onDeconnexion}
+        >
+          Se déconnecter
+        </button>
       </nav>
     </>
   )
+}
+
+export function BarreNavigation(nav: Navigation) {
+  return nav.connecte ? <RailApplication {...nav} /> : <BarreVisiteur {...nav} />
 }

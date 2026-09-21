@@ -154,3 +154,13 @@ export function adresseComplete(route: Route, origine = 'https://kitetudiant.fr'
  * garde la porte, côté serveur.
  */
 export const CHEMIN_CONSOLE_ADMIN = `${BASE}admin.html`
+
+/**
+ * La toque du logo, servie depuis `public/`.
+ *
+ * Le logo principal est un bandeau horizontal — le nom en entier — qui ne
+ * tient pas dans un rail replié à 4 rem. La toque, elle, est carrée. C'est le
+ * fichier de la favicone qui sert : un second dessin de la même forme finirait
+ * par diverger du premier.
+ */
+export const CHEMIN_TOQUE = `${BASE}favicon.svg`

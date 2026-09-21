@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync, existsSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { readFileSync, existsSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { resolve, relative, dirname, sep } from 'node:path'
 
 // Le serveur déployé sur le VPS n'est pas le dépôt : le script de déploiement
@@ -160,10 +163,67 @@ describe('le script ne peut pas effacer les secrets en place', () => {
 describe('la mise en ligne automatique', () => {
   const SCRIPT = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
 
-  it('est facultative et ne s’active pas toute seule', () => {
-    // L'autre projet de la machine ne doit pas hériter d'un minuteur qu'on
-    // n'a pas demandé pour lui.
-    expect(SCRIPT).toMatch(/AUTO_MAJ="\$\{AUTO_MAJ:-0\}"/)
+  /* ── AUTO_MAJ non passé ne doit RIEN décider ──────────────────────────
+   *
+   * Le paramètre valait zéro par défaut, et le bloc de fin s'en servait pour
+   * arrêter le minuteur déjà posé. Relancer ce script à la main — pour
+   * pousser un correctif, sans repenser à AUTO_MAJ=1 — éteignait donc la mise
+   * en ligne automatique. Le déploiement réussissait, la ligne « désactivée »
+   * passait inaperçue, et plus rien ne repartait ensuite. Constaté en
+   * production le 20/09/2026 : quatre fusions restées hors ligne neuf heures,
+   * avec un site qui répondait normalement pendant tout ce temps.
+   *
+   * Ces tests EXÉCUTENT la fonction de décision, avec un faux `systemctl`,
+   * plutôt que de relire le script. Une assertion sur le texte du script est
+   * ce qui a laissé passer la régression : elle vérifiait fidèlement la
+   * présence de la ligne fautive. */
+  /* Résolu une fois, hors du bac à sable : le PATH réduit passé au fils
+     l'empêcherait de se trouver lui-même. */
+  const BASH = execFileSync('sh', ['-c', 'command -v bash'], { encoding: 'utf8' }).trim()
+
+  const FONCTION = /^auto_maj_voulu\(\) \{$[\s\S]*?^\}$/m.exec(SCRIPT)
+
+  function decider(passe: string, minuteur: 'actif' | 'inactif' | 'absent'): string {
+    const bac = mkdtempSync(join(tmpdir(), 'automaj-'))
+    if (minuteur !== 'absent') {
+      // `systemctl is-enabled` rend 0 pour une unité active, non-zéro sinon.
+      writeFileSync(join(bac, 'systemctl'), `#!/bin/sh\nexit ${minuteur === 'actif' ? 0 : 1}\n`, {
+        mode: 0o755,
+      })
+    }
+    // PATH réduit au bac à sable : « absent » veut dire systemctl introuvable,
+    // ce qui est l'état d'une machine neuve ou d'un conteneur sans systemd.
+    // bash est donc appelé par son chemin absolu — le PATH du fils ne sert
+    // plus qu'aux recherches faites DEPUIS le script.
+    return execFileSync(
+      BASH,
+      ['-c', `set -euo pipefail\n${FONCTION?.[0] ?? ''}\nauto_maj_voulu "$1" "kitetudiant-maj.timer"`, 'bash', passe],
+      { env: { PATH: bac }, encoding: 'utf8' },
+    )
+  }
+
+  it('expose la décision dans une fonction, pas dans une valeur par défaut', () => {
+    expect(FONCTION, 'auto_maj_voulu doit rester une fonction de premier niveau').not.toBeNull()
+  })
+
+  it('reconduit le minuteur en place quand AUTO_MAJ n’est pas passé', () => {
+    // LA régression. Une mise en ligne manuelle ne doit pas éteindre
+    // l'automatique au passage.
+    expect(decider('', 'actif')).toBe('1')
+  })
+
+  it('ne s’active toujours pas toute seule sur une machine qui ne l’avait pas', () => {
+    // L'intention d'origine, préservée : l'autre projet de la machine
+    // n'hérite pas d'un minuteur qu'on n'a pas demandé pour lui.
+    expect(decider('', 'inactif')).toBe('0')
+    expect(decider('', 'absent')).toBe('0')
+  })
+
+  it('obéit à la valeur passée, dans les deux sens', () => {
+    // AUTO_MAJ=0 explicite reste la façon de désactiver — et il doit gagner
+    // contre un minuteur actif, sinon on ne pourrait plus l'arrêter.
+    expect(decider('0', 'actif')).toBe('0')
+    expect(decider('1', 'absent')).toBe('1')
   })
 
   it('installe un minuteur systemd, pas une tâche cron anonyme', () => {
@@ -290,5 +350,137 @@ describe('HSTS', () => {
 
   it('annonce un an par défaut, et reste réglable', () => {
     expect(script).toMatch(/HSTS_AGE="\$\{HSTS_AGE:-31536000\}"/)
+  })
+})
+
+/* ------------------------------------------------ la base de données du VPS */
+
+describe('l’installation de PostgreSQL', () => {
+  const PG = readFileSync(resolve(RACINE, 'deploy/postgres-setup.sh'), 'utf8')
+  const VPS = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
+
+  it('ne tourne jamais derrière le minuteur de mise en ligne', () => {
+    /* vps-setup.sh est relancé toutes les cinq minutes. Appliquer des
+       migrations à ce rythme, sur une base de production, c'est les appliquer
+       sans que personne ne l'ait décidé. */
+    expect(VPS).not.toContain('postgres-setup.sh')
+  })
+
+  it('ne régénère pas un mot de passe déjà posé', () => {
+    /* Une rotation silencieuse casse l'API jusqu'au prochain redémarrage, et
+       rien ne le dit : le script lit DATABASE_URL avant de décider. Même
+       règle que les secrets repris du .env, et qu'AUTO_MAJ. */
+    expect(PG).toMatch(/URL_EXISTANTE="\$\(sed -n 's\/\^DATABASE_URL=\/\/p'/)
+    const decision = PG.slice(PG.indexOf('if [ -n "${URL_EXISTANTE}" ]; then'))
+    expect(decision).toContain('mot de passe conservé')
+  })
+
+  it('n’écrit aucun mot de passe en dur', () => {
+    expect(PG).toContain('openssl rand -hex 24')
+    // Un mot de passe littéral dans un script versionné est un mot de passe
+    // public. Aucune affectation de MDP à autre chose qu'un tirage.
+    const affectations = PG.match(/^\s*MDP=.*/gm) ?? []
+    for (const a of affectations) {
+      expect(a, `MDP ne doit venir que d'un tirage : ${a}`).toMatch(
+        /MDP=""|MDP="\$\(openssl rand -hex 24\)"/,
+      )
+    }
+  })
+
+  it('relance pm2 avec TOUT l’environnement, pas la seule DATABASE_URL', () => {
+    /* `pm2 --update-env` REMPLACE l'environnement du processus par celui du
+       shell. Ne lui passer que DATABASE_URL effacerait ANTHROPIC_API_KEY,
+       ADMIN_TOKEN et surtout COMPTES_MASTER_KEY — sans laquelle les comptes
+       déjà créés deviennent illisibles et le détail chiffré s'ouvre à tous. */
+    const avantRestart = PG.slice(0, PG.indexOf('pm2 restart'))
+    expect(avantRestart).toContain('done < "${APP_DIR}/.env"')
+    // Lecture ligne à ligne et non `source` : une valeur contenant une espace
+    // — ADMIN_EMAILS="a@b.fr, c@d.fr" — casse un `source`.
+    expect(PG).not.toMatch(/^\s*(source|\.) "\$\{APP_DIR\}\/\.env"/m)
+  })
+
+  it('garde le .env illisible hors de root', () => {
+    // Il contient désormais le mot de passe de la base.
+    expect(PG).toContain('chmod 600 "${APP_DIR}/.env"')
+  })
+
+  it('S’ARRÊTE si la base écoute au-delà de la machine', () => {
+    /* Le défaut de Debian est « localhost », mais quelqu'un a pu le desserrer
+       pour se connecter depuis son poste et l'oublier.
+
+       Avertir ne suffit pas : l'avertissement défile, « Terminé. » s'affiche
+       quelques lignes plus bas, et la base de comptes de mineurs vient d'être
+       créée sur un serveur qui écoute l'Internet. Le script sort en erreur, à
+       moins qu'on ne l'ait explicitement assumé. */
+    expect(PG).toContain('show listen_addresses')
+    expect(PG).toContain('[ "${ECOUTE_LARGE_ASSUMEE:-0}" = "1" ] || exit 1')
+  })
+
+  it('S’ARRÊTE si PostGIS manque, plutôt que de migrer en mode dégradé', () => {
+    /* appliquer.sh compare les NOMS, jamais la colonne « degrade » : une
+       migration passée en mode dégradé n'est plus jamais rejouée. Une panne
+       passagère d'apt-get figerait donc le schéma de production en texte pour
+       toujours, carte et recherches par distance mortes sans message. */
+    expect(PG).toContain('[ "${SANS_POSTGIS:-0}" = "1" ] || exit 1')
+  })
+
+  it('pose ses deux gardes AVANT de créer quoi que ce soit', () => {
+    // Un garde posé après la création ne garde plus rien.
+    const gardePostgis = PG.indexOf('SANS_POSTGIS:-0')
+    const gardeEcoute = PG.indexOf('ECOUTE_LARGE_ASSUMEE:-0')
+    const creation = PG.indexOf('CREATE ROLE ${BASE}')
+    const migration = PG.indexOf('appliquer.sh"')
+    expect(gardePostgis).toBeGreaterThan(-1)
+    expect(gardeEcoute).toBeGreaterThan(-1)
+    expect(gardePostgis).toBeLessThan(creation)
+    expect(gardeEcoute).toBeLessThan(creation)
+    expect(creation).toBeLessThan(migration)
+  })
+
+  it('démarre PostgreSQL avant de l’interroger', () => {
+    // Version, PostGIS et listen_addresses passent tous par psql. Le service
+    // doit tourner avant la première requête, y compris sur une machine où
+    // quelqu'un l'a arrêté.
+    const demarrage = PG.indexOf('systemctl enable --now postgresql')
+    const premiereRequete = PG.indexOf('psql --version')
+    expect(demarrage).toBeGreaterThan(-1)
+    expect(demarrage).toBeLessThan(premiereRequete)
+  })
+
+  it('lit la version de PostgreSQL au lieu de la supposer', () => {
+    // Le nom du paquet PostGIS la porte : postgresql-16-postgis-3. Une
+    // version en dur cesserait de s'installer à la prochaine version de la
+    // distribution, sans autre symptôme qu'un mode dégradé silencieux.
+    expect(PG).toContain('VERSION="$(psql --version |')
+    expect(PG).toContain('"postgresql-${VERSION}-postgis-3"')
+  })
+})
+
+describe('une migration dégradée cesse d’être silencieuse', () => {
+  const APPLIQUER = readFileSync(
+    resolve(RACINE, 'kitetudiant/db/migrations/appliquer.sh'),
+    'utf8',
+  )
+
+  it('rappelle les migrations appliquées sans PostGIS, une fois PostGIS là', () => {
+    /* La boucle saute sur le nom seul : « select count(*) … where nom = … ».
+       La colonne « degrade » était donc écrite puis jamais relue, et le
+       passage suivant annonçait « Migrations à jour » sur un schéma resté en
+       texte. Reproduit contre un vrai PostgreSQL 16 : sans ce rappel, rien ne
+       distingue une base saine d'une base définitivement dégradée. */
+    expect(APPLIQUER).toContain('select count(*) from public.migration where degrade')
+    expect(APPLIQUER).toContain('migration(s) ont été appliquées SANS')
+  })
+
+  it('ne le rappelle pas pendant un passage lui-même dégradé', () => {
+    // Sinon un poste de développement sans PostGIS afficherait l'alerte à
+    // chaque lancement, et une alerte permanente n'est plus une alerte.
+    expect(APPLIQUER).toContain('[ "$DEGRADEES" != "0" ] && [ "$DEGRADE" = false ]')
+  })
+
+  it('ne prétend pas réparer', () => {
+    // Rejouer une migration sur une base qui porte des données est une
+    // décision, pas un effet de bord de script.
+    expect(APPLIQUER).toContain("c'est une migration à écrire")
   })
 })

@@ -811,8 +811,12 @@ export default function App() {
    * une école » — si bien que, depuis n'importe où, une seule destination
    * était atteignable, et jamais la même.
    */
+  /* La classe dit QUELLE navigation est en place, parce que la mise en page
+     de la coque en dépend : le visiteur a une barre en haut et une seule
+     colonne, l'élève connecté un rail à gauche et donc une grille. Sans cette
+     distinction, la page vide laisserait la colonne du rail absent. */
   const coque = (page: React.ReactNode) => (
-    <div className="coque">
+    <div className={connecte ? 'coque coque-app' : 'coque coque-visiteur'}>
       <BarreNavigation
         vue={vue}
         connecte={connecte}
