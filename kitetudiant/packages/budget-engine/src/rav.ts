@@ -6,6 +6,11 @@
  *   RAV = (R_famille + R_job + A_annuelles) / 10
  *         − ( L_net + T + Alim + S + (F_scol + F_install) / 10 )
  *
+ * `L_net` est ici écrit en deux lignes — le loyer charges comprises en
+ * dépense, l'aide au logement en ressource — parce qu'un « loyer net » de
+ * 128 € pour un studio à 311 € n'est un loyer pour personne. La différence
+ * est la même, et le reste-à-vivre ne bouge pas.
+ *
  * Divergence assumée et signalée : le cahier des charges définit R_famille
  * comme une « contribution mensuelle » et R_job comme un revenu mensuel, mais
  * les divise tous deux par 10 dans la formule. Diviser un montant déjà mensuel
@@ -20,6 +25,7 @@
 
 import { estIndisponible, montantApplicable } from '../../baremes/src/index.ts'
 import {
+  ligneAideLogement,
   ligneAideMerite,
   ligneAideMobilite,
   ligneAidesRegionales,
@@ -30,7 +36,7 @@ import {
   ligneFraisInstallation,
   ligneFraisScolarite,
   ligneJobEtudiant,
-  ligneLoyerNet,
+  ligneLoyer,
   ligneTransport,
   round2,
 } from './postes.ts'
@@ -90,7 +96,8 @@ export function calculerRAV(
   const m = mensualites.valeur
 
   const lignes: readonly LigneBudget[] = [
-    ligneLoyerNet(voeu, scenario),
+    ligneLoyer(voeu, scenario),
+    ligneAideLogement(voeu, scenario),
     ligneTransport(voeu),
     ligneAlimentation(profil, aLaDate),
     ligneFraisDivers(profil),

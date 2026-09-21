@@ -49,7 +49,7 @@ describe('les liens d’une carte sont repliés', () => {
        cacher. */
     const debut = APP.indexOf('<details className="carte-volet">')
     const avant = APP.slice(APP.indexOf('<article className={`carte'), debut)
-    for (const garde of ['carte-titre', 'carte-lieu', 'trio-case', 'verdict']) {
+    for (const garde of ['carte-titre', 'carte-lieu', 'bandeau-mesures', 'bandeau-cle', 'verdict']) {
       expect(avant, `« ${garde} » a été replié alors qu'il sert à comparer`).toContain(garde)
     }
   })

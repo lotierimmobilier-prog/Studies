@@ -12,8 +12,9 @@
 
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 
 import { bd, fermer } from '../bd.ts'
 import { DepotComptes } from '../comptes.ts'
@@ -236,34 +237,51 @@ surUneVraieBase('les erreurs parlent français', () => {
     )
   })
 
-  it('dit autre chose quand AUCUNE formation n’est chargée', async () => {
+  it('dit autre chose quand AUCUNE formation n’est chargée', () => {
     /* Deux situations sans rapport, et le message ne disait que la première.
 
        Constaté en production : `postgres-setup.sh` crée la base et applique
-       les migrations, mais ne charge PAS les données de référence — c'est
-       `charger.sh`. Table vide, donc « Enregistrer dans mes vœux » échouait
-       pour CHAQUE formation, en accusant la formation.
+       les migrations, mais ne charge PAS les données de référence — il faut
+       `telecharger.py`, `preparer.py`, puis `charger.sh`. Table vide, donc
+       « Enregistrer dans mes vœux » échouait pour CHAQUE formation, en
+       accusant la formation.
 
        Un élève à qui l'on dit « la formation 12 n'est pas dans les données »
-       en essaie une autre, échoue pareil, et croit avoir mal choisi. */
-    const sql = bd()!
-    const id = await comptePret('base-vide@example.fr')
-    await sql`delete from eleve.panier_voeu`
-    await sql`delete from reference.formation`
-    try {
-      await expect(ajouter(id, CODES[0]!, SESSION)).rejects.toThrow(
-        /ne sont pas chargées sur ce serveur/,
-      )
-      // Et surtout : il ne doit plus accuser le vœu de l'élève.
-      await expect(ajouter(id, CODES[0]!, SESSION)).rejects.not.toThrow(
-        /La formation .* n’est pas dans les données/,
-      )
-      await expect(ajouter(id, CODES[0]!, SESSION)).rejects.toThrow(
-        /Ce n’est pas ton vœu qui est en cause/,
-      )
-    } finally {
-      await semerFormations()
-    }
+       en essaie une autre, échoue pareil, et croit avoir mal choisi.
+
+       ── Pourquoi ce test ne touche plus à la base ───────────────────────
+
+       Un premier jet vidait `reference.formation` pour de vrai, puis
+       resemait les douze codes d'essai. Sur une base de développement
+       chargée, il a fait deux dégâts d'un coup : il a violé la clé
+       étrangère de `stat_admission` (donc échoué), et il AURAIT effacé
+       quatorze mille formations s'il avait réussi.
+
+       Un test qui détruit la base de celui qui le lance pour prouver le
+       libellé d'un message est un mauvais échange. Le libellé se vérifie
+       ici ; le branchement — compter les lignes avant de choisir le
+       message — est vérifié en lisant `voeux.ts`, juste après. */
+    const vide = new FormationInconnue('12', true).message
+    const absente = new FormationInconnue('12', false).message
+
+    expect(vide).toMatch(/ne sont pas chargées sur ce serveur/)
+    expect(vide).toMatch(/Ce n’est pas ton vœu qui est en cause/)
+    // Et surtout : il ne doit plus accuser le vœu de l'élève.
+    expect(vide).not.toMatch(/La formation 12 n’est pas dans les données/)
+
+    // L'autre cas garde son message, qui lui est juste.
+    expect(absente).toMatch(/La formation 12 n’est pas dans les données/)
+    expect(absente).not.toMatch(/ne sont pas chargées sur ce serveur/)
+  })
+
+  it('choisit le message en comptant les formations, pas au hasard', () => {
+    /* Le pendant du test ci-dessus : il prouve les deux libellés, celui-ci
+       prouve qu'on sait lequel employer. Sans lui, `FormationInconnue`
+       pourrait recevoir `false` en dur et les deux messages resteraient
+       corrects tout en n'étant jamais choisis correctement. */
+    const source = readFileSync(resolve(import.meta.dirname, '..', 'voeux.ts'), 'utf8')
+    expect(source).toMatch(/count\(\*\)::int as n from reference\.formation/)
+    expect(source).toMatch(/new FormationInconnue\(codeFormation, ligne\?\.n === 0\)/)
   })
 
   it('la contrainte reste en place : un vœu désigne une formation réelle', async () => {

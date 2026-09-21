@@ -162,6 +162,6 @@ if (limoges) {
   console.log(`  RESTE-À-VIVRE : ${sansApl.ravMensuel === null ? 'non calculé' : euros(sansApl.ravMensuel)}`)
   console.log(`  verdict       : ${sansApl.soutenabilite}`)
   console.log(`  postes manquants : ${sansApl.postesManquants.join(', ')}`)
-  const manquant = sansApl.lignes.find((l) => l.poste === 'loyer_net')
+  const manquant = sansApl.lignes.find((l) => l.poste === 'aide_logement')
   if (manquant && manquant.statut === 'manquant') console.log(`  raison        : ${manquant.raison}`)
 }

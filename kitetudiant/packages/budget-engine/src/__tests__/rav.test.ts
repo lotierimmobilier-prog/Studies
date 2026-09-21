@@ -172,11 +172,12 @@ describe('cas 6 — commune sans indicateur de loyer', () => {
   it('refuse de rendre un RAV plutôt que d’en inventer un', () => {
     expect(resultat.ravMensuel).toBeNull()
     expect(resultat.soutenabilite).toBe('indeterminable')
-    expect(resultat.postesManquants).toContain('loyer_net')
+    expect(resultat.postesManquants).toContain('loyer')
+    expect(resultat.postesManquants).toContain('aide_logement')
   })
 
   it('dit pourquoi la donnée manque, en nommant la commune', () => {
-    const ligne = resultat.lignes.find((l) => l.poste === 'loyer_net')
+    const ligne = resultat.lignes.find((l) => l.poste === 'loyer')
     expect(ligne?.statut).toBe('manquant')
     if (ligne?.statut !== 'manquant') return
     expect(ligne.raison).toContain('97611')
@@ -184,7 +185,7 @@ describe('cas 6 — commune sans indicateur de loyer', () => {
 })
 
 describe('cas 7 — APL non simulée', () => {
-  it('ne calcule pas de loyer net, même avec un loyer connu', () => {
+  it('ne calcule pas l’aide, même avec un loyer connu', () => {
     const resultat = calculerRAV(
       BOURSIER_ECHELON_5,
       voeu(9, 180, { aplMensuelle: null }),
@@ -192,8 +193,11 @@ describe('cas 7 — APL non simulée', () => {
       LE_JOUR,
     )
     expect(resultat.ravMensuel).toBeNull()
-    expect(resultat.postesManquants).toContain('loyer_net')
-    const ligne = resultat.lignes.find((l) => l.poste === 'loyer_net')
+    expect(resultat.postesManquants).toContain('aide_logement')
+    // Le loyer, lui, reste connu : c'est l'aide qui manque, pas le logement.
+    const loyer = resultat.lignes.find((l) => l.poste === 'loyer')
+    expect(loyer?.statut).toBe('calcule')
+    const ligne = resultat.lignes.find((l) => l.poste === 'aide_logement')
     if (ligne?.statut !== 'manquant') throw new Error('ligne attendue manquante')
     expect(ligne.raison).toMatch(/OpenFisca/)
   })
@@ -255,17 +259,25 @@ describe('cas 10 — les trois scénarios et la qualité de l’estimation', () 
   })
 
   it('écarte optimiste et central de 95 €, APL comprise', () => {
-    // Loyer : 7 €/m² × 25 = 175 €, sous les 180 € d'APL, donc le poste est
-    // ramené à 0 € au lieu de −5 € ; l'écart de loyer vaut 45 € et non 50 €.
+    // Loyer : 7 €/m² × 25 = 175 €, sous les 180 € d'APL, donc l'aide est
+    // ramenée à 175 € ; le logement coûte 0 € net au lieu de −5 €, et l'écart
+    // de loyer vaut 45 € et non 50 €.
     // Job étudiant : 300 € au lieu de 250 €, soit 50 € de plus. Total 95 €.
     expect((fourchette.optimiste.ravMensuel ?? 0) - (fourchette.central.ravMensuel ?? 0)).toBeCloseTo(95, 10)
   })
 
-  it('ne rend jamais un loyer net négatif quand l’APL dépasse le loyer', () => {
-    const ligne = fourchette.optimiste.lignes.find((l) => l.poste === 'loyer_net')
-    if (ligne?.statut !== 'calcule') throw new Error('ligne attendue calculée')
-    expect(ligne.valeur.montant).toBe(0)
-    expect(ligne.valeur.hypothese).toContain('APL supérieure au loyer')
+  it('plafonne l’aide au loyer quand l’APL le dépasse', () => {
+    const loyer = fourchette.optimiste.lignes.find((l) => l.poste === 'loyer')
+    const aide = fourchette.optimiste.lignes.find((l) => l.poste === 'aide_logement')
+    if (loyer?.statut !== 'calcule' || aide?.statut !== 'calcule') {
+      throw new Error('lignes attendues calculées')
+    }
+    // 7 €/m² × 25 m² = 175 €, pour une APL simulée à 180 €.
+    expect(loyer.valeur.montant).toBeCloseTo(175, 10)
+    expect(aide.valeur.montant).toBeCloseTo(175, 10)
+    expect(aide.valeur.hypothese).toContain('ramenée au loyer')
+    // Le logement ne rapporte rien : les deux lignes s'annulent, jamais plus.
+    expect(aide.mensualise - loyer.mensualise).toBe(0)
   })
 
   it('avertit que le loyer n’est pas estimé au niveau communal', () => {

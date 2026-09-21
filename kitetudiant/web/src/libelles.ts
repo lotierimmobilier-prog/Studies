@@ -12,6 +12,7 @@
  */
 
 import type { Admissibilite } from '../../packages/admissibilite/src/index.ts'
+import type { Poste } from '../../packages/budget-engine/src/types.ts'
 import type { Affinite } from '../../packages/profil-scolaire/src/index.ts'
 
 /**
@@ -49,4 +50,51 @@ export function affiniteNote(a: Affinite): string {
   if (a.domaineInconnu) return 'domaine non reconnu'
   if (sansInformation(a)) return 'dis-nous ce qui t’intéresse'
   return 'selon tes notes et tes goûts'
+}
+
+/**
+ * Le nom d'un poste de budget, et ce qu'il recouvre, écrits pour un lycéen.
+ *
+ * Le libellé venait jusqu'ici du nom technique du poste, souligné remplacé par
+ * une espace : « Loyer Net », « Frais Scolarite », « Aide Mobilite
+ * Parcoursup ». C'est le vocabulaire du moteur de calcul, pas celui d'un élève
+ * de terminale — et « loyer net » désignait en plus un montant que personne ne
+ * paie, le loyer moins l'APL.
+ *
+ * `quoi` répond à la seule question qui vient ensuite : « ça veut dire quoi,
+ * concrètement ». Le détail du calcul, lui, reste derrière « d'où vient ce
+ * chiffre », avec sa source et son millésime.
+ */
+export const LIBELLES_POSTE: Readonly<Record<Poste, { nom: string; quoi: string }>> = {
+  loyer: { nom: 'Ton loyer', quoi: 'charges comprises' },
+  aide_logement: {
+    nom: 'L’aide au logement',
+    quoi: 'l’APL, versée par la CAF sur ce loyer',
+  },
+  transport: { nom: 'Les transports', quoi: 'ton abonnement de bus ou de train' },
+  alimentation: { nom: 'Manger', quoi: 'tes courses et tes repas au resto U' },
+  frais_divers: { nom: 'Le reste', quoi: 'téléphone, vêtements, sorties, imprévus' },
+  frais_scolarite: {
+    nom: 'L’inscription',
+    quoi: 'droits d’inscription et CVEC, étalés sur l’année',
+  },
+  frais_installation: {
+    nom: 'L’installation',
+    quoi: 'caution, déménagement, premier équipement, étalés sur l’année',
+  },
+  contribution_familiale: {
+    nom: 'Ce que ta famille donne',
+    quoi: 'le montant que tu nous as indiqué',
+  },
+  job_etudiant: { nom: 'Ton job étudiant', quoi: 'ce que tu penses gagner à côté' },
+  bourse_crous: { nom: 'La bourse du Crous', quoi: 'selon ton échelon' },
+  aide_merite: {
+    nom: 'L’aide au mérite',
+    quoi: 'pour les boursiers ayant eu mention Très bien au bac',
+  },
+  aide_mobilite_parcoursup: {
+    nom: 'L’aide à la mobilité Parcoursup',
+    quoi: 'pour les boursiers de lycée qui changent d’académie',
+  },
+  aides_regionales: { nom: 'Les aides de la région', quoi: 'celles de la région de la formation' },
 }

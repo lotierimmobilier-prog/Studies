@@ -23,7 +23,14 @@ export interface DemandeAideLogement {
   readonly ref: string
   /** Code INSEE de la commune du logement. */
   readonly codeInsee: string
-  /** Loyer mensuel hors charges, en euros. */
+  /**
+   * Loyer mensuel envoyé à OpenFisca, en euros.
+   *
+   * L'aide se calcule sur le loyer HORS charges. L'indicateur ANIL, seule
+   * source de loyer dont on dispose, ne publie que du charges comprises et
+   * aucune part de charges : l'appelant passe donc ce qu'il a, et l'hypothèse
+   * rendue avec le montant dit laquelle des deux il a passée.
+   */
   readonly loyerMensuel: number
   /** Charges locatives mensuelles, en euros. */
   readonly chargesMensuelles?: number
@@ -193,8 +200,13 @@ async function calculerUnLot(
       source: `OpenFisca France — ${OPENFISCA_URL}`,
       millesime: mois,
       hypothese:
-        `Étudiant locataire d'un logement vide à ${d.codeInsee}, loyer ${d.loyerMensuel} € ` +
-        `hors charges, revenu annuel ${d.revenuAnnuel ?? 0} €, situation de ${mois}`,
+        `Étudiant locataire d'un logement vide à ${d.codeInsee}, ` +
+        `loyer ${d.loyerMensuel} € ${d.chargesMensuelles === undefined ? 'charges comprises' : 'hors charges'}, ` +
+        `revenu annuel ${d.revenuAnnuel ?? 0} €, situation de ${mois}` +
+        (d.chargesMensuelles === undefined
+          ? '. L’aide se calcule normalement sur le loyer hors charges, que l’indicateur des ' +
+            'loyers ne publie pas : le montant est donc un peu plus haut que ce que la CAF versera'
+          : ''),
     }
   })
 }
