@@ -46,7 +46,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { Boussole, Carnet, Chevrons, Etoile, Fiche, Loupe, Toit } from './illustrations.tsx'
+import { Boussole, Carnet, Chevrons, Etoile, Fiche, Loupe, Plume, Toit } from './illustrations.tsx'
 import { Marque } from './marque.tsx'
 import { cheminDe, CHEMIN_TOQUE, type Route } from './routes.ts'
 
@@ -140,6 +140,20 @@ function destinations(nav: Navigation): Entree[] {
       icone: <Toit />,
       route: { vue: 'voeux' },
       actif: ['voeux'],
+    },
+    /* L'atelier de lettre de motivation.
+     *
+     * Entre les vœux et le blog : c'est l'étape qui vient juste après avoir
+     * choisi, et avant de lire des articles. Visible sans compte — la lettre
+     * se prépare bien avant de créer un dossier ici, et rien de ce qu'on y
+     * écrit ne quitte le navigateur. */
+    {
+      cle: 'lettre',
+      libelle: 'Ma lettre de motivation',
+      court: 'Lettre',
+      icone: <Plume />,
+      route: { vue: 'lettre' },
+      actif: ['lettre'],
     },
     {
       cle: 'blog',

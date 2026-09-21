@@ -53,6 +53,7 @@ const TOUTES: readonly Route[] = [
   { vue: 'collection' },
   { vue: 'voeux' },
   { vue: 'mentions' },
+  { vue: 'lettre' },
 ]
 
 /** Les chemins que le pré-rendu écarte nommément des index. */
