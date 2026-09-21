@@ -97,7 +97,17 @@ function Coordonnees({ profil }: { readonly profil: ProfilCompte }) {
         <ul>
           <li>Ni ton nom, ni ton prénom.</li>
           <li>Ni ton adresse, ni ton téléphone, ni ta date de naissance.</li>
-          <li>Ni tes notes, ni tes bulletins, ni les formations que tu regardes.</li>
+          <li>Ni tes notes, ni les formations que tu regardes.</li>
+          {/* Le bulletin était rangé ici, parmi ce qu'on ne sait pas. C'est
+              vrai de ce qui est CONSERVÉ — rien ne l'est — mais faux de ce
+              qui transite : le fichier part au serveur puis à l'API Claude
+              pour être lu. Sur cet écran, qui s'intitule « ce que nous ne
+              savons pas de toi », le raccourci se lisait comme « il ne part
+              jamais ». */}
+          <li>
+            Ni tes bulletins : celui que tu déposes est lu puis oublié, jamais
+            enregistré.
+          </li>
         </ul>
         <p className="note">
           Ce n’est pas un formulaire à compléter : nous ne demandons rien de tout cela,

@@ -92,3 +92,101 @@ describe('« Mes vœux » ne se fait pas passer pour Parcoursup', () => {
     expect(sansCommentaires(VOEUX)).toMatch(/pas un dépôt de vœux/i)
   })
 })
+
+/**
+ * Les bulletins PARTENT. Trois écrans juraient le contraire.
+ *
+ * ── Ce qui s'est passé ───────────────────────────────────────────────────
+ *
+ * Déposer un bulletin l'envoie à notre serveur, qui le transmet à l'API
+ * Claude pour en lire les moyennes et les appréciations
+ * (`web/src/donnees.ts` → `POST /api/bulletin-scolaire` →
+ * `server/bulletinScolaire.ts`). Rien n'est écrit sur disque, et le texte
+ * brut des appréciations n'est pas gardé — mais « non conservé » et
+ * « jamais envoyé » ne sont pas la même phrase.
+ *
+ * C'est la seconde qui était écrite, à trois endroits :
+ *
+ *   - « tes notes, tes bulletins […] ne sont jamais envoyés » (compte.tsx,
+ *     sous le bouton qui crée le compte) ;
+ *   - « tes moyennes, tes bulletins et ton budget restent dans ton
+ *     navigateur […] ils ne sont jamais envoyés » (accueil.tsx) ;
+ *   - « ni tes notes, ni tes bulletins » sous le titre « Ce que nous ne
+ *     savons pas de toi » (monCompte.tsx).
+ *
+ * Le bulletin d'un lycéen contient ses notes et les appréciations écrites
+ * de ses professeurs. Promettre qu'il ne quitte pas l'appareil, à un
+ * mineur, alors qu'il part chez un sous-traitant, est la promesse la plus
+ * lourde que ce site ait faussement tenue — la quatrième trouvée ici.
+ *
+ * ── Ce que le test exige ─────────────────────────────────────────────────
+ *
+ * Que le mot « bulletin » n'apparaisse jamais dans une phrase qui promet
+ * que quelque chose ne part pas, et que l'écran qui les mentionne dise ce
+ * qui leur arrive.
+ */
+describe('aucun écran ne promet qu’un bulletin ne quitte pas l’appareil', () => {
+  const ECRANS: readonly (readonly [string, string])[] = [
+    ['compte.tsx', COMPTE],
+    ['App.tsx', APP],
+    ['accueil.tsx', ACCUEIL],
+    ['monCompte.tsx', lire('monCompte.tsx')],
+  ]
+
+  /* Le JSX coupe une phrase là où la ligne se termine, pas où la phrase le
+     veut : « il part\n            se faire lire ». Toute lecture de prose
+     dans un .tsx doit donc replier les blancs avant de chercher quoi que ce
+     soit, sinon le test échoue sur la mise en forme et pas sur le texte. */
+  const prose = (source: string): string =>
+    sansCommentaires(source).replace(/\s+/g, ' ')
+
+  /** Ce qui promet qu'une chose ne part pas. */
+  const NE_PART_PAS = /(jamais envoyés?|ne sont pas envoyés?|ne quitte(nt)? (pas|jamais))/i
+  /** Ce qui, à côté, dit la vérité sur le sort d'un bulletin. */
+  const CORRIGE = /(lu puis oublié|pas conservé|jamais enregistré|n’est enregistré nulle part|fait exception|part se faire lire)/i
+
+  it('ne range jamais « bulletins » dans ce qui n’est jamais envoyé', () => {
+    /* Un premier jet découpait par phrase et ne voyait rien : la promesse
+       fautive s'étalait sur DEUX phrases — « Pas gardé : tes notes, tes
+       bulletins, tes réponses au questionnaire. » puis « Ils restent dans ce
+       navigateur et ne sont jamais envoyés. » Vérifié : le test passait au
+       vert sur le texte exact qu'il devait refuser.
+       
+       On regarde donc une fenêtre autour du mot, pas une phrase, et on
+       accepte la cohabitation uniquement si la correction est dans la même
+       fenêtre. */
+    const FENETRE = 260
+    for (const [nom, source] of ECRANS) {
+      const texte = prose(source)
+      for (const m of texte.matchAll(/bulletins?/gi)) {
+        const i = m.index ?? 0
+        const autour = texte.slice(Math.max(0, i - FENETRE), i + FENETRE)
+        if (!NE_PART_PAS.test(autour)) continue
+        expect(
+          CORRIGE.test(autour),
+          `${nom} promet qu’un bulletin ne part pas, sans dire ce qui lui arrive :\n` +
+            `« ${autour.trim()} »`,
+        ).toBe(true)
+      }
+    }
+  })
+
+  it('les écrans qui parlent des bulletins disent ce qui leur arrive', () => {
+    // Retirer la fausse promesse sans la remplacer laisserait un silence,
+    // qui se lit comme l'ancienne promesse.
+    for (const nom of ['compte.tsx', 'accueil.tsx', 'monCompte.tsx']) {
+      const texte = prose(lire(nom))
+      if (!/bulletin/i.test(texte)) continue
+      expect(
+        texte,
+        `${nom} mentionne les bulletins sans dire qu’ils sont lus puis oubliés`,
+      ).toMatch(/lu puis oublié|pas conservé|n’est enregistré nulle part|jamais enregistré|part se faire lire/i)
+    }
+  })
+
+  it('les mentions légales, elles, l’expliquent en entier', () => {
+    const legales = lire('../../packages/articles/src/mentionsLegales.ts')
+    expect(legales).toMatch(/Anthropic/)
+    expect(legales).toMatch(/bulletin/i)
+  })
+})

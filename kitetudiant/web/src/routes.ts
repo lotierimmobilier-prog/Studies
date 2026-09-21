@@ -61,6 +61,10 @@ export type Route =
   // La liste de vœux. Elle a une adresse comme le reste : c'est la page
   // qu'un élève rouvre le plus souvent, et celle qu'il montre à ses parents.
   | { readonly vue: 'voeux' }
+  /* Les mentions légales. Publique et indexable : c'est la page qu'on va
+     chercher pour savoir qui édite un site, et une page légale qu'un moteur
+     ne trouve pas ne remplit pas son office. */
+  | { readonly vue: 'mentions' }
 
 /** Le chemin d'une route, préfixé par la base de déploiement. */
 export function cheminDe(route: Route): string {
@@ -87,6 +91,8 @@ export function cheminDe(route: Route): string {
       return `${BASE}mes-cartes`
     case 'voeux':
       return `${BASE}mes-voeux`
+    case 'mentions':
+      return `${BASE}mentions-legales`
   }
 }
 
@@ -119,6 +125,7 @@ export function routeDuChemin(chemin: string): Route | null {
   if (reste === 'chercher-une-ecole') return { vue: 'recherche' }
   if (reste === 'mes-cartes') return { vue: 'collection' }
   if (reste === 'mes-voeux') return { vue: 'voeux' }
+  if (reste === 'mentions-legales') return { vue: 'mentions' }
   const article = /^blog\/([a-z0-9-]+)$/.exec(reste)
   if (article !== null) return { vue: 'article', slug: article[1]! }
   const formation = /^formation\/(.+)$/.exec(reste)

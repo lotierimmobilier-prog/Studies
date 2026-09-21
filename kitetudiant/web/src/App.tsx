@@ -48,6 +48,7 @@ import { MesVoeux } from './mesVoeux.tsx'
 import { PageFormation } from './pageFormation.tsx'
 import { PageEtablissement } from './pageEtablissement.tsx'
 import { MonCompte } from './monCompte.tsx'
+import { MentionsLegales } from './mentionsLegales.tsx'
 import { Cle, Epingle, Etoile, Fiche, Loupe, Residence, Toit } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
 import { moyenneGenerale } from '../../packages/profil-scolaire/src/index.ts'
@@ -460,6 +461,7 @@ export default function App() {
     | 'formation'
     | 'etablissement'
     | 'voeux'
+    | 'mentions'
   >(
     () => {
       // L'adresse fait foi au chargement : ouvrir directement un article doit
@@ -860,6 +862,10 @@ export default function App() {
     return coque(<MesVoeux connecte={connecte} onNaviguer={naviguer} />)
   }
 
+  if (vue === 'mentions') {
+    return coque(<MentionsLegales onNaviguer={naviguer} />)
+  }
+
   if (vue === 'recherche') {
     return coque(
       <RechercheEcoles
@@ -1107,6 +1113,20 @@ export default function App() {
           <p className="non-affiliation">
             KitEtudiant.fr n’est pas affilié à Parcoursup, au ministère ni aux CROUS.
             Rien de ce que tu fais ici n’est transmis à Parcoursup.
+          </p>
+          {/* Le pied de page est l'endroit où on va chercher les mentions
+              légales, et le seul endroit où leur absence se remarque. */}
+          <p className="pieds-liens">
+            <a
+              href={cheminDe({ vue: 'mentions' })}
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+                e.preventDefault()
+                naviguer({ vue: 'mentions' })
+              }}
+            >
+              Mentions légales et données personnelles
+            </a>
           </p>
         </footer>
       </main>
