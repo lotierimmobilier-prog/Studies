@@ -144,6 +144,44 @@ Une adresse listée ici voit en plus, dans son espace personnel, une section
 il évite seulement de retenir l'adresse `…/admin.html`. Un visiteur ordinaire
 ne le voit pas, mais la console reste gardée côté serveur pour tout le monde.
 
+## La base de données
+
+`vps-setup.sh` n'installe pas PostgreSQL, et n'applique aucune migration.
+C'est délibéré : le script tourne toutes les cinq minutes derrière le minuteur
+de mise en ligne, et une migration lancée par un minuteur sur une base de
+production est une migration que personne n'a décidé de lancer.
+
+Sans `DATABASE_URL`, l'API fonctionne — comptes dans le fichier chiffré,
+formations chez le ministère. Seuls **les vœux** exigent la base : sans elle,
+« Enregistrer dans mes vœux » répond « pas encore activé sur ce serveur ».
+
+Pour la poser, une fois, en root :
+
+```bash
+bash /opt/kitetudiant-src/deploy/postgres-setup.sh
+```
+
+Le script installe PostgreSQL et PostGIS, crée le rôle et la base, tire un mot
+de passe, applique les cinq migrations, écrit `DATABASE_URL` dans le `.env` et
+relance l'API. Il est **idempotent** : relancé, il ne refait que ce qui manque,
+et un mot de passe déjà posé n'est jamais régénéré — une rotation silencieuse
+casserait l'API sans rien dire.
+
+La base est **locale** et n'écoute que la machine : aucun port de base de
+données n'est exposé au réseau. Le script le vérifie plutôt que de le supposer.
+
+Le disque n'est pas chiffré. Ce sont les données **identifiantes** qui le
+sont, par l'application, avant d'arriver en base — c'est ce qu'exige la règle 3
+de `CLAUDE.md` pour des comptes de mineurs. Le reste est de la donnée
+publique : formations, établissements, communes, loyers.
+
+Charger ensuite les données de référence (facultatif, et distinct) :
+
+```bash
+PGURL="$(sed -n 's/^DATABASE_URL=//p' /opt/kitetudiant/.env)" \
+  bash /opt/kitetudiant-src/kitetudiant/db/migrations/charger.sh
+```
+
 `COMPTES_MASTER_KEY` (≥ 16) chiffre les comptes élèves : c'est elle qui active
 l'inscription. **Sans elle, personne ne peut s'inscrire et le détail du résultat
 reste ouvert à tous** — la console d'administration l'affiche en clair, section

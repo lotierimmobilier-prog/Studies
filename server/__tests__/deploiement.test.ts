@@ -352,3 +352,70 @@ describe('HSTS', () => {
     expect(script).toMatch(/HSTS_AGE="\$\{HSTS_AGE:-31536000\}"/)
   })
 })
+
+/* ------------------------------------------------ la base de données du VPS */
+
+describe('l’installation de PostgreSQL', () => {
+  const PG = readFileSync(resolve(RACINE, 'deploy/postgres-setup.sh'), 'utf8')
+  const VPS = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
+
+  it('ne tourne jamais derrière le minuteur de mise en ligne', () => {
+    /* vps-setup.sh est relancé toutes les cinq minutes. Appliquer des
+       migrations à ce rythme, sur une base de production, c'est les appliquer
+       sans que personne ne l'ait décidé. */
+    expect(VPS).not.toContain('postgres-setup.sh')
+  })
+
+  it('ne régénère pas un mot de passe déjà posé', () => {
+    /* Une rotation silencieuse casse l'API jusqu'au prochain redémarrage, et
+       rien ne le dit : le script lit DATABASE_URL avant de décider. Même
+       règle que les secrets repris du .env, et qu'AUTO_MAJ. */
+    expect(PG).toMatch(/URL_EXISTANTE="\$\(sed -n 's\/\^DATABASE_URL=\/\/p'/)
+    const decision = PG.slice(PG.indexOf('if [ -n "${URL_EXISTANTE}" ]; then'))
+    expect(decision).toContain('mot de passe conservé')
+  })
+
+  it('n’écrit aucun mot de passe en dur', () => {
+    expect(PG).toContain('openssl rand -hex 24')
+    // Un mot de passe littéral dans un script versionné est un mot de passe
+    // public. Aucune affectation de MDP à autre chose qu'un tirage.
+    const affectations = PG.match(/^\s*MDP=.*/gm) ?? []
+    for (const a of affectations) {
+      expect(a, `MDP ne doit venir que d'un tirage : ${a}`).toMatch(
+        /MDP=""|MDP="\$\(openssl rand -hex 24\)"/,
+      )
+    }
+  })
+
+  it('relance pm2 avec TOUT l’environnement, pas la seule DATABASE_URL', () => {
+    /* `pm2 --update-env` REMPLACE l'environnement du processus par celui du
+       shell. Ne lui passer que DATABASE_URL effacerait ANTHROPIC_API_KEY,
+       ADMIN_TOKEN et surtout COMPTES_MASTER_KEY — sans laquelle les comptes
+       déjà créés deviennent illisibles et le détail chiffré s'ouvre à tous. */
+    const avantRestart = PG.slice(0, PG.indexOf('pm2 restart'))
+    expect(avantRestart).toContain('done < "${APP_DIR}/.env"')
+    // Lecture ligne à ligne et non `source` : une valeur contenant une espace
+    // — ADMIN_EMAILS="a@b.fr, c@d.fr" — casse un `source`.
+    expect(PG).not.toMatch(/^\s*(source|\.) "\$\{APP_DIR\}\/\.env"/m)
+  })
+
+  it('garde le .env illisible hors de root', () => {
+    // Il contient désormais le mot de passe de la base.
+    expect(PG).toContain('chmod 600 "${APP_DIR}/.env"')
+  })
+
+  it('vérifie que la base n’écoute pas au-delà de la machine', () => {
+    /* Le défaut de Debian est « localhost », mais quelqu'un a pu le desserrer
+       pour se connecter depuis son poste et l'oublier. Une base de comptes de
+       mineurs ouverte sur l'Internet ne doit pas dépendre d'un souvenir. */
+    expect(PG).toContain('show listen_addresses')
+  })
+
+  it('lit la version de PostgreSQL au lieu de la supposer', () => {
+    // Le nom du paquet PostGIS la porte : postgresql-16-postgis-3. Une
+    // version en dur cesserait de s'installer à la prochaine version de la
+    // distribution, sans autre symptôme qu'un mode dégradé silencieux.
+    expect(PG).toContain('VERSION="$(psql --version |')
+    expect(PG).toContain('"postgresql-${VERSION}-postgis-3"')
+  })
+})
