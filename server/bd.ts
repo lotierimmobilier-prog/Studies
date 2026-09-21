@@ -155,24 +155,47 @@ function lieu(): string | null {
   }
 }
 
+/**
+ * Les pannes de CONNEXION, par code, avec ce qu'on en dit à l'exploitant.
+ *
+ * Une seule table pour deux usages : le libellé que la console affiche, et
+ * la reconnaissance de la panne par `panneDeConnexion`. Deux listes
+ * finiraient par diverger, et la seconde laisserait alors passer vers
+ * l'élève une erreur que la première sait nommer.
+ */
+const PANNES: Readonly<Record<string, string>> = {
+  ECONNREFUSED: 'connexion refusée : la base n’écoute pas à cette adresse',
+  ENOTFOUND: 'hôte introuvable',
+  ETIMEDOUT: 'délai dépassé',
+  CONNECT_TIMEOUT: 'délai dépassé',
+  '28P01': 'authentification refusée',
+  '3D000': 'cette base n’existe pas',
+  '57P03': 'la base démarre encore',
+}
+
 /** Le type de panne, jamais le message brut du pilote. */
 function raison(e: unknown): string {
   const code = (e as { code?: string }).code
-  switch (code) {
-    case 'ECONNREFUSED':
-      return 'connexion refusée : la base n’écoute pas à cette adresse'
-    case 'ENOTFOUND':
-      return 'hôte introuvable'
-    case 'ETIMEDOUT':
-    case 'CONNECT_TIMEOUT':
-      return 'délai dépassé'
-    case '28P01':
-      return 'authentification refusée'
-    case '3D000':
-      return 'cette base n’existe pas'
-    default:
-      return code ? `erreur ${code}` : 'erreur de connexion'
-  }
+  if (code !== undefined && code in PANNES) return PANNES[code] as string
+  return code ? `erreur ${code}` : 'erreur de connexion'
+}
+
+/**
+ * Cette erreur est-elle une panne de connexion, et non une faute de requête ?
+ *
+ * Ce qui la distingue compte : une base injoignable n'est pas la faute de
+ * l'élève et se répare toute seule ; une contrainte violée, elle, est un
+ * défaut de notre code qu'il ne faut pas déguiser en panne passagère.
+ *
+ * Sans cette distinction, un hôte mal saisi dans DATABASE_URL affiche
+ * « getaddrinfo ENOTFOUND … » sur la fiche d'une formation. Constaté en
+ * production le 21/09/2026 : le message brut du pilote, et le nom de l'hôte
+ * configuré avec lui, sous le bouton « Enregistrer dans mes vœux ».
+ */
+export function panneDeConnexion(e: unknown): boolean {
+  if (e === null || typeof e !== 'object') return false
+  const code = (e as { code?: unknown }).code
+  return typeof code === 'string' && code in PANNES
 }
 
 /** Ferme la connexion. Pour les tests et l'arrêt propre du serveur. */

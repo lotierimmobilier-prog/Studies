@@ -58,7 +58,7 @@ import {
   jetonDeLEnTete,
 } from './comptes.ts'
 import { DepotReleves } from './releves.ts'
-import { bd, configuree as baseConfiguree } from './bd.ts'
+import { bd, configuree as baseConfiguree, panneDeConnexion } from './bd.ts'
 import {
   ClientEmploi,
   EmploiNonConfigure,
@@ -160,6 +160,16 @@ const clientEmploi = new ClientEmploi(coffre)
  * ensuite — le cache de six heures est partagé entre toutes les écoles.
  */
 const THEMES_MAX = 5
+
+/**
+ * Ce qu'on dit à l'élève quand la base ne répond pas.
+ *
+ * Jamais le message du pilote : « getaddrinfo ENOTFOUND … » ne veut rien dire
+ * pour un lycéen, porte le nom de l'hôte que nous avons configuré, et se lit
+ * comme une panne de SON côté. Le vrai motif part dans le journal du serveur,
+ * où l'exploitant le lira — et la console d'administration le nomme déjà.
+ */
+const BASE_EN_PANNE = 'L’enregistrement des vœux est momentanément indisponible. Réessaie dans un moment.'
 
 async function regionDe(codeInsee: string): Promise<string | null> {
   const sql = bd()
@@ -632,6 +642,10 @@ async function demarrer(): Promise<void> {
           if (e instanceof BaseIndisponible) {
             return envoyerJson(res, 503, { erreur: e.message })
           }
+          if (panneDeConnexion(e)) {
+            console.error('Base injoignable (session) :', (e as { code?: string }).code)
+            return envoyerJson(res, 503, { erreur: BASE_EN_PANNE })
+          }
           throw e
         }
         if (compte === null) {
@@ -698,6 +712,10 @@ async function demarrer(): Promise<void> {
           }
           if (e instanceof BaseIndisponible) {
             return envoyerJson(res, 503, { erreur: e.message })
+          }
+          if (panneDeConnexion(e)) {
+            console.error('Base injoignable (vœux) :', (e as { code?: string }).code)
+            return envoyerJson(res, 503, { erreur: BASE_EN_PANNE })
           }
           throw e
         }
