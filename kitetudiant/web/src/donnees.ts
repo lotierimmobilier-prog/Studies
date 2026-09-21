@@ -431,15 +431,6 @@ export async function listerFilieres(
 
 /* ------------------------------------------------------------- emploi */
 
-export interface ComptageMetier {
-  readonly codeRome: string
-  readonly libelle: string
-  /** `null` veut dire « on n'a pas pu compter », jamais « aucune offre ». */
-  readonly enFrance: number | null
-  readonly enRegion: number | null
-  readonly lien: string
-}
-
 export interface OffresParMetier {
   readonly theme: string
   /** Ce que vaut le rapprochement formation → métiers. Jamais implicite. */
@@ -448,7 +439,6 @@ export interface OffresParMetier {
   readonly source: string
   readonly releveLe: string
   readonly total: { readonly enFrance: number | null; readonly enRegion: number | null }
-  readonly metiers: readonly ComptageMetier[]
 }
 
 /** Levée quand France Travail n'est pas configuré sur ce serveur. */

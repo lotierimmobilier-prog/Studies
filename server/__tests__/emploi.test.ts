@@ -7,7 +7,7 @@
  *   - la clé secrète ne doit apparaître dans aucun message d'erreur ;
  *   - « on n'a pas pu compter » ne doit jamais devenir « zéro offre » ;
  *   - le quota de dix requêtes par seconde ne doit pas être dépassé, donc
- *     le cache doit vraiment éviter les appels, et les comptages d'une
+ *     le cache doit vraiment éviter les appels, et les totaux d'une
  *     page doivent partir en série.
  *
  * Tout est exercé sur un `fetch` simulé : ces propriétés-là ne dépendent
@@ -90,9 +90,11 @@ describe('compter les offres', () => {
       url.includes('oauth2') ? jetonOk() : comptage(2295),
     )
     const client = new ClientEmploi(coffre(), recuperer)
-    const [c] = await client.comptages([{ code: 'J1502', libelle: 'Cadre de santé' }], null)
+    const [c] = await client.totaux(['J15'], null)
     expect(c!.enFrance).toBe(2295)
-    expect(c!.releveLe).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    /* `releveLe` n'est plus porté par le comptage : il était produit par
+       `comptages`, supprimée avec la liste de métiers qu'elle alimentait.
+       C'est désormais la réponse de /api/emploi qui le date. */
   })
 
   it('traite 204 comme un vrai zéro', async () => {
@@ -100,7 +102,7 @@ describe('compter les offres', () => {
       url.includes('oauth2') ? jetonOk() : new Response(null, { status: 204 }),
     )
     const client = new ClientEmploi(coffre(), recuperer)
-    const [c] = await client.comptages([{ code: 'M1805', libelle: 'Dév' }], null)
+    const [c] = await client.totaux(['M18'], null)
     expect(c!.enFrance).toBe(0)
   })
 
@@ -112,7 +114,7 @@ describe('compter les offres', () => {
       url.includes('oauth2') ? jetonOk() : new Response('', { status: 500 }),
     )
     const client = new ClientEmploi(coffre(), recuperer)
-    const [c] = await client.comptages([{ code: 'M1805', libelle: 'Dév' }], null)
+    const [c] = await client.totaux(['M18'], null)
     expect(c!.enFrance).toBeNull()
     expect(c!.enFrance).not.toBe(0)
   })
@@ -124,7 +126,7 @@ describe('compter les offres', () => {
       url.includes('oauth2') ? jetonOk() : comptage(12),
     )
     const client = new ClientEmploi(coffre(), recuperer)
-    await client.comptages([{ code: 'M1805', libelle: 'Dév' }], null)
+    await client.totaux(['M18'], null)
     expect(appels.find((a) => a.includes('offres/search'))).toContain('range=0-0')
   })
 
@@ -133,7 +135,7 @@ describe('compter les offres', () => {
       url.includes('oauth2') ? jetonOk() : comptage(26),
     )
     const client = new ClientEmploi(coffre(), recuperer)
-    const [c] = await client.comptages([{ code: 'M1855', libelle: 'Dév web' }], '75')
+    const [c] = await client.totaux(['M18'], '75')
     expect(c!.enFrance).toBe(26)
     expect(c!.enRegion).toBe(26)
     const recherches = appels.filter((a) => a.includes('offres/search'))
@@ -149,10 +151,10 @@ describe('le quota de dix requêtes par seconde', () => {
       url.includes('oauth2') ? jetonOk() : comptage(7),
     )
     const client = new ClientEmploi(coffre(), recuperer)
-    const metier = [{ code: 'M1805', libelle: 'Dév' }]
-    await client.comptages(metier, null)
-    await client.comptages(metier, null)
-    await client.comptages(metier, null)
+    const domaine = ['M18']
+    await client.totaux(domaine, null)
+    await client.totaux(domaine, null)
+    await client.totaux(domaine, null)
     expect(appels.filter((a) => a.includes('offres/search'))).toHaveLength(1)
   })
 
@@ -164,10 +166,10 @@ describe('le quota de dix requêtes par seconde', () => {
       url.includes('oauth2') ? jetonOk() : etat === 500 ? new Response('', { status: 500 }) : comptage(9),
     )
     const client = new ClientEmploi(coffre(), recuperer, () => temps)
-    expect((await client.comptages([{ code: 'M1805', libelle: 'D' }], null))[0]!.enFrance).toBeNull()
+    expect((await client.totaux(['M18'], null))[0]!.enFrance).toBeNull()
     etat = 200
     temps += 61_000
-    expect((await client.comptages([{ code: 'M1805', libelle: 'D' }], null))[0]!.enFrance).toBe(9)
+    expect((await client.totaux(['M18'], null))[0]!.enFrance).toBe(9)
   })
 
   it('ne redemande pas un jeton encore valable', async () => {
@@ -175,14 +177,7 @@ describe('le quota de dix requêtes par seconde', () => {
       url.includes('oauth2') ? jetonOk() : comptage(3),
     )
     const client = new ClientEmploi(coffre(), recuperer)
-    await client.comptages(
-      [
-        { code: 'A', libelle: 'a' },
-        { code: 'B', libelle: 'b' },
-        { code: 'C', libelle: 'c' },
-      ],
-      null,
-    )
+    await client.totaux(['A12', 'B34', 'C56'], null)
     expect(appels.filter((a) => a.includes('oauth2'))).toHaveLength(1)
   })
 

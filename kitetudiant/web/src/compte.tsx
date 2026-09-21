@@ -202,8 +202,25 @@ export function Compte({
             de formation et son rang, rien d’autre — ni note, ni montant, ni commentaire.
             C’est ce qui te permet de la retrouver d’un téléphone à l’autre.
           </li>
+          {/* « Aucune publicité » est tombé le jour où l'accueil a porté un
+              lien partenaire rémunéré (web/src/partenaires.ts). La phrase a
+              été réécrite EN MÊME TEMPS que le lien est apparu, pas après :
+              c'est la troisième promesse de ce site à devoir être réparée,
+              et les deux premières l'avaient été trop tard.
+
+              Ce qui reste vrai reste écrit tel quel. Ce qui a changé est
+              nommé, avec ce qui le borne : le partenaire n'apprend rien de
+              toi tant que tu ne cliques pas, puisque aucun script tiers
+              n'est chargé. */}
           <li>
-            <strong>Jamais :</strong> aucune revente, aucune publicité, aucun traceur.
+            <strong>Jamais :</strong> aucune revente de tes données, aucun traceur,
+            aucune bannière.
+          </li>
+          <li>
+            <strong>Dit franchement :</strong> une page du site propose un partenaire
+            pour comparer énergie, assurance et mobile, et il nous rémunère si tu
+            souscris. Il n’apprend rien de toi tant que tu ne cliques pas, et rien de
+            ce que tu fais ici ne lui est transmis.
           </li>
           <li>
             <strong>Effacé :</strong> un compte inutilisé pendant trois ans est supprimé

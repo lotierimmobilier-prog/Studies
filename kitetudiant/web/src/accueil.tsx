@@ -55,6 +55,7 @@ import {
 } from './calendrier.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
 import { dateLisible } from './dates.ts'
+import { PAPERNEST, REL_PARTENAIRE } from './partenaires.ts'
 
 // Les photographies sont IMPORTÉES et non désignées par un chemin : Vite leur
 // applique la base de déploiement (le site est servi sous un sous-chemin) et
@@ -483,6 +484,57 @@ export function Accueil({
           </li>
           <li>Jeu de communes assemblé le {dateLisible(GENERE_LE)}.</li>
         </ul>
+      </section>
+
+      {/* Placé JUSTE APRÈS « Ce que ce site ne fait pas » et « D'où viennent
+          les chiffres », et pas ailleurs.
+
+          C'est le seul bloc du site qui nous rapporte de l'argent. Le mettre
+          en haut, avant que le lecteur ait vu ce que le site fait et ce
+          qu'il refuse de faire, en ferait une bannière. Ici, il arrive après
+          la page où l'on explique d'où viennent les chiffres — et la mention
+          de rémunération se lit dans le même souffle que le reste.
+
+          Il n'est pas dans le corps pré-rendu (scripts/prerendre.ts) : ce
+          corps est un squelette pour les robots — titre, chapô, liens,
+          questions — et un lien rémunéré n'a rien à y faire. */}
+      <section className="bloc partenaire" id="factures" aria-labelledby="factures-titre">
+        <h2 id="factures-titre">Faire baisser tes factures, pas seulement les compter</h2>
+        <p className="bloc-intro">
+          Le reste-à-vivre que ce site calcule part de ce que coûtent les choses. Une
+          partie de ces lignes se négocie : l’électricité, le gaz, l’assurance
+          habitation — obligatoire dès que tu es locataire —, le forfait mobile et la
+          box. Ce sont des contrats que tu vas devoir signer de toute façon en
+          emménageant.
+        </p>
+        <p>
+          {PAPERNEST.quoi} Tu réponds à quelques questions, tu compares, et tu signes
+          seulement si ça te va.
+        </p>
+
+        {/* La mention AVANT le bouton, pas en bas de page. Quelqu'un qui
+            clique doit savoir ce qu'il fait au moment où il clique. */}
+        <p className="note partenaire-mention">{PAPERNEST.remuneration}</p>
+
+        <div className="cta-groupe">
+          <a
+            className="secondaire"
+            href={PAPERNEST.lien}
+            target="_blank"
+            rel={REL_PARTENAIRE}
+          >
+            Comparer mes contrats avec {PAPERNEST.nom}
+            <span aria-hidden="true"> ↗</span>
+          </a>
+        </div>
+
+        {/* Dit parce que c'est vrai, et parce que le public de ce site a
+            souvent dix-sept ans : un contrat signé par un mineur est
+            annulable, ce qui n'aide personne. */}
+        <p className="note">
+          Ces contrats se signent à 18 ans, ou par un parent. Si tu n’y es pas encore,
+          c’est une démarche à préparer avec eux — pas à faire seul.
+        </p>
       </section>
 
       <section className="bloc" id="blog">
