@@ -1009,9 +1009,13 @@ export default function App() {
             <button type="button" className="principal" onClick={() => setFormulaireCompte(true)}>
               Créer mon compte — une adresse, un mot de passe
             </button>
+            {/* « Aucun vœu n'est enregistré » était faux depuis D1, et c'est
+                ici que ça comptait le plus : juste sous le bouton qui crée le
+                compte. Une promesse de confidentialité fausse au moment du
+                consentement ne se rattrape pas ailleurs. */}
             <p className="note">
-              Aucune note, aucun vœu, aucun bulletin n’est enregistré. Seulement ton adresse,
-              chiffrée.
+              Aucune note, aucun bulletin n’est enregistré. Ton adresse, chiffrée — et ta
+              liste de vœux si tu en construis une : un code de formation et son rang.
             </p>
           </section>
         ) : null}

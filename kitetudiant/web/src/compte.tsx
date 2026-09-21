@@ -174,8 +174,18 @@ export function Compte({
             forme d’empreinte. Rien d’autre.
           </li>
           <li>
-            <strong>Pas gardé :</strong> tes notes, tes bulletins, tes vœux, tes réponses au
+            <strong>Pas gardé :</strong> tes notes, tes bulletins, tes réponses au
             questionnaire. Ils restent dans ce navigateur et ne sont jamais envoyés.
+          </li>
+          {/* Cette ligne manquait, et son absence rendait la précédente FAUSSE.
+              D1 a fait monter la liste de vœux au serveur — c'est ce qui permet
+              de la retrouver d'un appareil à l'autre — mais le texte continuait
+              de promettre l'inverse, à des mineurs, au moment précis où on leur
+              demande de créer un compte. */}
+          <li>
+            <strong>Gardé aussi, si tu le demandes :</strong> ta liste de vœux. Un code
+            de formation et son rang, rien d’autre — ni note, ni montant, ni commentaire.
+            C’est ce qui te permet de la retrouver d’un téléphone à l’autre.
           </li>
           <li>
             <strong>Jamais :</strong> aucune revente, aucune publicité, aucun traceur.

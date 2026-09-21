@@ -279,6 +279,17 @@ export function MesVoeux({
 
       <h1 className="article-titre">Mes vœux</h1>
 
+      {/* Cette page s'appelle « Mes vœux », plafonne à dix comme Parcoursup, et
+          propose de « retirer » un vœu. Rien n'y disait que la liste ne part
+          nulle part. Un élève de dix-sept ans pouvait raisonnablement croire
+          ses vœux déposés — et découvrir le contraire après la date limite. */}
+      <p className="bloc-intro">
+        Ta liste de travail, ici, sur KitEtudiant. <strong>Elle ne part pas sur
+        Parcoursup</strong> : c’est sur parcoursup.gouv.fr que les vœux se formulent
+        et se confirment. Dix au maximum, comme là-bas, pour que ta liste d’ici
+        ressemble à celle de là-bas.
+      </p>
+
       {etat === 'charge' ? (
         <p className="note" role="status" aria-live="polite">
           Chargement de ta liste…
@@ -416,7 +427,10 @@ export function BoutonVoeu({
         >
           Enregistrer dans mes vœux
         </button>
-        <span className="note">Il faut un compte pour retrouver ta liste d’un appareil à l’autre.</span>
+        <span className="note">
+          Une liste de travail, pas un dépôt de vœux : rien n’est envoyé à Parcoursup.
+          Il faut un compte pour la retrouver d’un appareil à l’autre.
+        </span>
       </div>
     )
   }

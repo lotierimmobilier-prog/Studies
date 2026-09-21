@@ -239,6 +239,22 @@ function ecrire(chemin: string, contenu: string): void {
 }
 
 const coquille = readFileSync(join(SORTIE, 'index.html'), 'utf8')
+/* La coquille est lue dans la SORTIE, et l'accueil y est réécrite plus bas :
+   relancer ce script sans « vite build » entre-temps poserait un second lien
+   canonique, un second jeu d'og:* et un second bloc JSON-LD — sur l'accueil,
+   et sur chaque article qui hérite d'elle. Deux canoniques contradictoires,
+   Google les ignore tous les deux.
+   
+   Vérifié : au second passage, l'accueil portait deux canoniques, deux
+   og:title et deux JSON-LD, et l'article aussi. Le pipeline nominal enchaîne
+   bien build puis pré-rendu, mais rien n'empêchait de lancer le second seul. */
+if (coquille.includes('rel="canonical"')) {
+  throw new Error(
+    'La coquille porte déjà un lien canonique : le pré-rendu a donc déjà ' +
+      'tourné sur cette sortie. Relance « npm run build:kitetudiant », qui ' +
+      'refait le build avant le pré-rendu.',
+  )
+}
 if (!coquille.includes('<div id="root"></div>')) {
   throw new Error(
     'La coquille ne contient pas « <div id="root"></div> » : le pré-rendu ne ' +
@@ -330,33 +346,84 @@ const accueilTitre = 'KitEtudiant.fr — trouve la meilleure solution pour l’a
 const accueilDescription =
   'Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet, ' +
   'au même endroit, avec des chiffres datés et leur source.'
+/**
+ * Le corps de l'accueil, posé dans la coquille.
+ *
+ * ── Pourquoi ce n'était pas là, et pourquoi il le faut ───────────────────
+ *
+ * L'accueil ne recevait que des métadonnées : son `<div id="root">` restait
+ * vide, et la page livrée par nginx ne contenait donc AUCUN lien. Pour un
+ * robot qui n'exécute pas JavaScript — et pour tous ceux qui l'exécutent
+ * mais rationnent ce budget — le site commençait et finissait sur une page
+ * blanche. Le blog n'était atteignable que par le plan du site.
+ *
+ * On pose ici de quoi partir : le titre, la promesse, et les liens vers les
+ * trois entrées publiques. React remplace tout au montage ; cette version
+ * n'est lue que par ce qui ne monte pas.
+ *
+ * Le texte reprend MOT POUR MOT celui de `accueil.tsx`. Deux formulations
+ * différentes pour la même page — l'une pour les robots, l'autre pour les
+ * gens — c'est la définition du contenu masqué, et ça se sanctionne.
+ */
+function corpsAccueil(): string {
+  const liens = [
+    { url: `${BASE}chercher-une-ecole`, texte: 'Chercher une école' },
+    { url: `${BASE}blog`, texte: 'Le blog : Parcoursup, budget et logement' },
+    ...ARTICLES.slice(0, 6).map((a) => ({
+      url: `${BASE}blog/${a.slug}`,
+      texte: a.titre,
+    })),
+  ]
+  return [
+    '<main>',
+    `<h1>${echapper('Trouve la meilleure solution pour l’année prochaine.')}</h1>`,
+    `<p>${echapper(accueilDescription)}</p>`,
+    '<nav aria-label="Aller à l’essentiel"><ul>',
+    ...liens.map((l) => `<li><a href="${echapper(l.url)}">${echapper(l.texte)}</a></li>`),
+    '</ul></nav>',
+    '</main>',
+  ].join('')
+}
+
 ecrire(
   join(SORTIE, 'index.html'),
-  coquille
-    .replace(/<title>[\s\S]*?<\/title>/, `<title>${echapper(accueilTitre)}</title>`)
-    .replace(
-      /<meta\s+name="description"\s+content="[\s\S]*?"\s*\/?>/,
-      `<meta name="description" content="${echapper(accueilDescription)}" />`,
-    )
-    .replace(
-      '</head>',
-      `  ${[
-        `<link rel="canonical" href="${echapper(accueilCanonique)}" />`,
-        `<meta property="og:type" content="website" />`,
-        `<meta property="og:title" content="${echapper(accueilTitre)}" />`,
-        `<meta property="og:description" content="${echapper(accueilDescription)}" />`,
-        `<meta property="og:url" content="${echapper(accueilCanonique)}" />`,
-        `<meta property="og:locale" content="fr_FR" />`,
-        ...enTetesDePartage('accueil', accueilTitre),
-        `<script type="application/ld+json">${identiteDuSite()}</script>`,
-      ].join('\n    ')}\n  </head>`,
-    ),
+  coquilleAvec(
+    coquille,
+    accueilTitre,
+    accueilDescription,
+    accueilCanonique,
+    corpsAccueil(),
+    [
+      ...enTetesDePartage('accueil', accueilTitre),
+      `<script type="application/ld+json">${identiteDuSite()}</script>`,
+    ].join('\n    '),
+  ).replace('<meta property="og:type" content="article" />',
+            '<meta property="og:type" content="website" />'),
 )
 
 // ------------------------------------------------------------- plan du site
+/* Les chemins PRIVÉS, tenus hors des index.
+   
+   Ce ne sont pas des pages de contenu : une page de connexion indexée vole
+   des clics aux pages utiles, et « Mes vœux » n'a rien à montrer à qui n'a
+   pas de compte. Ils sont énumérés ici, nommément, parce que `routes.test.ts`
+   exige que CHAQUE route de `routes.ts` soit soit au plan du site, soit dans
+   cette liste — une route ajoutée sans qu'on y pense fait échouer le test
+   plutôt que de disparaître en silence.
+   
+   `Disallow` empêche une nouvelle exploration ; il ne désindexe pas une page
+   déjà connue. Les écrans concernés portent donc AUSSI un
+   « <meta name="robots" content="noindex"> » posé au montage. */
+const CHEMINS_PRIVES = ['connexion', 'inscription', 'mon-compte', 'mes-cartes', 'mes-voeux']
+
 const adresses = [
   { url: `${ORIGINE}${BASE}`, le: ARTICLES[0]?.publieLe, priorite: '1.0' },
   { url: `${ORIGINE}${BASE}blog`, le: ARTICLES[0]?.publieLe, priorite: '0.8' },
+  /* La recherche d'école manquait au plan, et c'est la seule page publique
+     qui répond à « qu'est-ce qu'il y a comme écoles à Limoges ? ». Sans elle
+     au plan et sans lien depuis l'accueil livrée, elle n'était atteignable
+     par aucun robot. */
+  { url: `${ORIGINE}${BASE}chercher-une-ecole`, le: ARTICLES[0]?.publieLe, priorite: '0.8' },
   ...ARTICLES.map((a) => ({
     url: `${ORIGINE}${BASE}blog/${a.slug}`,
     le: a.revuLe ?? a.publieLe,
@@ -387,6 +454,9 @@ User-agent: *
 Allow: /
 # La console d'administration n'a rien à faire dans un index.
 Disallow: ${BASE}admin.html
+# Les pages de compte non plus : rien à y lire sans être connecté, et une
+# page de connexion indexée vole des clics aux pages qui répondent vraiment.
+${CHEMINS_PRIVES.map((c) => `Disallow: ${BASE}${c}`).join('\n')}
 
 # Les robots des moteurs génératifs, nommés un par un.
 #
