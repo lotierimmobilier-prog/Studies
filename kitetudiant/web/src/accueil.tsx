@@ -443,9 +443,11 @@ export function Accueil({
               un mensonge ; une promesse qu'on précise en expliquant pourquoi
               est tenable. Voir DECISIONS.md, D1. */}
           <li>
-            <strong>Il n’enregistre pas tes notes.</strong> Tes moyennes, tes bulletins
-            et ton budget restent dans ton navigateur, même une fois inscrit : ils ne
-            sont jamais envoyés. Le serveur ne garde que ton adresse, chiffrée, et — si
+            <strong>Il n’enregistre pas tes notes.</strong> Tes moyennes, ton budget et
+            tes réponses restent dans ton navigateur, même une fois inscrit : ils ne
+            sont jamais envoyés. Un bulletin que tu déposes fait exception — il part
+            se faire lire, sans être conservé nulle part, et les mentions légales
+            disent exactement ce qui lui arrive. Le serveur ne garde que ton adresse, chiffrée, et — si
             tu es connecté — <strong>ta liste de vœux</strong>, pour que tu la retrouves
             d’un appareil à l’autre. Un vœu, c’est un code de formation et son rang :
             aucun montant, aucune note. Tout est effacé après trois ans sans usage.
@@ -613,6 +615,18 @@ export function Accueil({
         <p className="non-affiliation">
           KitEtudiant.fr n’est pas affilié à Parcoursup, au ministère de l’Enseignement
           supérieur ni aux CROUS.
+        </p>
+        <p className="pieds-liens">
+          <a
+            href={cheminDe({ vue: 'mentions' })}
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+              e.preventDefault()
+              onNaviguer({ vue: 'mentions' })
+            }}
+          >
+            Mentions légales et données personnelles
+          </a>
         </p>
       </footer>
     </main>

@@ -189,8 +189,23 @@ export function Compte({
             forme d’empreinte. Rien d’autre.
           </li>
           <li>
-            <strong>Pas gardé :</strong> tes notes, tes bulletins, tes réponses au
-            questionnaire. Ils restent dans ce navigateur et ne sont jamais envoyés.
+            <strong>Pas gardé :</strong> tes notes, tes réponses au questionnaire, ton
+            budget. Ils restent dans ce navigateur et ne sont jamais envoyés.
+          </li>
+          {/* Cette ligne manquait, et son absence rendait la précédente FAUSSE
+              pour les bulletins : elle les rangeait parmi ce qui « ne part
+              jamais », alors que déposer un bulletin l'envoie au serveur puis
+              à l'API Claude, qui en fait la lecture (server/bulletinScolaire.ts).
+              Rien n'est écrit sur disque, mais « non conservé » et « jamais
+              envoyé » sont deux choses différentes, et c'est la seconde qui
+              était écrite — à des mineurs, sur leurs bulletins. */}
+          <li>
+            <strong>Envoyé, mais pas conservé :</strong> si tu déposes un bulletin, le
+            fichier part sur notre serveur puis à l’API Claude, qui en lit les moyennes
+            et les appréciations. Il n’est enregistré nulle part, et le texte des
+            appréciations n’est pas gardé — seuls les chiffres et un résumé te
+            reviennent. Tu peux aussi saisir tes moyennes à la main : dans ce cas rien
+            ne part.
           </li>
           {/* Cette ligne manquait, et son absence rendait la précédente FAUSSE.
               D1 a fait monter la liste de vœux au serveur — c'est ce qui permet

@@ -441,6 +441,7 @@ const accueilDescription = ACCUEIL_DESCRIPTION
 function corpsAccueil(): string {
   const liens = [
     { url: `${BASE}chercher-une-ecole`, texte: 'Chercher une école' },
+    { url: `${BASE}mentions-legales`, texte: 'Mentions légales et données personnelles' },
     { url: `${BASE}blog`, texte: 'Le blog : Parcoursup, budget et logement' },
     ...ARTICLES.slice(0, 6).map((a) => ({
       url: `${BASE}blog/${a.slug}`,
@@ -565,6 +566,11 @@ const adresses = [
      au plan et sans lien depuis l'accueil livrée, elle n'était atteignable
      par aucun robot. */
   { url: `${ORIGINE}${BASE}chercher-une-ecole`, le: ARTICLES[0]?.publieLe, priorite: '0.8' },
+  /* Les mentions légales sont au plan, et à dessein : c'est la page qu'on
+     cherche pour savoir qui édite un site, et une page légale introuvable
+     ne remplit pas son office. Priorité basse — elle doit être trouvable,
+     pas mise en avant. */
+  { url: `${ORIGINE}${BASE}mentions-legales`, le: ARTICLES[0]?.publieLe, priorite: '0.3' },
   ...ARTICLES.map((a) => ({
     url: `${ORIGINE}${BASE}blog/${a.slug}`,
     le: a.revuLe ?? a.publieLe,
@@ -714,6 +720,8 @@ ${ARTICLES.map((a) => `- [${a.titre}](${ORIGINE}${BASE}blog/${a.slug}) : ${a.cha
 - [Chercher une école](${ORIGINE}${BASE}chercher-une-ecole) : recherche par
   ville, par domaine ou par nom d'établissement.
 - [Blog](${ORIGINE}${BASE}blog) : la liste des articles.
+- [Mentions légales](${ORIGINE}${BASE}mentions-legales) : éditeur, hébergeur,
+  données personnelles, liens rémunérés et sources de données.
 - [Plan du site](${ORIGINE}${BASE}sitemap.xml)
 
 ## Fiches

@@ -486,6 +486,23 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .bloc-intro { margin: 0 0 1.1rem; color: var(--doux); font-size: 0.92rem; }
 .bloc-chute { margin: 1.25rem 0 0; font-size: 0.95rem; }
 
+/* --------------------------------------------------------- page légale */
+.legal-paragraphe { margin: 0 0 0.9rem; font-size: 0.92rem; line-height: 1.65; }
+.legal-liste { margin: 0 0 1.1rem; padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.65; }
+.legal-liste li { margin-bottom: 0.45rem; }
+/* Les trous de la page se voient. Masqués, ils ne seraient jamais comblés —
+   et c'est cette page qui fait foi le jour d'un litige. */
+.legal-manquant { color: var(--rouge); font-style: italic; }
+.legal-avertissement {
+  margin: 0 0 1.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--rouge);
+  border-radius: var(--rayon);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.pieds-liens { margin: 0.75rem 0 0; font-size: 0.85rem; }
+
 /* ------------------------------------------------------- bloc partenaire */
 /* Encadré, parce qu'il doit se distinguer du reste de la page : c'est le
    seul endroit du site qui mène vers un service rémunéré, et le lecteur a
