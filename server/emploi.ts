@@ -32,6 +32,7 @@
  */
 
 import { nombre } from '../kitetudiant/packages/budget-engine/src/nombres.ts'
+import { lienOffresFranceTravail } from '../kitetudiant/packages/metiers/src/index.ts'
 import { Coffre } from './secrets.ts'
 
 const OAUTH =
@@ -311,7 +312,5 @@ export function somme(valeurs: readonly (number | null)[]): number | null {
  * l'API.
  */
 export function lienOffres(libelle: string, region: string | null): string {
-  const p = new URLSearchParams({ motsCles: libelle })
-  if (region !== null) p.set('region', region)
-  return `https://candidat.francetravail.fr/offres/recherche?${p.toString()}`
+  return lienOffresFranceTravail(libelle, region)
 }

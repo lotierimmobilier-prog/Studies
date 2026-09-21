@@ -490,6 +490,57 @@ export async function chercherEmploi(
   return corps as OffresParMetier
 }
 
+/** Une spécialité de l'école, et ce que son secteur publie comme offres. */
+export interface SpecialiteEmploi {
+  readonly cle: string
+  /** Ce que vaut le rapprochement spécialité → métiers. Jamais implicite. */
+  readonly note: string
+  readonly enFrance: number | null
+  readonly enRegion: number | null
+}
+
+export interface DebouchesEtablissement {
+  readonly region: string | null
+  readonly source: string
+  readonly releveLe: string
+  /** Spécialités demandées, avant plafonnement. L'écran dit ce qu'il tait. */
+  readonly demandees: number
+  readonly specialites: readonly SpecialiteEmploi[]
+}
+
+/**
+ * Les débouchés d'un établissement, spécialité par spécialité.
+ *
+ * Une seule requête pour toute l'école : chaque spécialité coûte des appels à
+ * France Travail, dont le quota est serré. Les demander une par une depuis le
+ * navigateur multiplierait les allers-retours sans rien gagner.
+ *
+ * Le serveur plafonne le nombre de spécialités comptées et renvoie combien
+ * avaient été demandées, pour que l'écran puisse le dire.
+ */
+export async function chercherDebouches(
+  themes: readonly string[],
+  codeInsee: string | null,
+  base = BASE_API,
+  recuperer: typeof fetch = fetch,
+): Promise<DebouchesEtablissement> {
+  const p = new URLSearchParams({ themes: themes.join(',') })
+  if (codeInsee !== null) p.set('insee', codeInsee)
+  const reponse = await recuperer(`${base}/emploi/etablissement?${p.toString()}`)
+  const corps = (await reponse.json().catch(() => ({}))) as
+    | DebouchesEtablissement
+    | { erreur?: string }
+  if (reponse.status === 503) {
+    throw new EmploiIndisponible(
+      ('erreur' in corps && corps.erreur) || 'Offres d’emploi indisponibles.',
+    )
+  }
+  if (!reponse.ok) {
+    throw new Error(('erreur' in corps && corps.erreur) || `Erreur ${reponse.status}`)
+  }
+  return corps as DebouchesEtablissement
+}
+
 /* -------------------------------------------------------------------- vœux */
 
 export interface Voeu {

@@ -540,6 +540,66 @@ débordement horizontal, ni chevauchement, ni texte coupé.
 
 ---
 
+## D19 — Les débouchés d'une école : ses spécialités, pas ses diplômés
+
+**Tranché le 21/09/2026.**
+
+La fiche d'école montre désormais, au-dessus de la liste des formations, vers
+quels secteurs mènent ses spécialités et combien d'annonces y sont ouvertes.
+L'onglet « Après » d'une fiche de **formation** faisait déjà cela pour un seul
+intitulé ; c'est la même mécanique à l'échelle de l'établissement.
+
+### Ce que ces chiffres ne sont pas, et la page le dit
+
+Ce ne sont **pas** les débouchés des diplômés de cette école. Personne ne
+publie le devenir des sortants formation par formation, et nous ne
+l'inventerons pas. Ce sont les annonces ouvertes aujourd'hui dans les secteurs
+vers lesquels ces spécialités mènent — un ordre de grandeur sur un bassin
+d'emploi. Un chiffre posé à côté d'un nom d'école se lit comme une promesse ;
+la phrase qui l'en empêche vient **avant** les chiffres, pas après.
+
+Le rapprochement spécialité → métiers reste le nôtre, pas celui de Parcoursup.
+
+### Le classement est celui de l'école, jamais celui des chiffres
+
+Les spécialités sont rangées par **nombre de formations** que l'école y
+propose. Mesuré sur l'Université de Limoges : « Sciences » sort en tête avec
+1 342 offres en France, devant « Santé et soin » qui en compte 49 632. Sans
+une phrase pour l'expliquer, ce voisinage se lirait comme un classement des
+débouchés — soit exactement l'inverse du vrai.
+
+À poids égal, l'ordre de la table tranche. Un tri instable donnerait deux
+classements pour la même école d'un chargement à l'autre, donc deux jeux de
+chiffres différents puisque seules cinq spécialités sont comptées.
+
+### Cinq spécialités au plus, et l'écran le dit
+
+Chaque domaine ROME coûte un appel par échelle, le quota est de dix par
+seconde, et les seize thèmes couvrent quarante-sept domaines. Mesuré contre
+la vraie API : cinq spécialités neuves prennent **5,3 s**, les seize en
+prendraient près de dix. On en compte donc cinq, et la page écrit combien
+elle en tait — une liste tronquée en silence laisse croire que l'école ne
+fait que ça.
+
+Le cache de six heures est partagé entre toutes les écoles : le même appel
+retombe de **2 262 ms à 10 ms**. Les domaines communs à plusieurs spécialités
+ne sont comptés qu'une fois.
+
+### Une route à part, et pourquoi
+
+`/api/emploi/etablissement` ne rend que les totaux par spécialité, là où
+`/api/emploi` traite un thème et échantillonne ses métiers. Demander
+l'échantillon de chaque spécialité d'une université coûterait une seconde par
+spécialité, pour une liste que personne ne lirait.
+
+Le lien vers France Travail est défini une seule fois, dans
+`packages/metiers` : le serveur s'en sert pour les métiers d'une formation, le
+navigateur pour les spécialités d'une école. Deux constructions de la même URL
+divergeraient au premier changement de leur site, et personne ne s'en
+apercevrait avant qu'un lien ne mène nulle part.
+
+---
+
 ## Questions encore ouvertes
 
 | # | Question | Ce qui bloque | Échéance |

@@ -3165,3 +3165,72 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   padding: 0.6rem 0;
   border-bottom: 1px solid var(--trait);
 }
+
+/* ═══════════════════════════════ les débouchés d'une école, par spécialité
+ *
+ * Une ligne par spécialité : son nom à gauche, ses compteurs à droite. En
+ * dessous de 40 rem les deux passent l'un sous l'autre — deux nombres et un
+ * intitulé de secteur ne tiennent pas côte à côte sur un téléphone.
+ *
+ * Les chiffres sont alignés à droite et non centrés : on les compare d'une
+ * ligne à l'autre, et un alignement flottant rend cette comparaison pénible.
+ */
+.specialites {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.specialite {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--trait);
+}
+.specialite:last-child {
+  border-bottom: 1px solid var(--trait);
+}
+.specialite-tete {
+  min-width: 0;
+}
+.specialite-titre {
+  color: var(--encre);
+  font-family: var(--titres);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.specialite-titre:hover,
+.specialite-titre:focus-visible {
+  text-decoration: underline;
+}
+.specialite-tete .note {
+  margin: 0.2rem 0 0;
+}
+.specialite-chiffres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.5rem;
+}
+.specialite-chiffre strong {
+  font-family: var(--titres);
+  font-size: 1.15rem;
+  /* Chiffres à chasse fixe : sans cela, « 1 246 » et « 9 600 » n'ont pas la
+     même largeur et les colonnes dansent d'une ligne à l'autre. */
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 40rem) {
+  .specialite {
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .specialite-chiffres {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    text-align: right;
+  }
+}

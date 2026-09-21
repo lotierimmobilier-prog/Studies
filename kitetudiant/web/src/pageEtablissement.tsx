@@ -19,18 +19,199 @@
  * auprès des candidats, pas une qualité. La page le dit.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { FilAriane } from './filAriane.tsx'
+import { nombre } from './nombres.ts'
 import { adresseComplete, cheminDe, type Route } from './routes.ts'
+import { libelleDuTheme, specialitesDesLibelles } from './themes.ts'
+import { lienOffresFranceTravail } from '../../packages/metiers/src/index.ts'
 import {
+  chercherDebouches,
+  EmploiIndisponible,
   formationsDeLEtablissement,
   SOURCE_PARCOURSUP,
+  type DebouchesEtablissement,
   type Formation,
 } from './donnees.ts'
 
 /** Limite de l'API. Au-delà, la page le dit plutôt que de laisser croire. */
 const LIMITE_API = 100
+
+function dateLisible(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+/**
+ * Les débouchés de l'école, spécialité par spécialité.
+ *
+ * ── Ce que ces chiffres sont, et ce qu'ils ne sont pas ───────────────────
+ *
+ * Ce ne sont PAS les débouchés des diplômés de cette école : personne ne
+ * publie le devenir des sortants formation par formation, et nous ne
+ * l'inventerons pas. C'est le nombre d'annonces ouvertes aujourd'hui dans
+ * les secteurs vers lesquels ses spécialités mènent — un ordre de grandeur
+ * sur un bassin d'emploi, pas une promesse d'embauche.
+ *
+ * Le rapprochement spécialité → métiers est le NÔTRE. Parcoursup ne le
+ * publie pas, et la page le dit plutôt que de le laisser croire officiel.
+ */
+function Debouches({
+  formations,
+  codeInsee,
+}: {
+  readonly formations: readonly Formation[]
+  readonly codeInsee: string | null
+}) {
+  // `useMemo` parce que le tableau sert de dépendance à l'effet : recalculé à
+  // chaque rendu, il relancerait le comptage en boucle.
+  const specialites = useMemo(
+    () => specialitesDesLibelles(formations.map((f) => f.libelle)),
+    [formations],
+  )
+  const cles = specialites.join(',')
+
+  const [debouches, setDebouches] = useState<DebouchesEtablissement | null>(null)
+  const [etat, setEtat] = useState<'charge' | 'prete' | 'indisponible' | 'erreur' | 'aucune'>(
+    'charge',
+  )
+  const [message, setMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (cles === '') {
+      setEtat('aucune')
+      return
+    }
+    let vivant = true
+    setEtat('charge')
+    chercherDebouches(cles.split(','), codeInsee)
+      .then((d) => {
+        if (!vivant) return
+        setDebouches(d)
+        setEtat('prete')
+      })
+      .catch((e: unknown) => {
+        if (!vivant) return
+        if (e instanceof EmploiIndisponible) {
+          setEtat('indisponible')
+          return
+        }
+        setMessage((e as Error).message)
+        setEtat('erreur')
+      })
+    return () => {
+      vivant = false
+    }
+  }, [cles, codeInsee])
+
+  // Aucune spécialité reconnue : on ne montre rien. Proposer des secteurs au
+  // hasard serait pire que de se taire.
+  if (etat === 'aucune') return null
+
+  if (etat === 'charge') {
+    return (
+      <section className="bloc">
+        <h2>Vers quels métiers mènent ces formations</h2>
+        <p className="note" role="status" aria-live="polite">
+          Comptage des offres d’emploi…
+        </p>
+      </section>
+    )
+  }
+
+  if (etat === 'indisponible' || etat === 'erreur' || debouches === null) {
+    return (
+      <section className="bloc">
+        <h2>Vers quels métiers mènent ces formations</h2>
+        <p className="note">
+          Le comptage des offres d’emploi n’est pas disponible pour l’instant
+          {message === null ? '' : ` (${message})`}.
+        </p>
+      </section>
+    )
+  }
+
+  const { specialites: comptees, region, demandees, releveLe } = debouches
+  const tues = demandees - comptees.length
+
+  return (
+    <section className="bloc">
+      <h2>Vers quels métiers mènent ces formations</h2>
+
+      {/* La mise en garde AVANT les chiffres, pas après : un lecteur qui fait
+          défiler jusqu'en bas les a déjà lus comme un verdict. */}
+      <p className="bloc-intro">
+        Ce ne sont pas les débouchés des diplômés de cette école — personne ne publie le
+        devenir des sortants, formation par formation. Ce sont les annonces ouvertes le{' '}
+        {dateLisible(releveLe)} dans les secteurs vers lesquels ces spécialités mènent.
+      </p>
+      <p className="note">
+        Beaucoup de recrutements ne passent jamais par une annonce, et un secteur peut
+        embaucher sans publier. Ces chiffres situent un ordre de grandeur, rien de plus. Le
+        rapprochement entre une spécialité et ses métiers est le nôtre : Parcoursup ne le
+        publie pas.
+      </p>
+      {/* L'ordre est celui de l'école, pas celui des chiffres. Sans cette
+          phrase, une spécialité placée en tête avec mille offres devant une
+          autre qui en compte cinquante mille se lirait comme un classement
+          des débouchés — et le lecteur en tirerait l'inverse du vrai. */}
+      <p className="note">
+        Ces spécialités sont rangées par <strong>nombre de formations</strong> que l’école y
+        propose — c’est ce qu’elle enseigne le plus, <strong>pas</strong> un classement des
+        débouchés.
+      </p>
+
+      <ul className="specialites">
+        {comptees.map((sp) => {
+          const libelle = libelleDuTheme(sp.cle)
+          return (
+            <li key={sp.cle} className="specialite">
+              <div className="specialite-tete">
+                <a
+                  className="specialite-titre"
+                  href={lienOffresFranceTravail(libelle, region)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {libelle}
+                  <span aria-hidden="true"> ↗</span>
+                </a>
+                <p className="note">{sp.note}</p>
+              </div>
+              <div className="specialite-chiffres">
+                <span className="specialite-chiffre">
+                  <strong>{sp.enFrance === null ? 'non compté' : nombre(sp.enFrance)}</strong>
+                  <span className="note"> en France</span>
+                </span>
+                {region !== null ? (
+                  <span className="specialite-chiffre">
+                    <strong>{sp.enRegion === null ? 'non compté' : nombre(sp.enRegion)}</strong>
+                    <span className="note"> dans la région</span>
+                  </span>
+                ) : null}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
+
+      {/* Ce qui n'est pas compté est DIT. Une liste tronquée en silence laisse
+          croire que l'école ne fait que ça. */}
+      {tues > 0 ? (
+        <p className="note">
+          Cette école couvre {nombre(demandees)} spécialités ; les {nombre(comptees.length)}{' '}
+          les plus enseignées sont comptées ici. Chaque comptage interroge France Travail,
+          dont le quota est limité.
+        </p>
+      ) : null}
+
+      <p className="fiche-source">{debouches.source}</p>
+    </section>
+  )
+}
+
 
 export function PageEtablissement({
   uai,
@@ -125,7 +306,20 @@ export function PageEtablissement({
           </>
         ) : null}
 
-        {formations.length > 0 ? (
+      </section>
+
+      {/* AVANT la liste des formations, et c'est tout le sujet : une
+          université en publie jusqu'à cent, et une synthèse enterrée sous
+          cent vignettes n'est lue par personne. Le détail vient après. */}
+      {etat === 'prete' && formations.length > 0 ? (
+        <Debouches formations={formations} codeInsee={premiere?.codeInsee ?? null} />
+      ) : null}
+
+      {/* La section entière est conditionnelle, et pas seulement son contenu :
+          un « bloc » vide dessinerait un cadre bordé autour de rien. */}
+      {formations.length > 0 ? (
+        <section className="bloc">
+          <h2>Les formations de cette école</h2>
           <>
             <p>
               {formations.length === LIMITE_API
@@ -172,8 +366,8 @@ export function PageEtablissement({
             </ul>
             <p className="fiche-source">{SOURCE_PARCOURSUP}</p>
           </>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
     </main>
   )
 }

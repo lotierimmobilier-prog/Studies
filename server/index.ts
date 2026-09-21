@@ -148,6 +148,19 @@ const clientEmploi = new ClientEmploi(coffre)
  * `null` et l'écran n'affiche que le compte national : une échelle annoncée
  * vaut mieux qu'une seconde devinée.
  */
+/**
+ * Spécialités comptées au plus pour un établissement.
+ *
+ * Cinq, et pas seize : chaque domaine ROME coûte un appel par échelle, le
+ * quota est de dix par seconde, et les seize thèmes couvrent quarante-sept
+ * domaines. Compter tout ferait attendre près de dix secondes pour une page
+ * qui, de toute façon, ne se lit pas au-delà de quelques lignes.
+ *
+ * Cinq tient en trois secondes au premier chargement, et en rien du tout
+ * ensuite — le cache de six heures est partagé entre toutes les écoles.
+ */
+const THEMES_MAX = 5
+
 async function regionDe(codeInsee: string): Promise<string | null> {
   const sql = bd()
   if (sql === null || !/^[0-9AB]{5}$/i.test(codeInsee)) return null
@@ -522,6 +535,77 @@ async function demarrer(): Promise<void> {
               ...c,
               lien: lienOffres(c.libelle, region),
             })),
+          })
+        } catch (e) {
+          if (e instanceof EmploiNonConfigure) {
+            return envoyerJson(res, 503, { erreur: e.message })
+          }
+          return envoyerJson(res, 502, {
+            erreur: 'France Travail n’a pas répondu. Réessaie dans un moment.',
+          })
+        }
+      }
+
+      /* KITETUDIANT — les débouchés d'un établissement, spécialité par
+         spécialité.
+         
+         Distinct de /api/emploi, qui traite UN thème et échantillonne ses
+         métiers. Ici on ne rend que le total par spécialité : une école en
+         couvre plusieurs, et lui demander l'échantillon de chacune coûterait
+         une seconde par spécialité.
+         
+         ── Le plafond, et pourquoi il existe ──────────────────────────────
+         
+         Chaque domaine ROME coûte un appel par échelle, et le quota est de
+         dix par seconde. Une grande université touche les seize thèmes,
+         soit quarante-sept domaines : près de dix secondes d'attente pour
+         une page. On en garde donc au plus THEMES_MAX, et l'écran dit qu'il
+         y en a d'autres — plutôt que de faire patienter, ou de laisser
+         croire que l'école ne fait que ça.
+         
+         Le cache de six heures fait le reste : les domaines partagés entre
+         spécialités ne sont comptés qu'une fois, et le deuxième visiteur
+         n'attend pas. */
+      if (url.pathname === '/api/emploi/etablissement' && req.method === 'GET') {
+        const demandes = (url.searchParams.get('themes') ?? '')
+          .split(',')
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0)
+        // Les thèmes arrivent du navigateur : on ne garde que ceux de la
+        // table, et on les dédoublonne. Un thème inconnu n'est pas une
+        // erreur — il est ignoré, comme une formation sans correspondance.
+        const connus = [...new Set(demandes)]
+          .map((cle) => themeMetiers(cle))
+          .filter((t): t is NonNullable<typeof t> => t !== null)
+          .filter((t) => t.domaines.length > 0)
+        if (connus.length === 0) {
+          return envoyerJson(res, 400, { erreur: 'Aucune spécialité reconnue.' })
+        }
+        if (!(await clientEmploi.configure())) {
+          return envoyerJson(res, 503, { erreur: new EmploiNonConfigure().message })
+        }
+        try {
+          const insee = url.searchParams.get('insee')
+          const region = insee === null ? null : await regionDe(insee)
+          const retenus = connus.slice(0, THEMES_MAX)
+          const specialites = []
+          for (const theme of retenus) {
+            const totaux = await clientEmploi.totaux(theme.domaines, region)
+            specialites.push({
+              cle: theme.cle,
+              note: theme.note,
+              enFrance: somme(totaux.map((t) => t.enFrance)),
+              enRegion: region === null ? null : somme(totaux.map((t) => t.enRegion)),
+            })
+          }
+          return envoyerJson(res, 200, {
+            region,
+            source: SOURCE_EMPLOI,
+            releveLe: new Date().toISOString().slice(0, 10),
+            // Le nombre DEMANDÉ, pour que l'écran puisse dire « et trois
+            // autres » sans recompter lui-même ce qu'il a envoyé.
+            demandees: connus.length,
+            specialites,
           })
         } catch (e) {
           if (e instanceof EmploiNonConfigure) {

@@ -202,3 +202,23 @@ export function metiersDuTheme(
   const pas = retenus.length / combien
   return Array.from({ length: combien }, (_, i) => retenus[Math.floor(i * pas)]!)
 }
+
+/**
+ * Un lien vers les offres de France Travail, côté candidat.
+ *
+ * Défini ICI, et pas des deux côtés : le serveur s'en sert pour les métiers
+ * d'une fiche de formation, le navigateur pour les spécialités d'une école.
+ * Deux constructions de la même URL divergeraient au premier changement de
+ * leur site — et personne ne s'en apercevrait avant qu'un lien ne mène nulle
+ * part.
+ *
+ * `motsCles` et non un code ROME : la recherche publique de France Travail
+ * n'accepte pas les codes dans cette URL. C'est donc une recherche par mots,
+ * moins précise que le comptage affiché à côté — qui, lui, passe par l'API et
+ * filtre sur le code exact.
+ */
+export function lienOffresFranceTravail(motsCles: string, region: string | null): string {
+  const p = new URLSearchParams({ motsCles })
+  if (region !== null) p.set('region', region)
+  return `https://candidat.francetravail.fr/offres/recherche?${p.toString()}`
+}
