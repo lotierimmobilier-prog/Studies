@@ -20,11 +20,15 @@ import { euros } from './nombres.ts'
 export function ResumeRetours({ agregat }: { agregat: AgregatRetours | undefined }) {
   if (!agregat) return null
   if (agregat.statut === 'trop_peu_de_retours') {
+    /* Zéro retour ne s'écrit pas. Sur une liste de dix formations, « Aucun
+       retour d'étudiant pour l'instant » s'affichait dix fois, à l'identique,
+       et n'apprenait rien : l'absence de ligne dit déjà l'absence de retour.
+       La fiche détaillée, elle, continue de le dire — là, on est venu voir
+       les retours, et le silence serait une page inachevée. */
+    if (agregat.nombreRetours === 0) return null
     return (
       <p className="retours-resume">
-        {agregat.nombreRetours === 0
-          ? 'Aucun retour d’étudiant pour l’instant.'
-          : `${agregat.nombreRetours} retour${agregat.nombreRetours > 1 ? 's' : ''} d’étudiants : pas encore assez pour publier une moyenne.`}
+        {`${agregat.nombreRetours} retour${agregat.nombreRetours > 1 ? 's' : ''} d’étudiants : pas encore assez pour publier une moyenne.`}
       </p>
     )
   }

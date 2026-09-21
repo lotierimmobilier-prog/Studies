@@ -236,6 +236,36 @@ surUneVraieBase('les erreurs parlent français', () => {
     )
   })
 
+  it('dit autre chose quand AUCUNE formation n’est chargée', async () => {
+    /* Deux situations sans rapport, et le message ne disait que la première.
+
+       Constaté en production : `postgres-setup.sh` crée la base et applique
+       les migrations, mais ne charge PAS les données de référence — c'est
+       `charger.sh`. Table vide, donc « Enregistrer dans mes vœux » échouait
+       pour CHAQUE formation, en accusant la formation.
+
+       Un élève à qui l'on dit « la formation 12 n'est pas dans les données »
+       en essaie une autre, échoue pareil, et croit avoir mal choisi. */
+    const sql = bd()!
+    const id = await comptePret('base-vide@example.fr')
+    await sql`delete from eleve.panier_voeu`
+    await sql`delete from reference.formation`
+    try {
+      await expect(ajouter(id, CODES[0]!, SESSION)).rejects.toThrow(
+        /ne sont pas chargées sur ce serveur/,
+      )
+      // Et surtout : il ne doit plus accuser le vœu de l'élève.
+      await expect(ajouter(id, CODES[0]!, SESSION)).rejects.not.toThrow(
+        /La formation .* n’est pas dans les données/,
+      )
+      await expect(ajouter(id, CODES[0]!, SESSION)).rejects.toThrow(
+        /Ce n’est pas ton vœu qui est en cause/,
+      )
+    } finally {
+      await semerFormations()
+    }
+  })
+
   it('la contrainte reste en place : un vœu désigne une formation réelle', async () => {
     // La tentation, devant cette erreur, est de retirer la clé étrangère.
     // Ce test existe pour que ça ne se fasse pas en silence.

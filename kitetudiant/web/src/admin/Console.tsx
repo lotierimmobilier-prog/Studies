@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { Marque } from '../marque.tsx'
+import { nombre } from '../nombres.ts'
 
 import { Articles } from './Articles.tsx'
 import { Statistiques } from './Statistiques.tsx'
@@ -374,6 +375,39 @@ export function Console() {
                     ))
                   )}
                 </ul>
+
+                {/* Sans ce bloc, la console affichait TOUT AU VERT pendant que
+                    « Enregistrer dans mes vœux » échouait pour chaque
+                    formation : `postgres-setup.sh` crée la base et applique
+                    les migrations, mais ne charge pas les données de
+                    référence — c'est `charger.sh`. Base configurée, base qui
+                    répond, migrations appliquées, et table des formations
+                    vide. Constaté en production le 21/09/2026. */}
+                {etat.base.reference === null ? null : (
+                  <ul className="baremes">
+                    {Object.entries(etat.base.reference).map(([table, n]) => (
+                      <li key={table}>
+                        <span>reference.{table}</span>
+                        <span className={n === 0 ? 'alerte' : 'note'}>
+                          {n === null
+                            ? 'comptage impossible'
+                            : n === 0
+                              ? 'VIDE — aucun vœu enregistrable'
+                              : `${nombre(n)} lignes`}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {Object.values(etat.base.reference ?? {}).some((n) => n === 0) ? (
+                  <p className="alerte">
+                    Les migrations sont appliquées mais les données de référence ne
+                    sont pas chargées. Tant que c’est le cas, aucun élève ne peut
+                    enregistrer un vœu. Lance{' '}
+                    <code>PGURL=… bash kitetudiant/db/migrations/charger.sh</code>, après{' '}
+                    <code>scripts/import/preparer.py</code> qui produit les CSV.
+                  </p>
+                ) : null}
               </>
             ) : (
               <p className="alerte">

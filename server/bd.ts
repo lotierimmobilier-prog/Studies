@@ -102,8 +102,35 @@ export interface EtatBd {
   readonly version: string | null
   /** Migrations appliquées, la plus récente en dernier. */
   readonly migrations: readonly string[]
+  /**
+   * Nombre de lignes dans chaque table de référence, ou `null` si on n'a pas
+   * pu compter.
+   *
+   * ── Pourquoi ce champ existe ───────────────────────────────────────────
+   *
+   * `postgres-setup.sh` crée la base et applique les migrations. Il ne charge
+   * PAS les données de référence — c'est `charger.sh`, et il le dit à la fin.
+   * Quand on saute cette étape, la base est configurée, répond, et porte
+   * toutes ses migrations : l'état affichait donc tout au vert.
+   *
+   * Pendant ce temps, « Enregistrer dans mes vœux » échouait pour TOUTE
+   * formation, sur une violation de clé étrangère vers une table vide.
+   * L'exploitant voyait une console verte et un site cassé.
+   *
+   * C'est le même défaut que le minuteur de mise à jour qu'on croyait actif :
+   * un état qui rassure sans rien vérifier est pire qu'une absence d'état.
+   */
+  readonly reference: Readonly<Record<string, number | null>> | null
   readonly erreur: string | null
 }
+
+/**
+ * Les tables sans lesquelles le site ne peut rien enregistrer.
+ *
+ * `formation` d'abord : c'est sa clé étrangère que viole un vœu quand le
+ * chargement n'a pas eu lieu.
+ */
+const TABLES_DE_REFERENCE = ['formation', 'etablissement', 'commune'] as const
 
 /**
  * Ce que la console d'administration affiche.
@@ -119,6 +146,7 @@ export async function etat(): Promise<EtatBd> {
     ou: lieu(),
     version: null,
     migrations: [] as string[],
+    reference: null as Record<string, number | null> | null,
     erreur: null,
   }
   const sql = bd()
@@ -128,11 +156,23 @@ export async function etat(): Promise<EtatBd> {
     const appliquees = await sql<{ nom: string }[]>`
       select nom from public.migration order by applique_le
     `.catch(() => [] as { nom: string }[])
+    /* Un comptage par table, chacun rattrapé séparément : une table absente
+       — migration plus récente pas encore appliquée — ne doit pas faire
+       perdre le compte des autres. `null` dit « pas pu compter », ce qui
+       n'est pas la même chose que zéro. */
+    const reference: Record<string, number | null> = {}
+    for (const table of TABLES_DE_REFERENCE) {
+      const [ligne] = await sql<{ n: number }[]>`
+        select count(*)::int as n from reference.${sql(table)}
+      `.catch(() => [] as { n: number }[])
+      reference[table] = ligne?.n ?? null
+    }
     return {
       ...base,
       repond: true,
       version: v?.version.split(' ').slice(0, 2).join(' ') ?? null,
       migrations: appliquees.map((m) => m.nom),
+      reference,
     }
   } catch (e) {
     // Le message du pilote peut contenir l'URL : on ne garde que le type de

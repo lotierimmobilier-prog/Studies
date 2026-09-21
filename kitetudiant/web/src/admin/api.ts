@@ -30,6 +30,14 @@ export interface EtatBd {
   readonly ou: string | null
   readonly version: string | null
   readonly migrations: readonly string[]
+  /**
+   * Lignes par table de référence, ou `null` si le comptage a échoué.
+   *
+   * Sans lui, la console affichait tout au vert — base configurée, base qui
+   * répond, migrations appliquées — pendant qu'aucun vœu n'était
+   * enregistrable, faute de données chargées. Voir server/bd.ts.
+   */
+  readonly reference: Readonly<Record<string, number | null>> | null
   readonly erreur: string | null
 }
 

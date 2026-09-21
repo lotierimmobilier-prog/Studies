@@ -66,10 +66,26 @@ export class ListeComplete extends Error {
  * « foreign key constraint » et de noms de tables.
  */
 export class FormationInconnue extends Error {
-  constructor(code: string) {
+  constructor(code: string, referenceVide: boolean) {
+    /* Deux messages, parce que ce sont deux situations sans rapport, et que
+       le premier message disait toujours la seconde.
+
+       Table remplie, code absent : c'est cette formation-là, et réessayer
+       ailleurs a du sens.
+
+       Table VIDE : rien n'est enregistrable, pour personne. Constaté en
+       production — `postgres-setup.sh` crée la base et applique les
+       migrations mais ne charge PAS les données de référence (c'est
+       `charger.sh`). Dire « la formation 12 n'est pas dans les données »
+       envoie l'élève essayer une autre formation, qui échouera pareil, et
+       lui laisse croire qu'il a mal choisi. */
     super(
-      `La formation ${code} n’est pas dans les données chargées sur ce serveur : ` +
-        'impossible de l’enregistrer dans tes vœux.',
+      referenceVide
+        ? 'L’enregistrement des vœux n’est pas encore disponible : les données de ' +
+            'formations ne sont pas chargées sur ce serveur. Ce n’est pas ton vœu ' +
+            'qui est en cause, et réessayer plus tard ne coûte rien.'
+        : `La formation ${code} n’est pas dans les données chargées sur ce serveur : ` +
+            'impossible de l’enregistrer dans tes vœux.',
     )
   }
 }
@@ -235,7 +251,13 @@ export async function ajouter(
        surtout pas la contrainte : c'est elle qui empêche d'enregistrer un
        vœu vers rien. */
     if ((e as { code?: string }).code === CLE_ETRANGERE) {
-      throw new FormationInconnue(codeFormation)
+      /* On ne demande le compte QUE sur l'échec : une requête de plus sur
+         chaque ajout réussi, pour un cas qui n'arrive presque jamais, serait
+         payée par tout le monde. */
+      const [ligne] = await sql<{ n: number }[]>`
+        select count(*)::int as n from reference.formation
+      `.catch(() => [] as { n: number }[])
+      throw new FormationInconnue(codeFormation, ligne?.n === 0)
     }
     throw e
   }
