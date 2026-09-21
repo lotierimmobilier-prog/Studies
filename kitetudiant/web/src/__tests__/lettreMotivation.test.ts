@@ -26,13 +26,18 @@ import {
   SOURCE_LETTRE,
 } from '../../../packages/articles/src/lettreMotivation.ts'
 import {
+  amorceFormation,
   assembler,
+  avancement,
+  avecAmorce,
   chargerBrouillons,
   compterCaracteres,
   enregistrerBrouillons,
   identiteCitee,
   longueur,
+  messageDeChargement,
   poser,
+  QUESTION_PREREMPLIE,
   relire,
   ressemblance,
   SEUIL_RESSEMBLANCE,
@@ -344,5 +349,179 @@ describe('le contenu vient de la fiche du ministère', () => {
   it('couvre les trois parties du plan recommandé', () => {
     const parties = new Set(QUESTIONS.map((q) => q.partie))
     expect([...parties].sort()).toEqual(['conclusion', 'developpement', 'introduction'])
+  })
+})
+
+describe('le pré-remplissage', () => {
+  /* Le site pose UNE réponse, et c'est une donnée : l'intitulé exact du vœu,
+     tel que Parcoursup le publie. La fiche le réclame nommément — « le bon
+     intitulé de la formation » — et c'est là que les candidats se trompent,
+     en recopiant un nom approximatif lu sur le site d'une école.
+     Les cinq autres questions portent sur ce qui les intéresse et sur ce
+     qu'ils ont fait : aucune donnée n'y répond, et une phrase proposée serait
+     une phrase écrite à leur place. */
+
+  it('ne remplit QUE la question de l’intitulé', () => {
+    const rempli = avecAmorce({}, 'Licence de droit, à l’université de Bordeaux')
+    expect(Object.keys(rempli)).toEqual([QUESTION_PREREMPLIE])
+    expect(QUESTION_PREREMPLIE).toBe('demande')
+  })
+
+  it('ne laisse aucune autre question se pré-remplir', () => {
+    /* Le test qui tient la règle : si un jour quelqu'un ajoute une amorce à
+       « qu'est-ce qui t'intéresse », ce sont nos mots qui partiront sur
+       Parcoursup. Les cinq autres doivent rester vides. */
+    const rempli = avecAmorce({}, 'Licence de droit')
+    for (const q of QUESTIONS) {
+      if (q.cle === QUESTION_PREREMPLIE) continue
+      expect(rempli[q.cle], `« ${q.question} » a été pré-remplie`).toBeUndefined()
+    }
+  })
+
+  it('n’écrit jamais par-dessus une réponse existante', () => {
+    const ecrite = { demande: 'Ma propre formulation.' }
+    expect(avecAmorce(ecrite, 'Licence de droit')).toEqual(ecrite)
+    // Même une réponse réduite à des espaces compte comme vide.
+    expect(avecAmorce({ demande: '   ' }, 'Licence de droit').demande).toBe('Licence de droit')
+  })
+
+  it('ne pose rien quand le vœu n’a pas d’intitulé', () => {
+    expect(avecAmorce({}, '')).toEqual({})
+    expect(amorceFormation('', 'Université de Bordeaux')).toBe('')
+  })
+
+  it('assemble l’intitulé et l’établissement, sans phrase autour', () => {
+    expect(amorceFormation('Licence de droit', 'Université de Bordeaux')).toBe(
+      'Licence de droit, Université de Bordeaux',
+    )
+    // Sans établissement connu, l'intitulé seul, sans virgule orpheline.
+    expect(amorceFormation('Licence de droit', '')).toBe('Licence de droit')
+    expect(amorceFormation('Licence de droit', '   ')).toBe('Licence de droit')
+  })
+
+  it('n’ajoute pas de préposition devant l’établissement', () => {
+    /* L'open data publie « Université de Bordeaux », « IUT de Bordeaux »,
+       « INSA Toulouse » : aucun article ne va devant tous. Une apposition se
+       lit dans tous les cas ; « à Université de Bordeaux » ne se lit dans
+       aucun. */
+    for (const ou of ['Université de Bordeaux', 'IUT de Bordeaux', 'INSA Toulouse']) {
+      const a = amorceFormation('Licence de droit', ou)
+      expect(a).toBe(`Licence de droit, ${ou}`)
+      expect(a).not.toMatch(/\bà [A-Z]/)
+    }
+  })
+
+  it('ne fabrique aucune motivation', () => {
+    /* Une amorce qui contiendrait « je suis intéressé par » serait une phrase
+       écrite à la place de l'élève, quel que soit le nom qu'on lui donne. */
+    const a = amorceFormation('Licence de droit', 'Université de Bordeaux').toLowerCase()
+    for (const mot of ['je ', 'motiv', 'intéress', 'passionn', 'souhaite', 'candidat']) {
+      expect(a, `l’amorce contient « ${mot} »`).not.toContain(mot)
+    }
+  })
+})
+
+describe('l’avancement', () => {
+  it('compte les questions réellement remplies', () => {
+    expect(avancement({})).toEqual({ remplies: 0, total: QUESTIONS.length })
+    expect(avancement({ demande: 'Licence de droit', motivation: '  ' })).toEqual({
+      remplies: 1,
+      total: QUESTIONS.length,
+    })
+  })
+
+  it('atteint le total quand tout est rempli', () => {
+    const toutes = Object.fromEntries(QUESTIONS.map((q) => [q.cle, 'Une phrase.']))
+    expect(avancement(toutes).remplies).toBe(QUESTIONS.length)
+  })
+})
+
+describe('la présentation de l’atelier', () => {
+  const ecran = readFileSync(resolve(SRC, 'lettre.tsx'), 'utf8')
+
+  it('ouvre sur le premier vœu, pas sur le brouillon libre', () => {
+    expect(ecran).toMatch(/setCourant\(voeux\[0\]!\.code\)/)
+    // Et ne bouscule pas un choix déjà fait par l'élève.
+    expect(ecran).toMatch(/if \(voeuChoisi \|\| voeux\.length === 0\) return/)
+  })
+
+  it('descend le prénom près de la relecture qui s’en sert', () => {
+    const relecture = ecran.indexOf('Ce que Jean-Paul a vérifié')
+    const nom = ecran.indexOf('lettre-identite')
+    const questions = ecran.indexOf('Les questions de la fiche')
+    expect(nom).toBeGreaterThan(questions)
+    expect(nom).toBeGreaterThan(relecture)
+  })
+
+  it('replie le réglage IFSI au lieu de couper la page', () => {
+    expect(ecran).toContain('<details className="lettre-reglages">')
+  })
+
+  it('dit où on en est dans les six questions', () => {
+    expect(ecran).toContain('lettre-avancement')
+    expect(ecran).toMatch(/\{avance\.remplies\} question/)
+    // « 0 sur 6 question remplie » ne se dit pas : le cas zéro a sa phrase.
+    expect(ecran).toMatch(/avance\.remplies === 0 \? \(/)
+  })
+
+  it('signale le champ pré-rempli au lieu de le faire passer pour une réponse', () => {
+    /* Un champ déjà plein sans rien dire, c'est une question que l'élève croit
+       avoir traitée — et l'intitulé seul ne fait pas une introduction. */
+    expect(ecran).toContain('lettre-prerempli')
+    expect(ecran).toContain('pas une phrase')
+  })
+
+  it('un brouillon jamais retouché suit ses réponses', () => {
+    /* Sans cette règle, le pré-remplissage annonçait « tu as retouché le texte
+       à la main » dès l'ouverture, et le brouillon ne se remplissait plus. */
+    expect(ecran).toMatch(/const suitLesReponses = brouillon\.texte === '' \|\| brouillon\.texte === assemble/)
+    expect(ecran).toMatch(/const l = longueur\(texteCourant, ifsi\)/)
+  })
+})
+
+describe('quand les vœux ne se chargent pas', () => {
+  /* Une donnée manquante s'affiche comme manquante (CLAUDE.md). Le premier
+     jet avalait toutes les erreurs : une panne de l'API se présentait alors
+     exactement comme « tu n'as aucun vœu », et l'élève allait chercher ses
+     vœux ailleurs pendant que le serveur était à terre. */
+
+  function inscriptionRequise(): Error {
+    const e = new Error('Connecte-toi pour retrouver tes vœux.')
+    e.name = 'InscriptionRequise'
+    return e
+  }
+
+  it('se tait quand l’élève n’a simplement pas de compte', () => {
+    // Sans compte, la liste vide EST la réponse : annoncer une panne serait
+    // signaler un problème qui n'existe pas.
+    expect(messageDeChargement(inscriptionRequise())).toBeNull()
+  })
+
+  it('dit tout le reste', () => {
+    for (const panne of [
+      new Error('Failed to fetch'),
+      new Error('Le service ne répond pas'),
+      { message: 'objet quelconque' },
+      undefined,
+      null,
+    ]) {
+      const m = messageDeChargement(panne)
+      expect(m, `« ${String(panne)} » a été avalé en silence`).not.toBeNull()
+      expect(m).toContain('n’ont pas pu être chargés')
+    }
+  })
+
+  it('ne bloque pas l’élève pour autant', () => {
+    /* Une panne de nos vœux n'empêche pas d'écrire : le brouillon est gardé
+       dans le navigateur, et se rattachera à un vœu plus tard. */
+    const m = messageDeChargement(new Error('500'))
+    expect(m).toContain('quand même')
+    expect(m).toContain('gardé')
+  })
+
+  it('est affiché par l’écran, pas seulement calculé', () => {
+    const ecran = readFileSync(resolve(SRC, 'lettre.tsx'), 'utf8')
+    expect(ecran).toContain('setPanne(messageDeChargement(e))')
+    expect(ecran).toMatch(/\{panne === null \? null : <p className="erreur">\{panne\}<\/p>\}/)
   })
 })

@@ -144,6 +144,37 @@ Une adresse listée ici voit en plus, dans son espace personnel, une section
 il évite seulement de retenir l'adresse `…/admin.html`. Un visiteur ordinaire
 ne le voit pas, mais la console reste gardée côté serveur pour tout le monde.
 
+## Charger les données de référence
+
+`vps-setup.sh` déploie le code ; il ne charge aucune donnée. Tant que
+`reference.formation` est vide, **aucun élève ne peut enregistrer un vœu** :
+le serveur refuse le vœu avec un message qui le dit, mais la fonctionnalité est
+hors service.
+
+Une seule commande, en root sur le VPS :
+
+```bash
+bash /opt/kitetudiant-src/deploy/charger-donnees.sh
+```
+
+Elle enchaîne les trois étapes — téléchargement des jeux publics (~185 Mo),
+préparation des CSV, chargement en base — puis **compte les lignes chargées**.
+Elle vérifie ses prérequis (python3, curl, psql, 1,5 Go libres, migrations
+appliquées, `DATABASE_URL` lisible dans `/opt/kitetudiant/.env`) **avant** de
+télécharger quoi que ce soit : découvrir qu'il manque `psql` après dix minutes
+d'attente est une perte de temps évitable.
+
+Elle est idempotente. Le chargement insère en `ON CONFLICT DO NOTHING` : la
+relancer ne modifie aucun millésime déjà présent. Pour rejouer la préparation
+sans retélécharger :
+
+```bash
+SANS_TELECHARGEMENT=1 bash /opt/kitetudiant-src/deploy/charger-donnees.sh
+```
+
+À faire après `postgres-setup.sh`, et à refaire à chaque nouvelle campagne
+Parcoursup, quand un millésime est publié.
+
 ## La base de données
 
 `vps-setup.sh` n'installe pas PostgreSQL, et n'applique aucune migration.

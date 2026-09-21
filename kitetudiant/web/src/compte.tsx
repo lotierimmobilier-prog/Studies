@@ -12,6 +12,7 @@
 
 import { useEffect, useState } from 'react'
 
+import { ecrireAnneeNaissance, lireAnneeNaissance } from './age.ts'
 import { useMetadonnees } from './metadonnees.ts'
 
 import {
@@ -60,6 +61,13 @@ export function Compte({
   })
   const [email, setEmail] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
+  /* L'année déjà saisie au parcours, s'il y est passé. Pré-remplie plutôt
+     que redemandée à blanc : la reposer donnerait l'impression qu'on ne
+     l'a pas gardée, ou qu'on la vérifie. */
+  const [annee, setAnnee] = useState<string>(() => {
+    const connue = lireAnneeNaissance()
+    return connue === null ? '' : String(connue)
+  })
   const [enCours, setEnCours] = useState(false)
   const [erreur, setErreur] = useState<string | null>(null)
   // La connexion Google dépend d'identifiants posés sur le serveur. On
@@ -83,6 +91,12 @@ export function Compte({
     setErreur(null)
     try {
       await (mode === 'inscription' ? inscrire : connecter)(email, motDePasse)
+      /* Gardée seulement après une inscription réussie, et seulement si
+         elle est plausible : une année tapée à moitié n'a rien à faire en
+         mémoire. `ecrireAnneeNaissance` écarte le reste. */
+      if (mode === 'inscription' && annee !== '') {
+        ecrireAnneeNaissance(Number.parseInt(annee, 10))
+      }
       onOuvert()
     } catch (err) {
       setErreur(
@@ -155,6 +169,39 @@ export function Compte({
             <p className="note">Dix caractères au minimum.</p>
           ) : null}
         </div>
+
+        {/* Demandée à l'inscription, et seulement là.
+            Quelqu'un qui crée un compte sans passer par les sept questions
+            n'a jamais donné son année : sans elle, les écrans qui parlent de
+            bail ou de contrat ne savent pas à qui ils s'adressent, et
+            devraient poser la question au pire moment.
+
+            Elle ne part PAS au serveur. Le compte ne porte que l'adresse
+            e-mail (voir `ProfilCompte`), et ajouter l'année de naissance d'un
+            mineur à une base de données pour un choix d'affichage que le
+            navigateur fait déjà serait un recul sur la règle 3. */}
+        {mode === 'inscription' ? (
+          <div className="champ">
+            <label className="champ-label" htmlFor="compte-annee">
+              Ton année de naissance
+            </label>
+            <input
+              id="compte-annee"
+              type="number"
+              inputMode="numeric"
+              autoComplete="off"
+              min={1930}
+              max={new Date().getFullYear()}
+              value={annee}
+              onChange={(e) => setAnnee(e.target.value)}
+            />
+            <p className="note">
+              Elle sert à savoir ce qu’on peut te proposer : avant dix-huit ans, un
+              bail ou un contrat se signe avec un parent. Elle reste dans ce
+              navigateur et n’est enregistrée sur aucun serveur.
+            </p>
+          </div>
+        ) : null}
 
         {erreur ? <p className="erreur">{erreur}</p> : null}
 

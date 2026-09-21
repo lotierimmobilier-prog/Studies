@@ -26,6 +26,8 @@
  * bord.
  */
 
+import { ageMinimal } from './age.ts'
+
 /**
  * À changer dès que `TEXTE_CONSENTEMENT` change de SENS.
  *
@@ -77,26 +79,19 @@ export interface Consentement {
 
 const CLE = 'kitetudiant.consentement.bulletin'
 
-/**
- * L'âge, calculé au plus BAS de ce que l'année permet.
+/* L'âge se calcule dans `age.ts`, plus ici.
  *
- * Le site ne demande que l'année de naissance — c'est voulu, la date
- * complète ne sert à rien ici (règle 3 : minimisation). Mais alors, entre
- * deux personnes nées la même année, l'une a eu son anniversaire et l'autre
- * non : leur âge réel diffère d'un an.
+ * Deux écrans ont désormais besoin de la même règle du plus bas : le dépôt de
+ * bulletin, pour les quinze ans de l'article 45, et le choix du contenu, pour
+ * la majorité. La copier serait s'exposer à ce que les deux divergent — et
+ * c'est précisément la règle qu'on ne veut jamais voir diverger.
  *
- * On retient donc le plus petit des deux. Quelqu'un né en 2011, en 2026,
- * est compté pour 14 ans et non 15, parce qu'il PEUT avoir 14 ans.
- *
- * Conséquence assumée : un élève de quinze ans et demi devra saisir ses
- * moyennes à la main. C'est le bon sens de l'erreur — dans l'autre, on
- * enverrait le bulletin d'un enfant de quatorze ans à un sous-traitant.
+ * Réexportée ici : les appelants du consentement n'ont pas à savoir où elle
+ * vit, et rien de ce qui importait `ageMinimal` depuis ce module ne casse.
  */
-export function ageMinimal(anneeNaissance: number, maintenant = new Date()): number {
-  return maintenant.getFullYear() - anneeNaissance - 1
-}
+export { ageMinimal } from './age.ts'
 
-/** `true` si l'élève a l'âge de décider seul. */
+/** `true` si l'élève a l'âge de décider seul du dépôt de son bulletin. */
 export function assezAge(anneeNaissance: number, maintenant = new Date()): boolean {
   return ageMinimal(anneeNaissance, maintenant) >= AGE_MINIMUM
 }
