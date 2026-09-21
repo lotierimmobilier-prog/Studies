@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync, existsSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { readFileSync, existsSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { resolve, relative, dirname, sep } from 'node:path'
 
 // Le serveur déployé sur le VPS n'est pas le dépôt : le script de déploiement
@@ -160,10 +163,67 @@ describe('le script ne peut pas effacer les secrets en place', () => {
 describe('la mise en ligne automatique', () => {
   const SCRIPT = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
 
-  it('est facultative et ne s’active pas toute seule', () => {
-    // L'autre projet de la machine ne doit pas hériter d'un minuteur qu'on
-    // n'a pas demandé pour lui.
-    expect(SCRIPT).toMatch(/AUTO_MAJ="\$\{AUTO_MAJ:-0\}"/)
+  /* ── AUTO_MAJ non passé ne doit RIEN décider ──────────────────────────
+   *
+   * Le paramètre valait zéro par défaut, et le bloc de fin s'en servait pour
+   * arrêter le minuteur déjà posé. Relancer ce script à la main — pour
+   * pousser un correctif, sans repenser à AUTO_MAJ=1 — éteignait donc la mise
+   * en ligne automatique. Le déploiement réussissait, la ligne « désactivée »
+   * passait inaperçue, et plus rien ne repartait ensuite. Constaté en
+   * production le 20/09/2026 : quatre fusions restées hors ligne neuf heures,
+   * avec un site qui répondait normalement pendant tout ce temps.
+   *
+   * Ces tests EXÉCUTENT la fonction de décision, avec un faux `systemctl`,
+   * plutôt que de relire le script. Une assertion sur le texte du script est
+   * ce qui a laissé passer la régression : elle vérifiait fidèlement la
+   * présence de la ligne fautive. */
+  /* Résolu une fois, hors du bac à sable : le PATH réduit passé au fils
+     l'empêcherait de se trouver lui-même. */
+  const BASH = execFileSync('sh', ['-c', 'command -v bash'], { encoding: 'utf8' }).trim()
+
+  const FONCTION = /^auto_maj_voulu\(\) \{$[\s\S]*?^\}$/m.exec(SCRIPT)
+
+  function decider(passe: string, minuteur: 'actif' | 'inactif' | 'absent'): string {
+    const bac = mkdtempSync(join(tmpdir(), 'automaj-'))
+    if (minuteur !== 'absent') {
+      // `systemctl is-enabled` rend 0 pour une unité active, non-zéro sinon.
+      writeFileSync(join(bac, 'systemctl'), `#!/bin/sh\nexit ${minuteur === 'actif' ? 0 : 1}\n`, {
+        mode: 0o755,
+      })
+    }
+    // PATH réduit au bac à sable : « absent » veut dire systemctl introuvable,
+    // ce qui est l'état d'une machine neuve ou d'un conteneur sans systemd.
+    // bash est donc appelé par son chemin absolu — le PATH du fils ne sert
+    // plus qu'aux recherches faites DEPUIS le script.
+    return execFileSync(
+      BASH,
+      ['-c', `set -euo pipefail\n${FONCTION?.[0] ?? ''}\nauto_maj_voulu "$1" "kitetudiant-maj.timer"`, 'bash', passe],
+      { env: { PATH: bac }, encoding: 'utf8' },
+    )
+  }
+
+  it('expose la décision dans une fonction, pas dans une valeur par défaut', () => {
+    expect(FONCTION, 'auto_maj_voulu doit rester une fonction de premier niveau').not.toBeNull()
+  })
+
+  it('reconduit le minuteur en place quand AUTO_MAJ n’est pas passé', () => {
+    // LA régression. Une mise en ligne manuelle ne doit pas éteindre
+    // l'automatique au passage.
+    expect(decider('', 'actif')).toBe('1')
+  })
+
+  it('ne s’active toujours pas toute seule sur une machine qui ne l’avait pas', () => {
+    // L'intention d'origine, préservée : l'autre projet de la machine
+    // n'hérite pas d'un minuteur qu'on n'a pas demandé pour lui.
+    expect(decider('', 'inactif')).toBe('0')
+    expect(decider('', 'absent')).toBe('0')
+  })
+
+  it('obéit à la valeur passée, dans les deux sens', () => {
+    // AUTO_MAJ=0 explicite reste la façon de désactiver — et il doit gagner
+    // contre un minuteur actif, sinon on ne pourrait plus l'arrêter.
+    expect(decider('0', 'actif')).toBe('0')
+    expect(decider('1', 'absent')).toBe('1')
   })
 
   it('installe un minuteur systemd, pas une tâche cron anonyme', () => {

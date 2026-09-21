@@ -88,7 +88,37 @@ HSTS_AGE="${HSTS_AGE:-31536000}"              # durée de l'engagement HSTS, en 
 DOMAIN="${DOMAIN:-}"                          # nom de domaine (vide = IP seule)
 TLS="${TLS:-0}"                               # 1 = certificat Let's Encrypt
 TLS_EMAIL="${TLS_EMAIL:-}"                    # contact exigé par Let's Encrypt
-AUTO_MAJ="${AUTO_MAJ:-0}"                     # 1 = mise en ligne automatique à chaque commit
+# AUTO_MAJ n'a PAS de défaut fixe, et c'est délibéré.
+#
+# Il en avait un — zéro — et le bloc de fin s'en servait pour ARRÊTER le
+# minuteur déjà installé. Conséquence : relancer ce script à la main pour
+# pousser un correctif, sans repasser AUTO_MAJ=1, éteignait la mise en ligne
+# automatique. Le déploiement réussissait, le message « désactivée » passait
+# inaperçu dans la sortie, et plus rien ne repartait ensuite. C'est arrivé en
+# production : quatre fusions restées hors ligne pendant neuf heures.
+#
+# Un paramètre non passé ne doit rien décider. La règle est celle qui vaut
+# déjà pour les secrets repris du .env : une valeur passée en ligne de
+# commande l'emporte toujours, une valeur absente reconduit l'existant.
+# AUTO_MAJ=0 explicite désactive donc toujours — c'est la seule façon.
+#
+# L'état en place se lit sur systemd plutôt que dans un fichier : c'est la
+# seule source qui ne puisse pas mentir sur ce qui tourne réellement.
+#
+# $1 : la valeur passée par l'opérateur, vide si le paramètre est absent
+# $2 : le nom de l'unité minuteur
+auto_maj_voulu() {
+  if [ -n "$1" ]; then
+    printf '%s' "$1"
+    return
+  fi
+  if systemctl is-enabled "$2" >/dev/null 2>&1; then
+    printf '1'
+  else
+    printf '0'
+  fi
+}
+AUTO_MAJ="$(auto_maj_voulu "${AUTO_MAJ-}" "${SLUG}-maj.timer")"
 MINUTES_MAJ="${MINUTES_MAJ:-5}"               # intervalle de vérification, en minutes
 
 SRC_DIR="/opt/${SLUG}-src"                    # copie de travail du dépôt

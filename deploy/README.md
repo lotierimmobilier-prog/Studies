@@ -61,6 +61,20 @@ PROJET=kitetudiant SLUG=kitetudiant API_PORT=8788 \
 
 ### `AUTO_MAJ=1` — la mise en ligne devient automatique
 
+`AUTO_MAJ` **n'a pas de valeur par défaut**, et c'est voulu. Un paramètre qu'on
+ne passe pas ne décide rien : le script reconduit l'état déjà en place, lu sur
+systemd. Relancer la commande à la main pour pousser un correctif ne coupe donc
+pas la mise en ligne automatique.
+
+Pour l'arrêter, il faut le dire : `AUTO_MAJ=0`. Le minuteur est alors désactivé
+sans être supprimé, ce qui reste réversible et visible.
+
+> Ce n'était pas le cas jusqu'au 21/09/2026 : `AUTO_MAJ` valait zéro par défaut
+> et coupait le minuteur au passage. Une mise en ligne manuelle a ainsi laissé
+> quatre fusions hors ligne pendant neuf heures, sur un site qui répondait
+> normalement. Des tests exécutent désormais la décision, faux `systemctl` à
+> l'appui, au lieu de relire le script.
+
 Avec ce drapeau, le script installe un minuteur systemd sur le VPS. Toutes les
 cinq minutes, le VPS regarde si `main` a bougé ; si oui, il se redéploie tout
 seul. **Vous ne relancez plus jamais la commande à la main.**
