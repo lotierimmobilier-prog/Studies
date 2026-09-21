@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
 import {
   AIDES_FAMILLE,
@@ -119,5 +121,70 @@ describe('depensesDeclarees', () => {
     const base = TRAINS_DE_VIE[0]!
     const memeEuros = { ...base, repasCrousParMois: base.repasCrousParMois + 30 }
     expect(depensesDeclarees(memeEuros)).toBe(depensesDeclarees(base))
+  })
+})
+
+/**
+ * Les ordres de grandeur se présentent comme tels.
+ *
+ * ── Ce que ce test aurait évité ──────────────────────────────────────────
+ *
+ * L'en-tête de `budgetSimple.ts` affirmait que les montants « ne prétendent
+ * pas venir d'une source officielle, et le libellé le dit ».
+ *
+ * Aucun libellé ne le disait. Les treize options affichaient leurs montants
+ * — « environ 150 € par mois », « 220 € de courses · 60 € divers » — sans
+ * rien qui les distingue des barèmes datés qui viennent, eux, de sources
+ * publiées. Un élève ne pouvait pas faire la différence.
+ *
+ * La règle 6 de CLAUDE.md impose que toute donnée affichée porte son
+ * millésime et sa provenance. Ces montants-ci n'en ont pas, et c'est
+ * légitime — ce sont des hypothèses de départ — à condition de le dire.
+ *
+ * Un commentaire qui décrit une garantie absente est pire qu'un silence :
+ * il empêche d'aller la chercher. Le test lit donc l'écran, pas le
+ * commentaire.
+ */
+describe('l’étape budget dit que ses montants ne sont pas des barèmes', () => {
+  const PARCOURS = readFileSync(
+    resolve(import.meta.dirname, '..', 'parcours.tsx'),
+    'utf8',
+  )
+  const STYLES = readFileSync(resolve(import.meta.dirname, '..', 'styles.css'), 'utf8')
+
+  it('la phrase est à l’écran, avant les choix', () => {
+    expect(PARCOURS).toContain('budget-avertissement')
+    expect(PARCOURS).toMatch(/ordres de grandeur/)
+    expect(PARCOURS).toMatch(/pas\s*\n?\s*des barèmes officiels/)
+  })
+
+  it('elle précède la première question, pas le total', () => {
+    // Après coup, elle ne sert plus à rien : le choix est déjà fait.
+    const avertissement = PARCOURS.indexOf('budget-avertissement')
+    const premiereQuestion = PARCOURS.indexOf('Tes parents peuvent-ils')
+    expect(avertissement).toBeGreaterThan(-1)
+    expect(avertissement).toBeLessThan(premiereQuestion)
+  })
+
+  it('elle ne s’affiche pas comme une alerte', () => {
+    /* « Ne pas écrire de texte d'interface anxiogène » (CLAUDE.md). Un
+       encadré rouge sur un site qui s'adresse à des lycéens crée de
+       l'inquiétude là où il s'agit de dire d'où viennent les chiffres. */
+    const bloc = STYLES.slice(STYLES.indexOf('.budget-avertissement {'))
+    const regles = bloc.slice(0, bloc.indexOf('}'))
+    // `--rouge` est la seule couleur d'alerte du site (styles.css) : c'est
+    // elle qu'il faut nommer, pas un motif hexadécimal deviné.
+    expect(regles).not.toMatch(/--rouge|\bred\b|crimson|#[a-f0-9]{3,8}/i)
+    // Et il emploie bien les tons neutres, plutôt que rien du tout.
+    expect(regles).toMatch(/var\(--carte\)/)
+    expect(regles).toMatch(/var\(--doux\)/)
+  })
+
+  it('le commentaire de budgetSimple.ts ne réinvente pas une garantie', () => {
+    // Il disait « le libellé le dit » ; il doit maintenant désigner
+    // l'endroit exact, pour qu'on puisse aller vérifier.
+    const source = readFileSync(resolve(import.meta.dirname, '..', 'budgetSimple.ts'), 'utf8')
+    expect(source).toContain('budget-avertissement')
+    expect(source).not.toMatch(/et le libellé le dit/)
   })
 })

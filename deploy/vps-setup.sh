@@ -418,7 +418,18 @@ if [ "${RACINE}" = "1" ]; then
 # Projet « ${SLUG} » — servi SUR LA RACINE du domaine + API Node (port ${API_PORT})
 location / {
     root /var/www/${SLUG};
-    try_files \$uri \$uri/ /index.html;
+    # « /app.html » et NON « /index.html ».
+    #
+    # index.html est l'accueil pré-rendue : elle porte son propre
+    # « <link rel=canonical href=/> ». Servie en repli, elle faisait
+    # déclarer à chaque fiche — /formation/…, /etablissement/…,
+    # /chercher-une-ecole — qu'elle est un doublon de l'accueil. Un
+    # canonique est une déclaration, pas une suggestion.
+    #
+    # app.html est la même application sans canonique et sans og:url :
+    # la page est alors prise pour elle-même, et React pose les bonnes
+    # métadonnées au montage. Écrite par kitetudiant/scripts/prerendre.ts.
+    try_files \$uri \$uri/ /app.html;
 ${EN_TETE_HSTS}
 }
 
@@ -456,7 +467,9 @@ location = /${SLUG} { return 301 /${SLUG}/; }
 
 location /${SLUG}/ {
     root /var/www;                       # /${SLUG}/ -> /var/www/${SLUG}/
-    try_files \$uri \$uri/ /${SLUG}/index.html;
+    # Voir le commentaire du mode racine : l'accueil pré-rendue porte son
+    # propre canonique, donc le repli passe par app.html.
+    try_files \$uri \$uri/ /${SLUG}/app.html;
 ${EN_TETE_HSTS}
 }
 

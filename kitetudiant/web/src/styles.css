@@ -723,6 +723,22 @@ input[type='range'] { width: 100%; min-height: 44px; }
 .budget-montant { display: block; margin-top: 0.25rem; color: var(--doux); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
 .budget-resume { display: block; margin-top: 0.15rem; color: var(--doux); font-size: 0.84rem; }
 
+/* Discret mais lisible : c'est une mise au point, pas une alerte. Un
+   encadré rouge sur un site qui s'adresse à des lycéens crée l'inquiétude
+   que CLAUDE.md interdit, alors qu'il s'agit seulement de dire d'où
+   viennent les chiffres. */
+.budget-avertissement {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--carte);
+  border-left: 3px solid var(--trait);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+.budget-avertissement strong { color: var(--encre); }
+
 .budget-total {
   margin: 0;
   padding: 0.85rem 1rem;

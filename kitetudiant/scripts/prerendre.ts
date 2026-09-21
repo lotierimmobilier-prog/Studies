@@ -255,9 +255,23 @@ function coquilleAvec(
   coquille: string,
   titre: string,
   description: string,
-  canonique: string,
+  /**
+   * L'adresse qui fait foi, ou `null` pour n'en déclarer aucune.
+   *
+   * `null` sert à la coquille de repli : une page qui n'annonce pas sa forme
+   * canonique est prise pour elle-même ; une page qui en annonce une fausse
+   * est effacée de l'index au profit de celle qu'elle désigne.
+   */
+  canonique: string | null,
   contenu: string,
   extra = '',
+  /**
+   * « article » pour un article, « website » pour tout le reste. Réglé ici
+   * plutôt que rattrapé après coup : l'accueil corrigeait la valeur par un
+   * `.replace` sur le HTML produit, ce qui marchait tant qu'un seul appel
+   * en avait besoin — la coquille de repli en fait un deuxième.
+   */
+  type: 'article' | 'website' = 'article',
 ): string {
   let html = coquille
   html = html.replace(/<title>[\s\S]*?<\/title>/, `<title>${echapper(titre)}</title>`)
@@ -266,11 +280,15 @@ function coquilleAvec(
     `<meta name="description" content="${echapper(description)}" />`,
   )
   const entetes = [
-    `<link rel="canonical" href="${echapper(canonique)}" />`,
-    `<meta property="og:type" content="article" />`,
+    ...(canonique === null
+      ? []
+      : [
+          `<link rel="canonical" href="${echapper(canonique)}" />`,
+          `<meta property="og:url" content="${echapper(canonique)}" />`,
+        ]),
+    `<meta property="og:type" content="${type}" />`,
     `<meta property="og:title" content="${echapper(titre)}" />`,
     `<meta property="og:description" content="${echapper(description)}" />`,
-    `<meta property="og:url" content="${echapper(canonique)}" />`,
     `<meta property="og:locale" content="fr_FR" />`,
     extra,
   ]
@@ -445,8 +463,62 @@ ecrire(
       ...enTetesDePartage('accueil', accueilTitre),
       `<script type="application/ld+json">${identiteDuSite()}</script>`,
     ].join('\n    '),
-  ).replace('<meta property="og:type" content="article" />',
-            '<meta property="og:type" content="website" />'),
+    'website',
+  ),
+)
+
+// --------------------------------------------------- coquille des vues React
+/*
+ * Le repli de nginx, pour toutes les adresses qui ne sont pas pré-rendues.
+ *
+ * ── Ce qui se passait ────────────────────────────────────────────────────
+ *
+ * La configuration dit « try_files $uri $uri/ /index.html » : une adresse
+ * sans fichier — /formation/2519, /etablissement/0870669E,
+ * /chercher-une-ecole — reçoit donc index.html. Or index.html, c'est
+ * l'accueil pré-rendue, qui porte depuis ce script :
+ *
+ *     <link rel="canonical" href="https://kitetudiant.fr/">
+ *     <meta property="og:url" content="https://kitetudiant.fr/">
+ *     <title>KitEtudiant.fr — choisir ses vœux Parcoursup …</title>
+ *
+ * Autrement dit, CHAQUE fiche du site — elles se comptent par milliers —
+ * déclarait elle-même être un doublon de l'accueil. Un canonique est une
+ * déclaration, pas une suggestion : c'est la façon la plus efficace qui
+ * soit de faire désindexer ses propres pages.
+ *
+ * `useMetadonnees` corrige le tir au montage de React, mais le canonique
+ * est lu AVANT : par un moteur qui explore sans exécuter le JavaScript, et
+ * par tous les robots d'aperçu — messageries, réseaux sociaux — dont aucun
+ * n'exécute de JavaScript.
+ *
+ * ── Ce que cette coquille fait ───────────────────────────────────────────
+ *
+ * Elle ne déclare NI canonique NI og:url. Une page qui n'annonce pas sa
+ * forme canonique est simplement prise pour elle-même, ce qui est le
+ * comportement voulu ; une page qui en annonce une fausse est effacée.
+ *
+ * Elle porte en revanche un titre et une carte de partage génériques, pour
+ * qu'un lien collé dans une conversation avant que React ne rende quoi que
+ * ce soit montre au moins le site, et pas un aperçu nu.
+ *
+ * nginx doit retomber sur « /app.html » et non « /index.html » :
+ * deploy/vps-setup.sh et deploy/nginx.conf.example le font.
+ */
+ecrire(
+  join(SORTIE, 'app.html'),
+  coquilleAvec(
+    coquille,
+    ACCUEIL_TITRE_ONGLET,
+    ACCUEIL_DESCRIPTION,
+    // Pas de canonique : c'est tout l'objet de ce fichier.
+    null,
+    // Pas de corps non plus. Écrire ici celui de l'accueil rendrait chaque
+    // fiche identique à l'accueil aux yeux d'un robot — le défaut d'à côté.
+    '',
+    enTetesDePartage('accueil', 'KitEtudiant.fr').join('\n    '),
+    'website',
+  ),
 )
 
 // ------------------------------------------------------------- plan du site

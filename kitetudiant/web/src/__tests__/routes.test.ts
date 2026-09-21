@@ -125,3 +125,68 @@ describe('toute route a un sort explicite', () => {
     }
   })
 })
+
+/**
+ * Le repli de nginx ne doit pas faire mentir les pages qu'il sert.
+ *
+ * ── Ce que ce test aurait évité ──────────────────────────────────────────
+ *
+ * La configuration disait « try_files $uri $uri/ /index.html ». Une adresse
+ * sans fichier — et c'est le cas de TOUTES les fiches, qui se comptent par
+ * milliers — recevait donc index.html, c'est-à-dire l'accueil pré-rendue,
+ * avec son propre :
+ *
+ *     <link rel="canonical" href="https://kitetudiant.fr/">
+ *
+ * Chaque fiche déclarait ainsi elle-même être un doublon de l'accueil. Un
+ * canonique n'est pas une suggestion : c'est la façon la plus efficace qui
+ * soit de faire désindexer ses propres pages.
+ *
+ * `useMetadonnees` corrige au montage de React, mais le canonique est lu
+ * AVANT — par un moteur qui explore sans exécuter le JavaScript, et par
+ * tous les robots d'aperçu, dont aucun n'en exécute.
+ *
+ * Rien ne le signalait : `seo.test.ts` vérifiait que les articles étaient
+ * bouclés, et `metadonnees.ts` faisait son travail. Le défaut vivait dans
+ * l'espace entre le script de pré-rendu et la configuration du serveur, que
+ * ni l'un ni l'autre ne lisait.
+ */
+describe('les vues rendues par React ne se déclarent pas doublons de l’accueil', () => {
+  const RACINE = resolve(import.meta.dirname, '..', '..', '..', '..')
+  const SETUP = readFileSync(resolve(RACINE, 'deploy', 'vps-setup.sh'), 'utf8')
+  const EXEMPLE = readFileSync(resolve(RACINE, 'deploy', 'nginx.conf.example'), 'utf8')
+  const NGINX = [SETUP, EXEMPLE]
+
+  it('le pré-rendu écrit une coquille de repli', () => {
+    expect(PRERENDU).toContain("join(SORTIE, 'app.html')")
+  })
+
+  it('elle ne déclare ni canonique ni og:url', () => {
+    /* Le `null` passé à `coquilleAvec`. Une page qui n'annonce pas sa forme
+       canonique est prise pour elle-même — ce qu'on veut ; une page qui en
+       annonce une fausse est effacée au profit de celle qu'elle désigne. */
+    const bloc = PRERENDU.slice(PRERENDU.indexOf("join(SORTIE, 'app.html')"))
+    const appel = bloc.slice(0, bloc.indexOf('\n)'))
+    expect(appel).toMatch(/^\s*null,\s*$/m)
+    expect(appel).not.toContain('ORIGINE')
+  })
+
+  it('nginx retombe sur elle, et jamais sur l’accueil', () => {
+    for (const conf of NGINX) {
+      const replis = [...conf.matchAll(/try_files[^;]*;/g)].map((m) => m[0])
+      expect(replis.length, 'aucun try_files trouvé : le test ne vérifie rien').toBeGreaterThan(0)
+      for (const repli of replis) {
+        expect(
+          repli,
+          `« ${repli.trim()} » sert l’accueil pré-rendue en repli, ` +
+            `avec son canonique vers « / »`,
+        ).not.toMatch(/\/(?:[a-z0-9-]+\/)?index\.html/)
+      }
+    }
+  })
+
+  it('les deux modes de déploiement sont couverts', () => {
+    // vps-setup.sh en pose deux : racine de domaine, et sous-chemin.
+    expect([...SETUP.matchAll(/try_files[^;]*app\.html;/g)]).toHaveLength(2)
+  })
+})

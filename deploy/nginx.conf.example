@@ -11,9 +11,13 @@ server {
     root /var/www/parcoursup;
     index index.html;
 
-    # SPA : toutes les routes retombent sur index.html
+    # SPA : toutes les routes retombent sur app.html — PAS sur index.html.
+    # index.html est l'accueil pré-rendue, et elle porte son propre
+    # « <link rel=canonical href=/> » : servie en repli, elle faisait
+    # déclarer à chaque fiche du site qu'elle est un doublon de l'accueil.
+    # app.html est la même application, sans canonique ni og:url.
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri/ /app.html;
     }
 
     # API Node (prix + IA), proxyfiée vers le service pm2 sur le port 8787
