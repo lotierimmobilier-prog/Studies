@@ -9,6 +9,8 @@
  */
 
 import communes from '../donnees/communes.json'
+// Une seule définition, partagée avec la console d'administration.
+export { nomCommune } from './communes.ts'
 import type { LoyerCommune, MontantSource } from '../../packages/budget-engine/src/types.ts'
 
 /**
@@ -262,10 +264,6 @@ export function loyerDe(codeInsee: string | null): LoyerCommune | null {
   }
 }
 
-export function nomCommune(codeInsee: string): string | null {
-  const brut = (communes.communes as Record<string, { nom: string }>)[codeInsee]
-  return brut?.nom ?? null
-}
 
 function convertir(e: EnregistrementEsr): Formation | null {
   const id = e.cod_aff_form
