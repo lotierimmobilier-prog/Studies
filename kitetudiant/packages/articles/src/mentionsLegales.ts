@@ -93,10 +93,17 @@ export const LIENS_REMUNERES: SectionLegale = {
   titre: 'Liens commerciaux et rémunération du site',
   corps: [
     'KitEtudiant.fr publie un lien commercial, et un seul. Il figure sur la page ' +
-      'd’accueil, dans la section « Faire baisser tes factures », et renvoie vers ' +
-      'papernest, un service de comparaison et de souscription de contrats ' +
-      'd’électricité, de gaz, d’assurance habitation, de téléphonie mobile et ' +
-      'd’accès à internet.',
+      'd’accueil, dans la section « Trouver un logement, puis faire baisser les ' +
+      'factures », et renvoie vers papernest, un service de comparaison et de ' +
+      'souscription de contrats d’électricité, de gaz, d’assurance habitation, de ' +
+      'téléphonie mobile et d’accès à internet.',
+    'La même section renvoie aussi vers leboncoin, pour les annonces de location. ' +
+      'Ce second lien n’est PAS rémunéré : aucun accord ne nous lie à leboncoin, il ' +
+      'ne porte pas l’attribut « sponsored », et nous ne touchons rien si vous le ' +
+      'suivez. Il figure là parce qu’une grande partie des locations étudiantes y ' +
+      'sont publiées. L’écran le dit à l’endroit où les deux liens apparaissent : ' +
+      'deux logos côte à côte se liraient sinon comme deux partenariats de même ' +
+      'nature.',
     'Ce lien est rémunéré. Si vous souscrivez un contrat après l’avoir suivi, ' +
       'papernest verse une commission à l’éditeur du site. Le service reste gratuit ' +
       'pour vous, le prix des contrats est le même que si vous étiez passé ' +

@@ -55,11 +55,13 @@ import {
 } from './calendrier.ts'
 import { euros, eurosPrecis, nombre } from './nombres.ts'
 import { dateLisible } from './dates.ts'
-import { PAPERNEST, REL_PARTENAIRE } from './partenaires.ts'
+import { LEBONCOIN, PAPERNEST, relDe } from './partenaires.ts'
 
 // Les photographies sont IMPORTÉES et non désignées par un chemin : Vite leur
 // applique la base de déploiement (le site est servi sous un sous-chemin) et
 // les embarque dans le paquet. Un chemin écrit en dur reviendrait en 404.
+import logoLeboncoin from './images/leboncoin.png'
+import logoPapernest from './images/papernest.png'
 import photoArrivee from './images/arrivee.webp'
 import photoInstallation from './images/installation.webp'
 import photoPremiersJours from './images/premiers-jours.webp'
@@ -500,42 +502,78 @@ export function Accueil({
           Il n'est pas dans le corps pré-rendu (scripts/prerendre.ts) : ce
           corps est un squelette pour les robots — titre, chapô, liens,
           questions — et un lien rémunéré n'a rien à y faire. */}
-      <section className="bloc partenaire" id="factures" aria-labelledby="factures-titre">
-        <h2 id="factures-titre">Faire baisser tes factures, pas seulement les compter</h2>
+      <section className="bloc partenaire" id="logement" aria-labelledby="logement-titre">
+        <h2 id="logement-titre">Trouver un logement, puis faire baisser les factures</h2>
         <p className="bloc-intro">
-          Le reste-à-vivre que ce site calcule part de ce que coûtent les choses. Une
-          partie de ces lignes se négocie : l’électricité, le gaz, l’assurance
-          habitation — obligatoire dès que tu es locataire —, le forfait mobile et la
-          box. Ce sont des contrats que tu vas devoir signer de toute façon en
-          emménageant.
-        </p>
-        <p>
-          {PAPERNEST.quoi} Tu réponds à quelques questions, tu compares, et tu signes
-          seulement si ça te va.
+          Le loyer est la plus grosse ligne de ton reste-à-vivre, et trouver où habiter
+          est le premier obstacle concret d’une rentrée — souvent avant même d’avoir
+          une réponse sur Parcoursup. Ce site calcule ce que coûte chaque ville ; voici
+          par où commencer une fois que tu sais laquelle.
         </p>
 
-        {/* La mention AVANT le bouton, pas en bas de page. Quelqu'un qui
-            clique doit savoir ce qu'il fait au moment où il clique. */}
-        <p className="note partenaire-mention">{PAPERNEST.remuneration}</p>
+        <div className="partenaire-etapes">
+          <article className="partenaire-etape">
+            <img
+              className="partenaire-logo"
+              src={logoLeboncoin}
+              alt={LEBONCOIN.nom}
+              width={483}
+              height={88}
+            />
+            <h3>1. Chercher le logement</h3>
+            <p>{LEBONCOIN.quoi}</p>
+            <a
+              className="secondaire"
+              href={LEBONCOIN.lien}
+              target="_blank"
+              rel={relDe(LEBONCOIN)}
+            >
+              Voir les locations
+              <span aria-hidden="true"> ↗</span>
+            </a>
+          </article>
 
-        <div className="cta-groupe">
-          <a
-            className="secondaire"
-            href={PAPERNEST.lien}
-            target="_blank"
-            rel={REL_PARTENAIRE}
-          >
-            Comparer mes contrats avec {PAPERNEST.nom}
-            <span aria-hidden="true"> ↗</span>
-          </a>
+          <article className="partenaire-etape">
+            <img
+              className="partenaire-logo"
+              src={logoPapernest}
+              alt={PAPERNEST.nom}
+              width={467}
+              height={88}
+            />
+            <h3>2. Ouvrir les contrats</h3>
+            <p>{PAPERNEST.quoi}</p>
+            <a
+              className="secondaire"
+              href={PAPERNEST.lien}
+              target="_blank"
+              rel={relDe(PAPERNEST)}
+            >
+              Comparer mes contrats
+              <span aria-hidden="true"> ↗</span>
+            </a>
+          </article>
         </div>
 
-        {/* Dit parce que c'est vrai, et parce que le public de ce site a
-            souvent dix-sept ans : un contrat signé par un mineur est
-            annulable, ce qui n'aide personne. */}
+        {/* La mention dit lequel des deux liens est payé, et lequel ne l'est
+            pas. Deux logos côte à côte se lisent comme deux partenariats de
+            même nature : sans cette phrase, on laisserait croire que
+            leboncoin nous rapporte quelque chose, ou que papernest non plus.
+            Elle est AVANT rien du tout — elle est sous les deux boutons,
+            parce qu'ici il y a deux chemins et qu'une mention posée avant
+            l'un seulement se lirait comme ne concernant que celui-là. */}
+        <p className="note partenaire-mention">{PAPERNEST.remuneration}</p>
         <p className="note">
-          Ces contrats se signent à 18 ans, ou par un parent. Si tu n’y es pas encore,
-          c’est une démarche à préparer avec eux — pas à faire seul.
+          Le lien vers {LEBONCOIN.nom}, lui, ne nous rapporte rien : aucun accord ne
+          nous lie, il est là parce qu’il est utile.
+        </p>
+
+        {/* Dit parce que c'est vrai, et parce que le public de ce site a
+            souvent dix-sept ans : un bail comme un contrat d'énergie signé
+            par un mineur est annulable, ce qui n'aide personne. */}
+        <p className="note">
+          Un bail et un contrat d’énergie se signent à 18 ans, ou par un parent. Si tu
+          n’y es pas encore, c’est une démarche à préparer avec eux — pas à faire seul.
         </p>
       </section>
 

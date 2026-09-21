@@ -516,6 +516,39 @@ input[type='range'] { width: 100%; min-height: 44px; }
   border-radius: var(--rayon);
 }
 .partenaire p { font-size: 0.92rem; line-height: 1.6; }
+
+/* Deux colonnes dès qu'il y a la place, une seule sur téléphone : ce sont
+   deux étapes successives, pas deux options concurrentes, et empilées elles
+   se lisent dans le bon ordre. */
+.partenaire-etapes {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+}
+@media (min-width: 40rem) {
+  .partenaire-etapes { grid-template-columns: 1fr 1fr; }
+}
+.partenaire-etape {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.partenaire-etape h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+.partenaire-etape p { margin: 0; flex-grow: 1; }
+.partenaire-etape .secondaire { margin-top: 0.35rem; }
+/* Hauteur fixe, largeur libre : deux logos de marques différentes n'ont pas
+   le même rapport, et les caler sur la largeur en ferait un plus gros que
+   l'autre sans raison. */
+.partenaire-logo {
+  height: 1.35rem;
+  width: auto;
+  max-width: 100%;
+}
 /* La mention de rémunération n'est pas une note de bas de page : elle se lit
    avant le bouton, donc elle en a la largeur et l'espacement. */
 .partenaire-mention { margin: 1rem 0; }
