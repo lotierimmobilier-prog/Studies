@@ -40,7 +40,7 @@ import {
   TYPOLOGIE_LOYERS,
 } from './donnees.ts'
 import { Boussole, Carnet, Epingle, PorteMonnaie } from './illustrations.tsx'
-import { ACCUEIL_TITRE_PAGE } from '../../packages/articles/src/accueil.ts'
+import { ACCUEIL_QUESTIONS, ACCUEIL_TITRE_PAGE } from '../../packages/articles/src/accueil.ts'
 import { ARTICLES } from '../../packages/articles/src/index.ts'
 import { cheminDe, type Route } from './routes.ts'
 import {
@@ -525,6 +525,23 @@ export function Accueil({
             Tous les articles
           </button>
         </div>
+      </section>
+
+      {/* Les questions AVANT l'appel à l'action finale : celles qui retiennent
+          quelqu'un — « est-ce que c'est le site officiel ? », « est-ce que mes
+          vœux partent ? » — doivent trouver leur réponse avant le bouton, pas
+          après. Les textes vivent dans packages/articles pour que le pré-rendu
+          écrive exactement les mêmes (scripts/prerendre.ts). */}
+      <section className="accueil-questions" aria-labelledby="accueil-questions-titre">
+        <h2 id="accueil-questions-titre">Les questions qu’on nous pose</h2>
+        <dl className="questions-liste">
+          {ACCUEIL_QUESTIONS.map((q) => (
+            <div className="questions-paire" key={q.question}>
+              <dt className="questions-question">{q.question}</dt>
+              <dd className="questions-reponse">{q.reponse}</dd>
+            </div>
+          ))}
+        </dl>
       </section>
 
       <section className="cta-final">

@@ -23,6 +23,7 @@ import { dirname, join, resolve } from 'node:path'
 import { ARTICLES, MENTION_SOURCE, type Article } from '../packages/articles/src/index.ts'
 import {
   ACCUEIL_DESCRIPTION,
+  ACCUEIL_QUESTIONS,
   ACCUEIL_TITRE_ONGLET,
   ACCUEIL_TITRE_PAGE,
 } from '../packages/articles/src/accueil.ts'
@@ -139,9 +140,9 @@ function donneesStructurees(article: Article): string {
  * comme une erreur par les validateurs, et surtout il annoncerait un contenu
  * qui n'existe pas.
  */
-function questionsFrequentes(article: Article): string | null {
-  const questions = article.questions ?? []
-  if (questions.length === 0) return null
+function questionsEnFaq(
+  questions: readonly { readonly question: string; readonly reponse: string }[],
+): string {
   const objet = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -152,6 +153,12 @@ function questionsFrequentes(article: Article): string | null {
     })),
   }
   return JSON.stringify(objet).replaceAll('</', '<\\/')
+}
+
+function questionsFrequentes(article: Article): string | null {
+  const questions = article.questions ?? []
+  if (questions.length === 0) return null
+  return questionsEnFaq(questions)
 }
 
 /**
@@ -447,6 +454,15 @@ function corpsAccueil(): string {
     '<nav aria-label="Aller à l’essentiel"><ul>',
     ...liens.map((l) => `<li><a href="${echapper(l.url)}">${echapper(l.texte)}</a></li>`),
     '</ul></nav>',
+    // Les mêmes questions qu'à l'écran, et dans le même ordre. Écrites en
+    // clair autant qu'en JSON-LD : un moteur qui ne lit pas les données
+    // structurées les trouve quand même, et un lecteur arrivé avant que
+    // l'application ne prenne la main aussi.
+    '<section><h2>Les questions qu’on nous pose</h2><dl>',
+    ...ACCUEIL_QUESTIONS.map(
+      (q) => `<dt>${echapper(q.question)}</dt><dd>${echapper(q.reponse)}</dd>`,
+    ),
+    '</dl></section>',
     '</main>',
   ].join('')
 }
@@ -462,6 +478,11 @@ ecrire(
     [
       ...enTetesDePartage('accueil', accueilTitre),
       `<script type="application/ld+json">${identiteDuSite()}</script>`,
+      /* La page la plus citée d'un site est son accueil, et c'était la
+         seule à n'avoir aucune question déclarée. Une question suivie de sa
+         réponse est la plus petite unité citable qui existe : elle tient
+         debout hors de la page, ce qu'un paragraphe ne fait pas. */
+      `<script type="application/ld+json">${questionsEnFaq(ACCUEIL_QUESTIONS)}</script>`,
     ].join('\n    '),
     'website',
   ),

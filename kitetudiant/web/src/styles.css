@@ -2088,6 +2088,17 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 /* Une liste de définitions, pas une suite de paragraphes : la question et sa
    réponse sont liées sémantiquement, et un lecteur d'écran l'annonce. */
 
+/* La FAQ de l'accueil reprend la présentation de celle des articles
+   (.questions-liste, .questions-paire) : deux mises en forme pour deux
+   listes de questions donneraient l'impression de deux sites. Seul
+   l'espacement du bloc change, l'accueil étant une suite de sections. */
+.accueil-questions {
+  margin: 0;
+  padding: 2rem 0 0;
+  border-top: 1px solid var(--trait);
+}
+.accueil-questions h2 { margin: 0 0 1.25rem; }
+
 .questions {
   margin: 2.5rem 0 0;
   padding-top: 1.5rem;
