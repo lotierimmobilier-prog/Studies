@@ -482,6 +482,64 @@ compromis.
 
 ---
 
+## D18 — Deux navigations : le visiteur en haut, l'élève sur le côté
+
+**Tranché le 21/09/2026.**
+
+Un visiteur qui découvre le site et un élève connecté qui compare ses vœux ne
+font pas la même chose. Le premier lit — l'accueil, un article, une fiche — et
+veut de la largeur pour le texte. Le second travaille : allers-retours entre la
+recherche, ses vœux et ses cartes.
+
+D'où **une barre en haut pour le visiteur**, comme n'importe quel site qu'on
+découvre, avec « Se connecter » en bout de barre ; et **un rail à gauche pour
+l'élève connecté**, comme une application, repliable sur ses icônes.
+
+### Replié veut dire réduit, jamais caché
+
+Le rail passe de 15 rem à 4,5 rem — mesuré : la colonne de contenu gagne
+168 px sur un écran de 1280. Les mots partent, les icônes restent, et l'écran
+courant reste signalé. C'est ce qui distingue ce repli d'un menu derrière un
+bouton : on ne perd jamais la navigation de vue, et rouvrir ne coûte rien
+puisqu'on n'a rien à retrouver.
+
+Le nom des destinations ne disparaît pas avec les mots : `aria-label` et
+`title` portent le libellé long en permanence. Un test le vérifie — c'est le
+risque propre à cette fonctionnalité, et il ne se voit pas à l'œil.
+
+« Se déconnecter » disparaît en revanche complètement une fois replié : c'est
+le seul libellé qu'aucune icône ne remplace honnêtement, rien ne distinguant
+« sortir » de « supprimer ». Elle reste dans « Mon espace ».
+
+L'état est retenu dans le navigateur. Quelqu'un qui replie le fait pour une
+tâche, pas pour un écran.
+
+### Le téléphone ne suit aucune des deux formes
+
+Sous 1024 px, un rail latéral mangerait la moitié de l'écran. **L'élève
+connecté garde la barre du bas** : à portée de pouce, destination courante
+visible, un geste par déplacement. Un tiroir en coûterait deux, à chaque fois.
+
+Le visiteur garde sa barre en haut, qui passe sur deux rangées — marque et
+« Se connecter », puis les destinations. **Rien derrière un bouton « Menu »** :
+cinq destinations tiennent, et un menu qu'il faut ouvrir pour savoir ce qu'il
+contient ne s'explore pas. C'est ce menu déroulant que la barre avait
+justement remplacé.
+
+### Ce qui ne bouge pas
+
+Une seule liste de destinations, dans un seul `destinations()`, pour les trois
+rendus. Deux listes finissent toujours par diverger : une destination ajoutée
+d'un côté devient invisible pour la moitié des gens. Testé.
+
+La largeur de la colonne vaut `auto` : c'est le rail qui décide, la grille
+suit. Deux chiffres pour une seule mesure divergeraient au premier réglage.
+
+Vérifié au navigateur de 320 à 1920 px, dans les deux états de connexion : ni
+débordement horizontal, ni chevauchement, ni texte coupé.
+
+---
+
 ## Questions encore ouvertes
 
 | # | Question | Ce qui bloque | Échéance |

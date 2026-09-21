@@ -2607,16 +2607,106 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   text-decoration: underline;
 }
 
-/* ═══════════════════════════════════════════ la barre de navigation du site
+/* ═══════════════════════════════════════════════════ la navigation du site
  *
- * Une seule liste de destinations, deux formes selon la largeur : rail
- * vertical à gauche au-dessus de 1024 px, barre fixée en bas en dessous.
+ * Deux navigations, décidées par l'état de connexion :
+ *
+ *   .coque-visiteur — une barre en haut. Le visiteur lit, il navigue peu, et
+ *                     il veut de la largeur pour le texte.
+ *   .coque-app      — un rail à gauche au-dessus de 1024 px, repliable sur
+ *                     ses icônes ; une barre en bas en dessous.
  *
  * La barre du bas est à portée de pouce et ne se fait pas recouvrir par le
  * clavier, contrairement à une barre en haut. Le rail latéral, lui, mangerait
  * la moitié d'un écran de téléphone.
  */
-.coque-page {
+
+/* ---------------------------------------------------- le visiteur : en haut */
+
+.barre-haut {
+  position: sticky;
+  z-index: 40;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1.25rem;
+  padding: 0.65rem 16px;
+  border-bottom: 1px solid var(--trait);
+  background: var(--carte);
+}
+/* L'ordre explicite tient la première rangée : la marque à gauche, le bouton
+   à droite, et les destinations rejetées à la ligne par leur base de 100 %. */
+.barre-haut-marque {
+  flex: 1 1 auto;
+  order: 1;
+  min-width: 0;
+}
+.barre-haut-marque .marque-mot {
+  height: 1.5rem;
+}
+.barre-haut-compte {
+  flex: 0 0 auto;
+  order: 2;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon);
+  background: var(--accent);
+  color: var(--fond);
+  font-family: var(--titres);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.barre-haut-compte.courant {
+  background: transparent;
+  color: var(--accent);
+}
+.barre-haut-nav {
+  flex: 1 0 100%;
+  order: 3;
+  min-width: 0;
+}
+.barre-haut-liste {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.barre-haut-liste > li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.haut-lien {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* 3rem : la taille sous laquelle une cible tactile se rate. */
+  min-height: 3rem;
+  padding: 0.4rem 0.2rem;
+  border-bottom: 2px solid transparent;
+  color: var(--doux);
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+.haut-lien .illu-picto {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+.haut-lien-courant {
+  border-bottom-color: var(--vif);
+  color: var(--encre);
+  font-weight: 600;
+}
+
+/* ----------------------------------------- l'élève connecté : rail ou bas */
+
+.coque-app .coque-page {
   /* La barre du bas flotte au-dessus du contenu : sans cette réserve, elle
      recouvre les derniers boutons de chaque page — et c'est justement là que
      se trouve l'action principale. `safe-area-inset` tient compte de la barre
@@ -2648,9 +2738,9 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 .barre-marque .marque-logo img {
   height: 1.55rem;
 }
-/* Sur grand écran c'est le rail qui porte la marque ; deux logos à l'écran
-   font double emploi. */
-.rail-marque {
+/* Sur téléphone, c'est le bandeau ci-dessus qui porte la marque ; la tête du
+   rail — marque et bouton de repli — n'a de sens qu'en colonne. */
+.rail-tete {
   display: none;
 }
 .rail-liste {
@@ -2694,7 +2784,7 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   color: var(--encre);
   font-weight: 600;
 }
-/* Le libellé long est réservé au rail ; en bas, on n'a la place que du court. */
+/* Le libellé long est réservé au rail déplié ; ailleurs, la place manque. */
 .rail-libelle {
   display: none;
 }
@@ -2709,9 +2799,13 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 }
 
 @media (min-width: 64rem) {
-  .coque {
+  /* `auto` et non une largeur fixe : c'est le rail qui décide de sa largeur
+     selon qu'il est replié ou non, et la colonne suit. Une largeur déclarée
+     ici devrait être répétée à l'identique sur le rail — deux chiffres pour
+     une seule mesure finissent par diverger. */
+  .coque-app {
     display: grid;
-    grid-template-columns: 15rem 1fr;
+    grid-template-columns: auto 1fr;
   }
   /* `display: none` sort aussi l'élément de la grille : il ne reste que le
      rail et la page, soit exactement les deux colonnes déclarées. */
@@ -2720,8 +2814,49 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   }
   .coque-page {
     min-width: 0;
+  }
+  .coque-app .coque-page {
     padding-bottom: 0;
   }
+
+  /* La barre du visiteur repasse sur UNE rangée : les destinations quittent
+     la ligne du dessous et se glissent entre la marque et le bouton. */
+  .barre-haut {
+    flex-wrap: nowrap;
+    padding-inline: 2rem;
+  }
+  .barre-haut-marque {
+    flex: 0 0 auto;
+  }
+  /* Le bouton repasse APRÈS les destinations. Sur téléphone il partage la
+     première rangée avec la marque, donc il doit la précéder ; sur une seule
+     rangée, cet ordre le collerait au logo, l'action se lisant alors comme la
+     première destination de la liste. Sa place est au bout. */
+  .barre-haut-compte {
+    order: 4;
+  }
+  .barre-haut-nav {
+    flex: 1 1 auto;
+  }
+  .barre-haut-liste {
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+  .barre-haut-liste > li {
+    flex: 0 0 auto;
+  }
+  /* Les icônes sortent : une barre horizontale de destinations se lit par ses
+     mots, et cinq pictogrammes alignés n'ajoutent que du bruit à côté d'eux. */
+  .haut-lien {
+    flex-direction: row;
+    min-height: 0;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+  .haut-lien .illu-picto {
+    display: none;
+  }
+
   .rail {
     position: sticky;
     top: 0;
@@ -2729,15 +2864,65 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     bottom: auto;
     left: 0;
     flex-direction: column;
+    width: 15rem;
     height: 100vh;
     height: 100dvh;
     padding: 1.25rem 0.9rem 1.5rem;
     border-top: none;
     border-right: 1px solid var(--trait);
+    transition: width 0.18s ease;
+  }
+  .rail-replie {
+    width: 4.5rem;
+    padding-inline: 0.6rem;
+  }
+  .rail-tete {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    margin: 0 0.35rem 1.5rem;
+  }
+  .rail-replie .rail-tete {
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-inline: 0;
   }
   .rail-marque {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .rail-toque {
     display: block;
-    margin: 0 0.35rem 1.5rem;
+    border-radius: 7px;
+  }
+  .rail-bascule {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--doux);
+    cursor: pointer;
+  }
+  .rail-bascule:hover {
+    background: var(--fond);
+    color: var(--encre);
+  }
+  .rail-bascule .illu-picto {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    transition: transform 0.18s ease;
+  }
+  /* Le chevron pointe vers le geste à venir : vers la gauche pour replier,
+     vers la droite pour déplier. Un seul dessin, retourné. */
+  .rail-replie .rail-bascule .illu-picto {
+    transform: scaleX(-1);
   }
   .rail-liste {
     flex: 0 1 auto;
@@ -2774,6 +2959,16 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   .rail-court {
     display: none;
   }
+  /* Replié : l'icône seule, centrée. Le nom reste porté par `aria-label` et
+     par `title`, donc ni un lecteur d'écran ni la souris ne le perdent. */
+  .rail-replie .rail-lien {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0;
+  }
+  .rail-replie .rail-libelle {
+    display: none;
+  }
   .rail-deconnexion {
     display: block;
     margin-top: auto;
@@ -2790,6 +2985,12 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   .rail-deconnexion:hover {
     color: var(--encre);
     text-decoration: underline;
+  }
+  /* Replié, « Se déconnecter » disparaît : c'est le seul libellé du rail
+     qu'aucune icône ne remplace honnêtement — rien ne distingue « sortir » de
+     « supprimer ». Elle reste dans « Mon espace », la page faite pour ça. */
+  .rail-replie .rail-deconnexion {
+    display: none;
   }
 }
 
