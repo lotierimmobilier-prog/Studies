@@ -125,8 +125,22 @@ export function MonLycee({
                       setSaisie('')
                     }}
                   >
+                    {/* La ville d'abord : « Lycée Jean-Moulin » existe dans
+                        onze communes, et c'est la sienne que l'élève
+                        reconnaît. L'UAI reste, en dernier — c'est la clé
+                        pivot, et elle départage deux homonymes d'une même
+                        ville. */}
                     {l.nom}
-                    <span className="note"> · UAI {l.uai}</span>
+                    <span className="note">
+                      {l.ville !== '' ? (
+                        <>
+                          {' '}
+                          · {l.ville}
+                          {l.departement !== '' ? ` (${l.departement})` : ''}
+                        </>
+                      ) : null}{' '}
+                      · UAI {l.uai}
+                    </span>
                   </button>
                 </li>
               ))}

@@ -43,6 +43,10 @@ export interface Lycee {
   readonly nom: string
   /** Code INSEE de la commune. */
   readonly commune: string
+  /** Nom de la ville, tel que publié puis remis en casse française. */
+  readonly ville: string
+  /** Nom du département, même traitement. Départage deux villes homonymes. */
+  readonly departement: string
   readonly annee: string
 }
 
@@ -76,6 +80,8 @@ interface LigneLycee {
   readonly code_etablissement?: string | null | undefined
   readonly etablissement?: string | null | undefined
   readonly commune?: string | null | undefined
+  readonly ville?: string | null | undefined
+  readonly departement?: string | null | undefined
   readonly annee?: string | null | undefined
   readonly presents_gnle?: number | null | undefined
   readonly taux_reu_brut_gnle?: string | number | null | undefined
@@ -83,6 +89,48 @@ interface LigneLycee {
   readonly nombre_de_mentions_tb_sans_felicitations_g?: number | null | undefined
   readonly nombre_de_mentions_b_g?: number | null | undefined
   readonly nombre_de_mentions_ab_g?: number | null | undefined
+}
+
+/* Les mots qui restent en bas de casse à l'intérieur d'un nom de lieu. Hors
+   première position : « Le Havre » garde sa majuscule, « Saint-Jean-de-Luz »
+   non. La liste est fermée — inventer une règle générale sur les mots courts
+   donnerait « Aix-En-Provence » ou « Val D'oise ». */
+const MOTS_BAS = new Set([
+  'a', 'au', 'aux', 'd', 'de', 'des', 'du', 'en', 'et', 'l', 'la', 'le', 'les',
+  'lès', 'sous', 'sur', 'un', 'une',
+])
+
+/**
+ * « CARCASSONNE » → « Carcassonne », « SAINT-ETIENNE-DU-ROUVRAY » →
+ * « Saint-Etienne-du-Rouvray », « AIX-EN-PROVENCE » → « Aix-en-Provence ».
+ *
+ * L'open data des lycées publie tout en capitales. Le laisser tel quel donnait
+ * une ligne qui crie au milieu d'une phrase, et l'élève lit d'abord la ville.
+ *
+ * Les accents ne sont pas restitués : le jeu ne les publie pas, et les
+ * inventer produirait « Nîmes » sur une source qui écrit « NIMES ». On remet
+ * la casse, jamais ce qui n'est pas là.
+ */
+export function casseDeLieu(brut: string): string {
+  const net = brut.trim()
+  if (net === '') return ''
+  let debutDeMot = true
+  return [...net.toLowerCase()]
+    .map((c) => {
+      if (/[\s'’-]/.test(c)) {
+        debutDeMot = true
+        return c
+      }
+      const premier = debutDeMot
+      debutDeMot = false
+      return premier ? c.toLocaleUpperCase('fr-FR') : c
+    })
+    .join('')
+    .replace(/(?<=[\s'’-])([^\s'’-]+)/g, (mot, _m, decalage: number) =>
+      decalage > 0 && MOTS_BAS.has(mot.toLocaleLowerCase('fr-FR'))
+        ? mot.toLocaleLowerCase('fr-FR')
+        : mot,
+    )
 }
 
 function entier(v: unknown): number {
@@ -103,7 +151,7 @@ export async function chercherLycees(
   if (net.length < 3) return []
   const params = new URLSearchParams({
     where: `search(etablissement, "${net.replace(/"/g, '')}")`,
-    select: 'code_etablissement, etablissement, commune, annee',
+    select: 'code_etablissement, etablissement, commune, ville, departement, annee',
     order_by: 'annee DESC',
     limit: '40',
   })
@@ -122,6 +170,8 @@ export async function chercherLycees(
       uai,
       nom: l.etablissement ?? uai,
       commune: l.commune ?? '',
+      ville: casseDeLieu(l.ville ?? ''),
+      departement: casseDeLieu(l.departement ?? ''),
       annee: l.annee ?? '',
     })
   }
@@ -171,6 +221,8 @@ export function depuisLigne(l: LigneLycee): MentionsLycee {
     uai: l.code_etablissement ?? '',
     nom: l.etablissement ?? '',
     commune: l.commune ?? '',
+    ville: casseDeLieu(l.ville ?? ''),
+    departement: casseDeLieu(l.departement ?? ''),
     annee: l.annee ?? '',
     presents,
     tauxReussite,
