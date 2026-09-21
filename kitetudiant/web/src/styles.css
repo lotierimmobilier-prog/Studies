@@ -3180,18 +3180,6 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 /* Les métiers d'un domaine, sur l'onglet « Après ». Une liste sobre : ces
    chiffres situent un ordre de grandeur, ils ne classent rien, et une mise
    en forme qui les hiérarchiserait leur ferait dire plus qu'ils ne disent. */
-.metiers {
-  margin: 0.75rem 0 1rem;
-  padding: 0;
-  list-style: none;
-}
-.metier {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--trait);
-}
 
 /* ═══════════════════════════════ les débouchés d'une école, par spécialité
  *

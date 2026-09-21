@@ -433,7 +433,7 @@ function Emploi({ formation }: { readonly formation: Formation }) {
     )
   }
 
-  const { total, metiers, region } = offres
+  const { total, region } = offres
   return (
     <>
       <h2 className="fiche-sous-titre">Les offres d’emploi de ce domaine</h2>
@@ -454,29 +454,23 @@ function Emploi({ formation }: { readonly formation: Formation }) {
         rien de plus.
       </p>
 
-      <ul className="metiers">
-        {metiers.map((m) => (
-          <li key={m.codeRome} className="metier">
-            <a href={m.lien} target="_blank" rel="noopener noreferrer">
-              {m.libelle}
-              <span aria-hidden="true"> ↗</span>
-            </a>
-            <span className="note">
-              {m.enFrance === null
-                ? 'comptage indisponible'
-                : `${nombre(m.enFrance)} en France`}
-              {region !== null && m.enRegion !== null
-                ? ` · ${nombre(m.enRegion)} en région`
-                : ''}
-            </span>
-          </li>
-        ))}
-      </ul>
+      {/* La liste des métiers, avec un compteur chacun, vivait ici. Elle
+          faisait doublon avec les annonces qui suivent — deux fois « les
+          offres France Travail », une fois en chiffres, une fois en cartes —
+          et les cartes disent la même chose en montrant de vrais postes.
 
+          Ce qu'elle portait d'indispensable est repris ci-dessous : QUELS
+          domaines ont été comptés, et le fait que le rapprochement entre
+          cette formation et ces métiers vient de nous. La première phrase
+          dit sur quoi porte le chiffre ; sans elle il ne veut rien dire, et
+          la règle 6 tombe. La seconde évite qu'on prête ce rapprochement à
+          Parcoursup, qui ne publie rien de tel.
+
+          Sa suppression a aussi retiré seize appels à France Travail par
+          affichage (huit métiers × deux échelles, en série). */}
       <p className="note">
-        Quelques métiers du domaine, pris tout au long de la liste — <strong>ce n’est pas
-        un classement</strong>. {offres.note} Ce rapprochement entre la formation et ces
-        métiers est le nôtre : Parcoursup ne publie aucun lien de ce genre.
+        {offres.note} Ce rapprochement entre la formation et ces métiers est le nôtre :
+        Parcoursup ne publie aucun lien de ce genre.
       </p>
       <p className="fiche-source">{offres.source}</p>
     </>

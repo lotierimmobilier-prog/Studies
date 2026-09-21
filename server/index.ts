@@ -63,10 +63,9 @@ import {
   ClientEmploi,
   EmploiNonConfigure,
   SOURCE_EMPLOI,
-  lienOffres,
   somme,
 } from './emploi.ts'
-import { metiersDuTheme, themeMetiers } from '../kitetudiant/packages/metiers/src/index.ts'
+import { themeMetiers } from '../kitetudiant/packages/metiers/src/index.ts'
 import {
   BaseIndisponible,
   FormationInconnue,
@@ -544,7 +543,14 @@ async function demarrer(): Promise<void> {
              pas un secteur, et additionner ceux qu'on montre donnerait un
              total faux, plus petit que la réalité. */
           const totaux = await clientEmploi.totaux(infos.domaines, region)
-          const metiers = metiersDuTheme(theme, await clientEmploi.metiers())
+          /* Plus de comptage métier par métier.
+             
+             L'écran en faisait une liste, sous les deux compteurs et
+             au-dessus des annonces elles-mêmes : deux fois « les offres
+             France Travail » sur la même page, une fois en chiffres, une
+             fois en cartes. La liste est partie ; la calculer encore
+             coûterait seize appels en série — huit métiers × deux
+             échelles — pour une charge utile que personne ne lit. */
           return envoyerJson(res, 200, {
             theme: infos.cle,
             note: infos.note,
@@ -555,10 +561,6 @@ async function demarrer(): Promise<void> {
               enFrance: somme(totaux.map((t) => t.enFrance)),
               enRegion: region === null ? null : somme(totaux.map((t) => t.enRegion)),
             },
-            metiers: (await clientEmploi.comptages(metiers, region)).map((c) => ({
-              ...c,
-              lien: lienOffres(c.libelle, region),
-            })),
           })
         } catch (e) {
           if (e instanceof EmploiNonConfigure) {

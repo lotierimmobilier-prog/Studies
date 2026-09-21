@@ -64,17 +64,6 @@ export interface TotalDomaine {
   readonly enRegion: number | null
 }
 
-export interface Comptage {
-  readonly codeRome: string
-  readonly libelle: string
-  readonly enFrance: number | null
-  readonly enRegion: number | null
-  /** Code INSEE de la région comptée, quand il y en a une. */
-  readonly region: string | null
-  /** Date à laquelle le comptage a été relevé chez France Travail. */
-  readonly releveLe: string
-}
-
 export interface Metier {
   readonly code: string
   readonly libelle: string
@@ -244,33 +233,6 @@ export class ClientEmploi {
       jusqua: this.maintenant() + (valeur === null ? 60_000 : CACHE_HEURES * 3600_000),
     })
     return valeur
-  }
-
-  /**
-   * Compte les offres pour une liste de métiers.
-   *
-   * En SÉRIE, volontairement. Huit métiers × deux échelles font seize
-   * appels ; lancés ensemble, ils dépassent la rafale de dix par seconde et
-   * la moitié revient en erreur. En série, c'est plus lent d'une seconde et
-   * ça n'échoue pas.
-   */
-  async comptages(metiers: readonly Metier[], region: string | null): Promise<Comptage[]> {
-    const releveLe = new Date(this.maintenant()).toISOString().slice(0, 10)
-    const resultats: Comptage[] = []
-    for (const m of metiers) {
-      const enFrance = await this.compter({ codeROME: m.code }, null)
-      const enRegion =
-        region === null ? null : await this.compter({ codeROME: m.code }, region)
-      resultats.push({
-        codeRome: m.code,
-        libelle: m.libelle,
-        enFrance,
-        enRegion,
-        region,
-        releveLe,
-      })
-    }
-    return resultats
   }
 
   /**
