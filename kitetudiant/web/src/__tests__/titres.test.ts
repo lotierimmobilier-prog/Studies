@@ -149,3 +149,54 @@ describe('la hiérarchie des titres ne saute pas de niveau', () => {
     })
   }
 })
+
+/**
+ * Une page, un nom.
+ *
+ * ── Ce que ce test aurait évité ──────────────────────────────────────────
+ *
+ * La page des cartes en portait quatre à la fois :
+ *
+ *   - « Mes cartes » dans la barre de navigation ;
+ *   - « Ta collection » dans le fil d'Ariane ;
+ *   - « Tes cartes » dans le `h1` ;
+ *   - « Mes cartes de villes » dans l'onglet.
+ *
+ * Quatre noms pour une adresse, c'est quatre pages pour qui la cherche dans
+ * son historique, et c'est un fil d'Ariane qui ne nomme pas la page où il
+ * s'arrête. « Mes vœux » — l'autre page personnelle — en portait un seul,
+ * le même partout : c'est la convention, et elle suit l'adresse.
+ */
+describe('les pages personnelles portent le même nom partout', () => {
+  const PAGES: readonly {
+    readonly fichier: string
+    readonly nom: string
+    readonly cle: string
+  }[] = [
+    { fichier: 'collection.tsx', nom: 'Mes cartes', cle: 'collection' },
+    { fichier: 'mesVoeux.tsx', nom: 'Mes vœux', cle: 'voeux' },
+  ]
+
+  const NAV = readFileSync(resolve(SRC, 'navigation.tsx'), 'utf8')
+
+  it.each(PAGES)('« $nom » : fil d’Ariane, h1 et onglet concordent', ({ fichier, nom }) => {
+    const source = readFileSync(resolve(SRC, fichier), 'utf8')
+    expect(source, `${fichier} : le fil d’Ariane ne dit pas « ${nom} »`).toContain(
+      `{ libelle: '${nom}', route: null }`,
+    )
+    expect(source, `${fichier} : le h1 ne dit pas « ${nom} »`).toMatch(
+      new RegExp(`<h1[^>]*>${nom}</h1>`),
+    )
+    expect(source, `${fichier} : l’onglet ne commence pas par « ${nom} »`).toContain(
+      `titre: '${nom} — KitEtudiant.fr'`,
+    )
+  })
+
+  it('la barre de navigation emploie le même nom', () => {
+    for (const { nom } of PAGES) {
+      // Le libellé des cartes porte un compteur — « Mes cartes (3) » — d'où
+      // la recherche du nom seul plutôt que de la ligne entière.
+      expect(NAV, `la navigation ne dit pas « ${nom} »`).toContain(`'${nom}`)
+    }
+  })
+})

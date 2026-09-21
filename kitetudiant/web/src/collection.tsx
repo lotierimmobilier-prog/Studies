@@ -239,7 +239,7 @@ export function Collection({
   onImporter: (cartes: Obtention[]) => void
 }) {
   useMetadonnees({
-    titre: 'Mes cartes de villes — KitEtudiant.fr',
+    titre: 'Mes cartes — KitEtudiant.fr',
     description: 'Les cartes de villes que tu as gagnées en explorant tes options.',
     prive: true,
   })
@@ -266,12 +266,19 @@ export function Collection({
       <FilAriane
         maillons={[
           { libelle: 'Accueil', route: { vue: 'accueil' } },
-          { libelle: 'Ta collection', route: null },
+          { libelle: 'Mes cartes', route: null },
         ]}
         onNaviguer={onNaviguer}
       />
 
-      <h1 className="article-titre">Tes cartes</h1>
+      {/* « Mes cartes », comme la barre de navigation, comme le fil
+          d'Ariane, comme l'adresse /mes-cartes, et comme « Mes vœux » sur
+          l'autre page personnelle. La page portait quatre noms — « Mes
+          cartes » dans la navigation, « Ta collection » dans le fil,
+          « Tes cartes » ici, « Mes cartes de villes » dans l'onglet — et
+          quatre noms pour une page, c'est quatre pages pour qui la cherche
+          dans son historique. */}
+      <h1 className="article-titre">Mes cartes</h1>
 
       {/* Les récompenses d'abord, et seules dans leur section. Mêlées aux
           villes, elles disparaissaient : le compteur annonçait « 8 sur 1 253 »,
@@ -367,8 +374,8 @@ export function Collection({
       <section className="bloc">
         <h2>Changer d’appareil</h2>
         <p className="bloc-intro">
-          Ta collection ne quitte pas ce navigateur. Pour la reprendre ailleurs,
-          enregistre-la et rouvre le fichier là-bas.
+          Tes cartes ne quittent pas ce navigateur. Pour les reprendre ailleurs,
+          enregistre-les et rouvre le fichier là-bas.
         </p>
         <div className="cta-groupe">
           <a
@@ -376,10 +383,10 @@ export function Collection({
             download="kitetudiant-collection.json"
             href={`data:application/json;charset=utf-8,${encodeURIComponent(exporter(collection))}`}
           >
-            Enregistrer ma collection
+            Enregistrer mes cartes
           </a>
           <label className="cta-secondaire">
-            Ouvrir une collection
+            Ouvrir un fichier de cartes
             <input
               type="file"
               accept="application/json"

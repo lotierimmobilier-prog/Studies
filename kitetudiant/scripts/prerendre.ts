@@ -29,6 +29,8 @@ import {
 /* Le même module que l'application, pour que la page livrée et la page
    rendue affichent la même date. Il n'importe rien du navigateur. */
 import { dateLisible } from '../web/src/dates.ts'
+import { MILLESIME_CALENDRIER, RELEVE_LE } from '../web/src/calendrier.ts'
+import { nombre } from '../packages/budget-engine/src/nombres.ts'
 
 const RACINE = resolve(import.meta.dirname, '..', '..')
 const SORTIE = join(RACINE, 'dist-kitetudiant')
@@ -36,6 +38,23 @@ const BASE = (process.env.VITE_BASE ?? '/').endsWith('/')
   ? (process.env.VITE_BASE ?? '/')
   : `${process.env.VITE_BASE}/`
 const ORIGINE = (process.env.SITE_ORIGINE ?? 'https://kitetudiant.fr').replace(/\/$/, '')
+
+/**
+ * Ce que le site couvre, lu dans le jeu de données lui-même.
+ *
+ * Compté, jamais écrit en dur : un chiffre de couverture recopié à la main
+ * devient faux au premier import et personne ne s'en aperçoit. C'est la
+ * même raison qui fait compter `NOMBRE_COMMUNES_AVEC_LOYER` côté
+ * application (web/src/donnees.ts).
+ */
+const COMMUNES = JSON.parse(
+  readFileSync(join(RACINE, 'kitetudiant', 'web', 'donnees', 'communes.json'), 'utf8'),
+) as {
+  readonly millesimeLoyers: string
+  readonly genereLe: string
+  readonly source: string
+  readonly communes: Readonly<Record<string, unknown>>
+}
 
 /** Échappe un texte pour l'insérer dans du HTML. */
 function echapper(texte: string): string {
@@ -552,6 +571,20 @@ ecrire(
   la session précédente, telles quelles.
 - Il explique la **procédure Parcoursup** dans ${ARTICLES.length} articles.
 
+## Couverture et millésimes
+
+Ces chiffres sont comptés dans les données au moment du build, pas recopiés
+à la main.
+
+- **${nombre(Object.keys(COMMUNES.communes).length)} communes** avec un loyer de référence.
+- **Loyers** : millésime ${COMMUNES.millesimeLoyers}. ${COMMUNES.source}.
+- **Jeu de communes** assemblé le ${dateLisible(COMMUNES.genereLe)}.
+- **Calendrier Parcoursup** : session ${MILLESIME_CALENDRIER}, relevé le ${dateLisible(RELEVE_LE)}.
+- **Formations et établissements** : interrogés en direct dans l'open data
+  publié, à chaque affichage. Le site n'en garde pas de copie datée, donc la
+  fiche montre toujours le dernier millésime publié par le ministère.
+- **Cette page** a été écrite le ${dateLisible(new Date().toISOString().slice(0, 10))}.
+
 ## Ce que le site ne fait pas
 
 - Il **ne classe pas** les écoles entre elles. Pas de palmarès, pas de note
@@ -571,9 +604,27 @@ ${ARTICLES.map((a) => `- [${a.titre}](${ORIGINE}${BASE}blog/${a.slug}) : ${a.cha
 
 ## Pages
 
-- [Accueil](${ORIGINE}${BASE}) : le calculateur et la méthode.
+- [Accueil](${ORIGINE}${BASE}) : le questionnaire, le calcul du
+  reste-à-vivre et la méthode.
+- [Chercher une école](${ORIGINE}${BASE}chercher-une-ecole) : recherche par
+  ville, par domaine ou par nom d'établissement.
 - [Blog](${ORIGINE}${BASE}blog) : la liste des articles.
 - [Plan du site](${ORIGINE}${BASE}sitemap.xml)
+
+## Fiches
+
+Une page par formation et une par établissement, atteignables depuis la
+recherche. Elles se comptent par milliers et dépendent d'un appel à l'open
+data, donc elles ne figurent pas au plan du site — c'est assumé, pas un
+oubli.
+
+- Formation : \`${ORIGINE}${BASE}formation/<code d'affectation Parcoursup>\`
+- Établissement : \`${ORIGINE}${BASE}etablissement/<code UAI>\`
+
+Chaque fiche porte le taux d'accès publié, le reste-à-vivre estimé dans la
+commune de l'école, et les débouchés — nombre d'offres en cours sur France
+Travail pour les métiers liés à la formation. Aucune de ces pages ne classe
+les écoles entre elles.
 `,
 )
 

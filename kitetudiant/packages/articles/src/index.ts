@@ -145,7 +145,7 @@ export const ARTICLES: readonly Article[] = [
     titre: 'Comprendre Parcoursup en dix minutes',
     chapeau:
       'Une seule procédure, un seul dossier, un seul calendrier — et trois moments qui ' +
-      'comptent. De quoi savoir où vous mettez les pieds avant d’ouvrir la plateforme.',
+      'comptent. De quoi savoir où tu mets les pieds avant d’ouvrir la plateforme.',
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['parcoursup', 'orientation', 'post-bac', 'vœux'],
@@ -153,22 +153,22 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Faut-il remplir un dossier par vœu sur Parcoursup ?',
         reponse:
-          'Non. Vous remplissez un seul dossier — état civil, bulletins, résultats, activités — et chaque formation y puise ce qui l’intéresse. Seuls deux éléments sont propres à chaque vœu : le projet de formation motivé, et les pièces complémentaires que certaines filières demandent. Le gros du travail se fait donc une fois.',
+          'Non. Tu remplis un seul dossier — état civil, bulletins, résultats, activités — et chaque formation y puise ce qui l’intéresse. Seuls deux éléments sont propres à chaque vœu : le projet de formation motivé, et les pièces complémentaires que certaines filières demandent. Le gros du travail se fait donc une fois.',
       },
       {
         question: 'Le classement de mes vœux influence-t-il les formations ?',
         reponse:
-          'Non, et c’est pourquoi les vœux ne se classent pas au moment où on les formule. Les formations examinent votre dossier sans savoir à quel rang vous les placez, ni quels autres vœux vous avez formulés. Vous décidez quelles formations vous demandez et quelle proposition vous acceptez ; entre les deux, ce sont elles qui décident.',
+          'Non, et c’est pourquoi les vœux ne se classent pas au moment où on les formule. Les formations examinent ton dossier sans savoir à quel rang tu les places, ni quels autres vœux tu as formulés. Tu décides quelles formations tu demandes et quelle proposition tu acceptes ; entre les deux, ce sont elles qui décident.',
       },
       {
         question: 'Quelle est l’erreur la plus fréquente sur Parcoursup ?',
         reponse:
-          'Ce n’est pas de mal choisir, c’est de laisser passer une date. Chaque année, des dossiers complets ne sont jamais examinés parce que les vœux n’ont pas été confirmés avant la clôture : le travail est fait, la candidature n’existe pas. Notez la date de confirmation, pas seulement celle de formulation.',
+          'Ce n’est pas de mal choisir, c’est de laisser passer une date. Chaque année, des dossiers complets ne sont jamais examinés parce que les vœux n’ont pas été confirmés avant la clôture : le travail est fait, la candidature n’existe pas. Note la date de confirmation, pas seulement celle de formulation.',
       },
     ],
     corps: [
       p(
-        'Parcoursup n’est pas un concours. C’est un guichet : vous déposez un dossier, ' +
+        'Parcoursup n’est pas un concours. C’est un guichet : tu déposes un dossier, ' +
           'les formations le regardent, elles répondent. Tout le reste — les rumeurs sur ' +
           'l’algorithme, les stratégies de classement, les vœux qu’il faudrait « garder en ' +
           'réserve » — découle d’une mauvaise compréhension de ce point de départ.',
@@ -180,10 +180,10 @@ export const ARTICLES: readonly Article[] = [
           'le dossier se construit avec le service d’orientation de l’établissement ' +
           'd’origine plutôt qu’avec un professeur principal, mais la mécanique est la même.',
       ),
-      t('Un seul dossier pour tous vos vœux'),
+      t('Un seul dossier pour tous tes vœux'),
       p(
-        'C’est le point qui surprend le plus. Vous ne remplissez pas dix candidatures : ' +
-          'vous remplissez un dossier — état civil, bulletins, résultats, activités — et ' +
+        'C’est le point qui surprend le plus. Tu ne remplis pas dix candidatures : ' +
+          'tu remplis un dossier — état civil, bulletins, résultats, activités — et ' +
           'chaque formation y puise ce qui l’intéresse. Seuls deux éléments sont propres à ' +
           'chaque vœu : le projet de formation motivé, et les pièces complémentaires que ' +
           'certaines filières demandent.',
@@ -196,23 +196,23 @@ export const ARTICLES: readonly Article[] = [
       p(
         'L’année se découpe en trois temps qui ne changent pas d’une session à l’autre. ' +
           'D’abord une période où l’on regarde : la carte des formations s’ouvre en ' +
-          'décembre, et pendant deux mois personne ne vous demande rien. Ensuite une ' +
+          'décembre, et pendant deux mois personne ne te demande rien. Ensuite une ' +
           'période où l’on formule : les inscriptions ouvrent en janvier, les vœux se ' +
           'ferment en mars, le dossier se confirme début avril. Enfin une période où l’on ' +
           'répond : les propositions arrivent début juin et la phase principale se termine ' +
           'en juillet.',
       ),
       p(
-        'Retenez surtout que la deuxième période a deux échéances, pas une. Formuler un ' +
+        'Retiens surtout que la deuxième période a deux échéances, pas une. Formuler un ' +
           'vœu et le confirmer sont deux gestes différents, séparés de trois semaines. Les ' +
           'jours exacts changent chaque année : ils sont fixés par l’État et publiés à ' +
-          'l’ouverture de la session. Notez-les à ce moment-là, pas avant.',
+          'l’ouverture de la session. Note-les à ce moment-là, pas avant.',
       ),
-      t('Ce que vous décidez, ce que vous ne décidez pas'),
+      t('Ce que tu décides, ce que tu ne décides pas'),
       p(
-        'Vous décidez quelles formations vous demandez, et vous décidez quelle proposition ' +
-          'vous acceptez. Entre les deux, vous ne décidez rien : ce sont les formations qui ' +
-          'examinent les dossiers et fixent leur ordre. Aucun classement de votre part ' +
+        'Tu décides quelles formations tu demandes, et tu décides quelle proposition ' +
+          'tu acceptes. Entre les deux, tu ne décides rien : ce sont les formations qui ' +
+          'examinent les dossiers et fixent leur ordre. Aucun classement de ta part ' +
           'n’influence leur décision, et c’est précisément pour cela que les vœux ne se ' +
           'classent pas au moment où on les formule.',
       ),
@@ -224,16 +224,16 @@ export const ARTICLES: readonly Article[] = [
           'Lire ces critères vaut mieux que spéculer sur ce qu’on imagine qu’ils regardent.',
       ),
       e(
-        'Un vœu que vous n’osez pas formuler est un vœu refusé d’avance, par vous. ' +
-          'Formuler ne coûte rien et n’engage à rien tant que vous n’avez pas accepté une ' +
+        'Un vœu que tu n’oses pas formuler est un vœu refusé d’avance, par toi. ' +
+          'Formuler ne coûte rien et n’engage à rien tant que tu n’as pas accepté une ' +
           'proposition.',
       ),
       t('Ce qui n’est pas sur la plateforme'),
       p(
         'Presque toutes les formations reconnues par l’État y sont, mais pas toutes. ' +
           'Quelques écoles, notamment dans le privé, recrutent par leur propre procédure, ' +
-          'avec leur propre calendrier. Si une formation vous intéresse et que vous ne la ' +
-          'trouvez pas, cherchez son site : vous y lirez comment elle recrute, et surtout ' +
+          'avec leur propre calendrier. Si une formation t’intéresse et que tu ne la ' +
+          'trouves pas, cherche son site : tu y liras comment elle recrute, et surtout ' +
           'avant quelle date. Une candidature hors plateforme se prépare en parallèle, pas ' +
           'à la place.',
       ),
@@ -244,13 +244,13 @@ export const ARTICLES: readonly Article[] = [
           'confirmés avant la clôture. Le travail est fait, la candidature n’existe pas.',
       ),
       p(
-        'La parade tient en une phrase : notez la date de confirmation, pas seulement ' +
-          'celle de formulation, et prévoyez une semaine de marge. Rien dans la procédure ' +
-          'ne vous relancera à votre place.',
+        'La parade tient en une phrase : note la date de confirmation, pas seulement ' +
+          'celle de formulation, et prévois une semaine de marge. Rien dans la procédure ' +
+          'ne te relancera à ta place.',
       ),
       t('Et après la proposition ?'),
       p(
-        'Accepter une proposition ne vous inscrit pas. Il reste une inscription ' +
+        'Accepter une proposition ne t’inscrit pas. Il reste une inscription ' +
           'administrative à faire auprès de l’établissement, dans un délai qu’il fixe, avec ' +
           'ses propres pièces. C’est une formalité, mais une formalité qui a une date elle ' +
           'aussi — et c’est la dernière occasion de perdre une place qu’on a obtenue.',
@@ -270,7 +270,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Dix vœux, est-ce que cela veut dire dix formations ?',
         reponse:
-          'Non. Certaines filières se demandent par groupe : vous formulez un vœu pour la filière, puis vous choisissez les établissements qui vous intéressent — ce sont les sous-vœux. Le vœu compte pour un, les sous-vœux ont leur propre plafond. Un candidat organisé couvre donc bien plus de dix portes d’entrée. Vérifiez le décompte sur la fiche.',
+          'Non. Certaines filières se demandent par groupe : tu formules un vœu pour la filière, puis tu choisis les établissements qui t’intéressent — ce sont les sous-vœux. Le vœu compte pour un, les sous-vœux ont leur propre plafond. Un candidat organisé couvre donc bien plus de dix portes d’entrée. Vérifie le décompte sur la fiche.',
       },
       {
         question: 'Les vœux en apprentissage comptent-ils dans les dix ?',
@@ -280,7 +280,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'À quoi ressemble une liste de vœux solide ?',
         reponse:
-          'Elle couvre trois cas : des formations où votre dossier est dans la moyenne de ceux qui sont admis, des formations plus ouvertes qui vous conviendraient vraiment, et une ou deux formations ambitieuses. Variez les types de formation et surtout la géographie, le levier le plus efficace et le moins utilisé. Ne gardez aucun vœu que vous refuseriez.',
+          'Elle couvre trois cas : des formations où ton dossier est dans la moyenne de ceux qui sont admis, des formations plus ouvertes qui te conviendraient vraiment, et une ou deux formations ambitieuses. Varie les types de formation et surtout la géographie, le levier le plus efficace et le moins utilisé. Ne garde aucun vœu que tu refuserais.',
       },
     ],
     corps: [
@@ -290,8 +290,8 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Un vœu peut en contenir plusieurs'),
       p(
-        'Certaines filières se demandent par groupe. Vous formulez un vœu pour la filière, ' +
-          'puis vous choisissez les établissements qui vous intéressent : ce sont les ' +
+        'Certaines filières se demandent par groupe. Tu formules un vœu pour la filière, ' +
+          'puis tu choisis les établissements qui t’intéressent : ce sont les ' +
           'sous-vœux. Le vœu compte pour un, les sous-vœux ont leur propre plafond. ' +
           'Concrètement, un candidat organisé couvre bien plus de dix portes d’entrée.',
       ),
@@ -300,17 +300,17 @@ export const ARTICLES: readonly Article[] = [
           'beaucoup d’établissements : classes préparatoires, écoles d’ingénieurs et de ' +
           'commerce à concours commun, certains instituts de formation en santé. Le ' +
           'principe est toujours le même : un vœu pour la filière, des sous-vœux pour les ' +
-          'lieux. Vérifiez le décompte sur la fiche avant de vous restreindre — beaucoup ' +
+          'lieux. Vérifie le décompte sur la fiche avant de te restreindre — beaucoup ' +
           'de candidats s’interdisent des établissements en croyant, à tort, consommer un ' +
           'vœu entier à chaque fois.',
       ),
       t('Pourquoi il n’y a pas de classement'),
       p(
-        'Parce qu’un classement de votre part ne servirait à personne. Les formations ' +
-          'examinent votre dossier sans savoir à quel rang vous les placez, et elles ne ' +
-          'savent pas non plus quels autres vœux vous avez formulés. Demander une filière ' +
-          'très sélective ne dessert donc jamais vos autres vœux, et se « rabattre » ' +
-          'd’avance sur une formation plus accessible ne vous donne aucun bonus chez elle.',
+        'Parce qu’un classement de ta part ne servirait à personne. Les formations ' +
+          'examinent ton dossier sans savoir à quel rang tu les places, et elles ne ' +
+          'savent pas non plus quels autres vœux tu as formulés. Demander une filière ' +
+          'très sélective ne dessert donc jamais tes autres vœux, et se « rabattre » ' +
+          'd’avance sur une formation plus accessible ne te donne aucun bonus chez elle.',
       ),
       t('L’apprentissage a son propre compteur'),
       p(
@@ -327,8 +327,8 @@ export const ARTICLES: readonly Article[] = [
           'étudiante, et souvent la question du logement avec.',
       ),
       e(
-        'Si une filière qui vous intéresse existe en apprentissage, formuler le vœu ne ' +
-          'vous enlève rien. C’est le seul endroit de la procédure où la place est ' +
+        'Si une filière qui t’intéresse existe en apprentissage, formuler le vœu ne ' +
+          't’enlève rien. C’est le seul endroit de la procédure où la place est ' +
           'littéralement gratuite.',
       ),
       t('Pourquoi si peu de candidats vont au bout'),
@@ -346,8 +346,8 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('À quoi ressemble une liste solide'),
       p(
-        'Une liste solide couvre trois cas de figure. Des formations où votre dossier est ' +
-          'dans la moyenne de ceux qui sont admis. Des formations plus ouvertes, qui vous ' +
+        'Une liste solide couvre trois cas de figure. Des formations où ton dossier est ' +
+          'dans la moyenne de ceux qui sont admis. Des formations plus ouvertes, qui te ' +
           'conviendraient vraiment — pas des vœux de secours choisis au hasard. Et une ou ' +
           'deux formations ambitieuses, parce que les taux d’accès publiés sont des ' +
           'moyennes, pas des verdicts.',
@@ -357,11 +357,11 @@ export const ARTICLES: readonly Article[] = [
           'BTS et prépa ne recrutent pas sur les mêmes critères, et une liste qui mélange ' +
           'les voies résiste mieux qu’une liste qui les empile.',
         'Varier la géographie, qui est le levier le plus efficace et le moins utilisé.',
-        'Ne garder aucun vœu que vous refuseriez s’il tombait. Un vœu de remplissage ' +
-          'occupe une place et ne vous servira pas le jour où il sera la seule réponse.',
+        'Ne garder aucun vœu que tu refuserais s’il tombait. Un vœu de remplissage ' +
+          'occupe une place et ne te servira pas le jour où il sera la seule réponse.',
       ),
       p(
-        'Dernier point, souvent négligé : regardez ce que chaque ville vous coûterait avant ' +
+        'Dernier point, souvent négligé : regarde ce que chaque ville te coûterait avant ' +
           'de formuler, pas après les réponses. Une liste qui n’est pas finançable est une ' +
           'liste qu’on tronque dans l’urgence, en juin, avec de mauvais critères.',
       ),
@@ -380,12 +380,12 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Quelle différence entre formuler un vœu et le confirmer ?',
         reponse:
-          'Formuler ajoute le vœu à votre dossier ; confirmer le transmet aux formations. Ce sont deux gestes différents, séparés d’environ trois semaines. Un vœu formulé à temps mais non confirmé disparaît sans un mot : il donne l’impression d’exister, il n’existe pas encore. Chaque vœu se confirme séparément.',
+          'Formuler ajoute le vœu à ton dossier ; confirmer le transmet aux formations. Ce sont deux gestes différents, séparés d’environ trois semaines. Un vœu formulé à temps mais non confirmé disparaît sans un mot : il donne l’impression d’exister, il n’existe pas encore. Chaque vœu se confirme séparément.',
       },
       {
         question: 'Confirmer un vœu m’engage-t-il définitivement ?',
         reponse:
-          'Non. Une fois le vœu confirmé, vous ne pouvez plus en changer le contenu — le projet motivé est transmis tel quel — mais vous pouvez encore y renoncer si vous changez d’avis. Confirmer tôt ne vous enferme donc pas : c’est l’inverse, cela vous laisse le temps de réfléchir sans l’épée de la date au-dessus de la tête.',
+          'Non. Une fois le vœu confirmé, tu ne peux plus en changer le contenu — le projet motivé est transmis tel quel — mais tu peux encore y renoncer si tu changes d’avis. Confirmer tôt ne t’enferme donc pas : c’est l’inverse, cela te laisse le temps de réfléchir sans l’épée de la date au-dessus de la tête.',
       },
       {
         question: 'Que faire si la date de confirmation est passée ?',
@@ -396,14 +396,14 @@ export const ARTICLES: readonly Article[] = [
     corps: [
       p(
         'C’est la mécanique la plus coûteuse de la procédure, et la plus discrète. Un vœu ' +
-          'formulé apparaît dans votre dossier. Il donne l’impression d’exister. Il ' +
+          'formulé apparaît dans ton dossier. Il donne l’impression d’exister. Il ' +
           'n’existe pas encore.',
       ),
       t('Deux dates, pas une'),
       p(
         'La première clôt la formulation : passé ce jour, plus aucun vœu ne peut être ' +
           'ajouté en phase principale. La seconde, environ trois semaines plus tard, clôt ' +
-          'la confirmation : c’est elle qui transmet votre dossier aux formations. Un vœu ' +
+          'la confirmation : c’est elle qui transmet ton dossier aux formations. Un vœu ' +
           'formulé à temps mais non confirmé disparaît sans un mot.',
       ),
       p(
@@ -421,21 +421,21 @@ export const ARTICLES: readonly Article[] = [
       ),
       p(
         'Les pièces propres à une filière sont la source d’imprévu la plus fréquente : un ' +
-          'questionnaire à remplir, une attestation à demander, un document que votre ' +
+          'questionnaire à remplir, une attestation à demander, un document que ton ' +
           'établissement doit fournir. Certaines dépendent de quelqu’un d’autre, et c’est ' +
           'ce qui rend le dernier jour dangereux — un secrétariat fermé le week-end suffit ' +
           'à faire tomber un vœu.',
       ),
       e(
         'Chaque vœu se confirme séparément. Confirmer le premier ne confirme pas les ' +
-          'autres, et rien ne vous le rappellera à votre place.',
+          'autres, et rien ne te le rappellera à ta place.',
       ),
       t('Ce qui se fige, et ce qui reste modifiable'),
       p(
-        'Une fois un vœu confirmé, vous ne pouvez plus en changer le contenu : le projet ' +
-          'motivé est transmis tel quel. En revanche, vous pouvez encore renoncer à ce vœu ' +
-          'si vous changez d’avis. Confirmer tôt ne vous enferme donc pas — c’est ' +
-          'l’inverse : cela vous laisse le temps de réfléchir sans l’épée de la date ' +
+        'Une fois un vœu confirmé, tu ne peux plus en changer le contenu : le projet ' +
+          'motivé est transmis tel quel. En revanche, tu peux encore renoncer à ce vœu ' +
+          'si tu changes d’avis. Confirmer tôt ne t’enferme donc pas — c’est ' +
+          'l’inverse : cela te laisse le temps de réfléchir sans l’épée de la date ' +
           'au-dessus de la tête.',
       ),
       p(
@@ -445,12 +445,12 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Comment ne pas se faire avoir'),
       l(
-        'Notez la date de confirmation dans votre téléphone, avec un rappel une semaine avant.',
-        'Confirmez au fil de l’eau, dès qu’un vœu est prêt, plutôt que tout le dernier jour.',
-        'Demandez dès février les pièces qui dépendent d’un tiers : elles ne s’obtiennent ' +
+        'Note la date de confirmation dans ton téléphone, avec un rappel une semaine avant.',
+        'Confirme au fil de l’eau, dès qu’un vœu est prêt, plutôt que tout le dernier jour.',
+        'Demande dès février les pièces qui dépendent d’un tiers : elles ne s’obtiennent ' +
           'pas en vingt-quatre heures.',
-        'Le soir de la clôture, rouvrez le dossier et comptez : le nombre de vœux confirmés ' +
-          'doit être exactement celui que vous croyez avoir.',
+        'Le soir de la clôture, rouvre le dossier et compte : le nombre de vœux confirmés ' +
+          'doit être exactement celui que tu crois avoir.',
       ),
       p(
         'Cette dernière vérification prend deux minutes. Elle est la seule qui distingue ' +
@@ -461,9 +461,9 @@ export const ARTICLES: readonly Article[] = [
         'Les vœux en apprentissage suivent une règle à part : ils échappent à la clôture ' +
           'de la phase principale et peuvent être formulés, puis confirmés, bien plus tard. ' +
           'C’est logique — une place en apprentissage dépend d’un employeur autant que d’un ' +
-          'centre de formation, et une signature de contrat ne se commande pas. Si vous ' +
-          'avez ce type de vœu dans votre liste, ne calez pas tout votre calendrier sur lui ' +
-          'et ne calez surtout pas le sien sur celui des autres.',
+          'centre de formation, et une signature de contrat ne se commande pas. Si tu ' +
+          'as ce type de vœu dans ta liste, ne cale pas tout ton calendrier sur lui ' +
+          'et ne cale surtout pas le sien sur celui des autres.',
       ),
       t('Si la date est passée'),
       p(
@@ -489,17 +489,17 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Le taux d’accès est-il ma probabilité d’être pris ?',
         reponse:
-          'Non. Il rapporte le nombre de candidats qui ont reçu une proposition au nombre de candidats qui ont postulé, l’année précédente : c’est une moyenne sur une population entière, pas une estimation sur votre dossier. Une formation à 30 % n’est pas une formation où vous avez 30 % de chances. Il sert à situer la tension, rien de plus.',
+          'Non. Il rapporte le nombre de candidats qui ont reçu une proposition au nombre de candidats qui ont postulé, l’année précédente : c’est une moyenne sur une population entière, pas une estimation sur ton dossier. Une formation à 30 % n’est pas une formation où tu as 30 % de chances. Il sert à situer la tension, rien de plus.',
       },
       {
         question: 'Que veulent dire les attendus d’une formation ?',
         reponse:
-          'Ils décrivent le travail à venir plus qu’une condition d’entrée. « Savoir mobiliser des compétences mathématiques » ne veut pas dire « avoir 16 en maths » : cela veut dire que vous en ferez beaucoup. Lisez-les en vous demandant non pas si vous correspondez, mais si vous avez envie de passer trois ans à faire ça.',
+          'Ils décrivent le travail à venir plus qu’une condition d’entrée. « Savoir mobiliser des compétences mathématiques » ne veut pas dire « avoir 16 en maths » : cela veut dire que tu en feras beaucoup. Lis-les en te demandant non pas si tu corresponds, mais si tu as envie de passer trois ans à faire ça.',
       },
       {
         question: 'Quelle partie d’une fiche de formation est la plus utile ?',
         reponse:
-          'Les critères d’examen des vœux : ce que la commission regarde réellement, et avec quel poids. C’est la partie la moins lue de la fiche. Elle vous dit si ce sont les notes, la régularité, les appréciations ou le projet motivé qui pèsent le plus — donc où porter votre effort, et ce qu’il faut soigner dans votre texte.',
+          'Les critères d’examen des vœux : ce que la commission regarde réellement, et avec quel poids. C’est la partie la moins lue de la fiche. Elle te dit si ce sont les notes, la régularité, les appréciations ou le projet motivé qui pèsent le plus — donc où porter ton effort, et ce qu’il faut soigner dans ton texte.',
       },
     ],
     corps: [
@@ -508,17 +508,17 @@ export const ARTICLES: readonly Article[] = [
           'chose : le taux d’accès. C’est dommage, parce que c’est la donnée la plus facile ' +
           'à mal lire.',
       ),
-      t('Le taux d’accès n’est pas votre probabilité'),
+      t('Le taux d’accès n’est pas ta probabilité'),
       p(
         'Il rapporte le nombre de candidats qui ont reçu une proposition au nombre de ' +
           'candidats qui ont postulé, l’année précédente. C’est une moyenne sur une ' +
-          'population entière, pas une estimation sur votre dossier. Une formation à 30 % ' +
-          'n’est pas une formation où vous avez 30 % de chances : vous n’êtes pas un ' +
-          'candidat moyen, et ce chiffre ne sait rien de vous.',
+          'population entière, pas une estimation sur ton dossier. Une formation à 30 % ' +
+          'n’est pas une formation où tu as 30 % de chances : tu n’es pas un ' +
+          'candidat moyen, et ce chiffre ne sait rien de toi.',
       ),
       p(
         'Il reste utile pour une chose : situer la tension. Entre une filière à 12 % et une ' +
-          'filière à 80 %, l’écart d’exigence est réel, même si votre position exacte reste ' +
+          'filière à 80 %, l’écart d’exigence est réel, même si ta position exacte reste ' +
           'inconnue.',
       ),
       p(
@@ -529,22 +529,22 @@ export const ARTICLES: readonly Article[] = [
           'dernier candidat appelé, quand il est publié, dit mieux jusqu’où la file est ' +
           'descendue.',
       ),
-      t('Les attendus disent ce qu’on vous demandera de faire'),
+      t('Les attendus disent ce qu’on te demandera de faire'),
       p(
         'Ils sont souvent lus comme une liste de conditions d’entrée. Ce sont plutôt une ' +
           'description du travail à venir. « Savoir mobiliser des compétences ' +
-          'mathématiques » ne veut pas dire « avoir 16 en maths » : cela veut dire que vous ' +
-          'en ferez, beaucoup, et que l’année sera rude si le sujet vous rebute.',
+          'mathématiques » ne veut pas dire « avoir 16 en maths » : cela veut dire que tu en ' +
+          'feras, beaucoup, et que l’année sera rude si le sujet te rebute.',
       ),
       p(
         'À côté des attendus figurent les critères d’examen des vœux : ce que la commission ' +
           'regarde réellement, et avec quel poids. C’est la partie la plus utile de la ' +
-          'fiche et la moins lue. Elle vous dit si ce sont les notes, la régularité, les ' +
-          'appréciations ou le projet motivé qui pèsent le plus — donc où porter votre ' +
-          'effort, et ce qu’il faut absolument soigner dans votre texte.',
+          'fiche et la moins lue. Elle te dit si ce sont les notes, la régularité, les ' +
+          'appréciations ou le projet motivé qui pèsent le plus — donc où porter ton ' +
+          'effort, et ce qu’il faut absolument soigner dans ton texte.',
       ),
       e(
-        'Lisez les attendus en vous demandant non pas « est-ce que je corresponds ? » mais ' +
+        'Lis les attendus en te demandant non pas « est-ce que je corresponds ? » mais ' +
           '« est-ce que j’ai envie de passer trois ans à faire ça ? ». La deuxième question ' +
           'prédit mieux la réussite que la première.',
       ),
@@ -561,7 +561,7 @@ export const ARTICLES: readonly Article[] = [
           'attendus ne nomment pas explicitement.',
       ),
       p(
-        'Toutes ces données portent une année. Vérifiez laquelle : une statistique de l’an ' +
+        'Toutes ces données portent une année. Vérifie laquelle : une statistique de l’an ' +
           'dernier décrit l’an dernier. Une filière qui ouvre, qui change de capacité ou ' +
           'qui déménage rend ses propres chiffres caducs.',
       ),
@@ -569,8 +569,8 @@ export const ARTICLES: readonly Article[] = [
       p(
         'Elle décrit une formation, pas une vie étudiante. Elle ne dit rien du coût du ' +
           'logement sur place, de la distance entre le campus et le centre, du temps de ' +
-          'transport quotidien, ni de ce qu’il vous restera pour vivre une fois le loyer ' +
-          'payé. Ces éléments décident pourtant du fait que vous irez au bout ou non.',
+          'transport quotidien, ni de ce qu’il te restera pour vivre une fois le loyer ' +
+          'payé. Ces éléments décident pourtant du fait que tu iras au bout ou non.',
       ),
       p(
         'Elle ne dit pas non plus ce que devient une promotion : taux de passage en ' +
@@ -593,47 +593,47 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Puis-je accepter une proposition et rester en attente ailleurs ?',
         reponse:
-          'Oui, il faut simplement le dire explicitement au moment où vous répondez. C’est le geste le plus important de toute la procédure, et le plus souvent mal fait : accepter une proposition en conservant ses vœux en attente vous met à l’abri — vous avez une place, et la file continue d’avancer pour vous.',
+          'Oui, il faut simplement le dire explicitement au moment où tu réponds. C’est le geste le plus important de toute la procédure, et le plus souvent mal fait : accepter une proposition en conservant ses vœux en attente te met à l’abri — tu as une place, et la file continue d’avancer pour toi.',
       },
       {
         question: 'Un « oui si » est-il une réponse au rabais ?',
         reponse:
-          'Non. C’est un « oui » assorti d’un filet : année aménagée, modules de remise à niveau, tutorat. Les élèves qui l’acceptent réussissent souvent mieux que ceux qui entrent sans aide dans une filière trop exigeante pour eux. Le dispositif varie beaucoup d’un endroit à l’autre : demandez à la formation ce qu’il recouvre chez elle.',
+          'Non. C’est un « oui » assorti d’un filet : année aménagée, modules de remise à niveau, tutorat. Les élèves qui l’acceptent réussissent souvent mieux que ceux qui entrent sans aide dans une filière trop exigeante pour eux. Le dispositif varie beaucoup d’un endroit à l’autre : demande à la formation ce qu’il recouvre chez elle.',
       },
       {
         question: 'Que faire si je suis refusé partout ?',
         reponse:
-          'Un refus n’est pas un jugement sur vous : c’est le résultat d’un examen comparatif entre des centaines de dossiers, pour un nombre de places fixé d’avance. La phase complémentaire existe précisément pour cette situation et ouvre avant la fin de la phase principale. Une commission académique peut aussi être saisie depuis votre dossier.',
+          'Un refus n’est pas un jugement sur toi : c’est le résultat d’un examen comparatif entre des centaines de dossiers, pour un nombre de places fixé d’avance. La phase complémentaire existe précisément pour cette situation et ouvre avant la fin de la phase principale. Une commission académique peut aussi être saisie depuis ton dossier.',
       },
     ],
     corps: [
       p(
-        'À partir du début de la phase d’admission, votre dossier se met à bouger tout ' +
+        'À partir du début de la phase d’admission, ton dossier se met à bouger tout ' +
           'seul. Les réponses ne tombent pas toutes le même jour, et chacune ouvre un délai ' +
           'de réponse au terme duquel le silence vaut renoncement.',
       ),
       p(
         'Ce délai est court, surtout dans les premiers jours de la phase. Il se compte en ' +
-          'jours, pas en semaines, et il court même si vous êtes en voyage ou en épreuve. ' +
+          'jours, pas en semaines, et il court même si tu es en voyage ou en épreuve. ' +
           'La première chose à organiser, avant même de savoir quoi répondre, c’est de ' +
-          'pouvoir consulter votre dossier tous les jours pendant cette période.',
+          'pouvoir consulter ton dossier tous les jours pendant cette période.',
       ),
       t('« Oui »'),
       p(
-        'La formation vous accepte. Vous pouvez accepter à votre tour, ou refuser. Accepter ' +
-          'une proposition ne vous interdit pas de rester en attente ailleurs : il faut ' +
-          'simplement le dire explicitement au moment où vous répondez.',
+        'La formation t’accepte. Tu peux accepter à ton tour, ou refuser. Accepter ' +
+          'une proposition ne t’interdit pas de rester en attente ailleurs : il faut ' +
+          'simplement le dire explicitement au moment où tu réponds.',
       ),
       p(
         'C’est le geste le plus important de toute la procédure, et le plus souvent mal ' +
-          'fait. Accepter une proposition en conservant ses vœux en attente vous met à ' +
-          'l’abri : vous avez une place, et la file continue d’avancer pour vous. Refuser ' +
+          'fait. Accepter une proposition en conservant ses vœux en attente te met à ' +
+          'l’abri : tu as une place, et la file continue d’avancer pour toi. Refuser ' +
           'une proposition pour « ne pas bloquer » quelqu’un d’autre, en revanche, ne rend ' +
-          'service à personne et vous laisse sans rien.',
+          'service à personne et te laisse sans rien.',
       ),
       t('« Oui si »'),
       p(
-        'La formation vous accepte, à condition que vous suiviez un parcours renforcé : ' +
+        'La formation t’accepte, à condition que tu suives un parcours renforcé : ' +
           'année aménagée, modules de remise à niveau, tutorat. Ce n’est pas une réponse au ' +
           'rabais. C’est un « oui » assorti d’un filet, et les élèves qui l’acceptent ' +
           'réussissent souvent mieux que ceux qui entrent sans aide dans une filière trop ' +
@@ -642,40 +642,40 @@ export const ARTICLES: readonly Article[] = [
       p(
         'Le dispositif varie beaucoup d’un endroit à l’autre : quelques heures ' +
           'hebdomadaires en plus, un semestre supplémentaire, un accompagnement ' +
-          'individualisé. Demandez à la formation ce qu’il recouvre chez elle avant de ' +
+          'individualisé. Demande à la formation ce qu’il recouvre chez elle avant de ' +
           'trancher. Une année allongée n’est pas une année perdue si elle évite un ' +
           'redoublement.',
       ),
       e(
-        'Refuser un « oui si » par fierté est une erreur classique. Regardez ce que le ' +
+        'Refuser un « oui si » par fierté est une erreur classique. Regarde ce que le ' +
           'dispositif propose concrètement avant de décider.',
       ),
       t('« En attente »'),
       p(
-        'Vous êtes sur la liste, à un rang donné. Ce rang bouge, parce que les candidats ' +
-          'placés devant vous acceptent ailleurs. Une attente n’a rien d’anormal et se ' +
-          'débloque souvent, parfois tard. Gardez-la tant qu’elle vous intéresse vraiment, ' +
-          'et renoncez à celles qui ne vous intéressent plus : vous libérez une place et ' +
-          'vous faites avancer la file pour quelqu’un d’autre.',
+        'Tu es sur la liste, à un rang donné. Ce rang bouge, parce que les candidats ' +
+          'placés devant toi acceptent ailleurs. Une attente n’a rien d’anormal et se ' +
+          'débloque souvent, parfois tard. Garde-la tant qu’elle t’intéresse vraiment, ' +
+          'et renonce à celles qui ne t’intéressent plus : tu libères une place et ' +
+          'tu fais avancer la file pour quelqu’un d’autre.',
       ),
       p(
-        'Pour situer votre rang, comparez-le au rang du dernier candidat appelé l’an ' +
+        'Pour situer ton rang, compare-le au rang du dernier candidat appelé l’an ' +
           'dernier dans la même formation, quand il est publié. Ce n’est pas une promesse — ' +
           'une file ne descend pas au même rythme deux années de suite — mais cela ' +
           'distingue une attente qui a toutes les chances d’aboutir d’une attente très ' +
           'lointaine.',
       ),
       p(
-        'Une période est prévue, début juin, pour classer vos vœux en attente par ordre de ' +
-          'préférence. C’est le seul moment de la procédure où votre ordre compte — et il ne ' +
-          'sert qu’à vous, pour automatiser vos réponses. Ce classement répond à votre ' +
+        'Une période est prévue, début juin, pour classer tes vœux en attente par ordre de ' +
+          'préférence. C’est le seul moment de la procédure où ton ordre compte — et il ne ' +
+          'sert qu’à toi, pour automatiser tes réponses. Ce classement répond à ta ' +
           'place, jour et nuit, y compris pendant les épreuves du bac. Une fois activé, il ' +
-          'accepte pour vous dès qu’un vœu mieux classé se débloque : ne l’alimentez donc ' +
-          'qu’avec des formations que vous accepteriez vraiment.',
+          'accepte pour toi dès qu’un vœu mieux classé se débloque : ne l’alimente donc ' +
+          'qu’avec des formations que tu accepterais vraiment.',
       ),
       t('« Refusé »'),
       p(
-        'La formation ne retient pas votre dossier. Ce n’est pas un jugement sur vous : ' +
+        'La formation ne retient pas ton dossier. Ce n’est pas un jugement sur toi : ' +
           'c’est le résultat d’un examen comparatif entre des centaines de dossiers, pour ' +
           'un nombre de places fixé d’avance. La phase complémentaire existe précisément ' +
           'pour cette situation, et elle ouvre avant même la fin de la phase principale.',
@@ -702,7 +702,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'La phase complémentaire est-elle réservée aux candidats sans proposition ?',
         reponse:
-          'Non, elle est ouverte à presque tout le monde : un candidat sans aucune proposition, mais aussi un candidat qui a déjà accepté une place et voudrait mieux ou autrement, ou qui n’avait formulé aucun vœu en phase principale. Participer ne vous fait renoncer à rien : vos vœux en attente continuent de vivre en parallèle.',
+          'Non, elle est ouverte à presque tout le monde : un candidat sans aucune proposition, mais aussi un candidat qui a déjà accepté une place et voudrait mieux ou autrement, ou qui n’avait formulé aucun vœu en phase principale. Participer ne te fait renoncer à rien : tes vœux en attente continuent de vivre en parallèle.',
       },
       {
         question: 'Quand la phase complémentaire ouvre-t-elle ?',
@@ -712,7 +712,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Si rien ne vient, faut-il changer de filière ?',
         reponse:
-          'Élargissez d’abord la géographie, ensuite la filière, dans cet ordre. Accepter de partir à deux heures de chez soi ouvre beaucoup plus de portes que de se rabattre sur une filière qui ne vous intéresse pas — et une filière qui ne vous intéresse pas se quitte au bout d’un an.',
+          'Élargis d’abord la géographie, ensuite la filière, dans cet ordre. Accepter de partir à deux heures de chez soi ouvre beaucoup plus de portes que de se rabattre sur une filière qui ne t’intéresse pas — et une filière qui ne t’intéresse pas se quitte au bout d’un an.',
       },
     ],
     corps: [
@@ -751,21 +751,21 @@ export const ARTICLES: readonly Article[] = [
       t('Comment s’y prendre'),
       l(
         'Jusqu’à dix nouveaux vœux, indépendants de ceux de la phase principale.',
-        'Ils se formulent un par un, au fil des places qui se libèrent : revenez régulièrement.',
+        'Ils se formulent un par un, au fil des places qui se libèrent : reviens régulièrement.',
         'Chacun demande son projet de formation motivé, comme en phase principale : ' +
-          'préparez un texte de base que vous adapterez, plutôt que d’improviser à chaque fois.',
+          'prépare un texte de base que tu adapteras, plutôt que d’improviser à chaque fois.',
         'Les vœux en attente de la phase principale continuent de vivre en parallèle. ' +
-          'Participer à la complémentaire ne vous fait renoncer à rien.',
+          'Participer à la complémentaire ne te fait renoncer à rien.',
       ),
       t('Le bon réflexe si rien ne vient'),
       p(
-        'Élargissez d’abord la géographie, ensuite la filière. Dans cet ordre. Accepter de ' +
+        'Élargis d’abord la géographie, ensuite la filière. Dans cet ordre. Accepter de ' +
           'partir à deux heures de chez soi ouvre beaucoup plus de portes que de se rabattre ' +
-          'sur une filière qui ne vous intéresse pas — et une filière qui ne vous intéresse ' +
+          'sur une filière qui ne t’intéresse pas — et une filière qui ne t’intéresse ' +
           'pas se quitte au bout d’un an.',
       ),
       p(
-        'Pensez aussi à la commission académique, qui peut être saisie par un candidat ' +
+        'Pense aussi à la commission académique, qui peut être saisie par un candidat ' +
           'resté sans proposition. Elle examine la situation et cherche une place ' +
           'compatible avec le projet. Beaucoup de candidats ignorent qu’elle existe et ' +
           'passent l’été à rafraîchir une page.',
@@ -773,9 +773,9 @@ export const ARTICLES: readonly Article[] = [
       t('Se renseigner vite, mais se renseigner'),
       p(
         'La rapidité ne dispense pas de regarder ce qu’on demande. Avant de formuler un ' +
-          'vœu complémentaire, ouvrez la fiche de la formation comme vous l’auriez fait en ' +
+          'vœu complémentaire, ouvre la fiche de la formation comme tu l’aurais fait en ' +
           'mars : les attendus, le contenu réel de la première année, le nombre de places. ' +
-          'Appelez le secrétariat si un point vous échappe — en août, les équipes répondent ' +
+          'Appelle le secrétariat si un point t’échappe — en août, les équipes répondent ' +
           'souvent vite, et une question posée directement vaut mieux qu’une supposition.',
       ),
       p(
@@ -793,7 +793,7 @@ export const ARTICLES: readonly Article[] = [
       p(
         'À cette période, deux choses se jouent en même temps : la place et le logement. ' +
           'Les résidences universitaires se remplissent tôt, et le parc privé de la fin de ' +
-          'l’été est le moins bon de l’année. Si vous visez une ville tendue, cherchez un ' +
+          'l’été est le moins bon de l’année. Si tu vises une ville tendue, cherche un ' +
           'toit dès que la proposition tombe, sans attendre l’inscription administrative.',
       ),
     ],
@@ -803,7 +803,7 @@ export const ARTICLES: readonly Article[] = [
     titre: 'Choisir sa ville autant que son école',
     chapeau:
       'Le loyer décide plus souvent que le classement de l’établissement. C’est le facteur ' +
-      'le moins regardé au moment des vœux, et le premier à se rappeler à vous en novembre.',
+      'le moins regardé au moment des vœux, et le premier à se rappeler à toi en novembre.',
     publieLe: '2026-09-20',
     revuLe: null,
     motsCles: ['logement étudiant', 'budget', 'reste à vivre', 'ville'],
@@ -811,7 +811,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Faut-il comparer les loyers entre les villes ?',
         reponse:
-          'Non : comparez ce qu’il vous resterait une fois le loyer payé, les aides reçues, les charges réglées et le transport déduit. Deux villes peuvent afficher le même loyer et laisser des restes à vivre très différents, selon que vous êtes boursier, logé en résidence universitaire ou dans le privé, et selon la distance au campus.',
+          'Non : compare ce qu’il te resterait une fois le loyer payé, les aides reçues, les charges réglées et le transport déduit. Deux villes peuvent afficher le même loyer et laisser des restes à vivre très différents, selon que tu es boursier, logé en résidence universitaire ou dans le privé, et selon la distance au campus.',
       },
       {
         question: 'Une ville périphérique est-elle vraiment moins chère ?',
@@ -821,7 +821,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Quand faut-il regarder le coût de la vie sur place ?',
         reponse:
-          'Avant de formuler les vœux, pas après les réponses. En juin, le calcul est déjà fait : vous choisissez entre ce que vous avez demandé. Le vrai choix de ville se joue en février, au moment où vous décidez quelles portes vous ouvrez.',
+          'Avant de formuler les vœux, pas après les réponses. En juin, le calcul est déjà fait : tu choisis entre ce que tu as demandé. Le vrai choix de ville se joue en février, au moment où tu décides quelles portes tu ouvres.',
       },
     ],
     corps: [
@@ -833,20 +833,20 @@ export const ARTICLES: readonly Article[] = [
       p(
         'C’est pourtant le paramètre qu’on regarde en dernier, souvent en juin, quand les ' +
           'réponses tombent et qu’il n’y a plus de choix à faire. À ce moment-là le calcul ' +
-          'est déjà joué : vous arbitrez entre ce que vous avez demandé en mars.',
+          'est déjà joué : tu arbitres entre ce que tu as demandé en mars.',
       ),
       t('Le seul chiffre qui compte vraiment'),
       p(
         'Ce n’est pas le loyer. C’est ce qu’il reste une fois le loyer payé, les aides ' +
           'reçues, les charges réglées et le transport déduit. Deux villes peuvent afficher ' +
-          'le même loyer et laisser des restes à vivre très différents, selon que vous êtes ' +
+          'le même loyer et laisser des restes à vivre très différents, selon que tu es ' +
           'boursier, logé en résidence universitaire ou dans le privé, et selon la distance ' +
-          'entre votre logement et le campus.',
+          'entre ton logement et le campus.',
       ),
       p(
         'Cette somme-là décide de choses concrètes : pouvoir manger correctement, rentrer ' +
           'chez soi aux vacances, acheter les livres, payer une mutuelle, sortir de temps ' +
-          'en temps. C’est aussi elle qui détermine si vous devrez travailler pendant ' +
+          'en temps. C’est aussi elle qui détermine si tu devras travailler pendant ' +
           'l’année, et combien d’heures — le facteur le mieux documenté d’échec en ' +
           'première année.',
       ),
@@ -854,7 +854,7 @@ export const ARTICLES: readonly Article[] = [
       l(
         'Le loyer d’un logement réaliste dans la commune de la formation, pas dans la ' +
           'métropole voisine.',
-        'Ce à quoi vous avez droit : aide au logement, bourse, tarifs universitaires. ' +
+        'Ce à quoi tu as droit : aide au logement, bourse, tarifs universitaires. ' +
           'Cela change complètement l’équation et beaucoup de familles ne le simulent jamais.',
         'Le transport quotidien, qui est souvent le poste caché d’une ville « moins chère ».',
         'Les frais d’installation, qu’on oublie systématiquement : dépôt de garantie, ' +
@@ -862,9 +862,9 @@ export const ARTICLES: readonly Article[] = [
         'Ce qu’il reste une fois tout payé. C’est le seul chiffre qui dit si l’année est tenable.',
       ),
       e(
-        'Ne comparez pas des loyers, comparez des restes à vivre. Une ville chère où vous ' +
-          'êtes boursier et logé en résidence universitaire peut revenir moins cher qu’une ' +
-          'ville bon marché où vous louez dans le privé.',
+        'Ne compare pas des loyers, compare des restes à vivre. Une ville chère où tu ' +
+          'es boursier et logé en résidence universitaire peut revenir moins cher qu’une ' +
+          'ville bon marché où tu loues dans le privé.',
       ),
       t('Le piège de la ville « pas chère »'),
       p(
@@ -896,22 +896,22 @@ export const ARTICLES: readonly Article[] = [
       t('Quand s’en occuper'),
       p(
         'Avant de formuler les vœux, pas après les réponses. En juin, le calcul est déjà ' +
-          'fait : vous choisissez entre ce que vous avez demandé. Le vrai choix de ville se ' +
-          'joue en février, au moment où vous décidez quelles portes vous ouvrez.',
+          'fait : tu choisis entre ce que tu as demandé. Le vrai choix de ville se ' +
+          'joue en février, au moment où tu décides quelles portes tu ouvres.',
       ),
       p(
-        'Concrètement : pour chaque ville de votre liste, posez le loyer d’un logement ' +
-          'réaliste, ajoutez les aides auxquelles vous auriez droit, retranchez le ' +
-          'transport, et regardez ce qui reste. Faites-le avec des barèmes datés, pas avec ' +
+        'Concrètement : pour chaque ville de ta liste, pose le loyer d’un logement ' +
+          'réaliste, ajoute les aides auxquelles tu aurais droit, retranche le ' +
+          'transport, et regarde ce qui reste. Fais-le avec des barèmes datés, pas avec ' +
           'un chiffre lu sur un forum — les montants changent chaque année et dépendent de ' +
-          'votre situation. Une formation qui n’est pas finançable n’est pas un vœu, c’est ' +
+          'ta situation. Une formation qui n’est pas finançable n’est pas un vœu, c’est ' +
           'un regret programmé.',
       ),
     ],
   },
   {
     slug: 'ce-qui-compte-vraiment-dans-vos-bulletins',
-    titre: 'Ce qui compte vraiment dans vos bulletins',
+    titre: 'Ce qui compte vraiment dans tes bulletins',
     chapeau:
       'Les formations ne lisent pas une moyenne générale. Elles lisent une trajectoire, des ' +
       'matières précises, et des appréciations. Savoir lesquelles change la façon de ' +
@@ -923,7 +923,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Les formations regardent-elles la moyenne générale ?',
         reponse:
-          'Pas en priorité. Elles lisent vos bulletins de première et de terminale matière par matière, avec les appréciations, et les matières de la filière visée passent devant : un 12 dans la matière centrale pèse plus qu’un 15 obtenu ailleurs. Elles voient aussi une fiche renseignée par votre lycée, avec un avis par matière.',
+          'Pas en priorité. Elles lisent tes bulletins de première et de terminale matière par matière, avec les appréciations, et les matières de la filière visée passent devant : un 12 dans la matière centrale pèse plus qu’un 15 obtenu ailleurs. Elles voient aussi une fiche renseignée par ton lycée, avec un avis par matière.',
       },
       {
         question: 'Une première année moyenne est-elle rattrapable ?',
@@ -943,16 +943,16 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Ce que les formations voient exactement'),
       p(
-        'Elles voient vos bulletins de première et de terminale, matière par matière, avec ' +
-          'les appréciations. Elles voient vos résultats aux épreuves anticipées de ' +
-          'français. Elles voient vos spécialités et les notes obtenues dedans. Et elles ' +
-          'voient une fiche renseignée par votre lycée, où figurent un avis par matière et ' +
-          'une appréciation du chef d’établissement sur votre capacité à réussir dans la ' +
+        'Elles voient tes bulletins de première et de terminale, matière par matière, avec ' +
+          'les appréciations. Elles voient tes résultats aux épreuves anticipées de ' +
+          'français. Elles voient tes spécialités et les notes obtenues dedans. Et elles ' +
+          'voient une fiche renseignée par ton lycée, où figurent un avis par matière et ' +
+          'une appréciation du chef d’établissement sur ta capacité à réussir dans la ' +
           'voie demandée.',
       ),
       p(
         'Cette dernière pièce est la moins connue des élèves et l’une des plus regardées ' +
-          'par les commissions : elle vient de gens qui vous ont vu travailler toute ' +
+          'par les commissions : elle vient de gens qui t’ont vu travailler toute ' +
           'l’année, ce qu’aucune note ne dit.',
       ),
       t('Les matières de la filière visée passent devant'),
@@ -979,20 +979,20 @@ export const ARTICLES: readonly Article[] = [
       p(
         'C’est aussi pour cela que les premiers trimestres de terminale comptent beaucoup : ' +
           'ce sont les derniers résultats complets dont disposent les commissions au moment ' +
-          'où elles examinent votre dossier. Un sursaut au troisième trimestre arrive trop ' +
+          'où elles examinent ton dossier. Un sursaut au troisième trimestre arrive trop ' +
           'tard pour être lu.',
       ),
       e(
-        'Si votre première a été moyenne, la terminale n’est pas perdue — elle est ' +
-          'justement ce qui peut changer la lecture de votre dossier.',
+        'Si ta première a été moyenne, la terminale n’est pas perdue — elle est ' +
+          'justement ce qui peut changer la lecture de ton dossier.',
       ),
       t('Les appréciations pèsent plus qu’on ne croit'),
       p(
         '« Élève sérieux qui participe », « travail irrégulier », « des capacités mais peu ' +
           'd’efforts » : ces phrases sont lues. Elles disent ce qu’une note ne dit pas — ' +
           'l’assiduité, l’attitude en classe, la fiabilité. Ce sont aussi les seuls éléments ' +
-          'du dossier sur lesquels vos professeurs ont la main, et que vous pouvez ' +
-          'influencer par votre comportement, pas par vos résultats.',
+          'du dossier sur lesquels tes professeurs ont la main, et que tu peux ' +
+          'influencer par ton comportement, pas par tes résultats.',
       ),
       p(
         'Une appréciation sévère n’est pas irrattrapable, à une condition : qu’elle soit ' +
@@ -1009,9 +1009,9 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Ce que cela change concrètement'),
       l(
-        'Travaillez d’abord les matières de la filière que vous visez, même si la moyenne ' +
+        'Travaille d’abord les matières de la filière que tu vises, même si la moyenne ' +
           'générale en souffre un peu.',
-        'Soignez les deux premiers trimestres de terminale en priorité : ce sont ceux qui ' +
+        'Soigne les deux premiers trimestres de terminale en priorité : ce sont ceux qui ' +
           'seront lus.',
         'Une note faible s’explique mieux qu’elle ne se cache : le projet de formation ' +
           'motivé sert aussi à ça.',
@@ -1032,7 +1032,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Que cherche le lecteur d’un projet de formation motivé ?',
         reponse:
-          'Que vous sachiez ce qu’on fait dans cette formation — pas ce que le métier représente, ce que les études contiennent. Un lien concret entre ce que vous avez déjà fait et ce qui vous attend. Une raison de vouloir cette formation-là et pas la même ailleurs. Et que vous ayez lu les attendus publiés sur la fiche.',
+          'Que tu saches ce qu’on fait dans cette formation — pas ce que le métier représente, ce que les études contiennent. Un lien concret entre ce que tu as déjà fait et ce qui t’attend. Une raison de vouloir cette formation-là et pas la même ailleurs. Et que tu aies lu les attendus publiés sur la fiche.',
       },
       {
         question: 'Qu’est-ce qui dessert un projet de formation motivé ?',
@@ -1042,7 +1042,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Où trouver du concret à écrire ?',
         reponse:
-          'Dans la maquette de la formation, publiée par l’établissement : les intitulés des unités d’enseignement de première année donnent de quoi écrire une phrase qu’aucun autre candidat n’écrira. Dans une journée portes ouvertes. Dans un stage, un job, une association — à condition de dire ce que vous y avez fait, pas seulement que vous y étiez.',
+          'Dans la maquette de la formation, publiée par l’établissement : les intitulés des unités d’enseignement de première année donnent de quoi écrire une phrase qu’aucun autre candidat n’écrira. Dans une journée portes ouvertes. Dans un stage, un job, une association — à condition de dire ce que tu y as fait, pas seulement que tu y étais.',
       },
     ],
     corps: [
@@ -1053,17 +1053,17 @@ export const ARTICLES: readonly Article[] = [
       ),
       p(
         'Le format impose sa loi : l’espace est compté, en caractères, et il est court. ' +
-          'Cela n’est pas une contrainte hostile, c’est une indication. On ne vous demande ' +
-          'pas une dissertation sur votre vocation, on vous demande de montrer en quelques ' +
-          'phrases que vous savez où vous postulez.',
+          'Cela n’est pas une contrainte hostile, c’est une indication. On ne te demande ' +
+          'pas une dissertation sur ta vocation, on te demande de montrer en quelques ' +
+          'phrases que tu sais où tu postules.',
       ),
       t('Ce que le lecteur cherche'),
       l(
-        'Que vous sachiez ce qu’on fait dans cette formation — pas ce que le métier ' +
+        'Que tu saches ce qu’on fait dans cette formation — pas ce que le métier ' +
           'représente, ce que les études contiennent.',
-        'Un lien concret entre ce que vous avez déjà fait et ce qui vous attend.',
+        'Un lien concret entre ce que tu as déjà fait et ce qui t’attend.',
         'Une raison de vouloir CETTE formation-là, et pas la même ailleurs.',
-        'Que vous ayez lu les attendus et les critères d’examen publiés sur la fiche : ' +
+        'Que tu aies lu les attendus et les critères d’examen publiés sur la fiche : ' +
           'y répondre point par point, sans les réciter, est le moyen le plus simple ' +
           'd’écrire un texte utile.',
       ),
@@ -1076,9 +1076,9 @@ export const ARTICLES: readonly Article[] = [
       ),
       p(
         'S’y ajoutent deux défauts moins visibles. Le texte qui parle du métier plutôt que ' +
-          'des études : vouloir être avocat ne dit rien de votre intérêt pour trois ans de ' +
-          'droit civil. Et le texte qui raconte votre parcours scolaire, que le lecteur a ' +
-          'déjà sous les yeux dans vos bulletins — il n’a pas besoin qu’on le lui résume, ' +
+          'des études : vouloir être avocat ne dit rien de ton intérêt pour trois ans de ' +
+          'droit civil. Et le texte qui raconte ton parcours scolaire, que le lecteur a ' +
+          'déjà sous les yeux dans tes bulletins — il n’a pas besoin qu’on le lui résume, ' +
           'il a besoin qu’on l’éclaire.',
       ),
       e(
@@ -1088,21 +1088,21 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Une structure qui marche'),
       l(
-        'Une phrase sur ce qui vous a amené là — un cours, un stage, une lecture, une rencontre.',
-        'Deux ou trois phrases sur ce que vous savez du contenu de la formation, et sur ce ' +
-          'qui vous y attire.',
-        'Une phrase sur ce que vous y apportez : une matière où vous êtes solide, une ' +
+        'Une phrase sur ce qui t’a amené là — un cours, un stage, une lecture, une rencontre.',
+        'Deux ou trois phrases sur ce que tu sais du contenu de la formation, et sur ce ' +
+          'qui t’y attire.',
+        'Une phrase sur ce que tu y apportes : une matière où tu es solide, une ' +
           'expérience, une méthode de travail.',
-        'Une phrase sur la suite, sans promettre un métier précis si vous n’en savez rien.',
+        'Une phrase sur la suite, sans promettre un métier précis si tu n’en sais rien.',
       ),
       t('Où trouver le concret'),
       p(
         'Dans la maquette de la formation, publiée par l’établissement : les intitulés des ' +
-          'unités d’enseignement de première année vous donnent de quoi écrire une phrase ' +
+          'unités d’enseignement de première année te donnent de quoi écrire une phrase ' +
           'qu’aucun autre candidat n’écrira. Dans une journée portes ouvertes, où une ' +
           'question posée à un étudiant vaut dix pages de brochure. Dans un stage, un job, ' +
-          'une association, une pratique personnelle — à condition de dire ce que vous y ' +
-          'avez fait, pas seulement que vous y étiez.',
+          'une association, une pratique personnelle — à condition de dire ce que tu y ' +
+          'as fait, pas seulement que tu y étais.',
       ),
       p(
         'La rubrique consacrée aux activités et centres d’intérêt sert exactement à ça : ' +
@@ -1112,14 +1112,14 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Relire, couper, recommencer'),
       p(
-        'Relisez à voix haute. Si une phrase pourrait figurer dans la lettre de n’importe ' +
-          'qui, supprimez-la : elle occupe la place d’une phrase qui vous ressemble.',
+        'Relis à voix haute. Si une phrase pourrait figurer dans la lettre de n’importe ' +
+          'qui, supprime-la : elle occupe la place d’une phrase qui te ressemble.',
       ),
       p(
-        'Faites relire par quelqu’un qui ne connaît pas la filière : s’il ne comprend pas ' +
-          'ce que vous allez y étudier, le texte n’est pas assez concret. Et écrivez-les ' +
+        'Fais relire par quelqu’un qui ne connaît pas la filière : s’il ne comprend pas ' +
+          'ce que tu vas y étudier, le texte n’est pas assez concret. Et écris-les ' +
           'étalés dans le temps, un ou deux par semaine à partir de février — dix textes ' +
-          'rédigés la veille de la clôture se ressemblent tous, y compris pour vous.',
+          'rédigés la veille de la clôture se ressemblent tous, y compris pour toi.',
       ),
     ],
   },
@@ -1141,12 +1141,12 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Comment réviser efficacement en terminale ?',
         reponse:
-          'Des séances courtes et régulières battent les week-ends de rattrapage : la mémoire fonctionne à la répétition, pas à l’intensité. Se tester vaut mieux que relire — fermer le cours et tenter de le restituer révèle ce qu’on ne sait pas. Espacez les reprises : le lendemain, une semaine après, un mois après.',
+          'Des séances courtes et régulières battent les week-ends de rattrapage : la mémoire fonctionne à la répétition, pas à l’intensité. Se tester vaut mieux que relire — fermer le cours et tenter de le restituer révèle ce qu’on ne sait pas. Espace les reprises : le lendemain, une semaine après, un mois après.',
       },
       {
         question: 'Comment tenir le mois de juin, entre épreuves et réponses ?',
         reponse:
-          'Prévoyez un moment fixe dans la journée pour consulter votre dossier — le soir, une fois — plutôt que de le rafraîchir entre deux exercices. Le classement automatique des vœux en attente existe exactement pour ça : il répond à votre place pendant que vous composez, y compris pendant les épreuves.',
+          'Prévois un moment fixe dans la journée pour consulter ton dossier — le soir, une fois — plutôt que de le rafraîchir entre deux exercices. Le classement automatique des vœux en attente existe exactement pour ça : il répond à ta place pendant que tu composes, y compris pendant les épreuves.',
       },
     ],
     corps: [
@@ -1162,7 +1162,7 @@ export const ARTICLES: readonly Article[] = [
         'Janvier–février : formuler. Les vœux se posent, la réflexion est déjà faite.',
         'Mars : rédiger et confirmer. C’est le seul moment vraiment chargé, et il tombe ' +
           'avant les épreuves.',
-        'Avril–juin : réviser. Le dossier est clos, l’orientation ne vous prend plus rien.',
+        'Avril–juin : réviser. Le dossier est clos, l’orientation ne te prend plus rien.',
         'Juin–juillet : répondre. Consulter le dossier chaque jour, même pendant les épreuves.',
       ),
       p(
@@ -1171,7 +1171,7 @@ export const ARTICLES: readonly Article[] = [
           'exactement ainsi qu’on formule des vœux qu’on regrette.',
       ),
       p(
-        'L’automne est le moment le plus sous-employé de l’année. Personne ne vous demande ' +
+        'L’automne est le moment le plus sous-employé de l’année. Personne ne te demande ' +
           'rien, donc on ne fait rien — alors que c’est la seule période où l’on peut ' +
           'explorer sans enjeu, changer d’avis trois fois, et découvrir une filière dont on ' +
           'ignorait l’existence. Deux heures par semaine en novembre valent dix heures en ' +
@@ -1185,24 +1185,24 @@ export const ARTICLES: readonly Article[] = [
           'ce qu’on ne sait pas ; relire donne seulement l’impression de savoir.',
         'Espacer les reprises : revoir une notion le lendemain, puis une semaine après, ' +
           'puis un mois après, la fixe bien plus sûrement que trois relectures d’affilée.',
-        'Une matière difficile se travaille au moment de la journée où vous êtes le plus ' +
+        'Une matière difficile se travaille au moment de la journée où tu es le plus ' +
           'disponible, pas en dernier quand il ne reste que la fatigue.',
         'Le téléphone hors de la pièce, pas retourné sur la table : sa seule présence ' +
           'suffit à coûter de l’attention.',
       ),
       e(
         'Le sommeil n’est pas du temps perdu sur les révisions : c’est le moment où ce que ' +
-          'vous avez travaillé se fixe. Une nuit blanche avant une épreuve coûte plus ' +
+          'tu as travaillé se fixe. Une nuit blanche avant une épreuve coûte plus ' +
           'qu’elle ne rapporte.',
       ),
       t('Tenir le mois de juin'),
       p(
         'C’est la période la plus inconfortable de l’année : les épreuves et les réponses ' +
-          'tombent en même temps, et chaque proposition ouvre un délai court. Prévoyez un ' +
-          'moment fixe dans la journée pour consulter votre dossier — le soir, une fois — ' +
+          'tombent en même temps, et chaque proposition ouvre un délai court. Prévois un ' +
+          'moment fixe dans la journée pour consulter ton dossier — le soir, une fois — ' +
           'plutôt que de le rafraîchir entre deux exercices. Le classement automatique des ' +
-          'vœux en attente existe exactement pour ça : il répond à votre place pendant que ' +
-          'vous composez.',
+          'vœux en attente existe exactement pour ça : il répond à ta place pendant que ' +
+          'tu composes.',
       ),
       t('Ce que la famille peut faire, et ne pas faire'),
       p(
@@ -1214,14 +1214,14 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Garder une porte de sortie mentale'),
       p(
-        'Aucun vœu ne décide de votre vie. Les réorientations en première année sont ' +
+        'Aucun vœu ne décide de ta vie. Les réorientations en première année sont ' +
           'nombreuses, prévues, et sans drame. Le savoir en février rend le mois de mars ' +
           'beaucoup plus respirable.',
       ),
       p(
         'Et si l’année devient lourde, le dire tôt : professeur principal, personnels ' +
           'd’orientation, infirmerie du lycée. Ce sont des interlocuteurs prévus pour ça, ' +
-          'et ils ont vu passer beaucoup d’élèves dans la même situation que vous. Les ' +
+          'et ils ont vu passer beaucoup d’élèves dans la même situation que toi. Les ' +
           'services de santé étudiante proposent par ailleurs des consultations gratuites, ' +
           'y compris avant l’entrée dans le supérieur.',
       ),
@@ -1240,12 +1240,12 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Formuler des vœux déclenche-t-il une demande de bourse ?',
         reponse:
-          'Non, et c’est le malentendu central. Ce sont deux procédures distinctes, sur deux sites, avec deux calendriers, et personne ne fera le lien à votre place. Beaucoup de familles découvrent en août qu’il fallait faire une demande au printemps ; les aides ne sont pas rétroactives.',
+          'Non, et c’est le malentendu central. Ce sont deux procédures distinctes, sur deux sites, avec deux calendriers, et personne ne fera le lien à ta place. Beaucoup de familles découvrent en août qu’il fallait faire une demande au printemps ; les aides ne sont pas rétroactives.',
       },
       {
         question: 'Faut-il attendre les résultats pour demander une bourse ou un logement ?',
         reponse:
-          'Non. Le dossier social étudiant — la demande unique de bourse et de logement en résidence universitaire — se fait avant même de savoir où vous serez admis, et il se modifie ensuite. Les résidences s’attribuent au printemps : on postule sur les villes qu’on a demandées en vœux, quitte à renoncer ensuite.',
+          'Non. Le dossier social étudiant — la demande unique de bourse et de logement en résidence universitaire — se fait avant même de savoir où tu seras admis, et il se modifie ensuite. Les résidences s’attribuent au printemps : on postule sur les villes qu’on a demandées en vœux, quitte à renoncer ensuite.',
       },
       {
         question: 'Faut-il demander une bourse même en doutant d’y avoir droit ?',
@@ -1262,22 +1262,22 @@ export const ARTICLES: readonly Article[] = [
       p(
         'C’est le malentendu central : formuler des vœux ne déclenche aucune demande ' +
           'd’aide. Ce sont deux procédures distinctes, sur deux sites, avec deux ' +
-          'calendriers. Personne ne fera le lien à votre place.',
+          'calendriers. Personne ne fera le lien à ta place.',
       ),
       t('Le dossier social étudiant'),
       p(
         'C’est la demande unique de bourse et de logement en résidence universitaire. Elle ' +
-          'se fait indépendamment de vos vœux, avant même de savoir où vous serez admis, et ' +
+          'se fait indépendamment de tes vœux, avant même de savoir où tu seras admis, et ' +
           'elle se modifie ensuite. L’attendre pour la faire, c’est la faire trop tard.',
       ),
       p(
         'Elle s’appuie sur l’avis d’imposition du foyer, le nombre d’enfants à charge et la ' +
           'distance entre le domicile et le lieu d’études. Ces trois éléments déterminent un ' +
-          'échelon, et l’échelon détermine le montant. Rassemblez les documents en amont : ' +
+          'échelon, et l’échelon détermine le montant. Rassemble les documents en amont : ' +
           'c’est la partie qui bloque les familles au dernier moment.',
       ),
       e(
-        'Faites la demande même si vous doutez d’y avoir droit. Le calcul dépend des ' +
+        'Fais la demande même si tu doutes d’y avoir droit. Le calcul dépend des ' +
           'revenus, du nombre d’enfants à charge et de la distance au lieu d’études : ' +
           'beaucoup de familles s’excluent elles-mêmes à tort.',
       ),
@@ -1290,15 +1290,15 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Le logement, et son calendrier propre'),
       p(
-        'Les résidences universitaires s’attribuent au printemps, bien avant que vous ' +
-          'sachiez où vous serez admis. On postule donc sur les villes qu’on a demandées en ' +
+        'Les résidences universitaires s’attribuent au printemps, bien avant que tu ' +
+          'saches où tu seras admis. On postule donc sur les villes qu’on a demandées en ' +
           'vœux, quitte à renoncer ensuite. Ne pas postuler « parce qu’on n’est pas encore ' +
           'sûr » revient à se priver de la solution la moins chère.',
       ),
       p(
         'Dans le parc privé, le calendrier est inverse : les meilleures offres partent tôt ' +
           'dans les villes tendues, et ce qui reste en août est ce que personne n’a voulu. ' +
-          'Préparez le dossier de location en amont — pièces d’identité, avis d’imposition ' +
+          'Prépare le dossier de location en amont — pièces d’identité, avis d’imposition ' +
           'des garants, justificatifs — parce qu’un logement se perd souvent au profit du ' +
           'candidat qui répond dans l’heure avec un dossier complet.',
       ),
@@ -1316,10 +1316,10 @@ export const ARTICLES: readonly Article[] = [
         'Les aides des régions, départements et communes, qui existent presque partout et ' +
           'ne sont presque jamais demandées.',
       ),
-      t('Ce que personne ne vous dit'),
+      t('Ce que personne ne te dit'),
       p(
-        'Les aides ne se cumulent pas toutes, et certaines dépendent du logement que vous ' +
-          'choisissez. C’est exactement le genre de calcul qu’il vaut mieux faire avant de ' +
+        'Les aides ne se cumulent pas toutes, et certaines dépendent du logement que tu ' +
+          'choisis. C’est exactement le genre de calcul qu’il vaut mieux faire avant de ' +
           'signer, ville par ville, plutôt que de découvrir en octobre que le budget ne ' +
           'tombe pas juste.',
       ),
@@ -1331,8 +1331,8 @@ export const ARTICLES: readonly Article[] = [
           'avaient pourtant bien calculé l’année.',
       ),
       p(
-        'Les montants changent chaque année et dépendent de votre situation : ne vous fiez ' +
-          'pas à un chiffre lu sur un forum. Simulez le vôtre, avec des barèmes datés.',
+        'Les montants changent chaque année et dépendent de ta situation : ne te fie ' +
+          'pas à un chiffre lu sur un forum. Simule le tien, avec des barèmes datés.',
       ),
     ],
   },
@@ -1436,13 +1436,13 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Une méthode qui tient en quatre gestes'),
       l(
-        'Posez le loyer d’un logement réaliste dans la commune de la formation, pas dans ' +
+        'Pose le loyer d’un logement réaliste dans la commune de la formation, pas dans ' +
           'la métropole voisine.',
-        'Simulez les aides auxquelles vous auriez droit : beaucoup de familles ne le font ' +
+        'Simule les aides auxquelles tu aurais droit : beaucoup de familles ne le font ' +
           'jamais et s’excluent à tort.',
-        'Ajoutez le transport quotidien, qui est le poste caché des villes « moins chères ».',
-        'Regardez ce qui reste. Recommencez pour chaque ville de votre liste, avant de ' +
-          'formuler vos vœux et non après les réponses.',
+        'Ajoute le transport quotidien, qui est le poste caché des villes « moins chères ».',
+        'Regarde ce qui reste. Recommence pour chaque ville de ta liste, avant de ' +
+          'formuler tes vœux et non après les réponses.',
       ),
     ],
   },
@@ -1464,7 +1464,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Quel type de job s’accorde le mieux avec des cours ?',
         reponse:
-          'Celui dont les horaires sont prévisibles et négociables autour des examens. Un contrat aux horaires fixes le soir ou le week-end se planifie ; un poste où l’on est appelé la veille pour le lendemain oblige à choisir entre le salaire et le partiel. Demandez cette souplesse avant de signer, pas au moment où vous en aurez besoin.',
+          'Celui dont les horaires sont prévisibles et négociables autour des examens. Un contrat aux horaires fixes le soir ou le week-end se planifie ; un poste où l’on est appelé la veille pour le lendemain oblige à choisir entre le salaire et le partiel. Demande cette souplesse avant de signer, pas au moment où tu en auras besoin.',
       },
       {
         question: 'Vaut-il mieux travailler ou choisir une ville moins chère ?',
@@ -1488,8 +1488,8 @@ export const ARTICLES: readonly Article[] = [
       p(
         'Ce seuil n’est pas le même pour tout le monde. Une formation avec vingt heures de ' +
           'cours hebdomadaires ne laisse pas la même place qu’une formation qui en demande ' +
-          'trente-cinq, travail personnel compris. Regardez le volume réel de votre ' +
-          'formation avant de vous engager sur un contrat.',
+          'trente-cinq, travail personnel compris. Regarde le volume réel de ta ' +
+          'formation avant de t’engager sur un contrat.',
       ),
       t('Les horaires comptent autant que le nombre d’heures'),
       p(
@@ -1499,7 +1499,7 @@ export const ARTICLES: readonly Article[] = [
           'l’assiduité qui cède, parce que le loyer, lui, ne se reporte pas.',
       ),
       e(
-        'Demandez, avant de signer, si vos horaires peuvent être allégés pendant les ' +
+        'Demande, avant de signer, si tes horaires peuvent être allégés pendant les ' +
           'partiels. Un employeur qui l’accepte vaut mieux qu’un employeur qui paie un peu ' +
           'plus et le refuse.',
       ),
@@ -1548,9 +1548,9 @@ export const ARTICLES: readonly Article[] = [
       l(
         'Déclarer le job : il peut avoir des conséquences sur les aides, et les ignorer ' +
           'expose à devoir rembourser.',
-        'Vérifier si votre formation autorise un volume horaire maximal — certaines ' +
+        'Vérifier si ta formation autorise un volume horaire maximal — certaines ' +
           'filières sélectives l’encadrent.',
-        'Garder trace de vos contrats et bulletins de salaire : ils servent pour les ' +
+        'Garder trace de tes contrats et bulletins de salaire : ils servent pour les ' +
           'dossiers de logement, où un revenu régulier rassure un bailleur.',
       ),
     ],
@@ -1568,7 +1568,7 @@ export const ARTICLES: readonly Article[] = [
       {
         question: 'Être accepté en alternance suffit-il pour commencer l’année ?',
         reponse:
-          'Non, et c’est la différence la plus importante avec une formation classique. Le centre de formation vous accepte, mais la place ne devient réelle qu’une fois un contrat signé avec une entreprise. Sans employeur, la formation ne démarre pas. La recherche d’entreprise se mène donc en parallèle de la candidature, dès le printemps.',
+          'Non, et c’est la différence la plus importante avec une formation classique. Le centre de formation t’accepte, mais la place ne devient réelle qu’une fois un contrat signé avec une entreprise. Sans employeur, la formation ne démarre pas. La recherche d’entreprise se mène donc en parallèle de la candidature, dès le printemps.',
       },
       {
         question: 'Pourquoi l’alternance change-t-elle autant le budget ?',
@@ -1591,9 +1591,9 @@ export const ARTICLES: readonly Article[] = [
       p(
         'Deux dispositifs coexistent : le contrat d’apprentissage et le contrat de ' +
           'professionnalisation. Les conditions d’âge, la durée et le rythme diffèrent, ' +
-          'mais le principe est le même — vous êtes salarié d’une entreprise et étudiant ' +
-          'd’un centre de formation, en alternant les périodes. Le centre vous forme, ' +
-          'l’entreprise vous emploie.',
+          'mais le principe est le même — tu es salarié d’une entreprise et étudiant ' +
+          'd’un centre de formation, en alternant les périodes. Le centre te forme, ' +
+          'l’entreprise t’emploie.',
       ),
       p(
         'Le rythme varie beaucoup : quelques jours par semaine, une semaine sur deux, des ' +
@@ -1603,14 +1603,14 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Ce que cela change au budget'),
       p(
-        'Deux lignes s’inversent en même temps. Les frais de scolarité ne sont plus à votre ' +
+        'Deux lignes s’inversent en même temps. Les frais de scolarité ne sont plus à ta ' +
           'charge, et une rémunération s’ajoute aux ressources. Une année qui ne tenait pas ' +
           'en formation classique peut tenir en alternance, dans la même ville et la même ' +
           'filière — sans rien changer d’autre.',
       ),
       e(
-        'Si une filière qui vous intéresse existe en alternance, formuler le vœu ne vous ' +
-          'enlève rien : il ne consomme aucun de vos autres vœux.',
+        'Si une filière qui t’intéresse existe en alternance, formuler le vœu ne ' +
+          't’enlève rien : il ne consomme aucun de tes autres vœux.',
       ),
       t('Le vrai obstacle : l’entreprise'),
       p(
@@ -1626,14 +1626,14 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Comment chercher une entreprise'),
       l(
-        'Demandez au centre de formation sa liste d’entreprises partenaires : beaucoup en ' +
+        'Demande au centre de formation sa liste d’entreprises partenaires : beaucoup en ' +
           'tiennent une, et peu de candidats la réclament.',
-        'Candidatez largement et tôt, avec un texte adapté à chaque entreprise — le ' +
+        'Candidate largement et tôt, avec un texte adapté à chaque entreprise — le ' +
           'copier-coller se repère ici comme ailleurs.',
-        'Visez aussi les structures qui ne publient pas d’annonce : collectivités, ' +
+        'Vise aussi les structures qui ne publient pas d’annonce : collectivités, ' +
           'associations, petites entreprises qui n’ont jamais eu d’alternant.',
-        'Préparez-vous à un entretien d’embauche, pas à un entretien d’admission : ce ' +
-          'qu’on vous demandera, c’est ce que vous saurez faire dans l’équipe.',
+        'Prépare-toi à un entretien d’embauche, pas à un entretien d’admission : ce ' +
+          'qu’on te demandera, c’est ce que tu sauras faire dans l’équipe.',
       ),
       t('Où trouver les formations en alternance'),
       p(
@@ -1644,7 +1644,7 @@ export const ARTICLES: readonly Article[] = [
       ),
       p(
         'Une même filière peut exister dans les deux régimes, classique et alternance, ' +
-          'parfois dans le même établissement. Vérifiez-le systématiquement : c’est le ' +
+          'parfois dans le même établissement. Vérifie-le systématiquement : c’est le ' +
           'genre de détail qui ne saute pas aux yeux sur une fiche et qui change le budget ' +
           'd’une année entière.',
       ),
@@ -1656,7 +1656,7 @@ export const ARTICLES: readonly Article[] = [
           'discontinue, ou deux hébergements, ou beaucoup de trajets.',
       ),
       p(
-        'C’est une contrainte à examiner AVANT de signer, pas après. Demandez au centre de ' +
+        'C’est une contrainte à examiner AVANT de signer, pas après. Demande au centre de ' +
           'formation où se trouvent habituellement ses entreprises partenaires : la réponse ' +
           'change complètement le calcul du logement, et donc celui du budget.',
       ),
@@ -1669,7 +1669,7 @@ export const ARTICLES: readonly Article[] = [
       p(
         'La poursuite d’études, enfin, mérite d’être vérifiée avant de s’engager. Certaines ' +
           'filières en alternance mènent naturellement à un niveau supérieur, d’autres sont ' +
-          'conçues comme un aboutissement. Posez la question au centre de formation : la ' +
+          'conçues comme un aboutissement. Pose la question au centre de formation : la ' +
           'réponse oriente le choix autant que le salaire.',
       ),
     ],
@@ -1708,11 +1708,11 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('Distinguer trois situations très différentes'),
       p(
-        'La première : la formation vous convient, mais le rythme ou la méthode ne passent ' +
+        'La première : la formation te convient, mais le rythme ou la méthode ne passent ' +
           'pas. Cela se travaille, et c’est souvent affaire de quelques semaines ' +
-          'd’adaptation. La deuxième : le contenu ne correspond pas à ce que vous ' +
-          'imaginiez. La troisième : l’année n’est pas finançable, et c’est le budget qui ' +
-          'décide à votre place.',
+          'd’adaptation. La deuxième : le contenu ne correspond pas à ce que tu ' +
+          'imaginais. La troisième : l’année n’est pas finançable, et c’est le budget qui ' +
+          'décide à ta place.',
       ),
       p(
         'Les trois demandent des réponses différentes, et les confondre fait perdre du ' +
@@ -1761,7 +1761,7 @@ export const ARTICLES: readonly Article[] = [
           'perçue. C’est une piste qu’il vaut la peine de regarder avant de se limiter aux ' +
           'formations classiques.',
       ),
-      t('Ce qui ne doit pas décider à votre place'),
+      t('Ce qui ne doit pas décider à ta place'),
       p(
         'Le regard des autres, d’abord. Une réorientation se raconte mal au dîner de ' +
           'famille et très bien dans un projet de formation motivé : ce sont deux publics ' +
@@ -1779,11 +1779,11 @@ export const ARTICLES: readonly Article[] = [
       ),
       t('À qui en parler'),
       p(
-        'Au service d’orientation de votre établissement, qui connaît les passerelles et ' +
-          'les délais. Au responsable de votre formation, qui peut proposer un aménagement. ' +
+        'Au service d’orientation de ton établissement, qui connaît les passerelles et ' +
+          'les délais. Au responsable de ta formation, qui peut proposer un aménagement. ' +
           'Et, si l’année pèse, aux services de santé étudiante, qui proposent des ' +
           'consultations gratuites. Ces interlocuteurs sont prévus pour cela, et ils ont vu ' +
-          'passer beaucoup d’étudiants dans votre situation.',
+          'passer beaucoup d’étudiants dans ta situation.',
       ),
     ],
   },
