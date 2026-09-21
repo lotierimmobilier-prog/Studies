@@ -161,6 +161,47 @@ function Mentions({ formation }: { readonly formation: Formation }) {
 
 /* --------------------------------------------------------- les onglets */
 
+/**
+ * Où se trouve l'école, sur une carte.
+ *
+ * Le même repère sert aux deux onglets : « Admission », pour situer l'école
+ * avant même de penser au logement, et « Vivre ici », pour la replacer dans
+ * sa ville. Construire le point deux fois finirait par donner deux positions
+ * différentes pour la même école.
+ *
+ * Rien n'est demandé à l'IGN tant qu'on n'a pas cliqué — `CarteALaDemande`
+ * s'en charge — donc une seconde carte sur la fiche ne coûte rien à qui ne
+ * l'ouvre pas.
+ */
+function OuEstLEcole({
+  formation,
+  libelleBouton,
+}: {
+  readonly formation: Formation
+  readonly libelleBouton: string
+}) {
+  if (formation.coordonnees === null) {
+    return (
+      <p className="note">
+        La position de cette formation n’est pas publiée : la carte ne s’affiche pas.
+      </p>
+    )
+  }
+  return (
+    <CarteALaDemande
+      libelleBouton={libelleBouton}
+      points={[
+        {
+          cle: formation.id,
+          lat: formation.coordonnees.lat,
+          lon: formation.coordonnees.lon,
+          libelle: `${formation.etablissement} — ${formation.ville}`,
+        },
+      ]}
+    />
+  )
+}
+
 function Admission({ formation }: { readonly formation: Formation }) {
   const s = formation.stats
   return (
@@ -186,6 +227,16 @@ function Admission({ formation }: { readonly formation: Formation }) {
       </div>
 
       <Mentions formation={formation} />
+
+      {/* Où est l'école, tout en bas : un taux d'accès ne dit rien du trajet
+          qu'il faudra faire tous les jours, et la ville seule ne suffit pas à
+          se le représenter. Ici pour SITUER — le logement et le coût de la
+          vie restent l'affaire de « Vivre ici ». */}
+      <h4 className="fiche-sous-titre">Où se trouve cette école</h4>
+      <p className="note">
+        {formation.etablissement} — {formation.ville} ({formation.departement}).
+      </p>
+      <OuEstLEcole formation={formation} libelleBouton="Voir l’école sur la carte" />
 
       <p className="fiche-source">
         {SOURCE_PARCOURSUP} — session {formation.session || 'non précisée'}.
@@ -263,22 +314,7 @@ function VivreIci({
         ))}
       </ul>
 
-      {formation.coordonnees !== null ? (
-        <CarteALaDemande
-          points={[
-            {
-              cle: formation.id,
-              lat: formation.coordonnees.lat,
-              lon: formation.coordonnees.lon,
-              libelle: `${formation.etablissement} — ${formation.ville}`,
-            },
-          ]}
-        />
-      ) : (
-        <p className="note">
-          La position de cette formation n’est pas publiée : la carte ne s’affiche pas.
-        </p>
-      )}
+      <OuEstLEcole formation={formation} libelleBouton="Voir sur la carte" />
     </>
   )
 }
