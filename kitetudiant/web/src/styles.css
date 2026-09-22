@@ -3667,6 +3667,11 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
    et les champs y sont hauts : on y tape des phrases, pas des mots. */
 .lettre { max-width: 44rem; }
 .lettre h2 { font-size: 1.5rem; margin: 0 0 0.4rem; }
+/* L'en-tête et le pied restent étroits même quand l'atelier passe à deux
+   colonnes : ce sont des textes à lire, et une ligne de cent-vingt caractères
+   ne se relit pas. Seul l'atelier s'élargit, parce qu'il tient deux colonnes
+   de quarante. */
+.lettre-tete, .lettre-fin { max-width: 44rem; }
 .lettre-chapeau { margin: 0 0 1.2rem; color: var(--doux); }
 .lettre-chapeau strong { color: var(--encre); }
 .lettre-titre { margin: 2rem 0 0.5rem; font-size: 1.05rem; }
@@ -3674,13 +3679,13 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 /* La phrase du ministère sur les IA. Citée, donc présentée comme une citation
    — avec sa source visible, et non fondue dans notre propre texte. */
 .lettre-avertissement {
-  margin: 0 0 1.5rem;
-  padding: 0.9rem 1.1rem;
+  margin: 0 0 1.2rem;
+  padding: 0.7rem 0.95rem;
   border-left: 3px solid var(--orange);
   border-radius: 0 var(--rayon) var(--rayon) 0;
   background: var(--carte);
 }
-.lettre-avertissement p { margin: 0; font-size: 0.92rem; line-height: 1.55; }
+.lettre-avertissement p { margin: 0; font-size: 0.88rem; line-height: 1.5; }
 .lettre-avertissement cite {
   display: block;
   margin-top: 0.5rem;
@@ -3689,8 +3694,23 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   color: var(--doux);
 }
 
-.lettre-voeu, .lettre-identite { margin: 0 0 1.1rem; }
+.lettre-voeu { margin: 0 0 1.1rem; }
 .lettre-voeu .note, .lettre-identite .note { margin-top: 0.35rem; }
+
+/* Le prénom, replié. Il est facultatif et ne sert qu'à une vérification ;
+   déplié en permanence, c'était un champ de saisie de plus à côté de la
+   lettre, qui laissait croire qu'on attendait quelque chose. */
+.lettre-identite { margin-top: 1rem; }
+.lettre-identite > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+  min-height: 36px;
+}
+.lettre-identite > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .lettre-ifsi {
   display: flex;
@@ -3711,10 +3731,123 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 .lettre-ifsi-detail h3 { margin: 0 0 0.4rem; font-size: 0.95rem; }
 .lettre-ifsi-detail ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--doux); }
 
+/* La barre des réglages : le vœu et la limite de longueur.
+   Empilés pleine largeur, ils se lisaient comme les deux premières étapes du
+   parcours. Sur une ligne, ils redeviennent ce qu'ils sont — un choix qu'on
+   fait une fois, avant de commencer. */
+.lettre-barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.6rem 1.6rem;
+  margin: 0 0 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--trait);
+}
+.lettre-barre .lettre-voeu { flex: 1 1 22rem; margin: 0; max-width: 34rem; }
+.lettre-barre .lettre-reglages { flex: 0 1 auto; margin: 0; padding-top: 1.55rem; }
+
+/* L'atelier : les questions à gauche, ce qu'elles produisent à droite.
+
+   Une seule colonne par défaut — c'est l'ordre du parcours, et celui du DOM.
+   La deuxième colonne n'apparaît que s'il y a la place pour deux colonnes de
+   texte lisibles ; en dessous, la superposer donnerait deux colonnes trop
+   étroites pour qu'on y écrive des phrases. */
+.lettre-atelier { display: block; }
+.lettre-colonne { min-width: 0; }
+
+@media (min-width: 72rem) {
+  .lettre { max-width: 76rem; }
+  .lettre-atelier {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+    gap: 2.4rem;
+    /* PAS `align-items: start`.
+       Il paraît juste — la colonne de droite est plus courte — et il casse
+       exactement ce pour quoi elle existe : une case de grille ramenée à la
+       hauteur de son contenu n'offre plus aucune course au `position: sticky`
+       qu'elle contient, et le brouillon défile hors de l'écran comme avant.
+       Étirée sur toute la hauteur de la rangée, elle lui en donne. */
+  }
+  /* Le brouillon suit le regard pendant qu'on répond : c'est tout l'intérêt
+     de la deuxième colonne. `max-height` et le défilement propre évitent
+     qu'une relecture longue dépasse l'écran sans jamais pouvoir remonter. */
+  .lettre-sortie-collee {
+    position: sticky;
+    /* Sous la barre du haut, qui est elle-même collée : `top: 0` glisserait
+       le brouillon DERRIÈRE elle, et on écrirait dans un champ dont on ne
+       voit plus le premier tiers. Mesurée à 63 px, plus un peu d'air. */
+    top: 4.75rem;
+    max-height: calc(100vh - 6.25rem);
+    overflow-y: auto;
+    /* La barre de défilement mangerait le bord droit du champ. */
+    padding-right: 0.4rem;
+  }
+  .lettre-sortie .lettre-titre:first-child { margin-top: 0; }
+}
+
 /* Les questions. Numérotées : elles suivent le plan que la fiche recommande,
-   et leur ordre est celui du texte final. */
-.lettre-questions { margin: 0; padding: 0 0 0 1.4rem; }
-.lettre-question { margin: 0 0 1.4rem; padding-left: 0.3rem; }
+   et leur ordre est celui du texte final.
+
+   La pastille remplace le marqueur de liste : gris et minuscule, il se perdait
+   dans la marge, alors que c'est lui qui dit combien il en reste. Elle change
+   d'aspect dès que la question est remplie — l'avancement se lit là où l'on
+   travaille, pas seulement en haut de la colonne. */
+.lettre-questions { list-style: none; margin: 0; padding: 0; }
+.lettre-question {
+  position: relative;
+  margin: 0 0 1.5rem;
+  padding-left: 2.4rem;
+}
+.lettre-numero {
+  position: absolute;
+  left: 0;
+  top: 0.05rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: 1px solid var(--trait);
+  border-radius: 50%;
+  background: var(--carte);
+  color: var(--doux);
+  font-family: var(--titres);
+  font-weight: 800;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.lettre-numero.rempli {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+}
+
+/* La jauge des six questions. Elle répète en un coup d'œil ce que la phrase
+   au-dessus dit en toutes lettres — d'où `aria-hidden` sur le balisage : la
+   faire lire deux fois n'apporte rien à qui l'entend. */
+.lettre-jauge {
+  display: flex;
+  gap: 0.3rem;
+  list-style: none;
+  margin: 0 0 1.4rem;
+  padding: 0;
+}
+.lettre-cran {
+  height: 4px;
+  flex: 1 1 0;
+  border-radius: 2px;
+  background: var(--trait);
+  transition: background-color 0.2s ease;
+}
+.lettre-cran.rempli { background: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  .lettre-cran { transition: none; }
+}
+
+/* L'aide sous un champ. Elle disait la même chose que le label, dans la même
+   taille : deux phrases de poids égal, dont une seule est la question. */
+.lettre-pourquoi { font-size: 0.82rem; margin-top: 0.35rem; }
 .lettre-champ, .lettre-texte {
   width: 100%;
   margin-top: 0.3rem;
@@ -3743,7 +3876,32 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 }
 .lettre-pistes ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; }
 
-.lettre-compteur { margin: 0.5rem 0 0; font-size: 0.88rem; color: var(--doux); }
+/* Le compteur, avec sa jauge.
+   « 1 210 sur 1 500 » demande une soustraction ; une barre qui se remplit n'en
+   demande aucune. Le chiffre reste — c'est lui qui est exact, et lui que la
+   jauge illustre. Elle est bornée à 100 % : au-delà, c'est la couleur et la
+   phrase qui disent le dépassement, pas une barre qui sort du cadre. */
+.lettre-compteur { margin: 0.6rem 0 0; font-size: 0.88rem; color: var(--doux); }
+.lettre-remplissage {
+  display: block;
+  height: 4px;
+  margin-bottom: 0.45rem;
+  border-radius: 2px;
+  background: var(--trait);
+  overflow: hidden;
+}
+.lettre-remplissage::before {
+  content: '';
+  display: block;
+  height: 100%;
+  width: var(--part, 0%);
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+.lettre-compteur.depasse .lettre-remplissage::before { background: var(--rouge); }
+@media (prefers-reduced-motion: reduce) {
+  .lettre-remplissage::before { transition: none; }
+}
 .lettre-compteur strong { font-family: var(--titres); font-variant-numeric: tabular-nums; }
 .lettre-compteur.depasse { color: var(--rouge); }
 .lettre-compteur.depasse strong { color: var(--rouge); }
@@ -3777,6 +3935,13 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   font-weight: 600;
   font-size: 0.95rem;
   padding: 0.5rem 0;
+}
+/* Quatre listes d'expressions empilées faisaient une page à elles seules.
+   Côte à côte, elles se parcourent — c'est à ça qu'elles servent. */
+.lettre-aides-grille {
+  display: grid;
+  gap: 0.4rem 1.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 }
 .lettre-aide { margin-top: 1rem; }
 .lettre-aide h4 { margin: 0 0 0.3rem; font-size: 0.9rem; }
@@ -3830,11 +3995,14 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   .lettre-avertissement p { font-size: 0.86rem; line-height: 1.45; }
   .lettre-avertissement cite { font-size: 0.72rem; }
   .lettre-titre { margin-top: 1.5rem; }
-  /* La numérotation mangeait 1,4 rem de largeur sur un écran qui en compte
-     24 : elle passe dans la marge du texte plutôt qu'à côté. */
-  .lettre-questions { padding-left: 1.1rem; }
-  .lettre-question { margin-bottom: 1.1rem; }
+  /* La pastille mangeait 2,4 rem de largeur sur un écran qui en compte 24,
+     et c'est la ligne de texte qui les perdait. Elle remonte au-dessus du
+     label, sur la même ligne que lui plutôt qu'à sa gauche. */
+  .lettre-question { padding-left: 0; padding-top: 2rem; margin-bottom: 1.2rem; }
+  .lettre-numero { top: 0; }
   .lettre-champ, .lettre-texte { font-size: 0.95rem; padding: 0.5rem 0.6rem; }
+  .lettre-barre { gap: 0.4rem; padding-bottom: 1rem; margin-bottom: 1.2rem; }
+  .lettre-barre .lettre-reglages { padding-top: 0; }
 }
 
 /* Le bouton « se déconnecter » de l'espace personnel. Discret et non rouge :
