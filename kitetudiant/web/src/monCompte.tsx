@@ -39,6 +39,7 @@ import {
   type ProfilCompte,
 } from './donnees.ts'
 import { FilAriane } from './filAriane.tsx'
+import { Sortie } from './illustrations.tsx'
 import { nombre } from './nombres.ts'
 import { chargerCollection, villesDe } from './collection.ts'
 import { LIBELLES_MATIERE } from '../../packages/profil-scolaire/src/index.ts'
@@ -344,6 +345,38 @@ function Administration() {
   )
 }
 
+/* ------------------------------------------------------ déconnexion */
+
+/**
+ * Se déconnecter, depuis l'espace personnel.
+ *
+ * Elle n'existait NULLE PART sur un téléphone. Le seul bouton vivait dans le
+ * rail, masqué sous 64 rem et masqué aussi quand le rail était replié ; et
+ * dans cette page, `onDeconnexion` n'était câblé qu'à l'effacement du compte.
+ * Un commentaire du CSS affirmait pourtant qu'elle « reste dans Mon espace ».
+ * Elle y est maintenant.
+ *
+ * Juste au-dessus de l'effacement, et séparée de lui : ce sont les deux
+ * façons de partir, et les confondre coûte un compte. Celle-ci est réversible
+ * — on se reconnecte —, l'autre ne l'est pas, et rien ne doit laisser penser
+ * qu'elles se valent. D'où le bouton discret ici, et le bouton rouge là-bas.
+ */
+function Deconnexion({ onPartir }: { readonly onPartir: () => void }) {
+  return (
+    <section className="bloc-compte">
+      <h2>Se déconnecter</h2>
+      <p className="bloc-intro">
+        Ferme ta session sur cet appareil. Tes vœux et ton compte restent intacts : tu
+        les retrouveras à la prochaine connexion.
+      </p>
+      <button type="button" className="secondaire bouton-deconnexion" onClick={onPartir}>
+        <Sortie />
+        Se déconnecter
+      </button>
+    </section>
+  )
+}
+
 /* -------------------------------------------------------- effacement */
 
 function Effacer({ onEfface }: { readonly onEfface: () => void }) {
@@ -474,6 +507,12 @@ export function MonCompte({
           <Recapitulatif reponses={reponses} />
           {profil.administrateur ? <Administration /> : null}
           <MotDePasse />
+          <Deconnexion
+            onPartir={() => {
+              onDeconnexion()
+              onNaviguer({ vue: 'accueil' })
+            }}
+          />
           <Effacer
             onEfface={() => {
               onDeconnexion()

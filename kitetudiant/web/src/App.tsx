@@ -50,6 +50,7 @@ import { PageEtablissement } from './pageEtablissement.tsx'
 import { MonCompte } from './monCompte.tsx'
 import { MentionsLegales } from './mentionsLegales.tsx'
 import { AtelierLettre } from './lettre.tsx'
+import { BoutonGarder, useVoeuxRapides, type VoeuxRapides } from './voeuxRapides.tsx'
 import { Cle, Epingle, Etoile, Fiche, Loupe, Residence, Toit } from './illustrations.tsx'
 import { liensLogement } from './logement.ts'
 import { moyenneGenerale } from '../../packages/profil-scolaire/src/index.ts'
@@ -250,6 +251,7 @@ function Carte({
   verrouille,
   onInscrire,
   onNaviguer,
+  voeux,
 }: {
   resultat: ResultatFormation
   tous: readonly ResultatFormation[]
@@ -259,6 +261,8 @@ function Carte({
   /** Ouvre le formulaire d'inscription depuis la fiche elle-même. */
   onInscrire: () => void
   onNaviguer: (route: Route) => void
+  /** L'état des vœux, partagé par toute la liste. Voir voeuxRapides.tsx. */
+  voeux: VoeuxRapides
   /**
    * Vrai quand le montant existe mais demande un compte. À ne pas confondre
    * avec « non calculable », qui veut dire qu'une donnée manque réellement :
@@ -355,7 +359,16 @@ function Carte({
 
           Bouton et non `details` : l'ouverture est tenue par la liste, qui
           décide ce qui reste ouvert. `aria-expanded` dit l'état. */}
+      {/* « Garder » d'abord : c'est le geste qu'on fait en parcourant, et il
+          doit rester à portée de pouce sans rien déplier. Le budget vient
+          après — on l'ouvre sur une carte qu'on a déjà retenue. */}
       <div className="carte-actions">
+        <BoutonGarder
+          code={formation.id}
+          session={Number(formation.session) || new Date().getFullYear()}
+          libelleFormation={`${formation.libelle} à ${formation.ville}`}
+          etat={voeux}
+        />
         {verrouille ? (
           <button type="button" className="carte-volet-bouton" onClick={onInscrire}>
             Créer mon compte pour voir le budget
@@ -596,7 +609,13 @@ export default function App() {
   const [verrou, setVerrou] = useState<string | null>(null)
   /** Vrai quand l'élève a demandé à s'inscrire : le formulaire prend l'écran. */
   const [formulaireCompte, setFormulaireCompte] = useState(false)
+
   const [connecte, setConnecte] = useState(() => jetonSession() !== '')
+  /* L'état des vœux pour toute la liste des résultats, monté une seule fois.
+     Quarante cartes qui interrogeraient l'API chacune de leur côté feraient
+     quarante requêtes au chargement, et leurs états divergeraient au premier
+     ajout. Voir voeuxRapides.tsx. */
+  const voeuxRapides = useVoeuxRapides(connecte, () => setFormulaireCompte(true))
   /**
    * Position de l'élève, établie par son navigateur avec son accord, et gardée
    * UNIQUEMENT en mémoire : elle n'est ni stockée ni transmise (voir geo.ts).
@@ -1156,11 +1175,25 @@ export default function App() {
           onFiltres={setFiltres}
         />
 
+        {/* Le refus du serveur et le rappel du plafond sont posés UNE fois,
+            au-dessus de la liste, et non sur la carte cliquée : un message
+            attaché à la trente-septième carte s'affiche hors de l'écran, et
+            l'élève voit seulement que rien ne s'est passé. */}
+        {voeuxRapides.message !== null ? (
+          <p className="erreur voeux-message" role="alert">
+            {voeuxRapides.message}
+          </p>
+        ) : null}
+        {voeuxRapides.rappel !== null ? (
+          <p className="note voeux-rappel">{voeuxRapides.rappel}</p>
+        ) : null}
+
         <div className="cartes">
           {affiches.map((r) => (
             <Carte
               key={r.formation.id}
               resultat={r}
+              voeux={voeuxRapides}
               tous={resultats}
               retours={retours.get(r.formation.id)}
               ouvert={ouvert === r.formation.id}

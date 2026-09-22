@@ -1258,7 +1258,15 @@ input[type='range'] { width: 100%; min-height: 44px; }
 }
 .bandeau-mesures span { color: var(--doux); }
 
-.carte-actions { margin-top: 1rem; }
+/* La rangée porte maintenant deux boutons — « Garder » et le budget : ils
+   s'alignent, et passent l'un sous l'autre quand la carte est trop étroite. */
+.carte-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
 .carte-deplier { width: 100%; }
 
 /* Ces liens mènent AILLEURS. Ils se présentent donc comme des pastilles
@@ -3289,7 +3297,9 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     display: none;
   }
   .rail-deconnexion {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     margin-top: auto;
     padding: 0.55rem 0.75rem;
     border: none;
@@ -3300,16 +3310,22 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     font-size: 0.85rem;
     text-align: left;
     cursor: pointer;
+    /* Même hauteur de cible que les liens du rail : c'est un bouton comme
+       les autres, même s'il n'est pas une destination. */
+    min-height: 44px;
   }
+  .rail-deconnexion .illu-picto { flex: 0 0 auto; width: 20px; height: 20px; }
   .rail-deconnexion:hover {
     color: var(--encre);
     text-decoration: underline;
   }
-  /* Replié, « Se déconnecter » disparaît : c'est le seul libellé du rail
-     qu'aucune icône ne remplace honnêtement — rien ne distingue « sortir » de
-     « supprimer ». Elle reste dans « Mon espace », la page faite pour ça. */
+  /* Replié, l'icône reste et le libellé s'en va, comme pour les liens.
+     Le bouton disparaissait entièrement, faute d'icône — et comme il n'existe
+     nulle part ailleurs sur cette largeur, replier le rail retirait la
+     déconnexion du site. */
   .rail-replie .rail-deconnexion {
-    display: none;
+    justify-content: center;
+    padding-inline: 0;
   }
 }
 
@@ -3820,3 +3836,50 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   .lettre-question { margin-bottom: 1.1rem; }
   .lettre-champ, .lettre-texte { font-size: 0.95rem; padding: 0.5rem 0.6rem; }
 }
+
+/* Le bouton « se déconnecter » de l'espace personnel. Discret et non rouge :
+   c'est l'action réversible des deux façons de partir, et la confondre avec
+   l'effacement du compte coûterait un compte. */
+.bouton-deconnexion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.bouton-deconnexion .illu-picto { width: 18px; height: 18px; flex: 0 0 auto; }
+
+/* ------------------------------------------- garder un vœu depuis la liste */
+/* Compact : le bouton est répété sur chaque carte. Il partage la rangée
+   d'actions avec le budget, et vient en premier — c'est le geste qu'on fait
+   en parcourant, l'autre s'ouvre sur une carte déjà retenue. */
+.garder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.8rem;
+  min-height: 44px;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: var(--carte);
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.garder .illu-picto { width: 16px; height: 16px; flex: 0 0 auto; }
+.garder:hover { border-color: var(--accent); }
+.garder:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.garder[disabled] { opacity: 0.6; cursor: default; }
+/* Gardé : l'aplat du marque-page ET la bordure. La couleur seule ne se lit
+   ni en noir et blanc, ni par qui confond le bleu et le gris. */
+.garder.est-garde {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+}
+.garder.est-garde:hover { opacity: 0.9; }
+
+.carte-actions .carte-volet-bouton { flex: 1 1 12rem; }
+
+.voeux-message, .voeux-rappel { margin: 0 0 0.8rem; }

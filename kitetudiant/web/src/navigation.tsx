@@ -46,7 +46,17 @@
 
 import { useEffect, useState } from 'react'
 
-import { Boussole, Carnet, Chevrons, Etoile, Fiche, Loupe, Plume, Toit } from './illustrations.tsx'
+import {
+  Boussole,
+  Carnet,
+  Chevrons,
+  CartesAJouer,
+  Fiche,
+  Loupe,
+  Plume,
+  Sortie,
+  Toit,
+} from './illustrations.tsx'
 import { Marque } from './marque.tsx'
 import { cheminDe, CHEMIN_TOQUE, type Route } from './routes.ts'
 
@@ -172,7 +182,7 @@ function destinations(nav: Navigation): Entree[] {
       cle: 'collection',
       libelle: nav.cartes > 0 ? `Mes cartes (${nav.cartes})` : 'Mes cartes',
       court: 'Cartes',
-      icone: <Etoile />,
+      icone: <CartesAJouer />,
       route: { vue: 'collection' },
       actif: ['collection'],
     },
@@ -410,20 +420,30 @@ function RailApplication(nav: Navigation) {
           ))}
         </ul>
 
-        {/* La déconnexion est à part, en bas du rail et jamais dans la barre
+        {/* La déconnexion est à part, en bas du rail, et jamais dans la barre
             du bas d'un téléphone : c'est une action, pas une destination, et
-            une action irréversible posée d'un doigt à côté des onglets se
-            déclenche par accident. Sur téléphone, elle vit dans « Mon
-            espace », qui est la page faite pour ça — et c'est aussi ce qui se
-            passe quand le rail est replié : « Se déconnecter » est le seul
-            libellé qui ne se remplace pas honnêtement par une icône, aucun
-            pictogramme ne distinguant « sortir » de « supprimer ». */}
+            une action posée d'un doigt à côté des onglets se déclenche par
+            accident. Sur téléphone, elle vit dans « Mon espace ».
+
+            Elle a maintenant une icône, et reste donc visible quand le rail
+            est replié. Elle n'en avait pas, au motif qu'aucun pictogramme ne
+            distingue « sortir » de « supprimer » — ce qui est vrai d'une croix
+            ou d'une corbeille, mais pas d'une porte franchie par une flèche.
+            Le libellé disparaissait alors avec le rail, et il n'existait plus
+            aucun moyen de se déconnecter : ni ici, ni ailleurs.
+
+            `aria-label` et `title` portent toujours le libellé complet : replié,
+            le texte visible n'existe plus, et une icône seule sans nom
+            accessible est un bouton muet. */}
         <button
           type="button"
           className="rail-deconnexion"
           onClick={nav.onDeconnexion}
+          aria-label="Se déconnecter"
+          title="Se déconnecter"
         >
-          Se déconnecter
+          <Sortie />
+          <span className="rail-libelle">Se déconnecter</span>
         </button>
       </nav>
     </>

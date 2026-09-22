@@ -56,13 +56,28 @@ export function Fiche() {
   )
 }
 
-/** Une étoile. Les avis du public sur une adresse. */
-export function Etoile() {
+/**
+ * Une étoile. Deux emplois, et le contexte les sépare.
+ *
+ * Creuse à côté d'une note — « 4,2/5 sur l'adresse » —, elle illustre un avis.
+ * En bouton, avec « Garder » écrit à côté, elle marque un vœu retenu : c'est
+ * la convention du favori partout ailleurs, et c'est ce qu'on attend en la
+ * voyant sur une liste.
+ *
+ * Ce qui les distingue n'est pas le dessin mais ce qui l'accompagne : un
+ * nombre d'un côté, un verbe de l'autre. Une icône seule serait ambiguë ;
+ * aucune des deux ne l'est.
+ *
+ * `plein` la remplit — l'état « déjà gardé ». Un contour et un aplat se
+ * distinguent d'un coup d'œil sur quarante cartes, là où deux nuances de
+ * gris demandent de comparer.
+ */
+export function Etoile({ plein = false }: { readonly plein?: boolean } = {}) {
   return (
     <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
       <path
         d="m12 4 2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5 2.7.9-5.6-4-3.9 5.6-.8Z"
-        fill="none"
+        fill={plein ? 'currentColor' : 'none'}
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
@@ -202,6 +217,71 @@ export function Plume() {
         strokeLinejoin="round"
       />
       <path d="M9.7 16.3 4.5 21.5" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+/**
+ * Deux cartes empilées — la collection.
+ *
+ * L'entrée « Mes cartes » portait une étoile, qui disait déjà « avis » dans
+ * cette application et qui dit maintenant « vœu gardé ». Trois sens pour un
+ * dessin n'en font plus aucun, et c'est l'entrée qui cédait le sien le plus
+ * facilement : une collection de cartes se dessine par des cartes.
+ */
+export function CartesAJouer() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <rect
+        x="3.5"
+        y="6.5"
+        width="11"
+        height="14"
+        rx="1.5"
+        fill="none"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M8 4.2h8.2a1.5 1.5 0 0 1 1.5 1.5v11"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+/**
+ * Porte et flèche sortante — se déconnecter.
+ *
+ * Le rail se passait d'icône ici, au motif qu'aucun pictogramme ne distingue
+ * « sortir » de « supprimer ». C'est vrai d'une croix ou d'une corbeille, pas
+ * de celui-ci : un cadre ouvert d'un côté et une flèche qui le franchit ne
+ * dit rien d'autre que « on s'en va ». Rien n'y est barré, rien n'y est jeté.
+ *
+ * La flèche sort vers la DROITE, dans le sens de la lecture. Vers la gauche,
+ * elle se lirait comme « revenir », ce qui est le contraire.
+ */
+export function Sortie() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      {/* Le cadre, ouvert à droite : on ne dessine pas le montant que la
+          flèche traverse, sinon elle a l'air de buter dessus. */}
+      <path
+        d="M13.5 4.5H6.5A1.5 1.5 0 0 0 5 6v12a1.5 1.5 0 0 0 1.5 1.5h7"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M11 12h9" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="m16.8 8.6 3.4 3.4-3.4 3.4"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
