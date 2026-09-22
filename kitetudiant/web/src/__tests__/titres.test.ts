@@ -175,6 +175,11 @@ describe('les pages personnelles portent le même nom partout', () => {
   }[] = [
     { fichier: 'collection.tsx', nom: 'Mes cartes', cle: 'collection' },
     { fichier: 'mesVoeux.tsx', nom: 'Mes vœux', cle: 'voeux' },
+    /* L'atelier de lettre en portait DEUX — « Ma lettre de motivation » dans
+       la navigation, « Ta lettre de motivation » en tête de page — et pas
+       d'onglet du tout : le titre du navigateur restait celui de la page
+       précédente. */
+    { fichier: 'lettre.tsx', nom: 'Ma lettre de motivation', cle: 'lettre' },
   ]
 
   const NAV = readFileSync(resolve(SRC, 'navigation.tsx'), 'utf8')
