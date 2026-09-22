@@ -22,7 +22,7 @@ import {
   VoeuxIndisponibles,
   type Voeu,
 } from './donnees.ts'
-import { MarquePage } from './illustrations.tsx'
+import { Etoile } from './illustrations.tsx'
 import {
   codesEnregistres,
   gesteDuClic,
@@ -140,7 +140,7 @@ export function BoutonGarder({
       aria-label={nomAccessible(garde, libelleFormation)}
       title={nomAccessible(garde, libelleFormation)}
     >
-      <MarquePage plein={garde} />
+      <Etoile plein={garde} />
       <span>{enCours ? '…' : libelleDuBouton(garde)}</span>
     </button>
   )

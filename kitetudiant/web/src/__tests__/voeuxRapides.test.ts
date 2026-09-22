@@ -191,3 +191,28 @@ describe('le branchement sur la liste', () => {
     expect(message).toBeLessThan(liste)
   })
 })
+
+describe('l’icône du bouton', () => {
+  const module = readFileSync(resolve(SRC, 'voeuxRapides.tsx'), 'utf8')
+  const illus = readFileSync(resolve(SRC, 'illustrations.tsx'), 'utf8')
+  const nav = readFileSync(resolve(SRC, 'navigation.tsx'), 'utf8')
+
+  it('est une étoile, pleine quand le vœu est gardé', () => {
+    /* Le contour et l'aplat se distinguent d'un coup d'œil sur quarante
+       cartes, là où deux nuances de gris demandent de comparer. */
+    expect(module).toContain('<Etoile plein={garde} />')
+    expect(illus).toMatch(/fill=\{plein \? 'currentColor' : 'none'\}/)
+  })
+
+  it('ne se dispute plus l’étoile avec « Mes cartes »', () => {
+    /* L'étoile disait déjà « avis » dans cette application. Lui donner aussi
+       « vœu gardé » ET « collection » ferait trois sens pour un dessin, donc
+       plus aucun. L'entrée de la collection cède le sien : une collection de
+       cartes se dessine par des cartes. */
+    expect(illus).toContain('export function CartesAJouer()')
+    const collection = /cle: 'collection',[\s\S]*?\},/.exec(nav)
+    expect(collection, 'l’entrée de la collection a disparu').not.toBeNull()
+    expect(collection![0], '« Mes cartes » reprend l’étoile').not.toContain('<Etoile')
+    expect(collection![0]).toContain('<CartesAJouer />')
+  })
+})

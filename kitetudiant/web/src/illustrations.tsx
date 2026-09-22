@@ -56,13 +56,28 @@ export function Fiche() {
   )
 }
 
-/** Une étoile. Les avis du public sur une adresse. */
-export function Etoile() {
+/**
+ * Une étoile. Deux emplois, et le contexte les sépare.
+ *
+ * Creuse à côté d'une note — « 4,2/5 sur l'adresse » —, elle illustre un avis.
+ * En bouton, avec « Garder » écrit à côté, elle marque un vœu retenu : c'est
+ * la convention du favori partout ailleurs, et c'est ce qu'on attend en la
+ * voyant sur une liste.
+ *
+ * Ce qui les distingue n'est pas le dessin mais ce qui l'accompagne : un
+ * nombre d'un côté, un verbe de l'autre. Une icône seule serait ambiguë ;
+ * aucune des deux ne l'est.
+ *
+ * `plein` la remplit — l'état « déjà gardé ». Un contour et un aplat se
+ * distinguent d'un coup d'œil sur quarante cartes, là où deux nuances de
+ * gris demandent de comparer.
+ */
+export function Etoile({ plein = false }: { readonly plein?: boolean } = {}) {
   return (
     <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
       <path
         d="m12 4 2.5 5.1 5.6.8-4 3.9 1 5.6-5.1-2.7-5 2.7.9-5.6-4-3.9 5.6-.8Z"
-        fill="none"
+        fill={plein ? 'currentColor' : 'none'}
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
@@ -207,25 +222,30 @@ export function Plume() {
 }
 
 /**
- * Marque-page — garder une formation dans ses vœux.
+ * Deux cartes empilées — la collection.
  *
- * Et non une étoile : l'étoile est déjà l'icône des cartes à collectionner,
- * et deux sens pour un même dessin, à trois centimètres l'un de l'autre,
- * n'en font plus aucun. Un marque-page dit « j'y reviendrai », ce qui est
- * exactement ce qu'est un vœu à ce stade.
- *
- * `plein` le remplit : c'est l'état « déjà gardé ». Un contour et un aplat se
- * distinguent d'un coup d'œil sur une liste de quarante cartes, là où deux
- * nuances de gris demandent de comparer.
+ * L'entrée « Mes cartes » portait une étoile, qui disait déjà « avis » dans
+ * cette application et qui dit maintenant « vœu gardé ». Trois sens pour un
+ * dessin n'en font plus aucun, et c'est l'entrée qui cédait le sien le plus
+ * facilement : une collection de cartes se dessine par des cartes.
  */
-export function MarquePage({ plein = false }: { readonly plein?: boolean }) {
+export function CartesAJouer() {
   return (
     <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
-      <path
-        d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.5L5.5 20.5v-16a1 1 0 0 1 1-1Z"
-        fill={plein ? 'currentColor' : 'none'}
+      <rect
+        x="3.5"
+        y="6.5"
+        width="11"
+        height="14"
+        rx="1.5"
+        fill="none"
         strokeWidth="1.8"
-        strokeLinejoin="round"
+      />
+      <path
+        d="M8 4.2h8.2a1.5 1.5 0 0 1 1.5 1.5v11"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
       />
     </svg>
   )
