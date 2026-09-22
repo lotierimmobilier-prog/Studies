@@ -3392,6 +3392,79 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
  * choix, pas de mise en avant. Les trois critères restent séparés et
  * l'ordre est celui de l'élève (règles 4 et 5 de CLAUDE.md).
  */
+/* ─────────────────────────── la page des vœux ───────────────────────────
+   Elle reprend la présentation de l'atelier de lettre, parce que les deux
+   écrans posent le même problème : une colonne de travail longue, et un
+   récapitulatif — combien il en reste, ce qui n'est pas enregistré — qu'on
+   ne voyait qu'en arrivant tout en bas. */
+
+/* L'en-tête se lit, donc il reste étroit même quand la page s'élargit. Les
+   états sans liste (déconnecté, serveur non activé) aussi : un bouton de
+   1 200 px de large n'est pas plus facile à trouver, il est plus difficile
+   à viser. */
+.voeux-tete, .voeux-seul { max-width: 44rem; }
+
+.voeux-atelier { display: block; }
+.voeux-colonne { min-width: 0; }
+
+@media (min-width: 72rem) {
+  .voeux-atelier {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+    gap: 2.4rem;
+    /* PAS `align-items: start` : une case de grille ramenée à la hauteur de
+       son contenu n'offre aucune course au `position: sticky` qu'elle
+       contient, et le récapitulatif redéfilerait hors de l'écran. Appris sur
+       l'atelier de lettre, où le compteur repartait en haut. */
+  }
+  .voeux-cote-collee {
+    position: sticky;
+    /* Sous la barre du haut, qui est elle-même collée et haute de 63 px. */
+    top: 4.75rem;
+    max-height: calc(100vh - 6.25rem);
+    overflow-y: auto;
+    padding-right: 0.4rem;
+  }
+}
+
+/* En une colonne, le récapitulatif vient après la liste et rien ne l'en
+   sépare : un trait suffit pour qu'il ne se lise pas comme un onzième vœu. */
+@media (max-width: 71.99rem) {
+  .voeux-cote {
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--trait);
+  }
+}
+
+.voeux-cote-titre { margin: 0 0 0.5rem; font-size: 1.05rem; }
+.voeux-compte { margin: 0 0 0.6rem; font-size: 0.92rem; color: var(--doux); }
+.voeux-compte strong {
+  font-family: var(--titres);
+  font-weight: 800;
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Les dix crans du plafond. La même idée que la jauge des six questions de
+   l'atelier : « 3 sur 10 » demande une soustraction, dix traits n'en
+   demandent aucune. En `aria-hidden`, la phrase au-dessus le disant déjà. */
+.voeux-jauge {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+.voeux-cran {
+  height: 4px;
+  flex: 1 1 0;
+  border-radius: 2px;
+  background: var(--trait);
+}
+.voeux-cran.pose { background: var(--accent); }
+.voeux-cote .note { margin-bottom: 0.8rem; }
+
 .voeux {
   margin: 1.25rem 0 1rem;
   padding: 0;
@@ -3405,13 +3478,23 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   padding: 0.9rem 0;
   border-bottom: 1px solid var(--trait);
 }
+/* Le rang en pastille, comme le numéro d'une question de l'atelier. Un
+   chiffre gris aligné à droite se lisait comme une décoration ; un rang, ça
+   se déplace avec les flèches d'à côté, et ça doit donc se voir. */
 .voeu-rang {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-top: 0.1rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--fond);
   font-family: var(--titres);
-  font-size: 1.35rem;
-  font-weight: 600;
-  line-height: 1.2;
-  color: var(--doux);
-  text-align: right;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 .voeu-corps {
@@ -3678,14 +3761,21 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 
 /* La phrase du ministère sur les IA. Citée, donc présentée comme une citation
    — avec sa source visible, et non fondue dans notre propre texte. */
-.lettre-avertissement {
+/* La même règle sert la page des vœux : là-bas, c'est « elle ne part pas sur
+   Parcoursup » — une phrase qu'on ne peut pas se permettre de sauter, donc
+   qui ne se met pas dans le paragraphe qu'on saute. Deux écrans, un seul
+   traitement : une phrase encadrée veut dire la même chose partout. */
+.lettre-avertissement, .voeux-avertissement {
   margin: 0 0 1.2rem;
   padding: 0.7rem 0.95rem;
   border-left: 3px solid var(--orange);
   border-radius: 0 var(--rayon) var(--rayon) 0;
   background: var(--carte);
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
-.lettre-avertissement p { margin: 0; font-size: 0.88rem; line-height: 1.5; }
+.lettre-avertissement p { margin: 0; }
+.voeux-avertissement strong { color: var(--encre); }
 .lettre-avertissement cite {
   display: block;
   margin-top: 0.5rem;

@@ -283,18 +283,29 @@ export function MesVoeux({
         onNaviguer={onNaviguer}
       />
 
-      <h1 className="article-titre">Mes vœux</h1>
+      <header className="voeux-tete">
+        <h1 className="article-titre">Mes vœux</h1>
+        <p className="bloc-intro">
+          Ta liste de travail, ici, sur KitEtudiant. Dix au maximum, comme là-bas, pour
+          que ta liste d’ici ressemble à celle de là-bas.
+        </p>
 
-      {/* Cette page s'appelle « Mes vœux », plafonne à dix comme Parcoursup, et
-          propose de « retirer » un vœu. Rien n'y disait que la liste ne part
-          nulle part. Un élève de dix-sept ans pouvait raisonnablement croire
-          ses vœux déposés — et découvrir le contraire après la date limite. */}
-      <p className="bloc-intro">
-        Ta liste de travail, ici, sur KitEtudiant. <strong>Elle ne part pas sur
-        Parcoursup</strong> : c’est sur parcoursup.gouv.fr que les vœux se formulent
-        et se confirment. Dix au maximum, comme là-bas, pour que ta liste d’ici
-        ressemble à celle de là-bas.
-      </p>
+        {/* Cette page s'appelle « Mes vœux », plafonne à dix comme Parcoursup, et
+            propose de « retirer » un vœu. Rien n'y disait que la liste ne part
+            nulle part. Un élève de dix-sept ans pouvait raisonnablement croire
+            ses vœux déposés — et découvrir le contraire après la date limite.
+
+            La phrase existait, noyée au milieu du chapô gris. Encadrée, elle a
+            le poids de ce qu'elle évite : c'est le même traitement que
+            l'avertissement du ministère sur l'atelier de lettre, et pour la
+            même raison — une phrase qu'on ne peut pas se permettre de sauter
+            ne se met pas dans le paragraphe qu'on saute. */}
+        <p className="voeux-avertissement">
+          <strong>Elle ne part pas sur Parcoursup.</strong> C’est sur
+          parcoursup.gouv.fr que les vœux se formulent et se confirment — ici, tu les
+          prépares.
+        </p>
+      </header>
 
       {etat === 'charge' ? (
         <p className="note" role="status" aria-live="polite">
@@ -303,7 +314,7 @@ export function MesVoeux({
       ) : null}
 
       {etat === 'deconnecte' ? (
-        <section className="bloc">
+        <section className="bloc voeux-seul">
           <h2>Connecte-toi pour retrouver tes vœux</h2>
           <p>
             Une liste de vœux se construit sur plusieurs semaines, et rarement sur le même
@@ -334,7 +345,7 @@ export function MesVoeux({
       ) : null}
 
       {etat === 'indisponible' ? (
-        <section className="bloc">
+        <section className="bloc voeux-seul">
           <h2>Pas encore activé sur ce serveur</h2>
           {/* Une session finie se répare en se reconnectant ; ceci, non. Lui
               proposer de se reconnecter en boucle lui ferait perdre son temps
@@ -350,25 +361,36 @@ export function MesVoeux({
       {etat === 'erreur' ? <p className="erreur">{message}</p> : null}
 
       {etat === 'prete' ? (
-        <section className="bloc">
-          <p className="bloc-intro">
-            {voeux.length === 0
-              ? 'Ta liste est vide. Ajoute une formation depuis sa fiche, et tu la retrouveras ici sur n’importe quel appareil.'
-              : `${voeux.length} vœu${voeux.length > 1 ? 'x' : ''} sur ${VOEUX_MAX}. L’ordre est le tien : rien ici ne les classe à ta place.`}
-          </p>
+        /* Deux colonnes sur grand écran, comme l'atelier de lettre : la liste
+           à gauche, ce qu'elle produit à droite.
 
-          {voeux.length === 0 ? (
-            <div className="navigation">
-              <button
-                type="button"
-                className="principal"
-                onClick={() => onNaviguer({ vue: 'recherche' })}
-              >
-                Chercher une école
-              </button>
-            </div>
-          ) : (
-            <>
+           Avant, « 3 vœux sur 10 » était une phrase au-dessus de la liste, et
+           l'avertissement sur le reste-à-vivre une note sous le dixième. Avec
+           dix lignes, on ne voyait ni l'un ni l'autre en travaillant — et la
+           moitié droite de l'écran restait vide.
+
+           L'ORDRE DU CODE ne change pas : la liste d'abord, le récapitulatif
+           ensuite. C'est la grille qui déplace la colonne, pas le balisage,
+           donc un téléphone et un lecteur d'écran gardent l'ordre du parcours. */
+        <div className="voeux-atelier">
+          <div className="voeux-colonne">
+            {voeux.length === 0 ? (
+              <section className="bloc voeux-seul">
+                <p className="bloc-intro">
+                  Ta liste est vide. Ajoute une formation depuis sa fiche, et tu la
+                  retrouveras ici sur n’importe quel appareil.
+                </p>
+                <div className="navigation">
+                  <button
+                    type="button"
+                    className="principal"
+                    onClick={() => onNaviguer({ vue: 'recherche' })}
+                  >
+                    Chercher une école
+                  </button>
+                </div>
+              </section>
+            ) : (
               <ol className="voeux">
                 {voeux.map((v, i) => (
                   <LigneVoeu
@@ -385,19 +407,64 @@ export function MesVoeux({
                   />
                 ))}
               </ol>
+            )}
+          </div>
 
-              {/* Dit une fois, sous la liste, et pas sur chaque ligne : répété
-                  dix fois il deviendrait du décor qu'on ne lit plus. */}
+          <aside className="voeux-colonne voeux-cote">
+            <div className="voeux-cote-collee">
+              <h2 className="voeux-cote-titre">Où tu en es</h2>
+              <p className="voeux-compte">
+                <strong>
+                  {voeux.length} vœu{voeux.length > 1 ? 'x' : ''}
+                </strong>{' '}
+                sur {VOEUX_MAX}
+                {voeux.length === 0
+                  ? ''
+                  : voeux.length >= VOEUX_MAX
+                    ? ' — la liste est pleine, comme sur Parcoursup.'
+                    : ` — il t’en reste ${VOEUX_MAX - voeux.length} à poser.`}
+              </p>
+              {/* La même chose en un coup d'œil. `aria-hidden` : la phrase
+                  au-dessus la dit déjà, et faire annoncer dix fois « posé,
+                  libre » n'apprendrait rien à qui l'écoute. */}
+              <ol className="voeux-jauge" aria-hidden="true">
+                {Array.from({ length: VOEUX_MAX }, (_, i) => (
+                  <li
+                    key={i}
+                    className={i < voeux.length ? 'voeux-cran pose' : 'voeux-cran'}
+                  />
+                ))}
+              </ol>
+
+              {voeux.length === 0 ? null : (
+                <p className="note">
+                  L’ordre est le tien : rien ici ne les classe à ta place.
+                </p>
+              )}
+
+              {/* Dit une fois, à côté du décompte, et pas sur chaque ligne :
+                  répété dix fois il deviendrait du décor qu'on ne lit plus. */}
               <p className="note">
                 Le reste-à-vivre n’est pas enregistré à côté d’un vœu : il dépend de ta
                 bourse, de ton logement et de ton budget, qui ne quittent pas ton
                 navigateur. Ouvre une fiche depuis l’appareil où tu as fait le parcours
                 pour le revoir.
               </p>
-            </>
-          )}
-        </section>
+
+              {voeux.length === 0 || voeux.length >= VOEUX_MAX ? null : (
+                <button
+                  type="button"
+                  className="secondaire"
+                  onClick={() => onNaviguer({ vue: 'recherche' })}
+                >
+                  Chercher une école
+                </button>
+              )}
+            </div>
+          </aside>
+        </div>
       ) : null}
+
     </main>
   )
 }
