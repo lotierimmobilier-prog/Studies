@@ -19,6 +19,11 @@
  */
 
 import { LONGUEUR, QUESTIONS, type Question } from '../../packages/articles/src/lettreMotivation.ts'
+/* Tout nombre affiché passe par là : « 1 500 » et non « 1500 ». Les deux
+   remarques ci-dessous s'affichent à côté du compteur, qui le fait déjà —
+   deux mises en forme pour un même nombre, à deux lignes d'écart, se lisent
+   comme deux nombres différents. */
+import { nombre } from './nombres.ts'
 
 /** Les réponses, une par question. Une clé absente vaut « pas encore répondu ». */
 export type Reponses = Readonly<Record<string, string>>
@@ -42,6 +47,45 @@ export interface Brouillon {
  * développement, la conclusion, comme le demande la fiche. Rien d'autre n'est
  * ajouté entre elles.
  */
+/**
+ * La typographie d'une lettre, appliquée aux phrases de l'élève.
+ *
+ * ── Pourquoi ce n'est pas rédiger à sa place ─────────────────────────────
+ *
+ * Aucun mot n'est ajouté, retiré ni remplacé. Une majuscule en début de
+ * phrase et un point à la fin, c'est la mise en forme d'un texte, pas sa
+ * composition — au même titre que les espaces entre les paragraphes, que
+ * `assembler` pose déjà.
+ *
+ * La différence avec ce que la fiche interdit tient en une phrase : ici, si
+ * l'on retire la mise en forme, il reste exactement ce que l'élève a écrit.
+ *
+ * ── Ce qui n'est volontairement PAS fait ────────────────────────────────
+ *
+ * Les espaces fines insécables avant « ; : ? ! », que la typographie
+ * française demande. Ce texte finit collé dans un champ de Parcoursup, dont
+ * on ne maîtrise ni la police ni l'encodage : une U+202F qui s'y afficherait
+ * en carré vide abîmerait la lettre au lieu de la soigner.
+ */
+export function typographier(texte: string): string {
+  return texte
+    .split('\n')
+    .map((ligne) => {
+      const l = ligne.trim()
+      if (l === '') return ''
+      /* Majuscule au début, et après chaque fin de phrase. Le motif exige
+         l'espace qui suit : « M. Dupont » ou « 3.5 » ne sont pas des fins de
+         phrase, et une règle sans cette espace les couperait en deux. */
+      const majuscules = l.replace(
+        /(^|[.!?]\s+)([a-zà-öø-ÿ])/g,
+        (_, avant: string, lettre: string) => avant + lettre.toUpperCase(),
+      )
+      // Un point final, sauf si la phrase se termine déjà par une ponctuation.
+      return /[.!?…»)]$/.test(majuscules) ? majuscules : `${majuscules}.`
+    })
+    .join('\n')
+}
+
 export function assembler(reponses: Reponses, questions: readonly Question[] = QUESTIONS): string {
   const parties: string[] = []
   for (const partie of ['introduction', 'developpement', 'conclusion'] as const) {
@@ -50,7 +94,7 @@ export function assembler(reponses: Reponses, questions: readonly Question[] = Q
       .map((q) => (reponses[q.cle] ?? '').trim())
       .filter((t) => t !== '')
       .join(' ')
-    if (bloc !== '') parties.push(bloc)
+    if (bloc !== '') parties.push(typographier(bloc))
   }
   return parties.join('\n\n')
 }
@@ -201,6 +245,15 @@ export function ressemblance(a: string, b: string): number {
 export const SEUIL_RESSEMBLANCE = 0.8
 
 /**
+ * En dessous de cette part de la limite, le texte est encore des notes.
+ *
+ * 40 % de 1 500, c'est six cents caractères — deux petits paragraphes. En
+ * dessous, il ne s'agit plus d'étoffer mais de reprendre, et le dire tôt vaut
+ * mieux que le découvrir à la relecture.
+ */
+export const SEUIL_NOTES = 0.4
+
+/**
  * Ce que Jean-Paul a à dire sur un brouillon.
  *
  * Que des constats vérifiables : un compte, une présence, une comparaison.
@@ -228,8 +281,9 @@ export function relire(
       cle: 'longueur',
       gravite: 'bloquant',
       texte:
-        `Ton texte fait ${l.caracteres} caractères, soit ${l.caracteres - l.limite} de trop. ` +
-        `Parcoursup en accepte ${l.limite}.`,
+        `Ton texte fait ${nombre(l.caracteres)} caractères, soit ` +
+        `${nombre(l.caracteres - l.limite)} de trop. Parcoursup en accepte ` +
+        `${nombre(l.limite)}.`,
     })
   }
 
@@ -251,6 +305,36 @@ export function relire(
       texte:
         'On dirait un début de courrier. La fiche précise que c’est « un texte, sans date ' +
         'et sans en-tête ».',
+    })
+  }
+
+  /* « C'est encore des notes, pas une lettre. »
+   *
+   * Le cas le plus fréquent, et celui que rien ne disait : six réponses de
+   * trois mots font un texte de quatre-vingt-dix caractères là où la fiche en
+   * attend mille cinq cents. Le compteur l'affichait — « 90 sur 1 500 » — mais
+   * un compteur ne dit pas que c'est un problème, il dit un nombre.
+   *
+   * Le seuil est à 40 % : en dessous, il ne s'agit plus d'étoffer mais de
+   * reprendre, et le dire tôt vaut mieux que le découvrir à la relecture.
+   *
+   * La remarque NOMME la réponse la plus courte, parce que « développe » sans
+   * dire où est un conseil qu'on ne peut pas suivre. Elle ne juge pas ce qui
+   * est écrit : elle compte des caractères, comme le reste de cette relecture.
+   */
+  const ecrites = questions
+    .map((q) => ({ q, texte: (brouillon.reponses[q.cle] ?? '').trim() }))
+    .filter((r) => r.texte !== '')
+  if (texte.trim() !== '' && l.caracteres < Math.round(l.limite * SEUIL_NOTES) && ecrites.length > 0) {
+    const plusCourte = ecrites.reduce((a, b) => (a.texte.length <= b.texte.length ? a : b))
+    remarques.push({
+      cle: 'notes',
+      gravite: 'conseil',
+      texte:
+        `Ton texte fait ${nombre(l.caracteres)} caractères, là où une lettre en fait environ ` +
+        `${nombre(l.limite)} : il en manque ${nombre(l.restants)}. Ce sont encore des notes. Reprends tes ` +
+        `réponses une par une et écris-les en phrases — la plus courte pour l’instant est ` +
+        `« ${plusCourte.q.question} ».`,
     })
   }
 
