@@ -1009,7 +1009,17 @@ export default function App() {
            si le parcours a réellement été entamé ici. */
         reponses={resultats === null && etape === 0 ? null : reponses}
         onNaviguer={naviguer}
-        onDeconnexion={() => setConnecte(false)}
+        /* `seDeconnecter` et non `setConnecte(false)` : le second ne change
+           que l'affichage. Le jeton restait dans le navigateur et la session
+           restait ouverte côté serveur — un rafraîchissement reconnectait.
+
+           Personne ne l'avait vu parce que cette fonction ne servait qu'à
+           l'EFFACEMENT du compte, où la session meurt de toute façon avec
+           le compte. Le jour où un vrai bouton « Se déconnecter » s'y est
+           branché, le défaut est devenu la fonctionnalité — sur l'écran
+           justement fait pour les téléphones et les appareils partagés.
+           Signalé par la relecture automatique de la PR #46. */
+        onDeconnexion={() => void seDeconnecter()}
       />
     )
   }

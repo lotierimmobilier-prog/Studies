@@ -17,6 +17,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const SRC = resolve(__dirname, '..')
+const APP = readFileSync(resolve(SRC, 'App.tsx'), 'utf8')
 const NAV = readFileSync(resolve(SRC, 'navigation.tsx'), 'utf8')
 const COMPTE = readFileSync(resolve(SRC, 'monCompte.tsx'), 'utf8')
 const STYLES = readFileSync(resolve(SRC, 'styles.css'), 'utf8')
@@ -119,5 +120,52 @@ describe('l’icône de sortie', () => {
     expect(svg[0]).toContain('viewBox="0 0 24 24"')
     expect(svg[0]).toContain('strokeWidth="1.8"')
     expect(svg[0]).toContain('className="illu-picto"')
+  })
+})
+
+describe('la session est vraiment fermée', () => {
+  /* Le défaut que la relecture de la PR #46 a trouvé : l'espace personnel
+     recevait `() => setConnecte(false)`, qui ne change que l'affichage. Le
+     jeton restait dans le navigateur et la session restait ouverte côté
+     serveur — un rafraîchissement reconnectait.
+
+     Invisible jusque-là parce que ce rappel ne servait qu'à l'EFFACEMENT du
+     compte, où la session meurt avec le compte. Le jour où un vrai bouton
+     « Se déconnecter » s'y est branché, le défaut est devenu la
+     fonctionnalité, sur l'écran fait pour les téléphones partagés. */
+
+  it('aucun rappel de déconnexion ne se contente de l’affichage', () => {
+    const rappels = [...APP.matchAll(/onDeconnexion=\{([^}]*)\}/g)].map((m) => m[1]!)
+    expect(rappels.length).toBeGreaterThan(0)
+    for (const r of rappels) {
+      expect(r, `« ${r} » ne ferme pas la session`).toContain('seDeconnecter')
+      expect(r, `« ${r} » se contente de changer l’affichage`).not.toMatch(
+        /^\s*\(\)\s*=>\s*setConnecte\(false\)\s*$/,
+      )
+    }
+  })
+
+  it('oublie le jeton ET ferme la session côté serveur', () => {
+    /* Oublier le jeton localement laisserait une session ouverte jusqu'à son
+       expiration ; la fermer sans oublier le jeton laisserait le navigateur
+       croire qu'il est connecté. Les deux, ou rien. */
+    const donnees = readFileSync(resolve(SRC, 'donnees.ts'), 'utf8')
+    const f = /export async function deconnecter\([\s\S]*?\n\}/.exec(donnees)
+    expect(f).not.toBeNull()
+    expect(f![0]).toContain('oublierJeton()')
+    expect(f![0]).toContain('/comptes/deconnexion')
+
+    const se = /const seDeconnecter = useCallback\([\s\S]*?\}, \[\]\)/.exec(APP)
+    expect(se).not.toBeNull()
+    expect(se![0]).toContain('await deconnecter()')
+  })
+
+  it('vaut aussi pour l’effacement du compte', () => {
+    /* Même rappel, même exigence : après une suppression, un jeton laissé
+       dans le navigateur est un jeton qui désigne un compte disparu. */
+    const compte = readFileSync(resolve(SRC, 'monCompte.tsx'), 'utf8')
+    const effacer = compte.indexOf('<Effacer')
+    const bloc = compte.slice(effacer, effacer + 250)
+    expect(bloc).toContain('onDeconnexion()')
   })
 })
