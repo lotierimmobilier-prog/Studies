@@ -49,6 +49,9 @@ import {
   type Reponses,
 } from './lettre.ts'
 import { nombre } from './nombres.ts'
+import { FilAriane } from './filAriane.tsx'
+import { useMetadonnees } from './metadonnees.ts'
+import type { Route } from './routes.ts'
 import {
   chercherVoeux,
   formationParCode,
@@ -135,7 +138,22 @@ function useVoeux(connecte: boolean): { voeux: Voeu[]; panne: string | null } {
   return { voeux, panne }
 }
 
-export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
+export function AtelierLettre({
+  connecte,
+  onNaviguer,
+}: {
+  readonly connecte: boolean
+  readonly onNaviguer: (route: Route) => void
+}) {
+  /* L'onglet du navigateur gardait le titre de la page PRÉCÉDENTE : cette
+     page n'en posait aucun. Une adresse mise en favori, un onglet parmi dix,
+     un résultat d'historique — tous portaient le nom d'ailleurs. */
+  useMetadonnees({
+    titre: 'Ma lettre de motivation — KitEtudiant.fr',
+    description:
+      'Les six questions de la fiche du ministère, une par une. Le site n’écrit rien à ta place.',
+    prive: true,
+  })
   const { voeux, panne } = useVoeux(connecte)
   const [brouillons, setBrouillons] = useState<Brouillon[]>([])
   const [courant, setCourant] = useState<string>(SANS_VOEU)
@@ -233,10 +251,36 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
 
 
   return (
-    <section className="lettre">
+    /* Cette page n'avait AUCUN `main`.
+     *
+     * Toutes les autres rendent `<main className="app app-large">`, qui borne
+     * la largeur à 72 rem, centre, et pose 2 rem de gouttière. Sans lui, le
+     * titre et le texte étaient collés au bord gauche de la fenêtre et la
+     * page s'étalait sur toute sa largeur — seule de tout le site. Elle
+     * n'avait pas non plus de repère de navigation pour un lecteur d'écran,
+     * pas de fil d'Ariane, et son `h1` manquait : le premier titre était un
+     * `h2`, ce qui fait commencer le plan du document au deuxième niveau.
+     *
+     * Constaté en production le 22/09/2026, en mesurant les gouttières des
+     * cinq pages : 32 px partout, 0 ici.
+     */
+    <main className="app app-large">
+      <FilAriane
+        maillons={[
+          { libelle: 'Accueil', route: { vue: 'accueil' } },
+          { libelle: 'Ma lettre de motivation', route: null },
+        ]}
+        onNaviguer={onNaviguer}
+      />
+
+      <section className="lettre">
       {/* ------------------------------------------------------ l'en-tête */}
       <header className="lettre-tete">
-        <h2>Ta lettre de motivation</h2>
+        {/* « Ma » et non « Ta » : le même nom que la barre de navigation, le
+            fil d'Ariane et l'onglet. Quatre noms pour une adresse, c'est
+            quatre pages pour qui la cherche dans son historique — la leçon
+            de « Mes cartes », qui en portait quatre. */}
+        <h1 className="article-titre">Ma lettre de motivation</h1>
         {/* Deux lignes, pas cinq.
             Sur un téléphone, le chapô précédent occupait un tiers du premier
             écran, et la première question n'arrivait qu'après trois défilements.
@@ -664,6 +708,7 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
           nulle part, pas même avec tes vœux.
         </p>
       </div>
-    </section>
+      </section>
+    </main>
   )
 }

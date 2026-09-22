@@ -984,7 +984,7 @@ export default function App() {
   }
 
   if (vue === 'lettre') {
-    return coque(<AtelierLettre connecte={connecte} />)
+    return coque(<AtelierLettre connecte={connecte} onNaviguer={naviguer} />)
   }
 
   if (vue === 'recherche') {
