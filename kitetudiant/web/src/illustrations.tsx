@@ -207,6 +207,31 @@ export function Plume() {
 }
 
 /**
+ * Marque-page — garder une formation dans ses vœux.
+ *
+ * Et non une étoile : l'étoile est déjà l'icône des cartes à collectionner,
+ * et deux sens pour un même dessin, à trois centimètres l'un de l'autre,
+ * n'en font plus aucun. Un marque-page dit « j'y reviendrai », ce qui est
+ * exactement ce qu'est un vœu à ce stade.
+ *
+ * `plein` le remplit : c'est l'état « déjà gardé ». Un contour et un aplat se
+ * distinguent d'un coup d'œil sur une liste de quarante cartes, là où deux
+ * nuances de gris demandent de comparer.
+ */
+export function MarquePage({ plein = false }: { readonly plein?: boolean }) {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      <path
+        d="M6.5 3.5h11a1 1 0 0 1 1 1v16l-6.5-4.5L5.5 20.5v-16a1 1 0 0 1 1-1Z"
+        fill={plein ? 'currentColor' : 'none'}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/**
  * Porte et flèche sortante — se déconnecter.
  *
  * Le rail se passait d'icône ici, au motif qu'aucun pictogramme ne distingue
