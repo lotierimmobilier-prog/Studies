@@ -471,6 +471,31 @@ describe('la présentation de l’atelier', () => {
     expect(ecran).toContain('pas une phrase')
   })
 
+  it('garde l’ordre du parcours dans le code, quelle que soit la colonne', () => {
+    /* Les deux colonnes sont une affaire de GRILLE, pas de balisage. Déplacer
+       le brouillon avant les questions dans le code le placerait au même
+       endroit à l'écran large — et le ferait passer AVANT les questions sur
+       un téléphone et dans un lecteur d'écran, c'est-à-dire demanderait de
+       relire un texte qu'on n'a pas encore écrit. */
+    const questions = ecran.indexOf('lettre-questions')
+    const brouillon = ecran.indexOf('lettre-texte')
+    const relecture = ecran.indexOf('Ce que Jean-Paul a vérifié')
+    expect(questions).toBeGreaterThan(-1)
+    expect(brouillon).toBeGreaterThan(questions)
+    expect(relecture).toBeGreaterThan(brouillon)
+  })
+
+  it('ne fait pas relire la jauge à qui écoute la page', () => {
+    /* La phrase « 2 questions sur 6 » dit déjà tout. La jauge la redessine :
+       la faire annoncer ferait entendre six fois « rempli, vide » pour une
+       information déjà donnée. */
+    const jauge = /<ol className="lettre-jauge"[^>]*>/.exec(ecran)
+    expect(jauge, 'la jauge a disparu de l’écran').not.toBeNull()
+    expect(jauge![0]).toContain('aria-hidden="true"')
+    // Et le repère de chaque question, pour la même raison.
+    expect(ecran).toMatch(/className=\{\s*\(brouillon\.reponses\[q\.cle\] \?\? ''\)\.trim\(\) === ''/)
+  })
+
   it('un brouillon jamais retouché suit ses réponses', () => {
     /* Sans cette règle, le pré-remplissage annonçait « tu as retouché le texte
        à la main » dès l'ouverture, et le brouillon ne se remplissait plus. */
@@ -523,5 +548,48 @@ describe('quand les vœux ne se chargent pas', () => {
     const ecran = readFileSync(resolve(SRC, 'lettre.tsx'), 'utf8')
     expect(ecran).toContain('setPanne(messageDeChargement(e))')
     expect(ecran).toMatch(/\{panne === null \? null : <p className="erreur">\{panne\}<\/p>\}/)
+  })
+})
+
+/**
+ * La mise en page de l'atelier.
+ *
+ * Deux règles de CSS, et chacune a été apprise au navigateur.
+ */
+describe('les deux colonnes de l’atelier', () => {
+  /* Commentaires retirés : la règle porte précisément le mot `align-items:
+     start` pour dire de ne pas l'écrire, et un test qui s'attrape lui-même sur
+     sa propre explication ne prouve rien. */
+  const CSS = readFileSync(resolve(SRC, 'styles.css'), 'utf8').replace(
+    /\/\*[\s\S]*?\*\//g,
+    ' ',
+  )
+  const grille = /\.lettre-atelier \{[^}]*\}/g
+
+  it('ne ramène pas la colonne du brouillon à la hauteur de son contenu', () => {
+    /* `align-items: start` paraît juste — la colonne de droite est la plus
+       courte — et il annule exactement ce pour quoi elle existe : une case de
+       grille réduite à son contenu n'offre aucune course au `position: sticky`
+       qu'elle contient. Constaté au navigateur : le compteur repartait hors de
+       l'écran au premier défilement, comme avant le changement. */
+    for (const regle of CSS.match(grille) ?? []) {
+      expect(regle, 'le brouillon ne suivra plus le défilement').not.toMatch(
+        /align-items:\s*(start|flex-start)/,
+      )
+    }
+  })
+
+  it('pose le brouillon SOUS la barre du haut, pas derrière', () => {
+    /* La barre du haut est elle-même collée, et haute de 63 px. Un `top: 0`
+       glisserait le champ derrière elle : on écrirait dans une zone dont le
+       premier tiers est masqué. */
+    const collee = /\.lettre-sortie-collee \{[\s\S]*?\}/.exec(CSS)
+    expect(collee, 'la colonne collée a disparu de la feuille').not.toBeNull()
+    expect(collee![0]).toContain('position: sticky')
+    const top = /top:\s*([\d.]+)rem/.exec(collee![0])
+    expect(top, 'le décalage sous la barre du haut n’est plus exprimé en rem').not.toBeNull()
+    expect(Number(top![1]), 'top trop petit : le champ passera sous la barre').toBeGreaterThan(
+      3.9,
+    )
   })
 })

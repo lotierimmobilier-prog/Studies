@@ -155,8 +155,11 @@ describe('ce que voit un mineur sur l’accueil', () => {
     const bloc = /\{lecteur === 'mineur' \? \([\s\S]*?\) : \([\s\S]*?\)\}/.exec(accueil)
     expect(bloc, 'la carte des contrats n’est plus conditionnelle').not.toBeNull()
     const [pourMineur, pourMajeur] = bloc![0].split(') : (')
-    expect(pourMineur).not.toContain('PAPERNEST.lien')
-    expect(pourMajeur).toContain('PAPERNEST.lien')
+    /* Sans la casse : le lien se pose sur la constante du dépôt
+       (`PAPERNEST.lien`) ou sur le partenaire résolu par la console
+       (`partenaires.papernest.lien`), et la règle vaut pour les deux. */
+    expect(pourMineur).not.toMatch(/papernest\.lien/i)
+    expect(pourMajeur).toMatch(/papernest\.lien/i)
   })
 
   it('lui garde l’information, et lui dit avec qui faire la démarche', () => {

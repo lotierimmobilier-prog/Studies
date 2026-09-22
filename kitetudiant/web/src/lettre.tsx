@@ -19,7 +19,7 @@
  * Rien de ce qui est écrit ici ne quitte le navigateur (règle 3).
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
 
 import {
   AVERTISSEMENT_IA,
@@ -231,284 +231,380 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
 
   return (
     <section className="lettre">
-      <h2>Ta lettre de motivation</h2>
-      {/* Deux lignes, pas cinq.
-          Sur un téléphone, le chapô précédent occupait un tiers du premier
-          écran, et la première question n'arrivait qu'après trois défilements.
-          Ce qu'il disait d'essentiel — le site n'écrit pas à ta place — tient
-          en une phrase ; le reste se découvre en faisant. */}
-      <p className="lettre-chapeau">
-        Les questions de la fiche du ministère, dans l’ordre.{' '}
-        <strong>Les phrases restent les tiennes</strong> : rien ici n’écrit à ta place.
-      </p>
-
-      {/* La phrase du ministère, citée sans retouche. C'est un avertissement
-          que l'État adresse à l'élève ; l'adoucir serait le lui cacher, et le
-          replier reviendrait au même sur la seule page où il compte. */}
-      <blockquote className="lettre-avertissement">
-        <p>{AVERTISSEMENT_IA}</p>
-        <cite>
-          {SOURCE_LETTRE} ({MILLESIME_LETTRE})
-        </cite>
-      </blockquote>
-
-      {/* ------------------------------------------------ le choix du vœu */}
-      <div className="lettre-voeu">
-        <label className="champ-label" htmlFor="lettre-formation">
-          Pour quelle formation ?
-        </label>
-        <select
-          id="lettre-formation"
-          className="recherche-champ"
-          value={courant}
-          onChange={(ev) => {
-            setVoeuChoisi(true)
-            setCourant(ev.target.value)
-          }}
-        >
-          {/* Les vœux d'abord, le brouillon libre en dernier : quand il y en a,
-              c'est l'un d'eux qu'on vient écrire. Le brouillon sans vœu reste
-              pour qui prépare sa lettre avant d'avoir un compte. */}
-          {voeux.map((v) => (
-            <option key={v.code} value={v.code}>
-              {v.libelle}
-              {v.etablissement === '' ? '' : ` — ${v.etablissement}`}
-            </option>
-          ))}
-          <option value={SANS_VOEU}>Un brouillon, sans vœu rattaché</option>
-        </select>
-        {panne === null ? null : <p className="erreur">{panne}</p>}
-        <p className="note">
-          Un texte par formation. La fiche est nette : « Pas de copier/coller ! » — c’est
-          ce qui se repère le plus vite à la lecture de deux dossiers.
+      {/* ------------------------------------------------------ l'en-tête */}
+      <header className="lettre-tete">
+        <h2>Ta lettre de motivation</h2>
+        {/* Deux lignes, pas cinq.
+            Sur un téléphone, le chapô précédent occupait un tiers du premier
+            écran, et la première question n'arrivait qu'après trois défilements.
+            Ce qu'il disait d'essentiel — le site n'écrit pas à ta place — tient
+            en une phrase ; le reste se découvre en faisant. */}
+        <p className="lettre-chapeau">
+          Les questions de la fiche du ministère, dans l’ordre.{' '}
+          <strong>Les phrases restent les tiennes</strong> : rien ici n’écrit à ta place.
         </p>
-      </div>
 
-      {/* La longueur dépend du type de formation : c'est un réglage, pas une
-          question. Replié, il ne coupe plus la page en deux avant la
-          première question. */}
-      <details className="lettre-reglages">
-        <summary>C’est un IFSI (soins infirmiers) ?</summary>
-        <label className="lettre-ifsi">
-          <input
-            type="checkbox"
-            checked={ifsi}
-            onChange={(ev) => setIfsi(ev.target.checked)}
-          />
-          <span>
-            Oui — la limite passe à {nombre(LONGUEUR.ifsi)} caractères
-          </span>
-        </label>
-        {ifsi ? (
-          <div className="lettre-ifsi-detail">
-            <h3>{CAS_IFSI.titre}</h3>
-            <ul>
-              {CAS_IFSI.points.map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </details>
+        {/* La phrase du ministère, citée sans retouche. C'est un avertissement
+            que l'État adresse à l'élève ; l'adoucir serait le lui cacher, et le
+            replier reviendrait au même sur la seule page où il compte.
 
-      {/* ------------------------------------------------- les questions */}
-      <h3 className="lettre-titre">Les questions de la fiche</h3>
-      {/* Six questions, c'est long quand on ne voit pas la fin. Dire où on en
-          est coûte une ligne et transforme une liste en parcours. */}
-      <p className="lettre-avancement">
-        {avance.remplies === 0 ? (
-          <>
-            Commence par la question que tu veux : l’ordre n’a pas d’importance, et tout
-            est gardé si tu t’arrêtes.
-          </>
-        ) : (
-          <>
-            {/* « 0 sur 6 question remplie » ne se dit pas. Le nombre porte son
-                nom, accordé, et le cas zéro a sa propre phrase. */}
-            <strong>
-              {avance.remplies} question{avance.remplies > 1 ? 's' : ''} sur {avance.total}
-            </strong>{' '}
-            {avance.remplies === avance.total
-              ? 'Ton brouillon est en bas.'
-              : 'Tu peux t’arrêter et revenir : tout est gardé.'}
-          </>
-        )}
-      </p>
-      <ol className="lettre-questions">
-        {QUESTIONS.map((q) => (
-          <li key={q.cle} className="lettre-question">
-            <label className="champ-label" htmlFor={`q-${q.cle}`}>
-              {q.question}
-            </label>
-            <textarea
-              id={`q-${q.cle}`}
-              className="lettre-champ"
-              rows={3}
-              value={brouillon.reponses[q.cle] ?? ''}
-              onChange={(ev) => repondre(q.cle, ev.target.value)}
+            Il est resserré, pas allégé : c'était le bloc le plus lourd de la
+            page, posé avant qu'on sache de quoi il parle. Il garde son trait,
+            sa source et son texte entier — il cesse seulement d'écraser la
+            première question. */}
+        <blockquote className="lettre-avertissement">
+          <p>{AVERTISSEMENT_IA}</p>
+          <cite>
+            {SOURCE_LETTRE} ({MILLESIME_LETTRE})
+          </cite>
+        </blockquote>
+      </header>
+
+      {/* ------------------------------------------------------ les réglages */}
+      {/* Le vœu et la limite de longueur sont deux RÉGLAGES, pas deux étapes.
+          Empilés pleine largeur, ils se lisaient comme le début du parcours et
+          repoussaient la première question d'un écran. Réunis sur une ligne,
+          ils redeviennent ce qu'ils sont : un choix qu'on fait une fois. */}
+      <div className="lettre-barre">
+        <div className="lettre-voeu">
+          <label className="champ-label" htmlFor="lettre-formation">
+            Pour quelle formation ?
+          </label>
+          <select
+            id="lettre-formation"
+            className="recherche-champ"
+            value={courant}
+            onChange={(ev) => {
+              setVoeuChoisi(true)
+              setCourant(ev.target.value)
+            }}
+          >
+            {/* Les vœux d'abord, le brouillon libre en dernier : quand il y en a,
+                c'est l'un d'eux qu'on vient écrire. Le brouillon sans vœu reste
+                pour qui prépare sa lettre avant d'avoir un compte. */}
+            {voeux.map((v) => (
+              <option key={v.code} value={v.code}>
+                {v.libelle}
+                {v.etablissement === '' ? '' : ` — ${v.etablissement}`}
+              </option>
+            ))}
+            <option value={SANS_VOEU}>Un brouillon, sans vœu rattaché</option>
+          </select>
+          {panne === null ? null : <p className="erreur">{panne}</p>}
+          <p className="note">
+            Un texte par formation. La fiche est nette : « Pas de copier/coller ! » —
+            c’est ce qui se repère le plus vite à la lecture de deux dossiers.
+          </p>
+        </div>
+
+        {/* La longueur dépend du type de formation : c'est un réglage, pas une
+            question. Replié, il ne coupe plus la page en deux avant la
+            première question. */}
+        <details className="lettre-reglages">
+          <summary>C’est un IFSI (soins infirmiers) ?</summary>
+          <label className="lettre-ifsi">
+            <input
+              type="checkbox"
+              checked={ifsi}
+              onChange={(ev) => setIfsi(ev.target.checked)}
             />
-            {q.cle === QUESTION_PREREMPLIE && amorce !== '' &&
-            (brouillon.reponses[q.cle] ?? '') === amorce ? (
-              <p className="note lettre-prerempli">
-                Rempli avec l’intitulé exact de ton vœu, tel que Parcoursup le publie —
-                la fiche le demande. À compléter et à réécrire : c’est un début de
-                phrase, pas une phrase.
-              </p>
-            ) : null}
-            <p className="note">{q.pourquoi}</p>
-            <details className="lettre-pistes">
-              <summary>Des pistes, si tu sèches</summary>
+            <span>Oui — la limite passe à {nombre(LONGUEUR.ifsi)} caractères</span>
+          </label>
+          {ifsi ? (
+            <div className="lettre-ifsi-detail">
+              <h3>{CAS_IFSI.titre}</h3>
               <ul>
-                {q.pistes.map((p) => (
+                {CAS_IFSI.points.map((p) => (
                   <li key={p}>{p}</li>
                 ))}
               </ul>
-              <p className="note">
-                Ce sont des directions, pas des phrases à recopier : une formule reprise
-                telle quelle par des milliers de candidats se repère autant qu’un texte
-                de machine.
-              </p>
-            </details>
-          </li>
-        ))}
-      </ol>
-
-      {/* ---------------------------------------------------- le brouillon */}
-      <h3 className="lettre-titre">Ton brouillon</h3>
-      <p className="note">
-        Le texte ci-dessous est fait de tes réponses, dans l’ordre du plan que la fiche
-        recommande : une introduction d’une phrase, un développement, une phrase de
-        conclusion. Tu peux le réécrire entièrement — c’est même le but.
-      </p>
-      {desynchronise ? (
-        <p className="note lettre-desync">
-          Tu as retouché le texte à la main : tes réponses ne l’écrasent plus.{' '}
-          <button
-            type="button"
-            className="lien"
-            onClick={() =>
-              enregistrer({ ...brouillon, texte: assemble, modifieLe: new Date().toISOString() })
-            }
-          >
-            Repartir de mes réponses
-          </button>
-        </p>
-      ) : null}
-      <textarea
-        className="lettre-texte"
-        rows={12}
-        value={texteCourant}
-        aria-describedby="lettre-compteur"
-        onChange={(ev) =>
-          enregistrer({ ...brouillon, texte: ev.target.value, modifieLe: new Date().toISOString() })
-        }
-      />
-      <p id="lettre-compteur" className={`lettre-compteur${l.depasse ? ' depasse' : ''}`}>
-        <strong>{nombre(l.caracteres)}</strong> caractères sur {nombre(l.limite)}
-        {l.depasse ? ` — ${nombre(-l.restants)} de trop` : ` — il t’en reste ${nombre(l.restants)}`}
-        <span className="note"> · {LONGUEUR.mots} environ</span>
-      </p>
-
-      {/* ------------------------------------------ la relecture de Jean-Paul */}
-      <h3 className="lettre-titre">Ce que Jean-Paul a vérifié</h3>
-      <p className="note">
-        Jean-Paul est une machine, pas un professeur. Il compte, il compare, il cherche
-        ton prénom — il ne juge pas ce que tu as écrit, et n’en tire aucune note.
-      </p>
-
-      {/* Le prénom est descendu ici, à côté de ce qu'il sert à faire.
-          En tête de page, c'était un champ de plus à franchir avant la
-          première question, et on ne comprenait pas pourquoi un site qui
-          répète ne rien demander demandait un nom. */}
-      <div className="lettre-identite">
-        <label className="champ-label" htmlFor="lettre-nom">
-          Ton prénom et ton nom <span className="note">(facultatif)</span>
-        </label>
-        <input
-          id="lettre-nom"
-          type="text"
-          className="recherche-champ"
-          autoComplete="off"
-          placeholder="pour que Jean-Paul les cherche dans ton texte"
-          value={nomSaisi}
-          onChange={(ev) => {
-            setNomSaisi(ev.target.value)
-            try {
-              window.localStorage.setItem(CLE_IDENTITE, ev.target.value)
-            } catch {
-              // Stockage refusé : la vérification marchera pour cette session.
-            }
-          }}
-        />
-        <p className="note">
-          La fiche interdit de faire figurer son identité dans la lettre. Ces deux mots
-          restent dans ce navigateur et ne sont envoyés nulle part.
-        </p>
+            </div>
+          ) : null}
+        </details>
       </div>
-      {remarques.length === 0 ? (
-        <p className="lettre-ok">
-          {texteCourant.trim() === ''
-            ? 'Rien à vérifier pour l’instant : commence par répondre aux questions.'
-            : 'Rien à signaler. Fais relire par un proche ou un professeur, la fiche le recommande.'}
-        </p>
-      ) : (
-        <ul className="lettre-remarques">
-          {remarques.map((r) => (
-            <li key={r.cle} className={`lettre-remarque ${r.gravite}`}>
-              {r.texte}
-            </li>
-          ))}
-        </ul>
-      )}
 
-      {/* ------------------------------------------------ avant de recopier */}
-      <h3 className="lettre-titre">Avant de recopier dans Parcoursup</h3>
-      <ul className="lettre-relecture">
-        {RELECTURE.map((r) => (
-          <li key={r}>{r}</li>
-        ))}
-      </ul>
-      <p className="note">{CALENDRIER}</p>
+      {/* ------------------------------------------------------- l'atelier */}
+      {/* Deux colonnes sur grand écran, et c'est le cœur de cette page.
 
-      {/* ----------------------------------------- les aides du ministère */}
-      <details
-        className="lettre-aides"
-        open={aides}
-        onToggle={(ev) => setAides((ev.target as HTMLDetailsElement).open)}
-      >
-        <summary>Les aides à la formulation publiées par le ministère</summary>
-        <p className="note">
-          Ces listes viennent de la fiche. Elles servent à sortir d’une phrase qui
-          coince, pas à composer la lettre : une expression est un point de départ, la
-          suite est à toi.
-        </p>
-        {FORMULATIONS.map((f) => (
-          <div key={f.titre} className="lettre-aide">
-            <h4>{f.titre}</h4>
-            <ul>
-              {f.expressions.map((e) => (
-                <li key={e}>{e}</li>
-              ))}
-            </ul>
-          </div>
-        ))}
-        <div className="lettre-aide">
-          <h4>Éviter de répéter le même mot</h4>
-          <ul>
-            {Object.entries(SYNONYMES).map(([mot, syn]) => (
-              <li key={mot}>
-                <strong>{mot}</strong> — {syn.join(', ')}
+          Avant : six questions, puis le brouillon tout en bas. On répondait à
+          tout sans jamais voir sa lettre se former, et le compteur — la seule
+          chose qui dit si l'on tient dans les 1 500 caractères — vivait à six
+          défilements de l'endroit où l'on tape. Pendant ce temps la moitié
+          droite de l'écran restait vide.
+
+          Maintenant le brouillon, son compteur et la relecture sont collés à
+          droite : chaque phrase écrite à gauche s'y ajoute sous les yeux.
+
+          L'ORDRE DU CODE NE CHANGE PAS — questions, puis brouillon, puis
+          relecture. C'est la grille qui déplace la colonne, pas le DOM : un
+          lecteur d'écran et un téléphone gardent l'ordre du parcours. */}
+      <div className="lettre-atelier">
+        <div className="lettre-colonne">
+          <h3 className="lettre-titre">Les questions de la fiche</h3>
+          {/* Six questions, c'est long quand on ne voit pas la fin. Dire où on
+              en est coûte une ligne et transforme une liste en parcours. */}
+          <p className="lettre-avancement">
+            {avance.remplies === 0 ? (
+              <>
+                Commence par la question que tu veux : l’ordre n’a pas d’importance, et
+                tout est gardé si tu t’arrêtes.
+              </>
+            ) : (
+              <>
+                {/* « 0 sur 6 question remplie » ne se dit pas. Le nombre porte
+                    son nom, accordé, et le cas zéro a sa propre phrase. */}
+                <strong>
+                  {avance.remplies} question{avance.remplies > 1 ? 's' : ''} sur{' '}
+                  {avance.total}
+                </strong>{' '}
+                {avance.remplies === avance.total
+                  ? 'Ton brouillon est prêt à relire.'
+                  : 'Tu peux t’arrêter et revenir : tout est gardé.'}
+              </>
+            )}
+          </p>
+          {/* La même information, en un coup d'œil. `aria-hidden` parce que la
+              phrase juste au-dessus la dit déjà : la répéter ferait annoncer
+              six fois « rempli, vide » à un lecteur d'écran. */}
+          <ol className="lettre-jauge" aria-hidden="true">
+            {QUESTIONS.map((q) => (
+              <li
+                key={q.cle}
+                className={
+                  (brouillon.reponses[q.cle] ?? '').trim() === ''
+                    ? 'lettre-cran'
+                    : 'lettre-cran rempli'
+                }
+              />
+            ))}
+          </ol>
+
+          <ol className="lettre-questions">
+            {QUESTIONS.map((q, i) => (
+              <li key={q.cle} className="lettre-question">
+                {/* Le numéro était celui d'une liste ordinaire : gris, minuscule,
+                    perdu dans la marge. En pastille, il dit d'un coup d'œil
+                    combien il en reste — et il marque celles qui sont faites. */}
+                <span
+                  className={
+                    (brouillon.reponses[q.cle] ?? '').trim() === ''
+                      ? 'lettre-numero'
+                      : 'lettre-numero rempli'
+                  }
+                  aria-hidden="true"
+                >
+                  {i + 1}
+                </span>
+                <label className="champ-label" htmlFor={`q-${q.cle}`}>
+                  {q.question}
+                </label>
+                <textarea
+                  id={`q-${q.cle}`}
+                  className="lettre-champ"
+                  rows={3}
+                  value={brouillon.reponses[q.cle] ?? ''}
+                  onChange={(ev) => repondre(q.cle, ev.target.value)}
+                />
+                {q.cle === QUESTION_PREREMPLIE && amorce !== '' &&
+                (brouillon.reponses[q.cle] ?? '') === amorce ? (
+                  <p className="note lettre-prerempli">
+                    Rempli avec l’intitulé exact de ton vœu, tel que Parcoursup le
+                    publie — la fiche le demande. À compléter et à réécrire : c’est un
+                    début de phrase, pas une phrase.
+                  </p>
+                ) : null}
+                <p className="note lettre-pourquoi">{q.pourquoi}</p>
+                <details className="lettre-pistes">
+                  <summary>Des pistes, si tu sèches</summary>
+                  <ul>
+                    {q.pistes.map((p) => (
+                      <li key={p}>{p}</li>
+                    ))}
+                  </ul>
+                  <p className="note">
+                    Ce sont des directions, pas des phrases à recopier : une formule
+                    reprise telle quelle par des milliers de candidats se repère autant
+                    qu’un texte de machine.
+                  </p>
+                </details>
               </li>
             ))}
-          </ul>
+          </ol>
         </div>
-      </details>
 
-      <p className="lettre-source">
-        Tout le contenu de cette page vient de la {SOURCE_LETTRE.toLowerCase()},{' '}
-        {MILLESIME_LETTRE}. Ton brouillon reste dans ce navigateur : il n’est envoyé
-        nulle part, pas même avec tes vœux.
-      </p>
+        {/* ------------------------------------------------- le brouillon */}
+        <aside className="lettre-colonne lettre-sortie">
+          <div className="lettre-sortie-collee">
+            <h3 className="lettre-titre">Ton brouillon</h3>
+            <p className="note">
+              Fait de tes réponses, dans l’ordre du plan que la fiche recommande : une
+              introduction d’une phrase, un développement, une conclusion. Tu peux le
+              réécrire entièrement — c’est même le but.
+            </p>
+            {desynchronise ? (
+              <p className="note lettre-desync">
+                Tu as retouché le texte à la main : tes réponses ne l’écrasent plus.{' '}
+                <button
+                  type="button"
+                  className="lien"
+                  onClick={() =>
+                    enregistrer({
+                      ...brouillon,
+                      texte: assemble,
+                      modifieLe: new Date().toISOString(),
+                    })
+                  }
+                >
+                  Repartir de mes réponses
+                </button>
+              </p>
+            ) : null}
+            <textarea
+              className="lettre-texte"
+              rows={12}
+              value={texteCourant}
+              aria-describedby="lettre-compteur"
+              onChange={(ev) =>
+                enregistrer({
+                  ...brouillon,
+                  texte: ev.target.value,
+                  modifieLe: new Date().toISOString(),
+                })
+              }
+            />
+            {/* Le compteur porte une jauge : « 1 210 sur 1 500 » demande un
+                calcul, une barre qui se remplit n'en demande aucun. Le chiffre
+                reste — c'est lui qui est exact, et lui que la jauge illustre. */}
+            <p
+              id="lettre-compteur"
+              className={`lettre-compteur${l.depasse ? ' depasse' : ''}`}
+            >
+              <span
+                className="lettre-remplissage"
+                aria-hidden="true"
+                style={{
+                  // Bornée à 100 % : au-delà, c'est la couleur et la phrase qui
+                  // disent le dépassement, pas une barre qui sort du cadre.
+                  '--part': `${Math.min(100, Math.round((l.caracteres / l.limite) * 100))}%`,
+                } as CSSProperties}
+              />
+              <strong>{nombre(l.caracteres)}</strong> caractères sur {nombre(l.limite)}
+              {l.depasse
+                ? ` — ${nombre(-l.restants)} de trop`
+                : ` — il t’en reste ${nombre(l.restants)}`}
+              <span className="note"> · {LONGUEUR.mots} environ</span>
+            </p>
+
+            {/* --------------------------------- la relecture de Jean-Paul */}
+            <h3 className="lettre-titre">Ce que Jean-Paul a vérifié</h3>
+            <p className="note">
+              Jean-Paul est une machine, pas un professeur. Il compte, il compare, il
+              cherche ton prénom — il ne juge pas ce que tu as écrit, et n’en tire
+              aucune note.
+            </p>
+
+            {remarques.length === 0 ? (
+              <p className="lettre-ok">
+                {texteCourant.trim() === ''
+                  ? 'Rien à vérifier pour l’instant : commence par répondre aux questions.'
+                  : 'Rien à signaler. Fais relire par un proche ou un professeur, la fiche le recommande.'}
+              </p>
+            ) : (
+              <ul className="lettre-remarques">
+                {remarques.map((r) => (
+                  <li key={r.cle} className={`lettre-remarque ${r.gravite}`}>
+                    {r.texte}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* Le prénom est descendu ici, à côté de ce qu'il sert à faire.
+                En tête de page, c'était un champ de plus à franchir avant la
+                première question, et on ne comprenait pas pourquoi un site qui
+                répète ne rien demander demandait un nom. */}
+            <details className="lettre-identite">
+              <summary>Donner mon prénom, pour qu’il le cherche</summary>
+              <label className="champ-label" htmlFor="lettre-nom">
+                Ton prénom et ton nom <span className="note">(facultatif)</span>
+              </label>
+              <input
+                id="lettre-nom"
+                type="text"
+                className="recherche-champ"
+                autoComplete="off"
+                placeholder="pour que Jean-Paul les cherche dans ton texte"
+                value={nomSaisi}
+                onChange={(ev) => {
+                  setNomSaisi(ev.target.value)
+                  try {
+                    window.localStorage.setItem(CLE_IDENTITE, ev.target.value)
+                  } catch {
+                    // Stockage refusé : la vérification marchera pour cette session.
+                  }
+                }}
+              />
+              <p className="note">
+                La fiche interdit de faire figurer son identité dans la lettre. Ces deux
+                mots restent dans ce navigateur et ne sont envoyés nulle part.
+              </p>
+            </details>
+          </div>
+        </aside>
+      </div>
+
+      {/* ------------------------------------------------ avant de recopier */}
+      <div className="lettre-fin">
+        <h3 className="lettre-titre">Avant de recopier dans Parcoursup</h3>
+        <ul className="lettre-relecture">
+          {RELECTURE.map((r) => (
+            <li key={r}>{r}</li>
+          ))}
+        </ul>
+        <p className="note">{CALENDRIER}</p>
+
+        {/* ----------------------------------- les aides du ministère */}
+        <details
+          className="lettre-aides"
+          open={aides}
+          onToggle={(ev) => setAides((ev.target as HTMLDetailsElement).open)}
+        >
+          <summary>Les aides à la formulation publiées par le ministère</summary>
+          <p className="note">
+            Ces listes viennent de la fiche. Elles servent à sortir d’une phrase qui
+            coince, pas à composer la lettre : une expression est un point de départ, la
+            suite est à toi.
+          </p>
+          <div className="lettre-aides-grille">
+            {FORMULATIONS.map((f) => (
+              <div key={f.titre} className="lettre-aide">
+                <h4>{f.titre}</h4>
+                <ul>
+                  {f.expressions.map((e) => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            <div className="lettre-aide">
+              <h4>Éviter de répéter le même mot</h4>
+              <ul>
+                {Object.entries(SYNONYMES).map(([mot, syn]) => (
+                  <li key={mot}>
+                    <strong>{mot}</strong> — {syn.join(', ')}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </details>
+
+        <p className="lettre-source">
+          Tout le contenu de cette page vient de la {SOURCE_LETTRE.toLowerCase()},{' '}
+          {MILLESIME_LETTRE}. Ton brouillon reste dans ce navigateur : il n’est envoyé
+          nulle part, pas même avec tes vœux.
+        </p>
+      </div>
     </section>
   )
 }

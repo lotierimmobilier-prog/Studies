@@ -269,3 +269,43 @@ export function retirerArticle(slug: string): Promise<{ ok: boolean }> {
     method: 'DELETE',
   })
 }
+
+/* ---------------------------------------------------------- partenaires */
+
+/**
+ * Les adresses d'affiliation.
+ *
+ * SEULE l'adresse se règle. La mention de rémunération arrive en lecture
+ * seule, pour que la console montre ce qui s'affichera à côté du lien — et
+ * pour qu'il soit visible qu'elle, on ne la touche pas d'ici. La rendre
+ * modifiable en même temps que le lien, ce serait rendre possible un lien
+ * payé dont la phrase a été effacée, sans relecture et sans trace.
+ */
+export interface EtatPartenaire {
+  readonly nom: string
+  readonly lien: string
+  readonly lienParDefaut: string
+  readonly personnalise: boolean
+  readonly modifieLe: string | null
+  /** Le domaine hors duquel le serveur refuse toute adresse. */
+  readonly domaine: string
+  readonly remuneration: string | null
+}
+
+export function listerPartenaires(): Promise<readonly EtatPartenaire[]> {
+  return appeler<readonly EtatPartenaire[]>('/partenaires')
+}
+
+export function enregistrerLienPartenaire(nom: string, lien: string): Promise<EtatPartenaire> {
+  return appeler<EtatPartenaire>('/partenaires', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nom, lien }),
+  })
+}
+
+export function retablirLienPartenaire(nom: string): Promise<EtatPartenaire> {
+  return appeler<EtatPartenaire>(`/partenaires?nom=${encodeURIComponent(nom)}`, {
+    method: 'DELETE',
+  })
+}
