@@ -14,6 +14,7 @@
  */
 
 import { readFileSync } from 'node:fs'
+import { nombre } from '../nombres.ts'
 import { resolve } from 'node:path'
 
 import { describe, expect, it } from 'vitest'
@@ -265,7 +266,10 @@ describe('la relecture de Jean-Paul', () => {
     const r = relire(brouillon({ texte: 'a'.repeat(1600) }))
     const longue = r.find((x) => x.cle === 'longueur')
     expect(longue?.gravite).toBe('bloquant')
-    expect(longue?.texte).toContain('1600')
+    /* Mis en forme comme partout ailleurs : « 1 600 », pas « 1600 ». Le
+       compteur, juste à côté, le fait déjà — deux écritures d'un même nombre
+       à deux lignes d'écart se lisent comme deux nombres. */
+    expect(longue?.texte).toContain(nombre(1600))
     expect(longue?.texte).toContain('100')
   })
 
@@ -281,7 +285,17 @@ describe('la relecture de Jean-Paul', () => {
   })
 
   it('ne dit rien d’un brouillon complet et conforme', () => {
-    const reponses = Object.fromEntries(QUESTIONS.map((q) => [q.cle, 'Une phrase à moi.']))
+    /* Des réponses d'une LONGUEUR de lettre, et non de six mots.
+       « Une phrase à moi. » six fois donnait 109 caractères : un brouillon
+       que ce test appelait « conforme » alors qu'il faisait sept pour cent de
+       la longueur attendue. La remarque « ce sont encore des notes », ajoutée
+       depuis, l'a mis au jour — et elle avait raison. */
+    const phrase =
+      'Une phrase à moi, assez longue pour ressembler à ce qu’on écrit vraiment dans ' +
+      'une lettre de motivation, avec un exemple précis et une raison. '
+    /* Une fois par question : six fois cette phrase font environ 900
+       caractères — au-dessus du seuil des notes, sous la limite des 1 500. */
+    const reponses = Object.fromEntries(QUESTIONS.map((q) => [q.cle, phrase]))
     const r = relire(brouillon({ reponses, texte: assembler(reponses) }), {
       identite: ['Chloé'],
     })
