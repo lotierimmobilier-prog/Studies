@@ -34,6 +34,7 @@ import { GardeAdmin, estAdministrateur } from './admin'
 import { etatSysteme } from './etatSysteme'
 import { Coffre, CoffreNonConfigure, estSecretGere } from './secrets'
 import { ArticleIntrouvable, ArticleInvalide, DepotArticles } from './articles'
+import { DepotPartenaires, LienRefuse, PartenaireInconnu } from './partenaires'
 import { emailDepuisCode, GoogleRefuse, reglagesGoogle, urlDeDepart } from './googleIdentite.ts'
 import { avecParametre, etatsGoogle, retourSur, ticketsGoogle } from './googleSessions.ts'
 import {
@@ -200,6 +201,10 @@ async function regionDe(codeInsee: string): Promise<string | null> {
   }
 }
 const depotArticles = new DepotArticles(join(process.cwd(), '.data', 'articles.json'))
+
+/* Les adresses d'affiliation réglées en console. Rien d'autre : le nom, le
+   logo et la mention de rémunération restent dans le dépôt de code. */
+const depotPartenaires = new DepotPartenaires(join(process.cwd(), '.data', 'partenaires.json'))
 // KITETUDIANT — comptes élèves. Sans COMPTES_MASTER_KEY, le dépôt se déclare
 // non configuré : l'inscription est alors impossible ET le détail du résultat
 // reste ouvert, plutôt que de rendre le site inutilisable par omission. L'état
@@ -957,6 +962,15 @@ async function demarrer(): Promise<void> {
         return envoyerJson(res, 200, await chercherAvisLieux(demandes))
       }
 
+      // -------------------------------------------------------- partenaires
+      /* Publique, et elle doit l'être : ces adresses sont imprimées sur la
+         page d'accueil. Elle ne renvoie QUE les adresses qui diffèrent du
+         dépôt — le navigateur a déjà les autres, et les revalide toutes
+         avant de les poser sous un logo. */
+      if (url.pathname === '/api/partenaires' && req.method === 'GET') {
+        return envoyerJson(res, 200, { liens: await depotPartenaires.liens() })
+      }
+
       // -------------------------------------------------------------- blog
       // Publique : le front fusionne ces articles avec ceux du dépôt. Aucune
       // donnée personnelle ici, rien à protéger en lecture.
@@ -1040,6 +1054,45 @@ async function demarrer(): Promise<void> {
            l'exploitant verrait son quota fondre sans comprendre. */
         if (url.pathname === '/api/admin/emploi/essai' && req.method === 'POST') {
           return envoyerJson(res, 200, await clientEmploi.essayer())
+        }
+
+        /* Le lien d'affiliation.
+
+           Seule l'ADRESSE se règle ici. La mention de rémunération et le logo
+           restent dans le dépôt : les rendre modifiables côte à côte, ce
+           serait rendre possible un lien payé dont la phrase a été effacée,
+           sans relecture et sans trace. Le dépôt refuse en plus toute adresse
+           qui sort du domaine du partenaire — le logo affiché est le sien. */
+        if (url.pathname === '/api/admin/partenaires' && req.method === 'GET') {
+          return envoyerJson(res, 200, await depotPartenaires.lister())
+        }
+
+        if (url.pathname === '/api/admin/partenaires' && req.method === 'PUT') {
+          const { nom, lien } = JSON.parse(await lireCorps(req)) as {
+            nom: string
+            lien: string
+          }
+          try {
+            return envoyerJson(res, 200, await depotPartenaires.definir(nom, lien))
+          } catch (e) {
+            // Une adresse refusée est une erreur de saisie, pas une panne : la
+            // raison part telle quelle pour s'afficher sous le champ.
+            if (e instanceof LienRefuse) return envoyerJson(res, 400, { erreur: e.message })
+            if (e instanceof PartenaireInconnu)
+              return envoyerJson(res, 404, { erreur: e.message })
+            throw e
+          }
+        }
+
+        if (url.pathname === '/api/admin/partenaires' && req.method === 'DELETE') {
+          const nom = url.searchParams.get('nom') ?? ''
+          try {
+            return envoyerJson(res, 200, await depotPartenaires.retablir(nom))
+          } catch (e) {
+            if (e instanceof PartenaireInconnu)
+              return envoyerJson(res, 404, { erreur: e.message })
+            throw e
+          }
         }
 
         if (url.pathname === '/api/admin/articles' && req.method === 'GET') {

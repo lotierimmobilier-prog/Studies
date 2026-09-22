@@ -11,6 +11,7 @@ import { Marque } from '../marque.tsx'
 import { nombre } from '../nombres.ts'
 
 import { Articles } from './Articles.tsx'
+import { Partenaires } from './Partenaires.tsx'
 import { Statistiques } from './Statistiques.tsx'
 
 import {
@@ -485,6 +486,8 @@ export function Console() {
           <Statistiques />
 
           <Articles />
+
+          <Partenaires />
 
           <div className="navigation">
             <button type="button" className="secondaire" onClick={() => void rafraichir()}>

@@ -59,7 +59,8 @@ import {
 } from './calendrier.ts'
 import { euros, eurosPrecis } from './nombres.ts'
 import { dateLisible } from './dates.ts'
-import { LEBONCOIN, PAPERNEST, relDe } from './partenaires.ts'
+import { relDe } from './partenaires.ts'
+import { usePartenaires } from './partenairesEnLigne.tsx'
 
 // Les photographies sont IMPORTÉES et non désignées par un chemin : Vite leur
 // applique la base de déploiement (le site est servi sous un sous-chemin) et
@@ -377,6 +378,11 @@ export function Accueil({
      dès la première image — un mineur ne voit donc jamais clignoter le
      contenu destiné aux majeurs. */
   const [lecteur] = useState<Public>(() => publicDe(lireAnneeNaissance()))
+  /* Les adresses d'affiliation se règlent en console : le nom, le logo et la
+     mention de rémunération, eux, restent dans le dépôt. En attendant la
+     réponse — ou à jamais s'il n'y a pas de serveur — ce sont les adresses du
+     dépôt qui s'affichent, et elles fonctionnent. */
+  const partenaires = usePartenaires()
   return (
     <main className="app accueil">
       {/* L'accroche et sa photographie forment UNE zone, pas deux blocs
@@ -547,17 +553,17 @@ export function Accueil({
             <img
               className="partenaire-logo"
               src={logoLeboncoin}
-              alt={LEBONCOIN.nom}
+              alt={partenaires.leboncoin.nom}
               width={483}
               height={88}
             />
             <h3>1. Chercher le logement</h3>
-            <p>{LEBONCOIN.quoi}</p>
+            <p>{partenaires.leboncoin.quoi}</p>
             <a
               className="secondaire"
-              href={LEBONCOIN.lien}
+              href={partenaires.leboncoin.lien}
               target="_blank"
-              rel={relDe(LEBONCOIN)}
+              rel={relDe(partenaires.leboncoin)}
             >
               Voir les locations
               <span aria-hidden="true"> ↗</span>
@@ -595,17 +601,17 @@ export function Accueil({
               <img
                 className="partenaire-logo"
                 src={logoPapernest}
-                alt={PAPERNEST.nom}
+                alt={partenaires.papernest.nom}
                 width={467}
                 height={88}
               />
               <h3>2. Ouvrir les contrats</h3>
-              <p>{PAPERNEST.quoi}</p>
+              <p>{partenaires.papernest.quoi}</p>
               <a
                 className="secondaire"
-                href={PAPERNEST.lien}
+                href={partenaires.papernest.lien}
                 target="_blank"
-                rel={relDe(PAPERNEST)}
+                rel={relDe(partenaires.papernest)}
               >
                 Comparer mes contrats
                 <span aria-hidden="true"> ↗</span>
@@ -622,10 +628,10 @@ export function Accueil({
             parce qu'ici il y a deux chemins et qu'une mention posée avant
             l'un seulement se lirait comme ne concernant que celui-là. */}
         {lecteur === 'mineur' ? null : (
-          <p className="note partenaire-mention">{PAPERNEST.remuneration}</p>
+          <p className="note partenaire-mention">{partenaires.papernest.remuneration}</p>
         )}
         <p className="note">
-          Le lien vers {LEBONCOIN.nom}, lui, ne nous rapporte rien : aucun accord ne
+          Le lien vers {partenaires.leboncoin.nom}, lui, ne nous rapporte rien : aucun accord ne
           nous lie, il est là parce qu’il est utile.
         </p>
 

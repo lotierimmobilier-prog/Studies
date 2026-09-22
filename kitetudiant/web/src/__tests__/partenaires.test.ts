@@ -41,6 +41,15 @@ function sources(dossier = SRC): string[] {
 /** Le fragment qui identifie l'affiliation, sans dépendre de l'URL entière. */
 const IDENTIFIANT = 'app.papernest.com'
 
+/* Le lien se pose désormais soit sur la constante du dépôt (`PAPERNEST.lien`),
+   soit sur le partenaire résolu par la console (`partenaires.papernest.lien`,
+   voir partenairesEnLigne.tsx). Les deux comptent, et l'appariement lien ↔
+   mention doit tenir dans les deux cas : chercher sans la casse les attrape
+   tous les deux, et attrapera aussi la prochaine façon de les nommer. */
+const POSE_LE_LIEN = /papernest\.lien/i
+const AFFICHE_LA_MENTION = /papernest\.remuneration/i
+const POSE_LOGEMENT = /leboncoin\.lien/i
+
 describe('le lien partenaire est toujours déclaré comme tel', () => {
   const PORTEURS = sources().filter(
     (f) => readFileSync(f, 'utf8').includes(IDENTIFIANT) && !f.endsWith('partenaires.ts'),
@@ -59,9 +68,9 @@ describe('le lien partenaire est toujours déclaré comme tel', () => {
   it('tout écran qui pose le lien affiche la mention de rémunération', () => {
     for (const fichier of sources()) {
       const source = readFileSync(fichier, 'utf8')
-      if (!source.includes('PAPERNEST.lien')) continue
+      if (!POSE_LE_LIEN.test(source)) continue
       expect(
-        source.includes('PAPERNEST.remuneration'),
+        AFFICHE_LA_MENTION.test(source),
         `${fichier.slice(SRC.length + 1)} pose le lien sans afficher la mention`,
       ).toBe(true)
     }
@@ -70,9 +79,9 @@ describe('le lien partenaire est toujours déclaré comme tel', () => {
   it('au moins un écran le pose vraiment', () => {
     // Sinon les deux tests ci-dessus passeraient sur un site sans partenaire,
     // et diraient « tout va bien » de rien du tout.
-    const poseurs = sources().filter((f) => readFileSync(f, 'utf8').includes('PAPERNEST.lien'))
+    const poseurs = sources().filter((f) => POSE_LE_LIEN.test(readFileSync(f, 'utf8')))
     expect(poseurs.length).toBeGreaterThan(0)
-    const logement = sources().filter((f) => readFileSync(f, 'utf8').includes('LEBONCOIN.lien'))
+    const logement = sources().filter((f) => POSE_LOGEMENT.test(readFileSync(f, 'utf8')))
     expect(logement.length).toBeGreaterThan(0)
   })
 })
@@ -153,7 +162,7 @@ describe('leboncoin n’est pas présenté comme un partenariat payé', () => {
 
   it('l’écran dit lequel des deux est payé et lequel ne l’est pas', () => {
     const accueil = readFileSync(resolve(SRC, 'accueil.tsx'), 'utf8')
-    expect(accueil).toContain('PAPERNEST.remuneration')
+    expect(accueil).toMatch(AFFICHE_LA_MENTION)
     expect(accueil, 'rien ne dit que leboncoin ne nous rapporte rien').toMatch(
       /ne nous rapporte rien/,
     )
