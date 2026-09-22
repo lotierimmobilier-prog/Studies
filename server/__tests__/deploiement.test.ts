@@ -484,3 +484,78 @@ describe('une migration dégradée cesse d’être silencieuse', () => {
     expect(APPLIQUER).toContain("c'est une migration à écrire")
   })
 })
+
+/**
+ * Le chargement des données de référence, au déploiement.
+ *
+ * ── Ce qui manquait ─────────────────────────────────────────────────────
+ *
+ * Le code se déployait seul, les données non. Le site partait en ligne, la
+ * console affichait tout au vert, et « Enregistrer dans mes vœux » échouait
+ * pour chaque formation parce que `reference.formation` était vide. La
+ * commande existait ; elle attendait qu'un humain y pense.
+ *
+ * Les cinq chemins ont été éprouvés contre un vrai PostgreSQL avant d'écrire
+ * ces tests : pas de DATABASE_URL, schéma absent, table vide, chargement en
+ * échec, table déjà remplie. Ce qui suit tient ce que cette exécution a
+ * montré.
+ */
+describe('le déploiement charge les données quand il le faut', () => {
+  const SCRIPT = readFileSync(resolve(RACINE, 'deploy/vps-setup.sh'), 'utf8')
+  const BLOC = /les données de référence[\s\S]*?\nlog "\(Re\)démarrage/.exec(SCRIPT)?.[0] ?? ''
+
+  it('appelle bien le chargement', () => {
+    expect(BLOC, 'le bloc de chargement a disparu du script').not.toBe('')
+    expect(BLOC).toContain('deploy/charger-donnees.sh')
+  })
+
+  it('ne le fait QUE si la table des formations est vide', () => {
+    /* Sans cette condition, chaque déploiement retéléchargerait 185 Mo chez
+       le ministère — toutes les cinq minutes, pour n'insérer rien, puisque
+       charger.sh est en ON CONFLICT DO NOTHING. */
+    expect(BLOC).toContain('select count(*) from reference.formation')
+    expect(BLOC).toMatch(/\$\{LIGNES\}"?\s*=\s*"?0/)
+  })
+
+  it('ne présume pas que les migrations sont appliquées', () => {
+    // `to_regclass` rend NULL si la table n'existe pas : poser un schéma sur
+    // une base de production est une décision, pas un effet de bord.
+    expect(BLOC).toContain("to_regclass('reference.formation')")
+  })
+
+  it('n’arrête pas le déploiement si le chargement échoue', () => {
+    /* Le site fonctionne sans base : recherche, fiches et budgets tiennent
+       sur l'open data. Remplacer un site incomplet par pas de site du tout
+       serait pire. Vérifié en exécution : code de sortie 0 malgré l'échec. */
+    const echec = /if bash "\$\{SRC_DIR\}\/deploy\/charger-donnees\.sh"; then[\s\S]*?\n    fi/.exec(
+      BLOC,
+    )
+    expect(echec, 'le chargement n’est plus dans un `if` : un échec fera tomber la mise en ligne')
+      .not.toBeNull()
+    expect(echec![0], 'le déploiement s’arrête sur un échec de chargement').not.toMatch(
+      /\bexit\b/,
+    )
+  })
+
+  it('le dit quand même, et sur la sortie d’erreur', () => {
+    // Une donnée manquante s'affiche comme manquante (CLAUDE.md) : un échec
+    // silencieux laisserait croire que les vœux sont enregistrables.
+    expect(BLOC).toMatch(/ÉCHOUÉ[\s\S]*?>&2/)
+  })
+
+  it('n’appelle aucune fonction que le script ne définit pas', () => {
+    /* Le premier jet appelait `mal`, qui existe dans charger-donnees.sh mais
+       PAS ici. Un « command not found » sous `set -e` aurait terminé le
+       déploiement — exactement ce que ce bloc promet d'éviter. */
+    const definies = new Set(
+      [...SCRIPT.matchAll(/^([a-z_][a-z0-9_]*)\(\)\s*\{/gm)].map((m) => m[1]!),
+    )
+    const appelees = [...BLOC.matchAll(/^\s*([a-z_][a-z0-9_]*) "/gm)].map((m) => m[1]!)
+    const inconnues = [...new Set(appelees)].filter(
+      (f) => !definies.has(f) && !['echo', 'bash', 'psql', 'printf', 'export'].includes(f),
+    )
+    expect(inconnues, `fonctions appelées mais non définies : ${inconnues.join(', ')}`).toEqual(
+      [],
+    )
+  })
+})

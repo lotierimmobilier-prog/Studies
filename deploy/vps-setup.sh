@@ -281,6 +281,70 @@ fi
 # Le fichier .env contient des secrets : il ne doit être lisible que par root.
 chmod 600 "${APP_DIR}/.env"
 
+# ------------------------------------------------- les données de référence
+#
+# Le code se déploie tout seul ; les données, non — et il a fallu s'en
+# apercevoir. Le site partait en ligne, la console affichait tout au vert, et
+# « Enregistrer dans mes vœux » échouait pour chaque formation parce que
+# `reference.formation` était vide. La commande existait
+# (deploy/charger-donnees.sh), elle attendait juste qu'un humain y pense.
+#
+# ── Pourquoi UNE SEULE FOIS, et pas à chaque déploiement ────────────────
+#
+# Le chargement télécharge 185 Mo chez le ministère. Le refaire toutes les
+# cinq minutes serait inutile — `charger.sh` insère en ON CONFLICT DO NOTHING,
+# donc un deuxième passage n'ajoute rien — et discourtois envers data.gouv.
+# La condition est donc « la table des formations est VIDE » : vrai une fois
+# dans la vie d'un serveur, faux ensuite.
+#
+# Changer de millésime reste une décision, pas un effet de bord : on relance
+# la commande à la main, comme avant.
+#
+# ── Pourquoi un échec n'arrête pas le déploiement ──────────────────────
+#
+# Le site fonctionne sans base : recherche, fiches et budgets tiennent sur
+# l'open data. Faire tomber une mise en ligne parce qu'un téléchargement a
+# échoué remplacerait un site incomplet par pas de site du tout.
+#
+# Mais il ne se tait pas : le message est explicite et rappelle la commande.
+# Une donnée manquante s'affiche comme manquante (CLAUDE.md).
+if [ -n "${DATABASE_URL:-}" ] && command -v psql > /dev/null 2>&1; then
+  # `to_regclass` rend NULL si la table n'existe pas : les migrations ne sont
+  # pas appliquées, et ce n'est pas à un déploiement de les poser.
+  TABLE_LA="$(psql -qtAc "select to_regclass('reference.formation')" "${DATABASE_URL}" 2>/dev/null || echo '')"
+  if [ -z "${TABLE_LA}" ]; then
+    log "Base sans schéma de référence : chargement des données sauté."
+    # Le script d'installation de la base n'est pas NOMMÉ ici, et c'est tenu
+    # par un test : vps-setup.sh est relancé toutes les cinq minutes, et un
+    # jour quelqu'un transformerait la suggestion en appel. Appliquer des
+    # migrations à ce rythme sur une base de production, c'est les appliquer
+    # sans que personne ne l'ait décidé. La marche à suivre est dans
+    # deploy/README.md, et charger-donnees.sh la redonne quand on le lance.
+    log "  Applique d'abord les migrations sur cette base (voir deploy/README.md)."
+  else
+    LIGNES="$(psql -qtAc 'select count(*) from reference.formation' "${DATABASE_URL}" 2>/dev/null || echo '')"
+    if [ "${LIGNES}" = "0" ]; then
+      log "Table des formations VIDE : chargement des données de référence."
+      log "  Environ 185 Mo à télécharger, quelques minutes. Une seule fois."
+      if bash "${SRC_DIR}/deploy/charger-donnees.sh"; then
+        log "Données de référence chargées. Les vœux sont enregistrables."
+      else
+        # Sur la sortie d'erreur, et non par `log` : ce message doit rester
+        # visible dans `journalctl -u ...-maj` au milieu d'un déploiement qui,
+        # lui, s'est bien passé. `mal` n'existe pas dans ce script — l'appeler
+        # aurait terminé le déploiement sur un « command not found », soit
+        # exactement ce que ce bloc promet d'éviter.
+        echo "" >&2
+        echo "Le chargement des données a ÉCHOUÉ. Le site est en ligne, mais aucun" >&2
+        echo "vœu ne sera enregistrable. Relance à la main pour voir l'erreur :" >&2
+        echo "  bash ${SRC_DIR}/deploy/charger-donnees.sh" >&2
+      fi
+    else
+      log "Données de référence déjà en base (${LIGNES} formations)."
+    fi
+  fi
+fi
+
 log "(Re)démarrage de l'API « ${PM2_NAME} » (port ${API_PORT}) via pm2…"
 ENV_VARS="PORT=${API_PORT} ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-} GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY:-} MODERATION_TOKEN=${MODERATION_TOKEN:-} ADMIN_TOKEN=${ADMIN_TOKEN:-} ADMIN_MASTER_KEY=${ADMIN_MASTER_KEY:-} COMPTES_MASTER_KEY=${COMPTES_MASTER_KEY:-} ADMIN_EMAILS=${ADMIN_EMAILS:-}"
 if pm2 describe "${PM2_NAME}" >/dev/null 2>&1; then
