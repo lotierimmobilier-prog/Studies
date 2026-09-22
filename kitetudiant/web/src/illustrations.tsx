@@ -207,6 +207,41 @@ export function Plume() {
 }
 
 /**
+ * Porte et flèche sortante — se déconnecter.
+ *
+ * Le rail se passait d'icône ici, au motif qu'aucun pictogramme ne distingue
+ * « sortir » de « supprimer ». C'est vrai d'une croix ou d'une corbeille, pas
+ * de celui-ci : un cadre ouvert d'un côté et une flèche qui le franchit ne
+ * dit rien d'autre que « on s'en va ». Rien n'y est barré, rien n'y est jeté.
+ *
+ * La flèche sort vers la DROITE, dans le sens de la lecture. Vers la gauche,
+ * elle se lirait comme « revenir », ce qui est le contraire.
+ */
+export function Sortie() {
+  return (
+    <svg className="illu-picto" viewBox="0 0 24 24" role="presentation" aria-hidden="true">
+      {/* Le cadre, ouvert à droite : on ne dessine pas le montant que la
+          flèche traverse, sinon elle a l'air de buter dessus. */}
+      <path
+        d="M13.5 4.5H6.5A1.5 1.5 0 0 0 5 6v12a1.5 1.5 0 0 0 1.5 1.5h7"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M11 12h9" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="m16.8 8.6 3.4 3.4-3.4 3.4"
+        fill="none"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+/**
  * Double chevron — replier ou déplier le rail de navigation.
  *
  * Il pointe toujours vers la gauche ; c'est le CSS qui le retourne quand le

@@ -3289,7 +3289,9 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     display: none;
   }
   .rail-deconnexion {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     margin-top: auto;
     padding: 0.55rem 0.75rem;
     border: none;
@@ -3300,16 +3302,22 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
     font-size: 0.85rem;
     text-align: left;
     cursor: pointer;
+    /* Même hauteur de cible que les liens du rail : c'est un bouton comme
+       les autres, même s'il n'est pas une destination. */
+    min-height: 44px;
   }
+  .rail-deconnexion .illu-picto { flex: 0 0 auto; width: 20px; height: 20px; }
   .rail-deconnexion:hover {
     color: var(--encre);
     text-decoration: underline;
   }
-  /* Replié, « Se déconnecter » disparaît : c'est le seul libellé du rail
-     qu'aucune icône ne remplace honnêtement — rien ne distingue « sortir » de
-     « supprimer ». Elle reste dans « Mon espace », la page faite pour ça. */
+  /* Replié, l'icône reste et le libellé s'en va, comme pour les liens.
+     Le bouton disparaissait entièrement, faute d'icône — et comme il n'existe
+     nulle part ailleurs sur cette largeur, replier le rail retirait la
+     déconnexion du site. */
   .rail-replie .rail-deconnexion {
-    display: none;
+    justify-content: center;
+    padding-inline: 0;
   }
 }
 
@@ -3820,3 +3828,14 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   .lettre-question { margin-bottom: 1.1rem; }
   .lettre-champ, .lettre-texte { font-size: 0.95rem; padding: 0.5rem 0.6rem; }
 }
+
+/* Le bouton « se déconnecter » de l'espace personnel. Discret et non rouge :
+   c'est l'action réversible des deux façons de partir, et la confondre avec
+   l'effacement du compte coûterait un compte. */
+.bouton-deconnexion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.bouton-deconnexion .illu-picto { width: 18px; height: 18px; flex: 0 0 auto; }
