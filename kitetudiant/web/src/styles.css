@@ -1720,17 +1720,63 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
    personne ne les aura jamais toutes. Les mélanger dans une seule grille
    rendait le mécanisme incompréhensible. */
 
+/* ────────────────────────── la page des cartes ──────────────────────────
+   Même présentation que l'atelier de lettre et la page des vœux : l'en-tête
+   se lit donc il reste étroit, les albums occupent la colonne de travail, et
+   ce qu'ils totalisent — avec le seul moyen de ne pas tout perdre — suit le
+   regard dans une colonne collée. */
+.collec-tete { max-width: 44rem; }
+.collec-atelier { display: block; }
+.collec-colonne { min-width: 0; }
+
+@media (min-width: 72rem) {
+  .collec-atelier {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr);
+    gap: 2.4rem;
+    /* PAS `align-items: start` : une case de grille ramenée à la hauteur de
+       son contenu n'offre aucune course au `position: sticky` qu'elle
+       contient. Appris au navigateur sur l'atelier de lettre. */
+  }
+  .collec-cote-collee {
+    position: sticky;
+    /* Sous la barre du haut, elle-même collée et haute de 63 px. */
+    top: 4.75rem;
+    max-height: calc(100vh - 6.25rem);
+    overflow-y: auto;
+    padding-right: 0.4rem;
+  }
+}
+
+/* En une colonne, le récapitulatif vient après les albums : un trait suffit
+   pour qu'il ne se lise pas comme une troisième section de l'album. */
+@media (max-width: 71.99rem) {
+  .collec-cote {
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--trait);
+  }
+}
+
+.collec-cote-titre { margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+.collec-cote-collee > .collec-cote-titre:first-child { margin-top: 0; }
+.collec-cote .cta-groupe { margin-top: 0.7rem; }
+
 .collec-compte { margin: 0 0 0.5rem; font-size: 0.92rem; color: var(--doux); }
 .collec-compte strong { color: var(--encre); font-variant-numeric: tabular-nums; }
 
+/* Même trait que la jauge des six questions de la lettre et celle des dix
+   vœux : trois écrans, une seule façon de dire « voilà où tu en es ».
+   Elle garde son `role="progressbar"` — contrairement aux deux autres, elle
+   n'est pas doublée par une phrase qui donnerait le même chiffre. */
 .collec-jauge {
-  height: 6px;
-  border-radius: 999px;
+  height: 4px;
+  border-radius: 2px;
   background: var(--trait);
   overflow: hidden;
-  margin: 0 0 1.25rem;
+  margin: 0 0 1.1rem;
 }
-.collec-jauge span { display: block; height: 100%; background: var(--vif); }
+.collec-jauge span { display: block; height: 100%; background: var(--accent); }
 
 .recompenses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
 .recompense {
@@ -3765,7 +3811,7 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
    Parcoursup » — une phrase qu'on ne peut pas se permettre de sauter, donc
    qui ne se met pas dans le paragraphe qu'on saute. Deux écrans, un seul
    traitement : une phrase encadrée veut dire la même chose partout. */
-.lettre-avertissement, .voeux-avertissement {
+.lettre-avertissement, .voeux-avertissement, .collec-avertissement {
   margin: 0 0 1.2rem;
   padding: 0.7rem 0.95rem;
   border-left: 3px solid var(--orange);
@@ -3775,7 +3821,7 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   line-height: 1.5;
 }
 .lettre-avertissement p { margin: 0; }
-.voeux-avertissement strong { color: var(--encre); }
+.voeux-avertissement strong, .collec-avertissement strong { color: var(--encre); }
 .lettre-avertissement cite {
   display: block;
   margin-top: 0.5rem;
@@ -3881,58 +3927,76 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 
    La pastille remplace le marqueur de liste : gris et minuscule, il se perdait
    dans la marge, alors que c'est lui qui dit combien il en reste. Elle change
-   d'aspect dès que la question est remplie — l'avancement se lit là où l'on
-   travaille, pas seulement en haut de la colonne. */
+   d'aspect dès que la question est remplie. */
 .lettre-questions { list-style: none; margin: 0; padding: 0; }
+/* Plus de pastille dans la marge : une seule question est à l'écran, son
+   numéro est dans le pas-à-pas juste au-dessus, et la répéter à côté du champ
+   volerait 2,4 rem à la ligne de texte sans rien apprendre. */
 .lettre-question {
-  position: relative;
   margin: 0 0 1.5rem;
-  padding-left: 2.4rem;
 }
-.lettre-numero {
-  position: absolute;
-  left: 0;
-  top: 0.05rem;
+/* Le pas-à-pas des six questions.
+   Une seule question s'affiche à la fois ; ces crans disent où l'on en est ET
+   mènent à n'importe laquelle. Ce sont donc de vrais boutons, chacun portant
+   son numéro, son état et sa question dans son nom accessible — l'ordre
+   restait libre avant, il doit le rester. */
+.lettre-etapes { margin: 0 0 1.5rem; }
+.lettre-etapes ol {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  border: 1px solid var(--trait);
-  border-radius: 50%;
-  background: var(--carte);
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lettre-etapes li { flex: 1 1 0; display: flex; }
+.lettre-cran {
+  flex: 1 1 0;
+  /* Assez haut pour être visé au doigt ; le trait qui marque l'état est en
+     haut, le chiffre dessous. */
+  min-height: 44px;
+  padding: 0.35rem 0 0;
+  border: 0;
+  border-top: 4px solid var(--trait);
+  border-radius: 2px 2px 0 0;
+  background: none;
   color: var(--doux);
   font-family: var(--titres);
   font-weight: 800;
   font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
 }
-.lettre-numero.rempli {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--fond);
-}
-
-/* La jauge des six questions. Elle répète en un coup d'œil ce que la phrase
-   au-dessus dit en toutes lettres — d'où `aria-hidden` sur le balisage : la
-   faire lire deux fois n'apporte rien à qui l'entend. */
-.lettre-jauge {
-  display: flex;
-  gap: 0.3rem;
-  list-style: none;
-  margin: 0 0 1.4rem;
-  padding: 0;
-}
-.lettre-cran {
-  height: 4px;
-  flex: 1 1 0;
-  border-radius: 2px;
-  background: var(--trait);
-  transition: background-color 0.2s ease;
-}
-.lettre-cran.rempli { background: var(--accent); }
+.lettre-cran.rempli { border-top-color: var(--accent); color: var(--encre); }
+/* La question affichée se repère autrement que par la couleur : elle est la
+   seule à porter un fond, et `aria-current` le dit à qui écoute. */
+.lettre-cran.courante { background: var(--carte); color: var(--encre); }
+.lettre-cran:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .lettre-cran { transition: none; }
+}
+
+/* La cible du lien « Voir mon brouillon » passerait sous la barre du haut,
+   qui est collée : elle garde sa hauteur en marge de défilement. */
+#brouillon { scroll-margin-top: 5rem; }
+/* Sur un grand écran le brouillon est déjà à l'écran, dans la colonne collée
+   d'à côté : le lien n'a nulle part où emmener. Constaté au navigateur, où il
+   faisait défiler la colonne collée sur elle-même et posait le titre sous la
+   barre du haut.
+
+   `a.` et non `.` seul : `a.principal` porte un `display: inline-flex` de même
+   spécificité, et un sélecteur plus faible se serait fait écraser — c'est
+   exactement ce qui est arrivé au premier jet, où le lien restait affiché. */
+@media (min-width: 72rem) {
+  a.lettre-vers-brouillon { display: none; }
+}
+
+/* Précédente / suivante, sous le champ. */
+.lettre-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
 }
 
 /* L'aide sous un champ. Elle disait la même chose que le label, dans la même
@@ -4085,11 +4149,10 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
   .lettre-avertissement p { font-size: 0.86rem; line-height: 1.45; }
   .lettre-avertissement cite { font-size: 0.72rem; }
   .lettre-titre { margin-top: 1.5rem; }
-  /* La pastille mangeait 2,4 rem de largeur sur un écran qui en compte 24,
-     et c'est la ligne de texte qui les perdait. Elle remonte au-dessus du
-     label, sur la même ligne que lui plutôt qu'à sa gauche. */
-  .lettre-question { padding-left: 0; padding-top: 2rem; margin-bottom: 1.2rem; }
-  .lettre-numero { top: 0; }
+  .lettre-question { margin-bottom: 1.2rem; }
+  /* Six boutons sur 24 rem : chacun garde sa cible de 44 px en hauteur, le
+     chiffre rétrécit plutôt que le bouton. */
+  .lettre-cran { font-size: 0.75rem; }
   .lettre-champ, .lettre-texte { font-size: 0.95rem; padding: 0.5rem 0.6rem; }
   .lettre-barre { gap: 0.4rem; padding-bottom: 1rem; margin-bottom: 1.2rem; }
   .lettre-barre .lettre-reglages { padding-top: 0; }

@@ -485,15 +485,46 @@ describe('la présentation de l’atelier', () => {
     expect(relecture).toBeGreaterThan(brouillon)
   })
 
-  it('ne fait pas relire la jauge à qui écoute la page', () => {
-    /* La phrase « 2 questions sur 6 » dit déjà tout. La jauge la redessine :
-       la faire annoncer ferait entendre six fois « rempli, vide » pour une
-       information déjà donnée. */
-    const jauge = /<ol className="lettre-jauge"[^>]*>/.exec(ecran)
-    expect(jauge, 'la jauge a disparu de l’écran').not.toBeNull()
-    expect(jauge![0]).toContain('aria-hidden="true"')
-    // Et le repère de chaque question, pour la même raison.
-    expect(ecran).toMatch(/className=\{\s*\(brouillon\.reponses\[q\.cle\] \?\? ''\)\.trim\(\) === ''/)
+  it('affiche UNE question à la fois', () => {
+    /* Six champs vides empilés, c'est un mur : l'élève voit la quantité avant
+       la première question, et la quantité est ce qui fait refermer un
+       formulaire. */
+    expect(ecran).toMatch(/QUESTIONS\.filter\(\(_, i\) => i === etape\)/)
+  })
+
+  it('laisse toujours aller à n’importe quelle question', () => {
+    /* L'ordre était libre — « commence par la question que tu veux » — et il
+       doit le rester : un parcours imposé est plus simple à écrire et plus dur
+       à remplir. Les crans sont donc de vrais boutons. */
+    const pas = /<nav className="lettre-etapes"[\s\S]*?<\/nav>/.exec(ecran)
+    expect(pas, 'le pas-à-pas a disparu de l’écran').not.toBeNull()
+    expect(pas![0], 'les crans ne mènent plus nulle part').toContain('onClick={() => setEtape(i)}')
+    expect(pas![0], 'un cran n’est pas un bouton').toContain('type="button"')
+  })
+
+  it('donne à chaque cran un nom qui dit sa question et son état', () => {
+    /* Six boutons « 1 » à « 6 » ne se distinguent pas à l'oreille, et la
+       couleur seule ne dit pas ce qui est fait. Le nom porte les trois. */
+    const pas = /<nav className="lettre-etapes"[\s\S]*?<\/nav>/.exec(ecran)!
+    expect(pas[0]).toContain('aria-label={`Question ${i + 1}')
+    expect(pas[0]).toMatch(/remplie' : 'vide'/)
+    expect(pas[0]).toContain('${q.question}')
+    // Et la question courante ne se repère pas qu'à la couleur.
+    expect(pas[0]).toContain("aria-current={i === etape ? 'step' : undefined}")
+  })
+
+  it('ne fait pas d’une question passée un aveu', () => {
+    /* « Suivante » sur un champ vide se lit comme un abandon. Le bouton dit ce
+       que l'élève fait — il passe, et il pourra revenir. */
+    expect(ecran).toContain('Passer pour l’instant')
+  })
+
+  it('montre les pistes tant que le champ est vide', () => {
+    /* Elles étaient derrière un clic, au moment précis où l'on sèche —
+       c'est-à-dire au moment où l'on n'a pas envie de chercher l'aide. */
+    expect(ecran).toMatch(
+      /<details className="lettre-pistes" open=\{\(brouillon\.reponses\[q\.cle\] \?\? ''\)\.trim\(\) === ''\}>/,
+    )
   })
 
   it('un brouillon jamais retouché suit ses réponses', () => {

@@ -278,7 +278,39 @@ export function Collection({
           « Tes cartes » ici, « Mes cartes de villes » dans l'onglet — et
           quatre noms pour une page, c'est quatre pages pour qui la cherche
           dans son historique. */}
-      <h1 className="article-titre">Mes cartes</h1>
+      <header className="collec-tete">
+        <h1 className="article-titre">Mes cartes</h1>
+
+        {/* Elle vivait tout en bas, dans la troisième section, sous « Changer
+            d'appareil » — c'est-à-dire à l'endroit où personne n'arrive avant
+            d'avoir perdu ses cartes.
+
+            C'est pourtant la phrase de cette page : rien n'est sur un serveur,
+            donc un navigateur vidé, un autre téléphone ou un mode privé et
+            l'album repart de zéro. Encadrée en haut, comme « elle ne part pas
+            sur Parcoursup » sur les vœux et l'avertissement du ministère sur
+            la lettre — une phrase qu'on ne peut pas se permettre de sauter ne
+            se met pas à l'endroit qu'on saute. */}
+        <p className="collec-avertissement">
+          <strong>Tes cartes ne sont nulle part ailleurs que dans ce
+          navigateur.</strong> Rien n’est enregistré sur un serveur, même connecté :
+          si tu vides ton navigateur ou changes d’appareil, l’album repart de zéro.
+          Le fichier à enregistrer est la seule façon de l’emporter.
+        </p>
+      </header>
+
+      {/* Deux colonnes sur grand écran, comme l'atelier de lettre et la page
+          des vœux : les albums à gauche, ce qu'ils totalisent à droite.
+
+          Avant, les deux décomptes vivaient chacun au-dessus de sa liste, et
+          « Changer d'appareil » — le seul moyen de ne pas tout perdre —
+          arrivait après les deux. Avec quinze récompenses et trente villes, on
+          ne voyait aucun des trois en parcourant l'album.
+
+          L'ORDRE DU CODE ne change pas : les albums d'abord, le récapitulatif
+          ensuite. C'est la grille qui déplace la colonne, pas le balisage. */}
+      <div className="collec-atelier">
+        <div className="collec-colonne">
 
       {/* Les récompenses d'abord, et seules dans leur section. Mêlées aux
           villes, elles disparaissaient : le compteur annonçait « 8 sur 1 253 »,
@@ -291,23 +323,6 @@ export function Collection({
           villes comparées, un bulletin lu. Elles se gagnent en t’en servant, jamais
           en invitant quelqu’un, et restent dans ton navigateur.
         </p>
-
-        <p className="collec-compte">
-          <strong>
-            {recompenses.length} sur {totalRecompenses}
-          </strong>{' '}
-          obtenues
-        </p>
-        <div
-          className="collec-jauge"
-          role="progressbar"
-          aria-valuenow={recompenses.length}
-          aria-valuemin={0}
-          aria-valuemax={totalRecompenses}
-          aria-label="Récompenses obtenues"
-        >
-          <span style={{ width: `${(recompenses.length / totalRecompenses) * 100}%` }} />
-        </div>
 
         <ul className="recompenses">
           {TOUTES_RECOMPENSES.map(({ id, definition }) => {
@@ -349,10 +364,6 @@ export function Collection({
           </p>
         ) : (
           <>
-            <p className="collec-compte">
-              <strong>{villes.length}</strong> ville{villes.length > 1 ? 's' : ''} gardée
-              {villes.length > 1 ? 's' : ''}
-            </p>
             <div className="collec-grille">
               {villes.map((c) => (
                 <button
@@ -371,34 +382,71 @@ export function Collection({
         )}
       </section>
 
-      <section className="bloc">
-        <h2>Changer d’appareil</h2>
-        <p className="bloc-intro">
-          Tes cartes ne quittent pas ce navigateur. Pour les reprendre ailleurs,
-          enregistre-les et rouvre le fichier là-bas.
-        </p>
-        <div className="cta-groupe">
-          <a
-            className="cta-secondaire"
-            download="kitetudiant-collection.json"
-            href={`data:application/json;charset=utf-8,${encodeURIComponent(exporter(collection))}`}
-          >
-            Enregistrer mes cartes
-          </a>
-          <label className="cta-secondaire">
-            Ouvrir un fichier de cartes
-            <input
-              type="file"
-              accept="application/json"
-              className="collec-fichier"
-              onChange={(e) => {
-                const fichier = e.target.files?.[0]
-                if (fichier !== undefined) lireFichier(fichier)
-              }}
-            />
-          </label>
         </div>
-      </section>
+
+        {/* Le récapitulatif, et avec lui le seul moyen de ne pas tout perdre.
+            Il était en bas de page, après les deux albums : on ne le trouvait
+            qu'en cherchant, c'est-à-dire trop tard. */}
+        <aside className="collec-colonne collec-cote">
+          <div className="collec-cote-collee">
+            <h2 className="collec-cote-titre">Où tu en es</h2>
+
+            <p className="collec-compte">
+              <strong>
+                {recompenses.length} sur {totalRecompenses}
+              </strong>{' '}
+              récompense{recompenses.length > 1 ? 's' : ''} obtenue
+              {recompenses.length > 1 ? 's' : ''}
+            </p>
+            <div
+              className="collec-jauge"
+              role="progressbar"
+              aria-valuenow={recompenses.length}
+              aria-valuemin={0}
+              aria-valuemax={totalRecompenses}
+              aria-label="Récompenses obtenues"
+            >
+              <span style={{ width: `${(recompenses.length / totalRecompenses) * 100}%` }} />
+            </div>
+
+            {/* Pas de jauge pour les villes : le dénominateur, ce sont les
+                milliers de communes couvertes, et une barre immobile à 0,2 %
+                dirait « tu n'as rien » à qui en a gardé trente. C'est un
+                album, pas un score — le nombre suffit. */}
+            <p className="collec-compte">
+              <strong>{villes.length}</strong> ville{villes.length > 1 ? 's' : ''} gardée
+              {villes.length > 1 ? 's' : ''}
+            </p>
+
+            <h3 className="collec-cote-titre">Changer d’appareil</h3>
+            <p className="note">
+              Pour reprendre tes cartes ailleurs, enregistre-les et rouvre le fichier
+              là-bas. C’est aussi ta sauvegarde si tu vides ce navigateur.
+            </p>
+            <div className="cta-groupe">
+              <a
+                className="cta-secondaire"
+                download="kitetudiant-collection.json"
+                href={`data:application/json;charset=utf-8,${encodeURIComponent(exporter(collection))}`}
+              >
+                Enregistrer mes cartes
+              </a>
+              <label className="cta-secondaire">
+                Ouvrir un fichier de cartes
+                <input
+                  type="file"
+                  accept="application/json"
+                  className="collec-fichier"
+                  onChange={(e) => {
+                    const fichier = e.target.files?.[0]
+                    if (fichier !== undefined) lireFichier(fichier)
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+        </aside>
+      </div>
     </main>
   )
 }

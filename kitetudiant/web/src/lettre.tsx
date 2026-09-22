@@ -141,6 +141,9 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
   const [courant, setCourant] = useState<string>(SANS_VOEU)
   const [ifsi, setIfsi] = useState(false)
   const [aides, setAides] = useState(false)
+  /* La question affichée. Elle commence à la première, et l'élève va où il
+     veut par les crans : le nom du champ n'est pas un parcours imposé. */
+  const [etape, setEtape] = useState(0)
   const [nomSaisi, setNomSaisi] = useState('')
 
   useEffect(() => {
@@ -363,45 +366,56 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
               </>
             )}
           </p>
-          {/* La même information, en un coup d'œil. `aria-hidden` parce que la
-              phrase juste au-dessus la dit déjà : la répéter ferait annoncer
-              six fois « rempli, vide » à un lecteur d'écran. */}
-          <ol className="lettre-jauge" aria-hidden="true">
-            {QUESTIONS.map((q) => (
-              <li
-                key={q.cle}
-                className={
-                  (brouillon.reponses[q.cle] ?? '').trim() === ''
-                    ? 'lettre-cran'
-                    : 'lettre-cran rempli'
-                }
-              />
-            ))}
-          </ol>
+          {/* UNE question à la fois.
+
+              Les six d'un coup, c'était six champs vides empilés : un mur.
+              L'élève de dix-sept ans qui ouvre cette page voit alors la
+              quantité avant la première question, et la quantité est ce qui
+              fait refermer un formulaire.
+
+              Ce qui ne change PAS : l'ordre reste libre — les crans ci-dessus
+              mènent à n'importe laquelle —, tout est gardé à chaque frappe, et
+              on peut passer une question sans la remplir. Un parcours imposé
+              serait plus simple à écrire et plus dur à remplir. */}
+          <nav className="lettre-etapes" aria-label="Les six questions">
+            <ol>
+              {QUESTIONS.map((q, i) => {
+                const remplie = (brouillon.reponses[q.cle] ?? '').trim() !== ''
+                return (
+                  <li key={q.cle}>
+                    <button
+                      type="button"
+                      className={`lettre-cran${remplie ? ' rempli' : ''}${
+                        i === etape ? ' courante' : ''
+                      }`}
+                      aria-current={i === etape ? 'step' : undefined}
+                      /* Le nom dit le numéro, l'état ET la question. Six
+                         boutons « 1 » à « 6 » ne se distinguent pas à
+                         l'oreille, et la couleur seule ne dit rien de ce qui
+                         est fait. */
+                      aria-label={`Question ${i + 1} sur ${QUESTIONS.length}, ${
+                        remplie ? 'remplie' : 'vide'
+                      } : ${q.question}`}
+                      onClick={() => setEtape(i)}
+                    >
+                      <span aria-hidden="true">{i + 1}</span>
+                    </button>
+                  </li>
+                )
+              })}
+            </ol>
+          </nav>
 
           <ol className="lettre-questions">
-            {QUESTIONS.map((q, i) => (
+            {QUESTIONS.filter((_, i) => i === etape).map((q) => (
               <li key={q.cle} className="lettre-question">
-                {/* Le numéro était celui d'une liste ordinaire : gris, minuscule,
-                    perdu dans la marge. En pastille, il dit d'un coup d'œil
-                    combien il en reste — et il marque celles qui sont faites. */}
-                <span
-                  className={
-                    (brouillon.reponses[q.cle] ?? '').trim() === ''
-                      ? 'lettre-numero'
-                      : 'lettre-numero rempli'
-                  }
-                  aria-hidden="true"
-                >
-                  {i + 1}
-                </span>
                 <label className="champ-label" htmlFor={`q-${q.cle}`}>
                   {q.question}
                 </label>
                 <textarea
                   id={`q-${q.cle}`}
                   className="lettre-champ"
-                  rows={3}
+                  rows={5}
                   value={brouillon.reponses[q.cle] ?? ''}
                   onChange={(ev) => repondre(q.cle, ev.target.value)}
                 />
@@ -414,7 +428,15 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
                   </p>
                 ) : null}
                 <p className="note lettre-pourquoi">{q.pourquoi}</p>
-                <details className="lettre-pistes">
+                {/* Les pistes sont DÉPLIÉES tant que le champ est vide, et
+                    repliées dès qu'il y a quelque chose dedans.
+
+                    Elles étaient derrière un clic, au moment précis où l'on
+                    sèche — c'est-à-dire au moment où l'on n'a pas envie de
+                    chercher où est l'aide. Une seule question à l'écran laisse
+                    la place de les montrer ; et une fois qu'on écrit, elles
+                    n'encombrent plus. */}
+                <details className="lettre-pistes" open={(brouillon.reponses[q.cle] ?? '').trim() === ''}>
                   <summary>Des pistes, si tu sèches</summary>
                   <ul>
                     {q.pistes.map((p) => (
@@ -427,6 +449,41 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
                     qu’un texte de machine.
                   </p>
                 </details>
+
+                <div className="lettre-navigation">
+                  <button
+                    type="button"
+                    className="secondaire"
+                    disabled={etape === 0}
+                    onClick={() => setEtape((e) => Math.max(0, e - 1))}
+                  >
+                    Précédente
+                  </button>
+                  {etape === QUESTIONS.length - 1 ? (
+                    /* Sur un téléphone, le brouillon est à six questions plus
+                       bas : arrivé à la dernière, on ne sait plus où est ce
+                       qu'on vient d'écrire. Un lien d'ancre, qui marche sans
+                       JavaScript et laisse le retour du navigateur faire son
+                       travail. */
+                    <a className="principal lettre-vers-brouillon" href="#brouillon">
+                      Voir mon brouillon
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      className="principal"
+                      onClick={() => setEtape((e) => Math.min(QUESTIONS.length - 1, e + 1))}
+                    >
+                      {/* « Suivante » et non « Valider » : rien ne se valide,
+                          et rien n'oblige à répondre pour avancer. Le texte
+                          change selon que le champ est rempli, pour que passer
+                          une question soit un choix affiché et non un aveu. */}
+                      {(brouillon.reponses[q.cle] ?? '').trim() === ''
+                        ? 'Passer pour l’instant'
+                        : 'Question suivante'}
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ol>
@@ -435,7 +492,9 @@ export function AtelierLettre({ connecte }: { readonly connecte: boolean }) {
         {/* ------------------------------------------------- le brouillon */}
         <aside className="lettre-colonne lettre-sortie">
           <div className="lettre-sortie-collee">
-            <h3 className="lettre-titre">Ton brouillon</h3>
+            <h3 className="lettre-titre" id="brouillon">
+              Ton brouillon
+            </h3>
             <p className="note">
               Fait de tes réponses, dans l’ordre du plan que la fiche recommande : une
               introduction d’une phrase, un développement, une conclusion. Tu peux le

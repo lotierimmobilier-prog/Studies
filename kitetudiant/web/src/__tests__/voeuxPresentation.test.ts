@@ -40,7 +40,18 @@ describe('la phrase qui évite le malentendu est encadrée', () => {
     /* Deux écrans, un seul traitement : une phrase encadrée doit vouloir dire
        la même chose partout, sinon elle ne veut plus rien dire nulle part.
        Une règle séparée finirait par dériver de l'autre. */
-    expect(CSS).toMatch(/\.lettre-avertissement,\s*\.voeux-avertissement\s*\{/)
+    /* Le test vise la RÈGLE partagée, pas l'ordre des sélecteurs : la page des
+       cartes est venue s'y ajouter, et un motif qui exigeait « .voeux-
+       avertissement juste avant l'accolade » l'a fait virer au rouge pour un
+       élargissement qui allait dans le bon sens. */
+    const partagee = [...CSS.matchAll(/([^@{};]+)\{/g)]
+      .map((m) => m[1]!.split(',').map((x) => x.trim().split('\n').pop()!.trim()))
+      .find((sels) => sels.includes('.lettre-avertissement'))
+    expect(partagee, 'la règle de l’encadré a disparu').not.toBeUndefined()
+    expect(
+      partagee,
+      'la page des vœux ne partage plus la règle : les deux encadrés vont dériver',
+    ).toContain('.voeux-avertissement')
   })
 })
 
