@@ -1,32 +1,6 @@
-/**
- * Page d'accueil.
- *
- * Elle a un seul travail : faire comprendre en dix secondes que ce site aide à
- * CHOISIR une école ou une fac, puis s'effacer. Le cahier des charges fixe un
- * premier résultat utile en moins de 90 secondes, sans compte.
- *
- * Deux règles de CLAUDE.md pèsent directement sur le texte de cette page :
- *
- * - règle 5, les trois scores restent séparés, jamais de note globale unique.
- *   On ne promet donc nulle part « la meilleure école » dans l'absolu, ce qui
- *   supposerait un classement entre établissements. Le titre nomme deux des
- *   trois angles — les chances, le reste-à-vivre — et le sous-titre les
- *   énonce tous les trois : nommer n'est pas fondre. Il dit aussi « vœux » et
- *   « Parcoursup », les mots qu'un lycéen tape, que le titre précédent
- *   rejetait dans un sur-titre en petits caractères, hors du h1 ;
- * - règle 6, toute donnée affichée porte son millésime. Aucun chiffre de cette
- *   page n'est décoratif : ils viennent tous du jeu de communes versionné.
- *
- * ── Les photographies ────────────────────────────────────────────────────
- *
- * Trois, pas une de plus, et toutes décoratives : `alt` vide et `aria-hidden`,
- * parce qu'elles ne portent aucune information que le texte ne donne déjà. Un
- * lecteur d'écran les saute au lieu de les annoncer au milieu d'une phrase.
- *
- * Elles sont volontairement en bandeau bas — jamais en grande image pleine
- * page. Ce site vaut par ses chiffres ; une photographie qui occupe l'écran
- * repousse la première donnée utile sous la ligne de flottaison, et le cahier
- * des charges fixe un premier résultat en moins de 90 secondes.
+/** Accueil KitEtudiant : trois dimensions séparées et chiffres sourcés.
+ * L’identité ivoire, forêt et corail est partagée avec les autres écrans.
+ * L’aperçu graphique utilise le même référentiel de loyers que le moteur.
  */
 
 import { useState } from 'react'
@@ -110,7 +84,8 @@ function Hero({
           pour coller deux mots-clés, c'est le tic visuel le plus
           reconnaissable des pages fabriquées à la chaîne — et il ne disait
           rien que le titre ne dise déjà, puisque « Parcoursup » y figure. */}
-      <h1 className="promesse">{ACCUEIL_TITRE_PAGE}</h1>
+      <p className="kit-ouverture">Ton prochain chapitre commence ici.</p>
+      <h1 className="promesse">{ACCUEIL_TITRE_PAGE.split(' : ')[0]} : <em>{ACCUEIL_TITRE_PAGE.split(' : ')[1]}</em></h1>
       <p className="hero-texte">
         Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet,
         au même endroit, avec des chiffres datés et leur source. Chaque formation est
@@ -150,6 +125,22 @@ function Hero({
         <a href="#methode">Comment ça marche</a>
       </p>
     </section>
+  )
+}
+
+/** Aperçu des mêmes loyers que la comparaison et le moteur, sans valeur inventée. */
+function ApercuLoyers() {
+  const villes = VILLES_EXEMPLE.flatMap((code) => {
+    const loyer = loyerDe(code)
+    return loyer === null ? [] : [{ code, nom: nomLisible(nomCommune(code) ?? code), loyer }]
+  })
+  return (
+    <div className="kit-apercu">
+      <p className="kit-apercu-surtitre"><Epingle /> Un même studio, trois villes</p>
+      <p className="kit-apercu-hypothese">{SURFACE} m² · loyer mensuel d’annonce, charges comprises</p>
+      {villes.length === 0 ? <p>Loyers indisponibles pour cet aperçu.</p> : <ul>{villes.map((v) => <li key={v.code}><span>{v.nom}</span><strong>{euros(v.loyer.euroParM2.central * SURFACE)}</strong></li>)}</ul>}
+      <p className="kit-apercu-source"><abbr title={SOURCE_LOYERS}>DGALN / ANIL</abbr> · {MILLESIME_LOYERS}<br />Référentiel collecté le {dateLisible(GENERE_LE)}. Estimation pour {SURFACE} m², pas une annonce disponible.</p>
+    </div>
   )
 }
 
@@ -393,7 +384,11 @@ export function Accueil({
       <div className="hero-zone">
         <Hero onCommencer={onCommencer} onChercher={() => onNaviguer({ vue: 'recherche' })} />
 
-        <div className="illu-bande illu-bande-large">
+        <div className="kit-horizon">
+          <div className="kit-horizon-quadrillage" aria-hidden="true" />
+          <svg className="kit-horizon-chemin" viewBox="0 0 480 520" fill="none" aria-hidden="true"><path d="M45 475C-10 330 395 425 350 275S80 275 145 135S350 160 410 35" stroke="currentColor" strokeWidth="55" /><path d="M45 475C-10 330 395 425 350 275S80 275 145 135S350 160 410 35" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="5 8" /></svg>
+          <span className="kit-horizon-note">Une formation. Une ville. Ta vie sur place.</span>
+          <div className="illu-bande illu-bande-large">
           <img
             src={photoArrivee}
             alt=""
@@ -402,6 +397,9 @@ export function Accueil({
             height={462}
             decoding="async"
           />
+          </div>
+          <div className="kit-horizon-badge" aria-hidden="true">À chacun<br /><em>son chemin.</em></div>
+          <ApercuLoyers />
         </div>
       </div>
 

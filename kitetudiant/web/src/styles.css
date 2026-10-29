@@ -96,51 +96,58 @@
  */
 
 :root {
-  --fond: #fbfaf7;
-  --encre: #17222e;
-  --doux: #546475;
-  --trait: #dce2e8;
-  --carte: #ffffff;
-  --vert: #14846b;
-  --orange: #7c5a15;
-  --rouge: #8c2a1f;
-  --gris: #546475;
-  --accent: #19304a;
+  --fond: #f6f5ef;
+  --encre: #203d35;
+  --doux: #5f6e63;
+  --trait: #dcdfd2;
+  --carte: #fffefa;
+  --vert: #285b48;
+  --orange: #896020;
+  --rouge: #a34d39;
+  --gris: #5f6e63;
+  --accent: #285b48;
   /* Accent vif, purement décoratif : jamais utilisé pour un verdict. */
-  --vif: #1b8184;
-  --rayon: 10px;
+  --vif: #ae573c;
+  --rayon: 16px;
   --titres: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
-  --texte: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --texte: 'Segoe UI', system-ui, sans-serif;
+  --editorial: 'Source Serif 4', Georgia, serif;
+  --surface-sauge: #e8ecdf;
+  --surface-peche: #f2e7da;
+  --surface-citron: #e4e9c6;
+  --sur-accent: #fffefa;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --fond: #111a22;
-    --encre: #e9eef3;
-    --doux: #8494a7;
-    --trait: #28323d;
-    --carte: #19232e;
-    --vert: #1fcaa2;
+    --fond: #13251f;
+    --encre: #eff1e6;
+    --doux: #a7b8aa;
+    --trait: #34483b;
+    --carte: #1c3027;
+    --vert: #91c6a4;
     --orange: #e8c477;
-    --rouge: #da675b;
-    --gris: #8494a7;
-    --accent: #5c8fc8;
-    --vif: #24b0b5;
+    --rouge: #eea38a;
+    --gris: #a7b8aa;
+    --accent: #a2c9a3;
+    --vif: #e5a78d;
+    --surface-sauge: #293c2e; --surface-peche: #3a3026; --surface-citron: #364329; --sur-accent: #13251f;
   }
 }
 
 :root[data-theme='dark'] {
-  --fond: #111a22;
-  --encre: #e9eef3;
-  --doux: #8494a7;
-  --trait: #28323d;
-  --carte: #19232e;
-  --vert: #1fcaa2;
+  --fond: #13251f;
+  --encre: #eff1e6;
+  --doux: #a7b8aa;
+  --trait: #34483b;
+  --carte: #1c3027;
+  --vert: #91c6a4;
   --orange: #e8c477;
-  --rouge: #da675b;
-  --gris: #8494a7;
-  --accent: #5c8fc8;
-  --vif: #24b0b5;
+  --rouge: #eea38a;
+  --gris: #a7b8aa;
+  --accent: #a2c9a3;
+  --vif: #e5a78d;
+    --surface-sauge: #293c2e; --surface-peche: #3a3026; --surface-citron: #364329; --sur-accent: #13251f;
 }
 
 * { box-sizing: border-box; }
@@ -228,7 +235,7 @@ body {
   cursor: pointer;
   min-height: 48px;
 }
-.principal { background: var(--accent); color: var(--fond); border: 1px solid var(--accent); }
+.principal { background: var(--accent); color: var(--sur-accent); border: 1px solid var(--accent); }
 .principal[disabled] { opacity: 0.6; cursor: progress; }
 /* Un lien qui doit avoir l'air d'un bouton. La console d'administration est
    une autre page HTML : on l'ouvre par une vraie navigation, pas par le
@@ -4207,3 +4214,134 @@ a.entete-lien { text-decoration: none; display: inline-flex; align-items: center
 .carte-actions .carte-volet-bouton { flex: 1 1 12rem; }
 
 .voeux-message, .voeux-rappel { margin: 0 0 0.8rem; }
+
+/* Identité KitEtudiant : papier ivoire, forêt, sauge et corail.
+   Les styles composés ci-dessous partagent les composants des écrans existants. */
+html { scroll-behavior: smooth; }
+body ::selection { background: var(--surface-citron); color: var(--encre); }
+body button, body input, body select, body textarea { font-family: var(--texte); }
+body .principal { border-radius: 9px; padding: .85rem 1.4rem; font-weight: 600; box-shadow: 0 4px 12px #203d3508; }
+body .principal:hover:not(:disabled) { background: var(--encre); color: var(--fond); transform: translateY(-2px); }
+body .secondaire, body .cta-secondaire { border-radius: 9px; }
+body .app { padding-top: 2.5rem; }
+body .app.accueil { max-width: 72rem; padding: 2rem 3rem 4rem; }
+body .barre-haut { background: var(--fond); border-bottom-color: var(--trait); box-shadow: none; }
+body .barre-haut-compte { border-radius: 9px; background: var(--accent); color: var(--sur-accent); padding: .65rem 1.1rem; }
+body .haut-lien { font-family: var(--texte); font-size: .8rem; }
+body .haut-lien-courant { background: var(--surface-sauge); border-radius: 8px; }
+body .rail { background: var(--fond); border-color: var(--trait); }
+body .rail-lien-courant { background: var(--surface-sauge); color: var(--accent); }
+body .accueil .hero-zone { display: grid; grid-template-columns: 1.08fr 1fr; align-items: center; gap: 3.5rem; margin: 1rem 0 4rem; }
+body .accueil .hero { margin: 0; }
+.kit-ouverture { margin: 0 0 1.3rem; display: flex; align-items: center; gap: 9px; font-size: .78rem; color: var(--doux); }
+.kit-ouverture::before { content: ''; width: 7px; height: 7px; background: var(--vif); border-radius: 50%; }
+body .accueil .promesse { font-size: clamp(2.4rem, 4.3vw, 4rem); line-height: 1.04; letter-spacing: -.05em; font-weight: 600; margin-bottom: 1.5rem; }
+body .accueil .promesse em { display: block; font-family: var(--editorial); font-weight: 400; font-style: italic; color: var(--vif); margin-top: .2em; }
+body .accueil .hero-texte { font-size: .92rem; line-height: 1.8; max-width: 32rem; }
+body .accueil .hero-gratuit { font-size: .82rem; color: var(--doux); line-height: 1.7; max-width: 30rem; }
+body .accueil .hero-mentions { font-size: .74rem; text-align: left; }
+body .accueil .cta-groupe { flex-wrap: wrap; gap: .8rem; }
+body .accueil .cta-groupe .principal { font-size: .88rem; padding: .9rem 1.3rem; }
+body .accueil .cta-secondaire { font-size: .82rem; background: transparent; padding: .85rem .6rem; border: 0; text-decoration: underline; text-underline-offset: 5px; }
+.kit-horizon { position: relative; min-width: 0; height: 580px; border-radius: 160px 160px 18px 18px; background: var(--surface-sauge); isolation: isolate; }
+.kit-horizon-quadrillage { position: absolute; inset: 0; border-radius: inherit; background-image: linear-gradient(var(--trait) 1px,transparent 1px),linear-gradient(90deg,var(--trait) 1px,transparent 1px); background-size: 34px 34px; opacity: .5; z-index: -2; }
+.kit-horizon-chemin { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--surface-citron); z-index: -1; }
+.kit-horizon-note { display: block; text-align: center; padding: 35px 15px 0; font-family: var(--editorial); font-size: .8rem; font-style: italic; }
+.kit-horizon .illu-bande { position: absolute; left: -12px; top: 90px; width: 70%; height: 168px; border: 7px solid var(--carte); border-radius: 12px; margin: 0; transform: rotate(-5deg); box-shadow: 0 12px 30px #1d3d3112; }
+.kit-horizon .illu-bande img { width: 100%; height: 100%; object-fit: cover; max-height: none; }
+.kit-horizon-badge { position: absolute; top: 90px; right: -5px; display: grid; place-content: center; width: 115px; height: 115px; border-radius: 50%; background: #be694c; color: #fff9ec; font-size: .9rem; line-height: 1.4; text-align: center; transform: rotate(12deg); }
+.kit-horizon-badge em { font-family: var(--editorial); font-size: 1.1rem; }
+.kit-apercu-source abbr { text-decoration: none; }
+.kit-apercu { position: absolute; top: 272px; right: -10px; width: 88%; padding: 22px; border-radius: 12px; background: var(--carte); border: 1px solid var(--trait); box-shadow: 0 14px 30px #1d3d3110; transform: rotate(3deg); }
+.kit-apercu-surtitre { display: flex; align-items: center; gap: 8px; font-family: var(--titres); font-size: .88rem; font-weight: 600; margin: 0 0 5px; }
+.kit-apercu-hypothese { font-size: .65rem; color: var(--doux); margin: 0 0 12px; }
+.kit-apercu ul { list-style: none; margin: 0; padding: 0; }
+.kit-apercu li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--trait); font-size: .78rem; }
+.kit-apercu li strong { font-family: var(--titres); font-size: 1rem; white-space: nowrap; }
+.kit-apercu-source { font-size: .65rem; color: var(--doux); line-height: 1.6; margin: 10px 0 0; }
+body .accueil .bandeau { border-width: 1px 0; border-radius: 0; background: transparent; margin-bottom: 5rem; padding: 25px 0; }
+body .accueil .bandeau-item { background: transparent; padding: 0 25px; border-right: 1px solid var(--trait); }
+body .accueil .bandeau-item:last-child { border-right: 0; }
+body .accueil .bandeau-chiffre { font-size: 2.4rem; font-weight: 600; letter-spacing: -.06em; }
+body .accueil .bandeau-libelle { font-size: .75rem; max-width: 25ch; }
+body .accueil .bloc { margin-bottom: 5rem; }
+body .accueil .bloc h2 { font-size: clamp(1.6rem, 2.7vw, 2.5rem); letter-spacing: -.04em; line-height: 1.15; margin-bottom: 1rem; font-weight: 600; }
+body .accueil .bloc-intro { font-size: .95rem; line-height: 1.8; max-width: 48rem; margin-bottom: 1.8rem; }
+body .accueil .piliers-grille { gap: 18px; }
+body .accueil .pilier { background: var(--surface-sauge); border: 0; padding: 30px; border-radius: 14px; }
+body .accueil .pilier:nth-child(2) { background: var(--surface-citron); }
+body .accueil .pilier:nth-child(3) { background: var(--surface-peche); }
+body .accueil .pilier-numero { background: none; border: 0; color: var(--accent); padding: 0; margin-bottom: 25px; }
+body .accueil .pilier-titre { font-size: 1.2rem; margin-bottom: 7px; }
+body .accueil .pilier-question { font-family: var(--editorial); font-size: .92rem; color: var(--encre); }
+body .accueil .pilier-texte { font-size: .82rem; line-height: 1.8; }
+body .accueil .bloc-chute { color: var(--doux); font-size: .87rem; line-height: 1.8; }
+body .accueil .comparaison { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+body .accueil .comparaison li { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 25px; background: var(--carte); border-radius: 14px; }
+body .accueil .comparaison-montant { font-size: 2.2rem; font-weight: 600; letter-spacing: -.05em; }
+body .accueil .etapes-illustrees { display: block; background: var(--surface-sauge); padding: 35px; border-radius: 18px; }
+body .accueil .etapes-illustrees > .illu-bande { height: 200px; margin: 0 0 28px; }
+body .accueil .etapes-illustrees > .illu-bande img { height: 100%; width: 100%; object-fit: cover; max-height: none; }
+body .accueil .etapes-accueil { list-style: none; padding: 0; counter-reset: chemin; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+body .accueil .etapes-accueil li { position: relative; padding: 19px 0 0; border-top: 1px solid var(--trait); font-size: .85rem; counter-increment: chemin; }
+body .accueil .etapes-accueil li::before { content: '0' counter(chemin); display: block; font-family: var(--editorial); font-size: 1.6rem; color: var(--vif); margin-bottom: 12px; }
+body .accueil .etapes-accueil strong { display: block; margin-bottom: 7px; }
+body .accueil .chrono { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+body .accueil .chrono-phase { padding: 25px 0 0; border-left: 0; border-top: 1px solid var(--trait); }
+body .accueil .chrono-phase::before { display: none; }
+body .accueil .chrono-date { color: var(--accent); }
+body .accueil .cta-final { background: var(--surface-citron); border: 0; padding: 55px 28px; border-radius: 18px; }
+body .accueil .cta-final h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); letter-spacing: -.04em; }
+body .accueil .cta-final > p { font-family: var(--editorial); }
+body .accueil .articles-apercu { gap: 18px; }
+body .accueil .article-apercu { border-radius: 14px; }
+body .app .carte, body .app .choix-carte { border-radius: 16px; box-shadow: 0 6px 20px #203d3505; }
+body .app .choix-carte { padding: 24px; }
+body .app .etape { background: var(--carte); padding: 30px; border: 1px solid var(--trait); border-radius: 18px; }
+body .app .progression { gap: 8px; margin-bottom: 25px; }
+body .app .pas { height: 5px; border-radius: 9px; }
+body .app .choix button, body .app .domaines button { border-radius: 10px; padding: 15px; background: var(--fond); }
+body .app .choix-actif { background: var(--surface-sauge) !important; }
+body .app .champ input, body .app .champ select, body .app .recherche-champ { border-radius: 9px; min-height: 46px; background: var(--carte); }
+body .app .verrou { background: var(--surface-sauge); border: 0; padding: 25px; }
+body .app .bilan { background: var(--surface-sauge); border-radius: 12px; padding: 18px; }
+body .app .compte-form { background: var(--carte); border: 1px solid var(--trait); border-radius: 16px; padding: 25px; }
+body .app .fiche-onglets { border-color: var(--trait); }
+body .app .lettre-brouillon { background: var(--carte); border-radius: 12px; box-shadow: 0 12px 30px #203d3508; }
+@media (max-width: 1000px) {
+ body .app.accueil { padding-inline: 28px; }
+ body .accueil .hero-zone { gap: 25px; }
+ body .accueil .promesse { font-size: 2.8rem; }
+ .kit-horizon { height: 570px; }
+ .kit-horizon-badge { width: 95px; height: 95px; right: 0; font-size: .8rem; }
+ .kit-apercu { padding: 18px; right: 0; }
+ body .accueil .piliers-grille .pilier { padding: 22px; }
+}
+@media (max-width: 720px) {
+ body .app.accueil { padding: 30px 22px 3rem; }
+ body .accueil .hero-zone { grid-template-columns: 1fr; gap: 35px; margin: 0 0 40px; }
+ body .accueil .promesse { font-size: clamp(2.45rem,8.6vw,3.5rem); }
+ body .accueil .hero-texte { font-size: .9rem; }
+ body .accueil .hero-gratuit { font-size: .8rem; }
+ body .accueil .cta-groupe { align-items: stretch; }
+ .kit-horizon { width: calc(100% - 12px); max-width: 460px; height: 550px; margin: auto; }
+ .kit-horizon .illu-bande { width: 72%; height: 150px; left: -4px; }
+ .kit-horizon .kit-apercu { top: 255px; right: -4px; width: 92%; }
+ .kit-horizon-note { font-size: .72rem; padding-top: 32px; }
+ .kit-horizon .kit-horizon-badge { right: -4px; top: 100px; }
+ body .accueil .bandeau { grid-template-columns: repeat(3,minmax(0,1fr)); margin-bottom: 45px; }
+ body .accueil .bandeau-item { padding: 0 10px; }
+ body .accueil .bandeau-item:first-child { padding-left: 0; }
+ body .accueil .bandeau-chiffre { font-size: clamp(1.2rem,5vw,1.8rem); }
+ body .accueil .bandeau-libelle { font-size: .65rem; }
+ body .accueil .bloc { margin-bottom: 45px; }
+ body .accueil .bloc h2 { font-size: 1.8rem; }
+ body .accueil .piliers-grille, body .accueil .comparaison, body .accueil .chrono, body .accueil .etapes-accueil { grid-template-columns: 1fr; }
+ body .accueil .comparaison li { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; padding: 20px; }
+ body .accueil .comparaison-montant { font-size: 1.7rem; }
+ body .accueil .etapes-illustrees { padding: 23px; }
+ body .app .etape { padding: 23px 18px; }
+ body .app .choix-carte { padding: 20px; }
+ body .app .compte-form { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } body .principal:hover:not(:disabled) { transform: none; } }
