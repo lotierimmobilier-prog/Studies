@@ -191,6 +191,10 @@ export default function App() {
   if (statut === 'chargement') {
     return (
       <div className="app">
+        <nav className="app-nav" aria-label="Navigation principale">
+          <button className="brand" onClick={() => setVue('accueil')} aria-label="Revenir à l’accueil"><span className="brand-mark" aria-hidden="true"><svg className="arrow-icon" viewBox="0 0 24 24" fill="none"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" strokeWidth="1.7" /></svg></span>cap sup.</button>
+          <span>TON PARCOURS COMMENCE ICI</span>
+        </nav>
         <header className="hero">
           <h1>Simulation en cours…</h1>
         </header>
@@ -208,8 +212,13 @@ export default function App() {
     const resultats = simulerToutes(formations, profil)
     return (
       <div className="app">
+        <nav className="app-nav" aria-label="Navigation principale">
+          <button className="brand" onClick={() => setVue('accueil')} aria-label="Revenir à l’accueil"><span className="brand-mark" aria-hidden="true"><svg className="arrow-icon" viewBox="0 0 24 24" fill="none"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" strokeWidth="1.7" /></svg></span>cap sup.</button>
+          <span>TON PARCOURS COMMENCE ICI</span>
+        </nav>
         <header className="hero">
-          <h1>Vos résultats</h1>
+          <div className="acc-eyebrow">TON PROCHAIN CHAPITRE</div>
+          <h1>De nouvelles pistes s’ouvrent.</h1>
         </header>
         {!sourceReelle && (
           <div className="error-box" style={{ marginBottom: '1.25rem' }}>
@@ -247,8 +256,13 @@ export default function App() {
 
   return (
     <div className="app">
+        <nav className="app-nav" aria-label="Navigation principale">
+          <button className="brand" onClick={() => setVue('accueil')} aria-label="Revenir à l’accueil"><span className="brand-mark" aria-hidden="true"><svg className="arrow-icon" viewBox="0 0 24 24" fill="none"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" strokeWidth="1.7" /></svg></span>cap sup.</button>
+          <span>TON PARCOURS COMMENCE ICI</span>
+        </nav>
       <header className="hero">
-        <h1>Simulateur d'admission Parcoursup</h1>
+        <div className="acc-eyebrow">UN PEU DE TOI, BEAUCOUP DE POSSIBILITÉS</div>
+        <h1>Faisons connaissance.</h1>
         <p>
           Estimez vos chances d'être admis·e dans différentes formations selon
           vos résultats scolaires, votre localisation, vos passions et votre
@@ -575,7 +589,7 @@ export default function App() {
             </button>
           ) : (
             <button className="btn btn-primary" onClick={lancerSimulation}>
-              Simuler mes chances 🚀
+              Découvrir mes résultats ↗
             </button>
           )}
         </div>
