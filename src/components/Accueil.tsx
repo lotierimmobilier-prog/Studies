@@ -1,167 +1,78 @@
-/**
- * Page d'accueil : présente le simulateur aux lycéens.
- * Ton professionnel et rassurant, avec une pointe d'humour.
- */
+import { FORMATIONS } from '../data/formations'
+import { DOMAINES, LABELS_DOMAINE } from '../data/labels'
+import { budgetMensuel, coutDeLaVie } from '../data/coutVie'
+
+function Arrow() {
+  return <svg className="arrow-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+}
 
 interface AccueilProps {
   onCommencer: () => void
 }
 
 const FONCTIONS = [
-  {
-    emoji: '🎯',
-    titre: 'Ton taux d\'admission, estimé',
-    texte:
-      'À partir des vrais taux d\'accès Parcoursup. Fini le « au feeling » : tu vois où tu as tes chances.',
-  },
-  {
-    emoji: '📄',
-    titre: 'Ton bulletin analysé',
-    texte:
-      'Tu importes ton bulletin, l\'IA lit tes notes et tes appréciations. Elle fait le sale boulot.',
-  },
-  {
-    emoji: '💶',
-    titre: 'Prix + coût de la vie',
-    texte:
-      'Frais de scolarité et loyer par ville. Parce que « logé chez papa-maman » n\'est pas toujours une option.',
-  },
-  {
-    emoji: '🧭',
-    titre: 'Des conseils sur-mesure',
-    texte:
-      'Spécialités à choisir, liste de vœux équilibrée. Comme un prof principal, mais dispo à 2 h du mat.',
-  },
-]
-
-const ETAPES = [
-  {
-    n: 1,
-    titre: 'Ton profil',
-    texte: 'Notes, spécialités, région, passions et motivation. Ou juste ton bulletin.',
-  },
-  {
-    n: 2,
-    titre: 'La simulation',
-    texte: 'On interroge les données officielles et on calcule tes chances, formation par formation.',
-  },
-  {
-    n: 3,
-    titre: 'Ta liste de vœux',
-    texte: 'Ambitieux, réalistes, valeurs sûres — avec prix, loyer et conseils personnalisés.',
-  },
+  { icon: 'arrow', titre: 'Vois plus loin que tes notes.', texte: 'Tes résultats comptent. Tes passions, ta motivation et ton projet aussi. On regarde ton profil dans son ensemble.' },
+  { icon: '◎', titre: 'Trouve ta place.', texte: 'Compare les formations, explore de nouvelles villes et découvre les parcours qui te correspondent.' },
+  { icon: '€', titre: 'Garde les pieds sur terre.', texte: 'Frais de scolarité, logement, coût de la vie : construis un projet qui tient aussi dans ton budget.' },
 ]
 
 export default function Accueil({ onCommencer }: AccueilProps) {
+  const exemple = FORMATIONS.find((f) => f.id === 'licence-info-lyon') ?? FORMATIONS[0]
+  const cout = coutDeLaVie(exemple.ville, exemple.region)
+  const euros = (montant: number) => montant.toLocaleString('fr-FR') + ' €'
+
   return (
     <div className="accueil">
-      <nav className="acc-nav">
-        <div className="acc-logo">
-          <span aria-hidden="true">🧭</span> Cap&nbsp;Sup
-        </div>
-        <button className="btn btn-primary acc-nav-cta" onClick={onCommencer}>
-          Simuler mes chances
-        </button>
+      <nav className="acc-nav" aria-label="Navigation principale">
+        <a href="#" className="brand" aria-label="Cap Sup, accueil"><span className="brand-mark" aria-hidden="true"><Arrow /></span>cap sup<span className="brand-period">.</span></a>
+        <div className="nav-links"><a href="#approche">L’approche</a><a href="#comment">Comment ça marche</a></div>
+        <button className="btn btn-primary" onClick={onCommencer}>À toi de jouer <span aria-hidden="true"><Arrow /></span></button>
       </nav>
 
-      <header className="acc-hero">
-        <div className="acc-eyebrow">Orientation · Parcoursup</div>
-        <h1>
-          Parcoursup,
-          <br />
-          sans la boule au ventre.
-        </h1>
-        <p className="acc-lede">
-          Estime tes chances d&apos;admission dans les formations qui te
-          plaisent, à partir des <strong>données officielles</strong> — et
-          repars avec une liste de vœux équilibrée, des conseils et le budget
-          qui va avec.
-        </p>
-        <div className="acc-cta">
-          <button className="btn btn-primary acc-cta-main" onClick={onCommencer}>
-            Simuler mes chances 🚀
-          </button>
-          <a className="acc-cta-link" href="#comment">
-            Voir comment ça marche
-          </a>
-        </div>
-        <div className="acc-reassure">
-          <span>✓ 100 % gratuit</span>
-          <span>✓ Sans inscription</span>
-          <span>✓ Données officielles</span>
-        </div>
-      </header>
-
-      <section className="acc-stats">
-        <div>
-          <b>14 252</b>
-          <span>formations couvertes</span>
-        </div>
-        <div>
-          <b>4</b>
-          <span>critères analysés</span>
-        </div>
-        <div>
-          <b>0 €</b>
-          <span>et aucun compte</span>
-        </div>
-      </section>
-
-      <section className="acc-section">
-        <h2>Tout ce qu&apos;un simulateur devrait faire (et un peu plus)</h2>
-        <div className="acc-grid">
-          {FONCTIONS.map((f) => (
-            <div className="acc-card" key={f.titre}>
-              <div className="acc-card-emoji" aria-hidden="true">
-                {f.emoji}
-              </div>
-              <h3>{f.titre}</h3>
-              <p>{f.texte}</p>
+      <main>
+        <header className="acc-hero">
+          <div className="hero-copy">
+            <div className="acc-eyebrow"><span /> TON AVENIR A DE L’AVENIR</div>
+            <h1>La suite ?<br />Elle commence<br /><em>avec toi.</em><span className="title-star" aria-hidden="true">✳︎</span></h1>
+            <p className="acc-lede">Estime tes chances d’admission à partir de tes résultats, de ta localisation, de tes passions et de ta motivation. Compare les formations, leur budget et construis ta liste de vœux.</p>
+            <div className="acc-cta"><button className="btn btn-primary" onClick={onCommencer}>Explorer mes possibilités <span aria-hidden="true"><Arrow /></span></button><span className="cta-note">Ton profil. Ton rythme.</span></div>
+            <div className="acc-reassure"><span>✓ Gratuit</span><span>✓ Sans inscription</span><span>✓ Sans pression</span></div>
+          </div>
+          <div className="journey-art" role="group" aria-label="Aperçu d’une formation de l’échantillon de démonstration">
+            <div className="art-grid" />
+            <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
+            <span className="art-label">IL N’Y A PAS QU’UN SEUL CHEMIN.</span>
+            <svg className="journey-path" viewBox="0 0 480 500" fill="none" aria-hidden="true"><path d="M70 450C30 345 310 410 350 300S110 240 150 140S360 170 410 45" stroke="#e2e7aa" strokeWidth="58" /><path d="M70 450C30 345 310 410 350 300S110 240 150 140S360 170 410 45" stroke="#526d4a" strokeWidth="2" strokeDasharray="5 8" /></svg>
+            <div className="art-card profile-card"><span className="art-card-icon">☺</span><div><small>LE POINT DE DÉPART</small><strong>Toi, tout simplement.</strong><span>Des talents. Des envies. Du potentiel.</span></div></div>
+            <div className="art-card possibility-card data-preview">
+              <div className="card-kicker"><span className="tiny-dot" /> EXEMPLE · DONNÉES DE DÉMONSTRATION</div>
+              <div className="mini-formation"><span>01</span><div><strong>{exemple.nom}</strong><small>{exemple.etablissement} · {exemple.ville}</small></div></div>
+              <div className="preview-rate"><strong>{exemple.tauxAccesBase} %</strong><span>Taux d’accès de l’échantillon<br />Ce n’est pas ton estimation personnelle.</span></div>
+              <div className="match-label"><span>Loyer indicatif / mois</span><b>{euros(cout.loyerStudio)}</b></div>
+              <div className="match-label"><span>Budget de vie / mois, loyer inclus</span><b>{euros(budgetMensuel(exemple.ville, exemple.region))}</b></div>
             </div>
-          ))}
-        </div>
-      </section>
+            <span className="art-sticker">Et pourquoi<br /><em>pas toi ?</em></span><span className="art-spark" aria-hidden="true">✳︎</span><span className="art-bottom">CAP SUR TON PROCHAIN CHAPITRE</span>
+          </div>
+        </header>
 
-      <section className="acc-section" id="comment">
-        <h2>Comment ça marche</h2>
-        <p className="acc-sub">Trois étapes, cinq minutes, zéro prise de tête.</p>
-        <div className="acc-steps">
-          {ETAPES.map((e) => (
-            <div className="acc-step" key={e.n}>
-              <div className="acc-step-n">{e.n}</div>
-              <div>
-                <h3>{e.titre}</h3>
-                <p>{e.texte}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+        <div className="trust-strip"><span>Un peu moins de flou.<br /><strong>Beaucoup plus de perspectives.</strong></span><div><b>{DOMAINES.length}</b><span>Domaines d’études proposés</span></div><div><b>{FORMATIONS.length}</b><span>Formations dans l’échantillon local</span></div><div><b>0 €</b><span>Pour utiliser le simulateur</span></div></div>
 
-      <section className="acc-joke">
-        <p>
-          <strong>Spoiler :</strong> non, tu ne vas pas « finir sans rien ».
-          L&apos;idée, c&apos;est justement de bâtir une liste où tu tentes tes
-          rêves <em>et</em> où tu sécurises tes arrières. On s&apos;occupe des
-          maths, toi tu gères la motivation.
-        </p>
-      </section>
+        <section className="acc-section" id="approche"><div className="section-heading"><div><div className="acc-eyebrow">UNE BOUSSOLE, À TA FAÇON</div><h2>Pas besoin d’avoir<br />déjà tout prévu.</h2></div><p>On t’aide à relier ce que tu aimes, ce que tu sais faire et ce qui est possible. La décision reste la tienne.</p></div><div className="acc-grid">{FONCTIONS.map((f, i) => <article className="acc-card" key={f.titre}><div className="feature-top"><span className="feature-icon" aria-hidden="true">{f.icon === 'arrow' ? <Arrow /> : f.icon}</span><span>0{i + 1}</span></div><h3>{f.titre}</h3><p>{f.texte}</p></article>)}</div></section>
 
-      <section className="acc-final">
-        <h2>Prêt·e à y voir clair&nbsp;?</h2>
-        <p>Ton orientation mérite mieux qu&apos;un tirage au sort.</p>
-        <button className="btn btn-primary acc-cta-main" onClick={onCommencer}>
-          Lancer ma simulation
-        </button>
-      </section>
+        <section className="catalogue-section" aria-labelledby="catalogue-titre">
+          <div className="section-heading"><div><div className="acc-eyebrow">LES PARCOURS DÉJÀ DANS STUDIES</div><h2 id="catalogue-titre">Des pistes concrètes à explorer.</h2></div><p>Quelques formations de l’échantillon local. La simulation recherche les données officielles en direct et utilise cet échantillon si elles sont indisponibles.</p></div>
+          <div className="catalogue-grid">{FORMATIONS.slice(0, 6).map((f) => <article className="catalogue-card" key={f.id}>
+            <span className="tag">{LABELS_DOMAINE[f.domaine]}</span><h3>{f.nom}</h3><p>{f.etablissement}</p><div className="catalogue-facts"><span>{f.ville}</span><span>{f.statut}</span></div><div className="catalogue-budget">Budget de vie indicatif, loyer inclus<strong>{euros(budgetMensuel(f.ville, f.region))}<small> / mois</small></strong></div>
+            <button className="text-button" onClick={onCommencer}>Évaluer mon profil <Arrow /></button>
+          </article>)}</div>
+          <p className="source-note">Exemples de démonstration, pas un catalogue exhaustif. Les budgets de vie sont indicatifs et n’incluent pas les frais de scolarité.</p>
+        </section>
+        <section className="sources-section" aria-labelledby="sources-titre"><div><div className="acc-eyebrow">SAVOIR CE QUE L’ON COMPARE</div><h2 id="sources-titre">Les données, en toute clarté.</h2></div><div><h3>Formations et taux d’accès</h3><p>Le jeu public fr-esr-parcoursup fournit les établissements, les lieux, les capacités et les taux d’accès historiques. Ces taux sont distincts de tes chances estimées par le simulateur.</p><a href="https://data.enseignementsup-recherche.gouv.fr/explore/dataset/fr-esr-parcoursup/" target="_blank" rel="noreferrer">Consulter la source officielle <Arrow /></a></div><div><h3>Prix, logement et conseils</h3><p>Les frais proviennent de la base de prix, des sites d’écoles ou d’une estimation signalée dans les résultats. Les budgets par ville restent indicatifs. Les conseils fonctionnent aussi sans IA ; l’analyse de bulletin nécessite le service IA configuré.</p></div></section>
 
-      <footer className="acc-footer">
-        <p>
-          Outil pédagogique et indépendant. Les estimations reposent sur un
-          modèle simplifié et des données publiques ; elles ne préjugent pas des
-          décisions réelles des formations Parcoursup.
-        </p>
-      </footer>
+        <section className="how-section" id="comment"><div className="section-heading"><div><div className="acc-eyebrow">ON FAIT LE CHEMIN ENSEMBLE</div><h2>Du « je ne sais pas »<br />au « pourquoi pas ».</h2></div><button className="text-button" onClick={onCommencer}>C’est parti <span aria-hidden="true"><Arrow /></span></button></div><div className="acc-steps">{[{titre:'Raconte-nous un peu.', texte:'Tes notes, tes spécialités, tes envies et les endroits où tu te verrais étudier.'},{titre:'Ouvre les possibilités.', texte:'Explore tes chances estimées, compare les parcours et repère ceux qui te donnent envie.'},{titre:'Dessine ta prochaine étape.', texte:'Construis une liste de vœux équilibrée, avec les conseils et le budget pour avancer.'}].map((e,i)=><article className="acc-step" key={e.titre}><span className="acc-step-n">0{i+1}</span><h3>{e.titre}</h3><p>{e.texte}</p></article>)}</div></section>
+        <section className="acc-final"><span className="final-spark" aria-hidden="true">✳︎</span><div className="acc-eyebrow">LE PREMIER PAS SUFFIT</div><h2>Ton futur n’est pas écrit.<br /><em>Et c’est une bonne nouvelle.</em></h2><button className="btn btn-primary" onClick={onCommencer}>Je découvre mes possibilités <span aria-hidden="true"><Arrow /></span></button><p>Pas de compte à créer. Juste de nouvelles pistes.</p></section>
+      </main>
+      <footer className="acc-footer"><a href="#" className="brand"><span className="brand-mark" aria-hidden="true"><Arrow /></span>cap sup.</a><p>Une boussole pour ton orientation, pas une prédiction.<br />Outil pédagogique indépendant de Parcoursup. Les estimations ne garantissent pas une admission.</p><span>À chacun son chemin.</span></footer>
     </div>
   )
 }
