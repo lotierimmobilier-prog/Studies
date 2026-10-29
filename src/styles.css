@@ -1101,3 +1101,28 @@ h1 em, .acc-final em { font-family: Georgia, 'Times New Roman', serif; font-weig
  .art-orbit { width: 65%; height: auto; aspect-ratio: 1; }.orbit-one { left: 12%; }.orbit-two { left: 25%; }
  .final-spark { opacity: .32; z-index: 0; }.acc-final > :not(.final-spark) { position: relative; }
 }
+.data-preview { top: 230px; width: 310px; }
+.data-preview .mini-formation strong { font-size: 13px; }
+.data-preview .mini-formation small { font-size: 9px; line-height: 1.5; }
+.preview-rate { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+.preview-rate strong { font-size: 29px; line-height: 1; letter-spacing: -1px; }
+.preview-rate span { font-size: 8px; color: var(--text-muted); }
+.data-preview .match-label { font-size: 8px; gap: 8px; margin-top: 8px; }
+.data-preview .match-label b { white-space: nowrap; }
+.catalogue-section { padding: 0 0 65px; }
+.catalogue-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
+.catalogue-card { display: flex; flex-direction: column; align-items: flex-start; background: var(--bg-card); border: 1px solid var(--border); padding: 24px; border-radius: 14px; }
+.catalogue-card h3 { font-size: 19px; line-height: 1.3; margin: 16px 0 7px; letter-spacing: -.5px; }
+.catalogue-card > p { font-size: 12px; color: var(--text-muted); margin: 0 0 12px; }
+.catalogue-facts { display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); margin-bottom: 20px; }
+.catalogue-budget { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border); width: 100%; font-size: 10px; color: var(--text-muted); }
+.catalogue-budget strong { display: block; font-size: 23px; color: var(--text); margin-top: 4px; font-weight: 550; }
+.catalogue-budget small { font-size: 11px; font-weight: 400; }
+.catalogue-card .text-button { margin-top: 15px; font-size: 12px; }
+.source-note { font-size: 11px; color: var(--text-muted); margin: 18px 0 0; }
+.sources-section { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 30px; border-top: 1px solid var(--border); padding: 40px 0 65px; }
+.sources-section h2 { font-size: 28px; letter-spacing: -1px; line-height: 1.2; font-weight: 500; }
+.sources-section h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.sources-section p, .sources-section a { font-size: 12px; line-height: 1.8; color: var(--text-muted); }
+@media(max-width:900px) { .data-preview { width: 275px; padding: 18px; } }
+@media(max-width:650px) { .catalogue-grid, .sources-section { grid-template-columns: 1fr; }.data-preview { width: 270px; top: 202px; }.catalogue-section { padding-bottom: 40px; }.sources-section { padding-bottom: 40px; gap: 23px; }.catalogue-card h3 { font-size: 20px; } }

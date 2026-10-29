@@ -63,13 +63,12 @@ function NoteGoogle({ avis }: { avis?: AvisEcole }) {
   )
 }
 
-/**
- * Probabilité déclinée dans la couleur unique (bleu, teinte 214) :
- * un bleu plus profond signale de meilleures chances.
- */
+/** Couleur des estimations, harmonisée avec l’identité Cap Sup. */
 function couleurProba(p: number): string {
-  const l = 66 - (p / 100) * 36 // 66% (faible) → 30% (élevé)
-  return `hsl(214 82% ${l}%)`
+  if (p >= 70) return '#285b48'
+  if (p >= 50) return '#526d3b'
+  if (p >= 30) return '#95652b'
+  return '#a34d39'
 }
 
 function libelleChance(p: number): string {
