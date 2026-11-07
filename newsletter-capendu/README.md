@@ -1,4 +1,4 @@
-# Capendu Infos – page de la newsletter
+# Capendu en bref – page de la newsletter
 
 Page unique, statique (HTML/CSS/JS), sans dépendance ni cookie. Les polices sont hébergées dans `fonts/`
 (aucune requête vers Google), ce qui évite tout transfert d'adresse IP à un tiers.
@@ -19,7 +19,7 @@ Tous les textes à remplir sont surlignés en jaune (classe `.todo`) dans `index
 
 ## Brancher l'inscription (Brevo)
 
-1. Créer un compte Brevo, une liste « Capendu Infos » et un formulaire d'inscription avec **double opt-in**
+1. Créer un compte Brevo, une liste « Capendu en bref » et un formulaire d'inscription avec **double opt-in**
    (e-mail de confirmation). Signer l'accord de sous-traitance (DPA) proposé par Brevo.
 2. Dans Brevo, créer les attributs `PRENOM` et `PROFIL`, et activer l'enregistrement du consentement.
 3. Remplacer `REMPLACER-PAR-LIEN-FORMULAIRE-BREVO` dans l'attribut `action` du formulaire (`index.html`)

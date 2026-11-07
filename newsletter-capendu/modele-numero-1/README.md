@@ -1,4 +1,4 @@
-# Modèle du numéro 1 – Capendu Infos
+# Modèle du numéro 1 – Capendu en bref
 
 `numero-1.html` : modèle d'e-mail (tableaux, styles en ligne, polices système) prévu pour les messageries courantes
 (Gmail, Outlook, Apple Mail, webmails). Les textes entre crochets sur fond jaune sont à remplacer.
@@ -7,7 +7,7 @@
 
 1. Brevo > Campagnes > Créer une campagne e-mail > modèle HTML personnalisé : coller le contenu de `numero-1.html`.
 2. Remplacer tous les textes jaunes. Rechercher `[` pour n'en oublier aucun, puis supprimer les `<span style="background:#ffe27a;…">`.
-3. Remplacer `https://adresse-du-site.fr` et `jeromebouba@outlook.fr` par les vraies adresses.
+3. Remplacer `https://capenduenbref.fr` et `jeromebouba@outlook.fr` par les vraies adresses.
 4. Variables Brevo : `{{ mirror }}` (version navigateur) et `{{ unsubscribe }}` (désinscription). Si votre compte les écrit
    autrement, utiliser le bouton d'insertion de lien de l'éditeur Brevo. **Le lien de désinscription est obligatoire.**
 5. Envoyer un test à vous-même et à une personne âgée (téléphone et ordinateur) avant l'envoi.

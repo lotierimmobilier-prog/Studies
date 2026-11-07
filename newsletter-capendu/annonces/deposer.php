@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-layout_top('Déposer une annonce – Capendu Infos', '<a class="btn btn-small btn-ghost" href="partenaire/">Espace partenaire</a>');
+layout_top('Déposer une annonce – Capendu en bref', '<a class="btn btn-small btn-ghost" href="partenaire/">Espace partenaire</a>');
 echo '<h1>Déposer une annonce</h1>';
 echo '<p class="lead">Commerçants, artisans, associations, clubs : votre annonce sera relue puis publiée gratuitement dans la newsletter mensuelle. Vous serez prévenu(e) par e-mail et vous pourrez suivre son avancement dans votre <a href="partenaire/">espace partenaire</a>.</p>';
 

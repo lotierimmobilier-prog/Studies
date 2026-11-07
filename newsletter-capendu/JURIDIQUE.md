@@ -1,4 +1,4 @@
-# Cadre juridique – Capendu Infos (éditeur : Jérôme BOUBA, à titre personnel)
+# Cadre juridique – Capendu en bref (éditeur : Jérôme BOUBA, à titre personnel)
 
 Ce document est une liste de contrôle pratique, pas un avis juridique. En cas de doute, demander conseil à la CNIL
 (cnil.fr, rubrique « Besoin d'aide ») ou à un professionnel.

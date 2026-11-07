@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-layout_top('Administration – Capendu Infos', '');
+layout_top('Administration – Capendu en bref', '');
 echo '<h1>' . ($setup ? 'Première utilisation' : 'Administration') . '</h1>' . $msg;
 echo '<form class="card" method="post" action="login.php" autocomplete="off">' . csrf_field();
 if ($setup) {

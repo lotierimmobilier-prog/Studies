@@ -7,9 +7,9 @@ $id = (int)($_GET['id'] ?? 0);
 $st = db()->prepare("SELECT * FROM announcements WHERE id = ? AND status IN ('validated','published')");
 $st->execute([$id]);
 $a = $st->fetch();
-if (!$a) { http_response_code(404); layout_top('Annonce introuvable – Capendu Infos'); echo '<h1>Annonce introuvable</h1><p><a href="../index.html">Retour à l\'accueil</a></p>'; layout_bottom(); echo '</body></html>'; exit; }
+if (!$a) { http_response_code(404); layout_top('Annonce introuvable – Capendu en bref'); echo '<h1>Annonce introuvable</h1><p><a href="../index.html">Retour à l\'accueil</a></p>'; layout_bottom(); echo '</body></html>'; exit; }
 [$tag, $rub] = CATEGORIES[$a['category']];
-layout_top($a['title'] . ' – Capendu Infos');
+layout_top($a['title'] . ' – Capendu en bref');
 ?>
 <article class="fiche-pub">
   <span class="tag<?= $a['category'] === 'offre' ? ' tag-offre' : '' ?>"><?= h($tag) ?></span>
@@ -24,6 +24,6 @@ layout_top($a['title'] . ' – Capendu Infos');
   </dl>
   <?php if ($a['category'] === 'offre'): ?><p class="hint mt-14">Offre commerciale publiée sous la responsabilité du commerçant. Prix, dates et conditions peuvent changer.</p><?php endif; ?>
 </article>
-<p class="mt-20"><a href="../index.html">← Capendu Infos</a></p>
+<p class="mt-20"><a href="../index.html">← Capendu en bref</a></p>
 <?php layout_bottom(); ?>
 </body></html>

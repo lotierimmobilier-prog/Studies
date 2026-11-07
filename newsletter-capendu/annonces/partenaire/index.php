@@ -27,9 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ((int)$st->fetchColumn() > 0 && (int)$recent->fetchColumn() < 3) {
                 $token = bin2hex(random_bytes(32));
                 db()->prepare('INSERT INTO tokens (hash, email, expires) VALUES (?, ?, ?)')->execute([hash('sha256', $token), $asked, time() + 1800]);
-                send_mail($asked, 'Votre lien de connexion – Capendu Infos',
+                send_mail($asked, 'Votre lien de connexion – Capendu en bref',
                     "Bonjour,\n\nPour accéder à votre espace partenaire, ouvrez ce lien (valable 30 minutes, utilisable une seule fois) :\n\n"
-                    . SITE_URL . '/annonces/partenaire/lien.php?t=' . $token . "\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\nJérôme BOUBA, Capendu Infos");
+                    . SITE_URL . '/annonces/partenaire/lien.php?t=' . $token . "\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\nJérôme BOUBA, Capendu en bref");
             }
             // Même réponse dans tous les cas : on ne révèle pas quelles adresses sont connues.
             $msg = flash('ok', 'Si cette adresse a déjà servi à déposer une annonce, un e-mail avec un lien de connexion vient de vous être envoyé. Pensez à regarder dans les courriers indésirables.');
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $nav = $email ? '<a class="btn btn-small btn-ghost" href="../deposer.php">Déposer une annonce</a>' : '<a class="btn btn-small btn-ghost" href="../deposer.php">Déposer une annonce</a>';
-layout_top('Espace partenaire – Capendu Infos', $nav);
+layout_top('Espace partenaire – Capendu en bref', $nav);
 echo '<h1>Espace partenaire</h1>' . $msg;
 
 if (!$email) {
