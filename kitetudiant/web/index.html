@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- « %BASE_URL% » et non un chemin relatif : depuis une adresse profonde
+         comme /kitetudiant/blog/<slug>, « favicon.svg » serait cherchée dans
+         /blog/ et renverrait 404. -->
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <!-- Teinte de la barre d'adresse sur mobile : le marine du logo en clair,
+         le fond sombre du site en sombre. -->
+    <meta name="theme-color" content="#19304a" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111a22" media="(prefers-color-scheme: dark)" />
+    <meta
+      name="description"
+      content="Études, logement, budget, aides : tout ce qui se décide entre janvier et juillet, au même endroit, avec des chiffres datés et leur source."
+    />
+    <title>KitEtudiant.fr — trouve la meilleure solution pour l’année prochaine</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,4347 @@
+/* ------------------------------------------------------------------ polices
+ * Deux familles, servies DEPUIS CE SITE.
+ *
+ * Passer par fonts.googleapis.com aurait envoyé l'adresse IP de chaque élève
+ * à Google à chaque visite, ce que la page d'accueil promet justement de ne
+ * pas faire.
+ *
+ * ── Pourquoi celles-ci ───────────────────────────────────────────────────
+ *
+ * Le site tournait sur Poppins pour les titres et la pile système pour le
+ * texte. Poppins est l'une des familles les plus employées du web, et
+ * « ui-sans-serif » n'est pas un choix : c'est l'absence de choix. Deux
+ * familles très répandues donnaient une page qui pouvait appartenir à
+ * n'importe qui.
+ *
+ *   Bricolage Grotesque — les titres. Une grotesque contemporaine, un peu
+ *   irrégulière, qui a du caractère en grand sans crier.
+ *
+ *   Source Serif 4 — le texte courant. Un serif de document. Le métier de
+ *   ce site est de rendre lisible une décision administrative et financière ;
+ *   le registre du relevé lui va mieux qu'une sans-serif d'interface, et un
+ *   serif se lit mieux sur un paragraphe long.
+ *
+ * ── Le poids ─────────────────────────────────────────────────────────────
+ *
+ * Les fichiers de Google sont des polices VARIABLES : 330 Ko pour les
+ * quatre graisses, quatorze fois Poppins. Inacceptable sur le réseau mobile
+ * d'un lycéen. Chacune est donc figée à sa graisse et à sa taille optique,
+ * puis sous-ensemblée sur exactement la plage ci-dessous : 72 Ko en tout.
+ *
+ * Licences SIL Open Font 1.1, accompagnées de leur texte comme elles
+ * l'exigent.
+ *
+ * « swap » : le texte s'affiche tout de suite dans la police du système et
+ * bascule à l'arrivée. Jamais de page blanche en attendant.
+ *
+ * `unicode-range` n'est pas un détail, et la plage est reprise telle quelle
+ * de l'ancien réglage : sans elle, la police est réclamée pour TOUS les
+ * caractères, y compris l'espace fine insécable (U+202F) que
+ * « toLocaleString('fr-FR') » place dans « 1 246 » — et qui disparaissait,
+ * donnant « 1246 ». Elle dit exactement ce que ces polices savent rendre ;
+ * tout le reste retombe sur celle du système, qui, elle, sait.
+ * Constaté au navigateur le 20/09/2026, vérifié à nouveau le 21.
+ */
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./polices/bricolage-600.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Bricolage Grotesque';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('./polices/bricolage-800.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./polices/source-serif-400.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./polices/source-serif-600.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2013-2014, U+2018-201A, U+201C-201E, U+2022, U+2026, U+20AC, U+2039-203A, U+2212;
+}
+
+/* Mobile d'abord. Le reste-à-vivre est le plus gros caractère de la page. */
+
+/* ------------------------------------------------------------------ couleurs
+ * Toutes relevées sur le logo, puis ajustées jusqu'au contraste exigé.
+ *
+ *   marine    #19304A   accent d'interface — liens, boutons        13,4:1 ✅
+ *   teal      #1F969A   décor : pictogrammes, accents               3,6:1 ❌
+ *   ambre     #D59C24   verdict « tendu »                           2,4:1 ❌
+ *
+ * Deux des trois teintes ne passent pas pour du texte, là où il en faut 4,5.
+ * Ce site affiche des montants à des lycéens sur téléphone : on garde la
+ * teinte, on corrige la luminosité. Le marine, lui, est repris tel quel.
+ *
+ * Les trois verdicts sont étagés en LUMINOSITÉ autant qu'en teinte, pour ne
+ * pas dépendre de la seule couleur ; chacun reste écrit en toutes lettres.
+ *
+ * En thème sombre, les teintes sont remontées en gardant teinte et saturation
+ * plutôt que mélangées à du blanc, qui les aurait délavées en gris-bleu.
+ */
+
+:root {
+  --fond: #f6f5ef;
+  --encre: #203d35;
+  --doux: #5f6e63;
+  --trait: #dcdfd2;
+  --carte: #fffefa;
+  --vert: #285b48;
+  --orange: #896020;
+  --rouge: #a34d39;
+  --gris: #5f6e63;
+  --accent: #285b48;
+  /* Accent vif, purement décoratif : jamais utilisé pour un verdict. */
+  --vif: #ae573c;
+  --rayon: 16px;
+  --titres: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --texte: 'Segoe UI', system-ui, sans-serif;
+  --editorial: 'Source Serif 4', Georgia, serif;
+  --surface-sauge: #e8ecdf;
+  --surface-peche: #f2e7da;
+  --surface-citron: #e4e9c6;
+  --sur-accent: #fffefa;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --fond: #13251f;
+    --encre: #eff1e6;
+    --doux: #a7b8aa;
+    --trait: #34483b;
+    --carte: #1c3027;
+    --vert: #91c6a4;
+    --orange: #e8c477;
+    --rouge: #eea38a;
+    --gris: #a7b8aa;
+    --accent: #a2c9a3;
+    --vif: #e5a78d;
+    --surface-sauge: #293c2e; --surface-peche: #3a3026; --surface-citron: #364329; --sur-accent: #13251f;
+  }
+}
+
+:root[data-theme='dark'] {
+  --fond: #13251f;
+  --encre: #eff1e6;
+  --doux: #a7b8aa;
+  --trait: #34483b;
+  --carte: #1c3027;
+  --vert: #91c6a4;
+  --orange: #e8c477;
+  --rouge: #eea38a;
+  --gris: #a7b8aa;
+  --accent: #a2c9a3;
+  --vif: #e5a78d;
+    --surface-sauge: #293c2e; --surface-peche: #3a3026; --surface-citron: #364329; --sur-accent: #13251f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--texte);
+  /* 1.6 plutôt que 1.5 : le texte respire, ce qui compte plus que la taille
+     pour qu'une page paraisse posée. */
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+.app { max-width: 46rem; margin: 0 auto; padding: 1.5rem 16px 4rem; }
+
+.entete h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+.baseline { margin: 0.15rem 0 1.5rem; color: var(--doux); font-size: 0.95rem; }
+
+/* ------------------------------------------------------------ progression */
+.progression { display: flex; gap: 5px; margin-bottom: 1.75rem; }
+.pas { flex: 1; height: 3px; border-radius: 2px; background: var(--trait); }
+.pas.fait { background: var(--accent); }
+
+.compteur { margin: 0; color: var(--doux); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.etape h2 { margin: 0.35rem 0 0.3rem; font-size: 1.4rem; font-weight: 600; line-height: 1.25; }
+.aide { margin: 0 0 1.5rem; color: var(--doux); }
+.note { color: var(--doux); font-size: 0.85rem; margin: 0.5rem 0 0; }
+
+/* ----------------------------------------------------------------- champs */
+.choix { display: flex; flex-direction: column; gap: 0.6rem; }
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+.echelons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.filieres { display: flex; flex-direction: column; gap: 0.4rem; max-height: 22rem; overflow-y: auto; }
+
+.choix button, .filieres button {
+  text-align: left;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  cursor: pointer;
+  min-height: 44px;
+}
+.choix button:hover { border-color: var(--accent); }
+.choix-actif { border-color: var(--accent) !important; box-shadow: inset 0 0 0 1px var(--accent); }
+.filiere-nombre { display: block; color: var(--doux); font-size: 0.8rem; }
+
+.champ { display: flex; flex-direction: column; gap: 0.3rem; }
+.champ-label { font-size: 0.85rem; color: var(--doux); }
+.champ-saisie { display: flex; align-items: center; gap: 0.5rem; }
+.champ input, .champ select {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  min-height: 44px;
+}
+.champ-suffixe { color: var(--doux); font-size: 0.85rem; white-space: nowrap; }
+
+/* ------------------------------------------------------------- navigation */
+.navigation { display: flex; gap: 0.6rem; margin-top: 1.75rem; }
+.principal, .secondaire {
+  flex: 1;
+  padding: 0.9rem 1rem;
+  border-radius: var(--rayon);
+  font: inherit;
+  /* Après « font: inherit », qui écrase la famille — et la classe l'emporte
+     sur le sélecteur « button ». Sans cette ligne, les boutons restaient sur
+     la police du système. Constaté au navigateur le 20/09/2026. */
+  font-family: var(--titres);
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 48px;
+}
+.principal { background: var(--accent); color: var(--sur-accent); border: 1px solid var(--accent); }
+.principal[disabled] { opacity: 0.6; cursor: progress; }
+/* Un lien qui doit avoir l'air d'un bouton. La console d'administration est
+   une autre page HTML : on l'ouvre par une vraie navigation, pas par le
+   routeur. Sans ces lignes, l'ancre reste « inline » — « padding » et
+   « min-height » n'ont aucun effet, le texte n'est pas centré, et le
+   soulignement du lien traverse le bouton. */
+a.principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  padding-inline: 1.5rem;
+  text-decoration: none;
+}
+.secondaire { background: transparent; color: var(--encre); border: 1px solid var(--trait); }
+.sans-compte { margin-top: 1rem; color: var(--doux); font-size: 0.8rem; text-align: center; }
+
+/* ---------------------------------------------------------------- cartes */
+.resume { color: var(--doux); font-size: 0.9rem; margin-bottom: 1.25rem; }
+.cartes { display: flex; flex-direction: column; gap: 1rem; }
+
+.carte {
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-left: 4px solid var(--gris);
+  border-radius: var(--rayon);
+  padding: 1.1rem;
+}
+.carte.vert { border-left-color: var(--vert); }
+.carte.orange { border-left-color: var(--orange); }
+.carte.rouge { border-left-color: var(--rouge); }
+
+.verdict { display: block; font-size: 0.72rem; font-weight: 800; white-space: nowrap; }
+.verdict.vert { color: var(--vert); }
+.verdict.orange { color: var(--orange); }
+.verdict.rouge { color: var(--rouge); }
+.verdict.gris { color: var(--gris); }
+
+.etab { margin: 0; color: var(--doux); font-size: 0.9rem; }
+.admission { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
+.avertissement { margin: 0.5rem 0 0; font-size: 0.82rem; color: var(--orange); }
+
+.lien {
+  margin-top: 0.9rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  min-height: 44px;
+}
+
+/* ---------------------------------------------------------------- détail */
+.detail { margin-top: 1rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+/* Le budget du mois. Un trait fin entre les postes plutôt qu'un espacement :
+   on lit une addition, et une addition s'aligne. */
+.lignes { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.ligne {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.75rem;
+  align-items: baseline;
+  padding: 0.55rem 0;
+  border-top: 1px solid var(--trait);
+  font-size: 0.9rem;
+}
+.ligne-poste { font-family: var(--titres); font-weight: 600; }
+.ligne-montant {
+  font-family: var(--titres);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.ligne-quoi { grid-column: 1 / -1; color: var(--doux); font-size: 0.8rem; line-height: 1.4; }
+.ligne.ressource .ligne-montant { color: var(--vert); }
+.ligne.manquante .ligne-montant { color: var(--rouge); font-weight: 800; }
+.ligne.sans-objet .ligne-montant { color: var(--doux); font-weight: 400; }
+
+/* La provenance : repliée, mais attachée à son montant, dans la même ligne.
+   Règle 6 — la source et le millésime ne quittent jamais le chiffre. */
+.ligne-provenance { grid-column: 1 / -1; margin-top: 0.3rem; }
+.ligne-provenance summary {
+  display: inline-block;
+  cursor: pointer;
+  list-style: none;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.78rem;
+  min-height: 24px;
+}
+.ligne-provenance summary::-webkit-details-marker { display: none; }
+.ligne-provenance summary::before { content: '▸ '; font-size: 0.72em; }
+.ligne-provenance[open] summary::before { content: '▾ '; }
+.ligne-provenance summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ligne-provenance p {
+  margin: 0.35rem 0 0;
+  color: var(--doux);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* Le total. Il ferme l'addition, donc il en a le poids — mais il garde la
+   couleur du verdict, jamais une autre. */
+.bilan {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.75rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  border-top: 2px solid var(--encre);
+  border-radius: 0 0 var(--rayon) var(--rayon);
+  background: var(--fond);
+}
+.bilan-nom { font-family: var(--titres); font-weight: 800; font-size: 0.95rem; }
+.bilan-euros {
+  font-family: var(--titres);
+  font-weight: 800;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.bilan.manque .bilan-euros { color: var(--rouge); }
+.bilan.reste .bilan-euros { color: var(--vert); }
+.bilan-note {
+  grid-column: 1 / -1;
+  margin-top: 0.2rem;
+  color: var(--doux);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+/* Les aides sans objet. Repliées, mais comptées dans le titre : on sait
+   combien il y en a sans avoir à ouvrir. */
+.lignes-ecartees { margin-top: 0.9rem; }
+.lignes-ecartees > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-height: 32px;
+  padding: 0.25rem 0;
+}
+.lignes-ecartees > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.jumeaux { margin-top: 1.2rem; }
+.jumeaux h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+.jumeaux ul { margin: 0.5rem 0 0; padding-left: 1.1rem; font-size: 0.9rem; }
+
+.erreur { color: var(--rouge); font-size: 0.9rem; }
+
+.pieds { margin-top: 2.5rem; border-top: 1px solid var(--trait); padding-top: 1rem; color: var(--doux); font-size: 0.78rem; }
+.pieds p { margin: 0 0 0.5rem; }
+.non-affiliation { font-weight: 600; }
+
+a { color: var(--accent); }
+
+@media (min-width: 40rem) {
+  .echelons { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ---------------------------------------------- notes, domaines, deux axes */
+.notes { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
+.note-ligne {
+  display: grid;
+  grid-template-columns: 1fr 5.5rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+.note-ligne input {
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--trait);
+  border-radius: 8px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  text-align: right;
+  min-height: 44px;
+}
+
+.depot {
+  display: block;
+  padding: 1.1rem 1rem;
+  border: 1px dashed var(--accent);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  text-align: center;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--accent);
+}
+.depot input { display: none; }
+
+.domaines { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.domaines button {
+  text-align: center;
+  padding: 0.7rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+input[type='range'] { width: 100%; min-height: 44px; }
+
+.raisons { margin-bottom: 1.2rem; }
+.raisons h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.raisons ul { margin: 0; padding-left: 1.1rem; font-size: 0.87rem; color: var(--doux); }
+.detail h4 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+
+@media (min-width: 40rem) {
+  .notes { grid-template-columns: 1fr 1fr; }
+  .domaines { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ------------------------------------------------- retours des étudiants */
+.retours-resume { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--doux); }
+.retours { margin-top: 1.4rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+.retours h4 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+
+.annees { list-style: none; margin: 0.6rem 0; padding: 0; display: flex; flex-direction: column; gap: 0.8rem; }
+.annee { font-size: 0.88rem; }
+.annee.vide { color: var(--doux); }
+.annee-detail { margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.annee-detail p { margin: 0; color: var(--doux); }
+
+.barre { display: grid; grid-template-columns: 1fr 5rem auto; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.barre-libelle { color: var(--doux); }
+.barre-piste { height: 6px; border-radius: 3px; background: var(--trait); overflow: hidden; }
+.barre-remplie { display: block; height: 100%; background: var(--accent); }
+.barre-valeur { font-variant-numeric: tabular-nums; }
+
+.formulaire-retour {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* ------------------------------------------------- note publique du lieu */
+.note-lieu { margin-top: 1.4rem; border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+.note-lieu h4 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.note-lieu-valeur { margin: 0 0 0.4rem; font-size: 0.95rem; }
+
+/* ------------------------------------------------------------- accueil */
+.accueil { padding-bottom: 3rem; }
+
+/* En-tête : la marque à gauche, un rappel d'action à droite. Sur un écran de
+   téléphone, le bouton reste au-dessus de la ligne de flottaison. */
+.entete-accueil {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--trait);
+}
+/* Le titre de niveau 1 ne porte plus de texte, mais le logo : les réglages
+   typographiques de l'ancienne marque écrite (interlettrage, graisse) n'ont
+   plus d'objet et fausseraient l'alignement vertical. */
+.marque { margin: 0; font-size: 0; letter-spacing: normal; line-height: 0; }
+/* Le logo est un lien : il ne doit en porter aucune marque — pas de
+   soulignement, pas de couleur de lien. Ce qui dit qu'il est cliquable, c'est
+   la convention, et le curseur. */
+.marque-lien { display: inline-block; text-decoration: none; color: inherit; cursor: pointer; }
+.marque-lien:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.entete-cta {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  /* 44px : la cible tactile minimale. Mesurée en navigateur, pas supposée. */
+  min-height: 44px;
+}
+.entete-cta:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ------------------------------------------------------------------ hero */
+.hero { margin: 2rem 0 2.5rem; }
+.hero-sur {
+  font-family: var(--titres);
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+.promesse {
+  margin: 0 0 1rem;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  /* 800, la graisse haute de Bricolage. La note d'avant disait « 700 et non
+     800 : au-delà, un titre crie » — c'était vrai de Poppins, géométrique et
+     très large en gras. Bricolage est plus étroite et moins contrastée : son
+     800 tient là où le 800 de Poppins hurlait. Vérifié à l'écran avant de
+     changer la note. */
+  font-weight: 800;
+}
+.promesse em { font-style: italic; color: var(--accent); }
+.hero-texte { margin: 0 0 1.75rem; color: var(--doux); font-size: 1.02rem; max-width: 34rem; }
+
+.cta-groupe { display: flex; flex-direction: column; gap: 0.75rem; align-items: stretch; }
+.cta-groupe .principal { width: 100%; font-size: 1.02rem; padding: 1rem; }
+.cta-groupe-bloc { margin-top: 1.5rem; }
+.cta-secondaire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.75rem 1rem;
+  border-radius: var(--rayon);
+  border: 1px solid var(--trait);
+  color: var(--encre);
+  text-decoration: none;
+  font-weight: 600;
+}
+.cta-secondaire:hover { border-color: var(--accent); color: var(--accent); }
+.hero-mentions { margin: 0.9rem 0 0; color: var(--doux); font-size: 0.82rem; text-align: center; }
+
+/* La promesse : ce que le site fait, et qu'il ne coûte rien. Elle se lit avant
+   les mentions, donc elle est un cran plus grande qu'elles, et un cran plus
+   petite que le texte du titre. */
+.hero-gratuit {
+  margin: 1rem 0 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--encre);
+}
+.hero-gratuit strong { font-family: var(--titres); font-weight: 800; }
+
+/* -------------------------------------------------------------- bandeau */
+.bandeau {
+  display: grid;
+  gap: 1px;
+  background: var(--trait);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+}
+.bandeau-item {
+  background: var(--carte);
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+.bandeau-chiffre {
+  font-family: var(--titres);
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+.bandeau-libelle { color: var(--doux); font-size: 0.85rem; }
+
+/* ---------------------------------------------------------------- blocs */
+.bloc { margin-bottom: 2.75rem; }
+.bloc h2 { margin: 0 0 0.5rem; font-size: 1.2rem; font-weight: 600; letter-spacing: -0.005em; }
+.bloc-intro { margin: 0 0 1.1rem; color: var(--doux); font-size: 0.92rem; }
+.bloc-chute { margin: 1.25rem 0 0; font-size: 0.95rem; }
+
+/* --------------------------------------------------------- page légale */
+.legal-paragraphe { margin: 0 0 0.9rem; font-size: 0.92rem; line-height: 1.65; }
+.legal-liste { margin: 0 0 1.1rem; padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.65; }
+.legal-liste li { margin-bottom: 0.45rem; }
+/* Les trous de la page se voient. Masqués, ils ne seraient jamais comblés —
+   et c'est cette page qui fait foi le jour d'un litige. */
+.legal-manquant { color: var(--rouge); font-style: italic; }
+.legal-avertissement {
+  margin: 0 0 1.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--rouge);
+  border-radius: var(--rayon);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+.pieds-liens { margin: 0.75rem 0 0; font-size: 0.85rem; }
+
+/* ------------------------------------------------------- bloc partenaire */
+/* Encadré, parce qu'il doit se distinguer du reste de la page : c'est le
+   seul endroit du site qui mène vers un service rémunéré, et le lecteur a
+   le droit de voir d'un coup d'œil qu'il change de registre. Encadré et
+   pas coloré — une bannière publicitaire est exactement ce qu'on ne veut
+   pas être. */
+.partenaire {
+  padding: 1.25rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.partenaire p { font-size: 0.92rem; line-height: 1.6; }
+
+/* Deux colonnes dès qu'il y a la place, une seule sur téléphone : ce sont
+   deux étapes successives, pas deux options concurrentes, et empilées elles
+   se lisent dans le bon ordre. */
+.partenaire-etapes {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+}
+@media (min-width: 40rem) {
+  .partenaire-etapes { grid-template-columns: 1fr 1fr; }
+}
+.partenaire-etape {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--fond);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.partenaire-etape h3 { margin: 0; font-size: 1rem; font-weight: 600; }
+.partenaire-etape p { margin: 0; flex-grow: 1; }
+.partenaire-etape .secondaire { margin-top: 0.35rem; }
+/* Hauteur fixe, largeur libre : deux logos de marques différentes n'ont pas
+   le même rapport, et les caler sur la largeur en ferait un plus gros que
+   l'autre sans raison. */
+.partenaire-logo {
+  height: 1.35rem;
+  width: auto;
+  max-width: 100%;
+}
+/* La mention de rémunération n'est pas une note de bas de page : elle se lit
+   avant le bouton, donc elle en a la largeur et l'espacement. */
+.partenaire-mention { margin: 1rem 0; }
+.partenaire .cta-groupe { margin-top: 1rem; }
+
+/* ----------------------------------------------------------- trois piliers */
+.piliers-grille { display: grid; gap: 0.75rem; }
+.pilier {
+  position: relative;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 1.1rem 1.1rem 1.2rem;
+}
+/* Porte désormais un picto plutôt qu'un chiffre : même pastille, contenu
+   dessiné. Le fond devient transparent, sinon le trait du picto disparaîtrait
+   sur l'aplat d'accent. */
+.pilier-numero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid var(--trait);
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+}
+.pilier-titre { margin: 0 0 0.15rem; font-size: 1.02rem; }
+.pilier-question { margin: 0 0 0.6rem; color: var(--accent); font-size: 0.9rem; font-weight: 600; }
+.pilier-texte { margin: 0; color: var(--doux); font-size: 0.9rem; }
+
+/* ---------------------------------------------------------- comparaison */
+.comparaison { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.comparaison li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 0.35rem 0.75rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 0.85rem 1rem;
+}
+.comparaison-ville { font-weight: 600; }
+.comparaison-montant { font-family: var(--titres); font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.comparaison-m2 { grid-column: 1 / -1; color: var(--doux); font-size: 0.8rem; }
+
+.etapes-accueil { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.8rem; }
+.etapes-accueil li { font-size: 0.92rem; color: var(--doux); }
+.etapes-accueil strong { color: var(--encre); }
+
+.promesses, .sources { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.promesses li { font-size: 0.92rem; color: var(--doux); padding-left: 1.1rem; position: relative; }
+.promesses li::before { content: '—'; position: absolute; left: 0; color: var(--accent); }
+.promesses strong { color: var(--encre); }
+.sources li { font-size: 0.82rem; color: var(--doux); }
+
+/* ------------------------------------------------------------ CTA final */
+.cta-final {
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.cta-final h2 { margin: 0 0 0.5rem; font-size: 1.25rem; font-weight: 600; letter-spacing: -0.005em; }
+.cta-final p { margin: 0 0 1.25rem; color: var(--doux); font-size: 0.95rem; }
+.cta-final .principal { width: 100%; font-size: 1.02rem; padding: 1rem; }
+.cta-final .hero-mentions { margin-top: 0.8rem; }
+
+/* Au-delà du téléphone : deux puis trois colonnes, et un titre qui respire. */
+@media (min-width: 40rem) {
+  .promesse { font-size: 2.25rem; }
+  .cta-groupe { flex-direction: row; align-items: center; }
+  .cta-groupe .principal { width: auto; flex: 0 1 auto; padding-inline: 2rem; }
+  .cta-groupe .cta-secondaire { flex: 0 0 auto; }
+  .hero-mentions { text-align: left; }
+  .bandeau { grid-template-columns: repeat(3, 1fr); }
+  .piliers-grille { grid-template-columns: repeat(3, 1fr); }
+  .cta-final { padding: 2.5rem 2rem; }
+  .cta-final .principal { width: auto; padding-inline: 2.5rem; }
+  .cta-final .hero-mentions { text-align: center; }
+}
+
+/* ------------------------------------------------------- compte et verrou */
+/* Noms préfixés « compte- » et « verrou- » : la feuille est partagée par
+   toutes les vues, et un nom déjà pris ferait hériter cette vue d'une autre
+   mise en page sans rien casser visiblement (cf. styles.test.ts). */
+
+.entete-resultats {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.verrou {
+  background: var(--carte);
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon);
+  padding: 1.25rem 1.1rem 1.4rem;
+  margin-bottom: 1.75rem;
+}
+.verrou h2 { margin: 0 0 0.5rem; font-size: 1.15rem; }
+.verrou p { margin: 0 0 0.75rem; font-size: 0.95rem; }
+.verrou-detail { color: var(--doux); font-size: 0.9rem !important; }
+.verrou .principal { width: 100%; }
+.verrou .note { text-align: center; margin-top: 0.7rem; }
+
+.compte { max-width: 26rem; margin: 1.5rem auto 0; }
+.compte h2 { margin: 0 0 0.4rem; font-size: 1.5rem; letter-spacing: -0.01em; }
+.compte-pourquoi { margin: 0 0 1.5rem; color: var(--doux); }
+.compte-form { display: flex; flex-direction: column; gap: 1rem; }
+.compte-form .principal { width: 100%; margin-top: 0.3rem; }
+.compte-bascule { margin: 1.2rem 0 0; font-size: 0.9rem; color: var(--doux); text-align: center; }
+
+.compte-confiance {
+  margin-top: 2rem;
+  padding: 1rem 1.1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+}
+.compte-confiance h3 { margin: 0 0 0.6rem; font-size: 0.95rem; }
+.compte-confiance ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.compte-confiance li { font-size: 0.86rem; color: var(--doux); }
+.compte-confiance strong { color: var(--encre); }
+
+.compte-retour { display: block; margin: 1.2rem auto 0; }
+
+/* ------------------------------------------------- les trois choix de tête */
+/* Préfixe « choix- » : la feuille est partagée par toutes les vues, et un nom
+   déjà pris ferait hériter cette section d'une autre mise en page en silence
+   (cf. styles.test.ts). */
+
+.choix-tete { margin: 0 0 2.25rem; }
+.choix-tete-titre { margin: 0 0 0.3rem; font-size: 1.2rem; letter-spacing: -0.01em; }
+.choix-tete-intro { margin: 0 0 1rem; color: var(--doux); font-size: 0.88rem; }
+
+.choix-grille { display: grid; gap: 0.75rem; }
+
+.choix-carte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  padding: 1rem 1.1rem 1.1rem;
+}
+/* Une teinte par critère, pour qu'on les distingue d'un coup d'œil sans
+   jamais suggérer un classement entre eux. */
+.choix-geographique { border-left: 3px solid var(--accent); }
+.choix-strategique { border-left: 3px solid var(--vert); }
+.choix-economique { border-left: 3px solid var(--orange); }
+
+.choix-titre { margin: 0 0 0.1rem; font-size: 1rem; }
+.choix-sous { margin: 0 0 0.8rem; color: var(--doux); font-size: 0.84rem; }
+.choix-valeur {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+/* Un libellé officiel de formation peut faire deux cents caractères. Affiché
+   en entier, il faisait tripler la hauteur de sa carte et cassait la rangée.
+   Trois lignes au plus ; le texte complet reste dans l'attribut « title ». */
+.choix-formation {
+  margin: 0 0 0.15rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.32;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+/* Même traitement que le libellé de formation, et pour la même raison : un
+   établissement s'appelle « Université de Lorraine - Faculté de Droit,
+   Sciences Economiques et Gestion - Site de Nancy (54) ». En entier, il
+   prenait cinq lignes et noyait le chiffre au-dessus de lui. Deux lignes au
+   plus ; le nom complet reste dans l'attribut « title ». */
+.choix-etab {
+  margin: 0 0 0.7rem;
+  color: var(--doux);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+/* 0.85rem et non 0.8 : c'est la phrase qui EXPLIQUE le chiffre, donc celle
+   qu'il faut pouvoir lire. L'interligne compte autant que le corps. */
+.choix-pourquoi { margin: 0; color: var(--doux); font-size: 0.85rem; line-height: 1.5; }
+.choix-absent { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.88rem; }
+/* « auto » colle l'action au bas de la carte : les trois boutons s'alignent
+   quelle que soit la longueur des textes au-dessus d'eux.
+
+   « flex: 0 0 auto » n'est pas décoratif. La règle de base des boutons pose
+   « flex: 1 » — pensée pour une rangée, où elle partage la largeur. Dans
+   cette carte, qui est une colonne, la même règle le fait GRANDIR en hauteur
+   jusqu'à avaler tout l'espace libre : le bouton « Utiliser ma position »
+   devenait un cadre vide de trois cents pixels de haut. Constaté au
+   navigateur le 20/09/2026. */
+.choix-action { flex: 0 0 auto; width: 100%; margin-top: auto; }
+.choix-message { margin: -1.5rem 0 1.75rem; }
+
+.choix-confidentialite {
+  margin: 1rem 0 0;
+  color: var(--doux);
+  font-size: 0.78rem;
+}
+.choix-confidentialite strong { color: var(--encre); }
+
+@media (min-width: 40rem) {
+  .choix-grille { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ------------------------------------------------------ étape « budget » */
+/* Préfixe « budget- » : un nom déjà pris ferait hériter cette étape d'une
+   autre mise en page en silence (cf. styles.test.ts). */
+
+.budget { display: flex; flex-direction: column; gap: 1.75rem; }
+.budget-question .champ-label { display: block; margin-bottom: 0.6rem; font-size: 0.95rem; color: var(--encre); font-weight: 600; }
+/* Le montant appliqué par chaque réponse est affiché sous son libellé : c'est
+   ce qui distingue une hypothèse annoncée d'une valeur de repli silencieuse. */
+.budget-montant { display: block; margin-top: 0.25rem; color: var(--doux); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.budget-resume { display: block; margin-top: 0.15rem; color: var(--doux); font-size: 0.84rem; }
+
+/* Discret mais lisible : c'est une mise au point, pas une alerte. Un
+   encadré rouge sur un site qui s'adresse à des lycéens crée l'inquiétude
+   que CLAUDE.md interdit, alors qu'il s'agit seulement de dire d'où
+   viennent les chiffres. */
+/* ------------------------------------------------------ volets de carte */
+/* Une carte de résultat doit se comparer d'un coup d'œil à celle du dessus.
+   Tout ce qui ne sert pas à comparer — les liens, le logement — vit derrière
+   un volet, et ne coûte qu'une ligne tant qu'on ne l'ouvre pas. */
+.carte-volet { margin-top: 0.7rem; }
+.carte-volet > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--doux);
+  cursor: pointer;
+  list-style: none;
+  border-radius: 6px;
+}
+/* Le triangle par défaut diffère d'un navigateur à l'autre : on pose le
+   nôtre, qui pivote à l'ouverture. */
+.carte-volet > summary::-webkit-details-marker { display: none; }
+.carte-volet > summary::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease;
+  flex: 0 0 auto;
+}
+.carte-volet[open] > summary::before { transform: rotate(90deg); }
+.carte-volet > summary:hover { color: var(--encre); }
+/* Le focus doit se voir : c'est la seule façon de savoir où l'on est au
+   clavier, et ces volets sont maintenant le chemin vers tous les liens. */
+.carte-volet > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.carte-volet > summary .illu-picto { width: 15px; height: 15px; stroke: currentColor; }
+.carte-volet .carte-liens { margin-top: 0.3rem; }
+/* Le bouton du budget partage l'allure du volet, en plus appuyé : c'est la
+   même geste — un clic qui ouvre — et il occupait jusqu'ici un bloc pleine
+   largeur sur chacune des quarante cartes. */
+.carte-volet-bouton {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.45rem 0.1rem;
+  margin-top: 0.7rem;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--encre);
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.carte-volet-bouton::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.15s ease;
+  flex: 0 0 auto;
+}
+.carte-volet-bouton.est-ouvert::before { transform: rotate(90deg); }
+.carte-volet-bouton:hover { color: var(--accent); }
+.carte-volet-bouton:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .carte-volet-bouton::before { transition: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .carte-volet > summary::before { transition: none; }
+}
+
+/* ------------------------------------------------ consentement bulletin */
+/* Encadré, parce qu'on demande une décision — pas une note de bas de page.
+   En tons neutres : « ne pas écrire de texte anxiogène » (CLAUDE.md), et
+   il s'agit d'informer, pas d'alarmer. */
+.consentement {
+  padding: 1.1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.consentement h3 { margin: 0 0 0.6rem; font-size: 1rem; font-weight: 600; }
+.consentement ul { margin: 0 0 1rem; padding-left: 1.15rem; }
+.consentement li { margin-bottom: 0.45rem; color: var(--doux); }
+.consentement p { margin: 0 0 0.6rem; }
+.consentement p:last-child { margin-bottom: 0; }
+/* Le refus n'est pas une erreur de l'élève : même encadré, pas de rouge. */
+.consentement-refus { border-left: 3px solid var(--trait); }
+
+.budget-avertissement {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  background: var(--carte);
+  border-left: 3px solid var(--trait);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+.budget-avertissement strong { color: var(--encre); }
+
+.budget-total {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  background: var(--carte);
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  font-size: 0.9rem;
+}
+
+.budget-detail { border-top: 1px solid var(--trait); padding-top: 0.9rem; }
+/* Sans « display » : le <summary> garde son marqueur natif, et la hauteur de
+   cible tactile vient du rembourrage. (Note pour qui mesurerait ce repli :
+   getBoundingClientRect et offsetParent voient encore le contenu d'un
+   <details> fermé — seul checkVisibility() dit la vérité.) */
+.budget-detail summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 0.7rem 0;
+}
+.budget-champs { display: flex; flex-direction: column; gap: 0.8rem; margin-top: 0.6rem; }
+
+/* La liste des échelons n'apparaît qu'une fois « boursier » choisi. */
+.sous-question { margin-top: 0.4rem; }
+.sous-question .champ-label { display: block; margin-bottom: 0.5rem; }
+
+
+/* ------------------------------------------------------------ pictogrammes */
+/* Dessinés en SVG dans illustrations.tsx : aucune requête vers un tiers, donc
+   aucune adresse IP d'élève communiquée pour les afficher, et les couleurs
+   suivent le thème sans seconde version. */
+
+.illu-picto {
+  width: 1.45rem;
+  height: 1.45rem;
+  stroke: currentColor;
+  fill: currentColor;
+  vertical-align: -0.2em;
+}
+/* Les tracés déclarés « fill: none » gardent leur intérieur vide : la règle
+   ci-dessus ne remplit que les formes pleines (le point du porte-monnaie). */
+
+/* Une épingle devant le titre des loyers. */
+.bloc h2 .illu-picto { margin-right: 0.45rem; color: var(--vif); }
+
+/* ------------------------------------------------------------- collection */
+/* Noms préfixés « carte-collec- » et « collec- » : « .carte » est déjà pris par
+   l'affichage d'une formation, et la feuille est partagée par toutes les vues
+   (cf. styles.test.ts). */
+
+.entete-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+/* Pastille d'accès à la collection. Volontairement discrète : elle ne doit pas
+   concurrencer « Commencer », qui reste l'action de la page. */
+.pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 44px;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pastille:hover { border-color: var(--vif); color: var(--vif); }
+/* Sur un téléphone, le nombre suffit : le mot prend la place du bouton voisin. */
+.pastille-libelle { display: none; }
+
+.collec-grille { display: grid; gap: 0.6rem; margin-bottom: 1.25rem; }
+
+.collec-choix {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+/* La sélection passe par une ombre, jamais par « border-color » : celui-ci
+   repeindrait aussi le liseré du haut, qui porte la rareté. */
+.collec-choix-actif .carte-collec { box-shadow: 0 0 0 2px var(--accent); }
+
+.carte-collec {
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  border-top: 4px solid var(--gris);
+  background: var(--carte);
+  padding: 0.9rem 1rem 1rem;
+}
+/* La rareté se lit à la couleur du liseré. Elle vient du décile réel du loyer
+   parmi les communes couvertes, jamais d'un tirage (cf. collection.ts). */
+.carte-collec-rare { border-top-color: var(--vif); }
+.carte-collec-peu-frequente { border-top-color: var(--accent); }
+.carte-collec-courante { border-top-color: var(--gris); }
+
+.carte-collec-mention {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--doux);
+}
+.carte-collec-titre { margin: 0 0 0.2rem; font-size: 1.05rem; line-height: 1.25; }
+.carte-collec-valeur {
+  font-family: var(--titres);
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.carte-collec-detail { margin: 0; color: var(--doux); font-size: 0.88rem; }
+.carte-collec-source { margin: 0.5rem 0 0; color: var(--doux); font-size: 0.72rem; overflow-wrap: anywhere; }
+.carte-collec-partage { width: 100%; }
+/* Le canvas sert à fabriquer l'image, pas à être regardé : hors flux, hors
+   écran, et sans « display: none » qui l'empêcherait de se dessiner. */
+.carte-collec-canvas { position: absolute; left: -9999px; width: 1px; height: 1px; }
+
+/* Le champ de fichier est remplacé par son label, stylé en bouton. */
+.collec-fichier { position: absolute; width: 1px; height: 1px; opacity: 0; }
+
+@media (min-width: 40rem) {
+  .pastille-libelle { display: inline; }
+  .collec-grille { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ------------------------------------------------ la fiche d'une formation */
+/* Toute cette mise en page sert la règle 5 : trois réponses côte à côte, de
+   même poids, jamais fondues en une note. D'où l'absence de médaille, de score
+   global et de hiérarchie visuelle entre deux fiches. */
+
+.carte-titre {
+  margin: 0;
+  /* Un titre ne descend pas sous la largeur de son mot le plus long tant qu'on
+     ne lui donne pas « min-width: 0 » : sans cette règle, « Formation
+     d'ingénieur » faisait dépasser la fiche de 4 px à 390 px de large.
+     Constaté au navigateur le 20/09/2026. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 1.1rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.carte-lieu {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0;
+  color: var(--doux);
+  font-size: 0.88rem;
+}
+.carte-lieu .illu-picto { width: 1rem; height: 1rem; flex: 0 0 auto; color: var(--vif); }
+
+/* La note de l'adresse : discrète, et jamais présentée comme un quatrième
+   critère. Le libellé dit « sur l'adresse », jamais « l'école ». */
+.pastille-note {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  color: var(--doux);
+}
+.pastille-note-valeur { font-weight: 800; color: var(--encre); font-variant-numeric: tabular-nums; }
+.etoiles { color: var(--vif); letter-spacing: 0.05em; }
+.etoiles-vides { opacity: 0.28; }
+
+/* Les trois lectures, sans cadre.
+   Elles vivaient dans trois boîtes, dans une boîte : sur une liste de dix
+   résultats cela faisait trente cadres, et l'œil ne savait plus lequel lire.
+   Ici elles sont typographiques — un chiffre, un mot — et c'est le blanc qui
+   les sépare. Aucune note globale : elles restent trois, côte à côte, de même
+   graisse, et rien ne les additionne. */
+.bandeau-tete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.1rem;
+}
+.bandeau-tete > div:first-child { min-width: 0; }
+.bandeau-cle { text-align: right; white-space: nowrap; flex: 0 0 auto; }
+.bandeau-cle-valeur {
+  display: block;
+  font-family: var(--titres);
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+/* Seul le reste-à-vivre porte la couleur du verdict : c'est le seul des trois
+   axes sur lequel le site se prononce. */
+.bandeau-cle.vert .bandeau-cle-valeur { color: var(--vert); }
+.bandeau-cle.orange .bandeau-cle-valeur { color: var(--orange); }
+.bandeau-cle.rouge .bandeau-cle-valeur { color: var(--rouge); }
+.bandeau-cle.gris .bandeau-cle-valeur { color: var(--doux); font-size: 1.05rem; }
+.bandeau-cle-note { font-size: 0.72rem; color: var(--doux); line-height: 1.3; }
+
+.bandeau-mesures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1.6rem;
+  margin: 0.9rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.88rem;
+}
+.bandeau-mesures b {
+  font-family: var(--titres);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.bandeau-mesures span { color: var(--doux); }
+
+/* La rangée porte maintenant deux boutons — « Garder » et le budget : ils
+   s'alignent, et passent l'un sous l'autre quand la carte est trop étroite. */
+.carte-actions {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.carte-deplier { width: 100%; }
+
+/* Ces liens mènent AILLEURS. Ils se présentent donc comme des pastilles
+   sortantes, pas comme du texte de la page : en petits liens gris au bas
+   d'une fiche, personne ne les voyait. */
+.carte-liens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.5rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.83rem;
+}
+.carte-lien {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.carte-lien:hover { border-color: var(--accent); background: var(--accent); color: var(--fond); }
+/* Le picto hérite de la couleur du lien : trois teintes propres sur une même
+   ligne feraient trois taches, et la rangée cesserait de se lire d'un coup. */
+.carte-lien .illu-picto { width: 16px; height: 16px; flex: 0 0 auto; stroke: currentColor; }
+
+/* Sur un téléphone étroit, le reste-à-vivre passe sous le titre plutôt que de
+   lui disputer la largeur : un intitulé de formation fait souvent deux lignes. */
+@media (max-width: 26rem) {
+  .bandeau-tete { flex-direction: column; gap: 0.6rem; }
+  .bandeau-cle { text-align: left; }
+  .bandeau-mesures { gap: 0.25rem 1.1rem; font-size: 0.84rem; }
+}
+
+/* ------------------------------------------------------------------- logo */
+/* Deux découpes du logo fourni, assemblées en bandeau horizontal. La bascule
+   clair/sombre se fait dans marque.tsx, par <picture> : le navigateur ne
+   télécharge que la version dont il a besoin. */
+
+.marque-logo { display: inline-flex; align-items: center; }
+.marque-mot { display: block; width: auto; height: 1.3rem; }
+/* Signature de la marque : du texte, pas une image — net à toute taille, lu
+   par un lecteur d'écran, et traduisible. */
+.marque-logo-signee { flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+.marque-logo-signee .marque-mot { height: 1.6rem; }
+.marque-signature {
+  font-family: var(--titres);
+  font-size: 0.8rem;
+  /* Sans cela, la signature hérite du gras du « h1 » qui la contient. */
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--doux);
+  letter-spacing: 0.005em;
+}
+
+/* Poppins pour les titres, les boutons et les chiffres — le reste garde la
+   police du système. Par sélecteurs d'élément plutôt que par une règle
+   groupée de classes : la feuille interdit qu'une classe soit définie deux
+   fois au premier niveau, et styles.test.ts le vérifie. */
+h1, h2, h3, h4, button, a.cta-secondaire { font-family: var(--titres); }
+
+/* ------------------------------------------------------------ chronologie */
+/* Les dates de la dernière session, en repère. L'avertissement est au-dessus
+   des dates, pas en bas de page : un élève qui se fierait à une date périmée
+   manquerait un vœu. */
+
+.avertissement-calendrier {
+  margin: 0 0 1.5rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--orange);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  font-size: 0.88rem;
+  color: var(--doux);
+}
+.avertissement-calendrier strong { color: var(--encre); }
+
+.chrono { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.75rem; }
+
+.chrono-phase {
+  position: relative;
+  padding-left: 1.5rem;
+  border-left: 2px solid var(--trait);
+}
+/* La pastille qui marque le début d'une phase sur le fil. */
+.chrono-phase::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 0.35rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--vif);
+}
+
+.chrono-periode {
+  margin: 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--doux);
+}
+.chrono-titre { margin: 0.15rem 0 0.35rem; font-size: 1.02rem; line-height: 1.3; }
+.chrono-resume { margin: 0 0 0.9rem; color: var(--doux); font-size: 0.9rem; }
+
+.chrono-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.7rem; }
+.chrono-etape { display: flex; flex-direction: column; gap: 0.1rem; }
+.chrono-date {
+  font-family: var(--titres);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.chrono-quoi { font-size: 0.92rem; }
+.chrono-detail { color: var(--doux); font-size: 0.85rem; }
+/* La date réelle de la session précédente : elle justifie la fenêtre affichée
+   au-dessus, donc elle reste lisible, mais elle ne doit jamais lui disputer
+   l'attention — c'est la fenêtre que l'élève doit retenir. */
+.chrono-repere { color: var(--doux); font-size: 0.78rem; margin-top: 0.15rem; }
+
+.chrono-note {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+  color: var(--doux);
+  font-style: italic;
+}
+.chrono-source { margin-top: 1.5rem; }
+
+@media (min-width: 40rem) {
+  /* Les dates passent en colonne : l'œil balaie le fil sans lire les libellés.
+     Placement explicite des quatre cases, parce qu'une étape sans détail
+     laisserait sinon le repère remonter dans la colonne de droite. */
+  .chrono-etape { display: grid; grid-template-columns: 12rem 1fr; gap: 0.1rem 1rem; }
+  .chrono-date { grid-column: 1; grid-row: 1; padding-top: 0.1rem; }
+  .chrono-repere { grid-column: 1; grid-row: 2; margin-top: 0; }
+  .chrono-quoi { grid-column: 2; grid-row: 1; }
+  .chrono-detail { grid-column: 2; grid-row: 2; }
+}
+
+/* ------------------------------------------------------------------- blog */
+/* Le corps d'un article est une suite de blocs typés rendus par des
+   composants : aucun HTML brut n'est injecté, donc un article écrit depuis la
+   console d'administration ne peut pas exécuter de script. */
+
+.entete-lien {
+  border: none;
+  background: none;
+  padding: 0.5rem 0.2rem;
+  min-height: 44px;
+  color: var(--doux);
+  font: inherit;
+  font-family: var(--titres);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.entete-lien:hover { color: var(--accent); }
+
+.articles { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+
+.article-vignette {
+  display: block;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: inherit;
+  text-decoration: none;
+}
+.article-vignette:hover { border-color: var(--accent); }
+.article-vignette-titre {
+  margin: 0 0 0.3rem;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  color: var(--accent);
+}
+.article-vignette-chapeau { margin: 0; color: var(--doux); font-size: 0.9rem; }
+.article-vignette-pied {
+  margin: 0.6rem 0 0;
+  color: var(--doux);
+  font-size: 0.78rem;
+}
+
+/* Un article se lit : colonne étroite, interligne généreux. */
+.article { max-width: 38rem; }
+.article-pied {
+  margin: 0 0 0.4rem;
+  color: var(--doux);
+  font-size: 0.78rem;
+  text-transform: lowercase;
+}
+.article-titre {
+  margin: 0 0 0.6rem;
+  font-size: 1.7rem;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+.article-chapeau {
+  margin: 0 0 1.75rem;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--doux);
+}
+.article-titre-section {
+  margin: 2rem 0 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.article-paragraphe { margin: 0 0 1.1rem; line-height: 1.7; }
+.article-liste { margin: 0 0 1.1rem; padding-left: 1.2rem; line-height: 1.7; }
+.article-liste li { margin-bottom: 0.5rem; }
+
+.article-encadre {
+  margin: 1.4rem 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--vif);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  line-height: 1.6;
+}
+
+.article-source {
+  margin: 2.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 40rem) {
+  .articles-apercu { grid-template-columns: repeat(3, 1fr); }
+  .article-titre { font-size: 2rem; }
+}
+
+/* ---------------------------------------------------- photographies */
+/* Trois bandeaux, et rien de plus. Le rapport de forme est imposé ici, pas
+   laissé à l'image : la place est réservée avant le chargement, donc le texte
+   ne saute pas quand la photo arrive.
+
+   `max-height` borne la hauteur sur les écrans larges. Sans elle, un bandeau
+   de 1200 px de large prendrait presque la moitié d'un écran de portable en
+   paysage, et repousserait les chiffres — qui sont la raison d'être du site —
+   sous la ligne de flottaison. */
+.illu-bande {
+  margin: 0 0 1.4rem;
+  border-radius: var(--rayon);
+  overflow: hidden;
+  background: var(--trait);
+  line-height: 0;
+}
+.illu-bande img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 14rem;
+  object-fit: cover;
+  object-position: center 38%;
+}
+/* Le bandeau d'ouverture est plus panoramique : il sépare l'accroche du
+   premier chiffre sans s'imposer entre les deux. */
+.illu-bande-large {
+  margin: 0.4rem 0 1.6rem;
+}
+.illu-bande-large img { max-height: 11rem; }
+
+@media (min-width: 40rem) {
+  .illu-bande img { max-height: 17rem; }
+  /* 17rem correspond à la hauteur qu'atteint le bandeau d'ouverture à la
+     largeur du contenu : en dessous, `object-fit: cover` le recadrait une
+     seconde fois et mordait sur le haut des visages. */
+  .illu-bande-large img { max-height: 17rem; }
+}
+
+/* En thème sombre, une photographie claire tape à l'œil au milieu d'une page
+   sombre. On la pose légèrement en retrait plutôt que de la recadrer. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .illu-bande img { opacity: 0.88; }
+}
+:root[data-theme='dark'] .illu-bande img { opacity: 0.88; }
+
+/* ------------------------------------------------------------------- menu */
+/* Sur grand écran, les entrées sont posées en ligne et le bouton de bascule
+   n'existe pas. Sur téléphone, l'inverse : à partir de cinq entrées, la barre
+   ne tient plus sur 390 px, et une barre qui déborde pousse le logo hors de
+   l'écran. */
+.menu { position: relative; display: flex; align-items: center; }
+
+.menu-bascule {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-family: var(--titres);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 40px;
+}
+.menu-barres { display: flex; flex-direction: column; gap: 3px; }
+.menu-barres span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.menu-entrees {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 20;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  min-width: 13rem;
+  padding: 0.6rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  /* La seule ombre du site : ce panneau flotte réellement au-dessus du
+     contenu, et rien d'autre ne flotte. */
+  box-shadow: 0 10px 30px -12px rgba(23, 34, 46, 0.35);
+}
+.menu-entrees-ouvert { display: flex; }
+.menu-entrees .entete-lien,
+.menu-entrees .entete-cta,
+.menu-entrees .pastille {
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+}
+
+@media (min-width: 48rem) {
+  /* Le panneau flotte sous son bouton. En dessous de ce palier, le menu est
+     déjà replié derrière « Menu » : le panneau s'y ouvre en poussant le
+     contenu, ce qui est le bon comportement dans une liste déjà verticale. */
+  .menu-panneau-liste {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 25;
+    min-width: 17rem;
+    padding: 0.5rem;
+    border: 1px solid var(--trait);
+    border-radius: var(--rayon);
+    background: var(--carte);
+    box-shadow: 0 10px 30px -12px rgba(23, 34, 46, 0.35);
+  }
+  .menu-panneau-bouton { width: auto; }
+
+  /* Assez de place : tout s'aligne, et le bouton de bascule disparaît. */
+  .menu-bascule { display: none; }
+  .menu-entrees {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+  .menu-entrees .entete-lien,
+  .menu-entrees .entete-cta,
+  .menu-entrees .pastille {
+    width: auto;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* Un lien de menu doit ressembler à ses voisins, qui sont des boutons. */
+a.entete-lien { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* --------------------------------------------------- connexion par Google */
+/* Le lien est posé AU-DESSUS du formulaire : c'est le chemin le plus court
+   pour qui a déjà un compte Google, et le plus long à décrire pour les
+   autres. Le séparateur « ou » dit que les deux voies mènent au même endroit. */
+.compte-google { margin: 1.2rem 0 0; }
+.compte-google-lien {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.9rem 1rem;
+  text-decoration: none;
+}
+.compte-ou {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.2rem 0 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+}
+.compte-ou::before,
+.compte-ou::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--trait);
+}
+
+/* ------------------------------------------------------- fil d'Ariane */
+/* Le séparateur est posé ici, jamais dans le texte : écrit en dur entre deux
+   maillons, il serait lu à voix haute à chaque étape. */
+.fil { margin: 0 0 1.25rem; }
+.fil-liste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.45rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.84rem;
+}
+.fil-maillon { display: flex; align-items: center; gap: 0.45rem; }
+.fil-maillon + .fil-maillon::before {
+  content: '';
+  width: 0.34rem;
+  height: 0.34rem;
+  border-top: 1.5px solid var(--trait);
+  border-right: 1.5px solid var(--trait);
+  transform: rotate(45deg);
+  flex: none;
+}
+.fil-lien { color: var(--doux); text-decoration: none; }
+.fil-lien:hover { color: var(--accent); text-decoration: underline; }
+.fil-ici { color: var(--encre); font-weight: 600; }
+
+/* ------------------------------------------------------- récompenses */
+/* Deux natures de cartes, deux traitements. Une récompense marque un geste
+   accompli : elle se lit en liste, elle se compte, on peut les avoir toutes.
+   Une carte de ville est une pièce d'album : elle s'expose en grille, et
+   personne ne les aura jamais toutes. Les mélanger dans une seule grille
+   rendait le mécanisme incompréhensible. */
+
+/* ────────────────────────── la page des cartes ──────────────────────────
+   Même présentation que l'atelier de lettre et la page des vœux : l'en-tête
+   se lit donc il reste étroit, les albums occupent la colonne de travail, et
+   ce qu'ils totalisent — avec le seul moyen de ne pas tout perdre — suit le
+   regard dans une colonne collée. */
+.collec-tete { max-width: 44rem; }
+.collec-atelier { display: block; }
+.collec-colonne { min-width: 0; }
+
+@media (min-width: 72rem) {
+  .collec-atelier {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.65fr);
+    gap: 2.4rem;
+    /* PAS `align-items: start` : une case de grille ramenée à la hauteur de
+       son contenu n'offre aucune course au `position: sticky` qu'elle
+       contient. Appris au navigateur sur l'atelier de lettre. */
+  }
+  .collec-cote-collee {
+    position: sticky;
+    /* Sous la barre du haut, elle-même collée et haute de 63 px. */
+    top: 4.75rem;
+    max-height: calc(100vh - 6.25rem);
+    overflow-y: auto;
+    padding-right: 0.4rem;
+  }
+}
+
+/* En une colonne, le récapitulatif vient après les albums : un trait suffit
+   pour qu'il ne se lise pas comme une troisième section de l'album. */
+@media (max-width: 71.99rem) {
+  .collec-cote {
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--trait);
+  }
+}
+
+.collec-cote-titre { margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+.collec-cote-collee > .collec-cote-titre:first-child { margin-top: 0; }
+.collec-cote .cta-groupe { margin-top: 0.7rem; }
+
+.collec-compte { margin: 0 0 0.5rem; font-size: 0.92rem; color: var(--doux); }
+.collec-compte strong { color: var(--encre); font-variant-numeric: tabular-nums; }
+
+/* Même trait que la jauge des six questions de la lettre et celle des dix
+   vœux : trois écrans, une seule façon de dire « voilà où tu en es ».
+   Elle garde son `role="progressbar"` — contrairement aux deux autres, elle
+   n'est pas doublée par une phrase qui donnerait le même chiffre. */
+.collec-jauge {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--trait);
+  overflow: hidden;
+  margin: 0 0 1.1rem;
+}
+.collec-jauge span { display: block; height: 100%; background: var(--accent); }
+
+.recompenses { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+.recompense {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+/* Une récompense non obtenue reste lisible : elle dit quoi faire pour l'avoir.
+   La griser jusqu'à l'illisible laisserait croire qu'il n'y a rien à gagner. */
+.recompense-obtenue { border-color: var(--vif); }
+
+.recompense-etat {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  border: 2px solid var(--trait);
+}
+.recompense-obtenue .recompense-etat {
+  border-color: var(--vif);
+  background: var(--vif);
+  position: relative;
+}
+/* La coche, dessinée avec deux bords d'un carré tourné : pas de fichier, pas
+   de police d'icônes, et elle suit la couleur du thème.
+   Une première version croisait deux dégradés et produisait une CROIX — qui
+   se lit « échoué » exactement là où il fallait lire « obtenue ». */
+.recompense-obtenue .recompense-etat::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 0.22rem;
+  height: 0.44rem;
+  border: solid var(--carte);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.recompense-texte { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; }
+.recompense-texte strong { font-size: 0.95rem; }
+.recompense-texte span { color: var(--doux); font-size: 0.85rem; line-height: 1.45; }
+
+.recompense-mention {
+  flex: none;
+  align-self: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--doux);
+}
+.recompense-obtenue .recompense-mention { color: var(--vif); }
+
+/* La provenance est répétée à l'identique sur chaque carte de ville : lue
+   trois fois de suite, elle noie la grille. Elle reste bornée ici, et le
+   texte complet part entier dans l'image partagée — c'est là qu'il compte,
+   puisque l'image voyage sans son contexte (règle 6 de CLAUDE.md). */
+.collec-grille .carte-collec-source {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+
+@media (max-width: 26rem) {
+  /* Sur les écrans les plus étroits, la mention passe sous le texte plutôt
+     que de comprimer celui-ci à trois mots par ligne. */
+  .recompense { flex-wrap: wrap; }
+  .recompense-mention { margin-left: 1.8rem; align-self: flex-start; }
+}
+
+/* --------------------------------------------- bulletins et avis lu */
+.bulletins { margin: 1rem 0 0; }
+.bulletins-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+.bulletin-depose {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+.bulletin-nom { font-weight: 600; }
+.bulletin-progression { margin: 0.8rem 0 0; font-size: 0.9rem; line-height: 1.5; }
+
+/* L'avis de l'assistant. Encadré, donc visiblement à part du reste : c'est
+   une lecture, pas une donnée du dossier. Aucun chiffre ne s'y trouve. */
+.avis-jp {
+  margin: 1rem 0 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--trait);
+  border-left: 3px solid var(--vif);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.avis-jp-titre { margin: 0 0 0.45rem; font-size: 0.95rem; }
+.avis-jp-texte { margin: 0; font-size: 0.9rem; line-height: 1.55; }
+.avis-jp-sous {
+  margin: 0.8rem 0 0.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.avis-jp-liste { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; line-height: 1.5; color: var(--doux); }
+/* La mention d'auteur n'est pas une note de bas de page décorative : elle dit
+   que c'est une machine qui a écrit, et que rien de ceci ne compte dans un
+   calcul. Elle reste lisible, pas réduite à du gris minuscule. */
+.avis-jp-auteur {
+  margin: 0.8rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--trait);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--doux);
+}
+
+/* ------------------------------------------------- lycée et spécialités */
+
+/* Les étiquettes de spécialités : treize boutons courts qui doivent tenir
+   sur quelques lignes, pas treize blocs empilés comme les autres choix. */
+.choix-etiquettes { flex-direction: row; flex-wrap: wrap; gap: 0.4rem; }
+.choix-etiquettes button {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  min-height: 44px;
+}
+
+.lycee { margin-top: 1.75rem; }
+.lycee-propositions { list-style: none; margin: 0.5rem 0 0; padding: 0; display: grid; gap: 0.25rem; }
+.lycee-proposition {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+}
+.lycee-proposition:hover { border-color: var(--accent); }
+
+.lycee-choisi {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.lycee-nom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.lycee-changer {
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  min-height: 36px;
+}
+.lycee-changer:hover { border-color: var(--accent); color: var(--accent); }
+.lycee-titre { margin: 0 0 0.7rem; font-size: 0.98rem; font-weight: 600; }
+
+.lycee-mentions { list-style: none; margin: 0 0 0.9rem; padding: 0; display: grid; gap: 0.4rem; }
+.lycee-mentions li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 11rem) 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.86rem;
+}
+.lycee-mention-libelle { color: var(--doux); }
+/* La barre est un repère, le pourcentage est la donnée — il est toujours
+   écrit à côté, comme partout ailleurs sur ce site. */
+.lycee-barre { height: 8px; border-radius: 4px; background: var(--trait); overflow: hidden; }
+.lycee-barre span { display: block; height: 100%; background: var(--accent); }
+.lycee-mention-part { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 2.7rem; text-align: right; }
+
+/* ------------------------------------------------------------- recherche */
+/* Préfixe « recherche- » et « ecole- » : la feuille est partagée par toutes
+   les vues, et un nom déjà pris ferait hériter ces écrans d'une autre mise en
+   page sans rien casser visiblement (cf. styles.test.ts). */
+
+.recherche { margin: 0 0 1.5rem; }
+.recherche-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.recherche-ligne { display: flex; gap: 0.5rem; align-items: stretch; }
+.recherche-champ {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  color: var(--encre);
+  font: inherit;
+  min-height: 48px;
+}
+.recherche-champ:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.recherche-effacer {
+  flex: 0 0 auto;
+  padding: 0 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  min-height: 48px;
+}
+.recherche-effacer:hover { border-color: var(--accent); color: var(--accent); }
+.recherche-compte { margin: 0.5rem 0 0; }
+.recherche .principal { width: auto; padding-inline: 2rem; flex: 0 0 auto; }
+
+/* L'extrait, dans une vignette d'article : il montre OÙ le mot a été trouvé.
+   En retrait et en italique, pour qu'on ne le confonde pas avec le chapeau. */
+.article-vignette-extrait {
+  margin: 0.5rem 0 0;
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ------------------------------------------------- résultats d'une école */
+
+.ecoles { list-style: none; margin: 1.25rem 0 0; padding: 0; display: grid; gap: 0.75rem; }
+.ecole {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.ecole-titre { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 600; line-height: 1.35; }
+.ecole-lieu {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin: 0 0 0.7rem;
+  color: var(--doux);
+  font-size: 0.88rem;
+}
+.ecole-lieu .illu-picto { width: 18px; height: 18px; flex: 0 0 auto; stroke: var(--doux); }
+
+.ecole-faits { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.3rem; }
+.ecole-etiquette {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  color: var(--doux);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Une teinte par secteur, pour distinguer d'un coup d'œil — sans jamais
+   suggérer qu'un secteur vaut mieux que l'autre : les deux bordures ont la
+   même épaisseur, et aucune n'est remplie. */
+.ecole-public { border-color: var(--accent); color: var(--accent); }
+.ecole-prive { border-color: var(--orange); color: var(--orange); }
+.ecole-inconnu { font-style: italic; }
+
+/* Ce que cette page NE dit pas. Détaché et en évidence : posé en petit au
+   bas de la liste, il serait lu après qu'on a cru que le site ne calcule
+   rien. */
+.ecoles-rappel {
+  margin: 1.25rem 0 0;
+  padding: 1.25rem;
+  border: 1px solid var(--trait);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.ecoles-rappel h3 { margin: 0 0 0.4rem; font-size: 1.05rem; font-weight: 600; }
+.ecoles-rappel p { margin: 0 0 1rem; color: var(--doux); font-size: 0.93rem; }
+.ecoles-rappel .principal { width: auto; padding-inline: 1.75rem; flex: 0 0 auto; }
+
+/* ------------------------------------ encadré de tête cliquable, logement */
+
+/* Le texte réservé aux lecteurs d'écran. Il est LU mais pas vu : « Voir le
+   détail » seul, répété trois fois sur la page, ne dit pas de quoi. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.choix-cliquable { cursor: pointer; transition: border-color 120ms ease; }
+.choix-cliquable:hover { border-color: var(--accent); }
+
+.choix-ouvrir {
+  flex: 0 0 auto;
+  margin-top: auto;
+  padding: 0.55rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-family: var(--titres);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+/* Le bouton s'étend à toute la carte : on clique n'importe où, et le clavier
+   garde une cible réelle. Un gestionnaire de clic posé sur l'encadré aurait
+   rendu la carte inatteignable au clavier, sans que rien ne le signale. */
+.choix-ouvrir::before { content: ''; position: absolute; inset: 0; }
+.choix-ouvrir:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.choix-ouvrir-fleche {
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform 120ms ease;
+}
+.choix-cliquable:hover .choix-ouvrir-fleche { transform: rotate(45deg) translate(2px, -2px); }
+
+/* Se loger : une ligne détachée, sous les autres liens. */
+.carte-logement {
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--trait);
+}
+.carte-logement-titre {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-right: 0.3rem;
+  color: var(--doux);
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+.carte-logement-titre .illu-picto { width: 18px; height: 18px; stroke: var(--doux); }
+
+/* ----------------------------------------------------- écran d'attente */
+/* Préfixe « chargement- » : la feuille est partagée par toutes les vues
+   (cf. styles.test.ts). */
+
+.chargement {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--fond);
+}
+.chargement-boite {
+  width: 100%;
+  max-width: 30rem;
+  padding: 2rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.chargement-sur {
+  margin: 0 0 0.4rem;
+  font-family: var(--titres);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+}
+.chargement-titre {
+  margin: 0 0 1.5rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
+.chargement-etapes { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+.chargement-etape { display: flex; gap: 0.8rem; align-items: flex-start; }
+.chargement-texte { display: flex; flex-direction: column; gap: 0.1rem; }
+.chargement-etape-titre { font-weight: 600; font-size: 0.98rem; line-height: 1.3; }
+.chargement-etape-note { color: var(--doux); font-size: 0.82rem; line-height: 1.4; }
+
+/* La marque de chaque étape : un disque. Trois états, trois dessins — la
+   couleur seule ne suffirait pas à distinguer « faite » de « en attente »
+   pour qui ne la voit pas, d'où la coche. */
+.chargement-marque {
+  flex: 0 0 auto;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-top: 0.15rem;
+  border-radius: 50%;
+  border: 2px solid var(--trait);
+}
+
+/* Faite : disque plein et coche. Deux bordures d'un carré tourné — deux
+   dégradés croisés donneraient une croix, ce qui dit l'inverse. */
+.chargement-faite .chargement-marque { border-color: var(--accent); background: var(--accent); }
+.chargement-faite .chargement-marque::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--fond);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.chargement-faite .chargement-etape-titre { color: var(--doux); }
+
+/* En cours : un anneau qui bat lentement. */
+.chargement-encours .chargement-marque {
+  border-color: var(--accent);
+  animation: chargement-pulse 1.4s ease-in-out infinite;
+}
+.chargement-encours .chargement-etape-titre { color: var(--encre); }
+
+/* En attente : en retrait, sans être illisible. */
+.chargement-attente { opacity: 0.55; }
+
+@keyframes chargement-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(27, 129, 132, 0.45); }
+  50% { box-shadow: 0 0 0 6px rgba(27, 129, 132, 0); }
+}
+
+/* Le système demande moins d'animations : on retire la pulsation, et l'étape
+   en cours se distingue par son disque plein. Une animation qu'on ne peut pas
+   couper déclenche des malaises chez certaines personnes. */
+@media (prefers-reduced-motion: reduce) {
+  .chargement-encours .chargement-marque {
+    animation: none;
+    background: var(--accent);
+  }
+}
+
+.chargement-compte {
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--trait);
+  font-family: var(--titres);
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--doux);
+}
+.chargement-pied { margin-top: 0.4rem; }
+
+/* ------------------------------------------- panneau « Mon espace » du menu */
+
+.menu-panneau { position: relative; }
+.menu-panneau-bouton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: 100%;
+  justify-content: space-between;
+}
+/* Un chevron dessiné en CSS : deux bordures d'un carré tourné. Une flèche
+   écrite en texte (« ▾ ») serait lue à voix haute par un lecteur d'écran, et
+   la forme varie d'une police à l'autre. */
+.menu-chevron {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform 120ms ease;
+}
+.menu-panneau-bouton[aria-expanded='true'] .menu-chevron {
+  transform: rotate(-135deg) translate(-2px, -2px);
+}
+
+.menu-panneau-liste { display: none; flex-direction: column; gap: 0.15rem; }
+.menu-panneau-ouvert { display: flex; }
+
+.menu-entree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: var(--rayon);
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 48px;
+}
+.menu-entree:hover { border-color: var(--trait); background: var(--fond); }
+.menu-entree-titre {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--titres);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+/* La note explique l'entrée. Elle disparaît sur les écrans étroits, où la
+   place manque et où le libellé suffit. */
+.menu-entree-note { color: var(--doux); font-size: 0.78rem; line-height: 1.35; }
+.menu-entree-compte {
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--fond);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+/* Détachée : c'est la seule entrée qui défait quelque chose. */
+.menu-entree-sortie {
+  margin-top: 0.3rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--trait);
+  border-radius: 0;
+  color: var(--doux);
+}
+.menu-entree-sortie:hover { border-color: var(--trait); color: var(--encre); }
+
+/* ------------------------------------------------------- espace personnel */
+/* Préfixe « compte- » : la feuille est partagée par toutes les vues, et un
+   nom déjà pris ferait hériter cet écran d'une autre mise en page sans rien
+   casser visiblement (cf. styles.test.ts). */
+
+.bloc-compte {
+  margin: 0 0 2rem;
+  padding: 1.5rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.bloc-compte h2 { margin: 0 0 0.5rem; font-size: 1.15rem; font-weight: 600; }
+.bloc-compte h3 { margin: 0 0 0.5rem; font-size: 0.98rem; font-weight: 600; }
+
+/* Les faits : un libellé, une valeur, alignés en colonnes sur écran large.
+   Une liste de définitions et non un tableau : ce sont des paires, pas des
+   lignes d'un même relevé. */
+.compte-faits { margin: 0.5rem 0 0; display: grid; gap: 0.7rem; }
+.compte-fait { display: grid; gap: 0.1rem; }
+.compte-fait dt {
+  color: var(--doux);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+.compte-fait dd { margin: 0; font-size: 0.98rem; overflow-wrap: anywhere; }
+
+/* Ce que le site NE sait pas. Détaché par un filet : ce n'est pas une note
+   de bas de page, c'est la moitié de la réponse. */
+.compte-rien {
+  margin-top: 1.5rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--trait);
+}
+.compte-rien ul { margin: 0 0 0.8rem; padding-left: 1.1rem; font-size: 0.92rem; color: var(--doux); }
+.compte-rien li { margin-bottom: 0.25rem; }
+
+/* « compte-mdp- » et non « compte-form » : ce dernier appartient déjà au
+   formulaire de connexion (ligne 581). Réutiliser son nom aurait fait hériter
+   cet écran de sa mise en page sans que rien ne le signale — c'est exactement
+   la faute que styles.test.ts est là pour attraper, et il l'a attrapée. */
+.compte-mdp { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 1rem; }
+.compte-mdp input {
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.7rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  color: var(--encre);
+  font: inherit;
+  min-height: 48px;
+}
+.compte-mdp input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.compte-mdp .principal { align-self: flex-start; padding-inline: 1.5rem; flex: 0 0 auto; }
+
+.compte-erreur {
+  margin: 0 0 0.8rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--orange);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  font-size: 0.9rem;
+}
+.compte-ok {
+  margin: 0 0 0.8rem;
+  padding: 0.7rem 0.9rem;
+  border-left: 3px solid var(--vert);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  font-size: 0.9rem;
+}
+
+/* L'effacement. Signalé par un filet, pas par une couleur criarde : c'est un
+   droit, pas un piège — mais il demande deux gestes. */
+.bloc-compte-effacer { border-left: 3px solid var(--orange); }
+.compte-confirme {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 1rem 0;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+.compte-confirme input { margin-top: 0.2rem; width: 18px; height: 18px; flex: 0 0 auto; }
+.compte-danger {
+  flex: 0 0 auto;
+  width: auto;
+  padding-inline: 1.5rem;
+  border-color: var(--orange);
+  color: var(--orange);
+}
+.compte-danger:not([disabled]):hover { background: var(--orange); color: var(--fond); }
+.compte-danger[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* ------------------------------------------------- questions fréquentes */
+/* Une liste de définitions, pas une suite de paragraphes : la question et sa
+   réponse sont liées sémantiquement, et un lecteur d'écran l'annonce. */
+
+/* La FAQ de l'accueil reprend la présentation de celle des articles
+   (.questions-liste, .questions-paire) : deux mises en forme pour deux
+   listes de questions donneraient l'impression de deux sites. Seul
+   l'espacement du bloc change, l'accueil étant une suite de sections. */
+.accueil-questions {
+  margin: 0;
+  padding: 2rem 0 0;
+  border-top: 1px solid var(--trait);
+}
+.accueil-questions h2 { margin: 0 0 1.25rem; }
+
+.questions {
+  margin: 2.5rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--trait);
+}
+.questions-titre {
+  margin: 0 0 1.25rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+.questions-liste { margin: 0; }
+.questions-paire { margin: 0 0 1.4rem; }
+.questions-paire:last-child { margin-bottom: 0; }
+.questions-question {
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+/* La réponse est décalée et tenue par un filet : elle se lit comme un bloc
+   détachable, ce qu'elle est — c'est le morceau qu'un moteur reprendra seul. */
+.questions-reponse {
+  margin: 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ----------------------------------------------------- barre de classement */
+/* Préfixe « barre-tri- » : la feuille est partagée par toutes les vues, et un
+   nom déjà pris ferait hériter cette barre d'une autre mise en page sans rien
+   casser visiblement (cf. styles.test.ts). */
+
+.barre-tri {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.5rem;
+  margin: 0 0 1.25rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.barre-tri-groupe { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+.barre-tri-titre {
+  color: var(--doux);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+.barre-tri-boutons { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+.barre-tri-choix {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  /* 44 px de haut : la cible tactile minimale. La pastille reste fine à
+     l'œil grâce au remplissage, pas en rognant la zone cliquable. */
+  min-height: 44px;
+}
+.barre-tri-choix:hover { border-color: var(--accent); }
+/* L'état actif se lit à la couleur ET s'annonce par aria-pressed : la
+   couleur seule ne dit rien à qui ne la voit pas. */
+.barre-tri-choix[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+  font-weight: 600;
+}
+.barre-tri-compte { opacity: 0.7; font-variant-numeric: tabular-nums; }
+
+.barre-tri-select {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  color: var(--encre);
+  font: inherit;
+  font-size: 0.85rem;
+  min-height: 44px;
+  max-width: 16rem;
+}
+
+/* Le compte des écartés prend toute la ligne : c'est la garantie que rien
+   n'a disparu, elle ne se range pas dans un coin. */
+.barre-tri-ecartes {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  margin: 0.2rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--trait);
+  color: var(--doux);
+  font-size: 0.85rem;
+}
+.barre-tri-tout {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+.barre-tri-tout:hover { background: var(--accent); color: var(--fond); }
+.barre-tri-note { flex-basis: 100%; margin: 0; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GRAND ÉCRAN
+
+   Jusqu'ici la feuille n'avait qu'un seul palier, à 40rem, et la coquille
+   restait à 46rem quoi qu'il arrive. Sur un écran de 1440 px, le site
+   occupait 51 % de la largeur ; sur 1920 px, 38 %. Mesuré, pas supposé.
+
+   Le remède n'est pas d'étirer la page : une ligne de texte de 1100 px de
+   large est illisible, et la mesure de lecture de 46rem est un acquis, pas
+   un défaut. Ce qui s'élargit, ce sont les mises en page qui ONT plusieurs
+   colonnes à montrer — l'accueil, la liste du blog, l'album, les résultats.
+   Le parcours en sept questions et le corps d'un article gardent leur
+   colonne étroite : ce sont des textes qu'on lit, pas des tableaux qu'on
+   balaie.
+
+   Dans la coquille élargie, la prose garde sa mesure et reste alignée à
+   gauche. Le blanc à sa droite n'est pas un oubli : c'est la marge, et elle
+   ne sert à rien d'autre que respirer.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 64rem) {
+  /* 72rem = 1152 px. Au-delà, l'en-tête s'étire jusqu'à ce que la marque et
+     le menu n'aient plus l'air d'appartenir à la même barre. */
+  .app-large,
+  .accueil {
+    max-width: 72rem;
+    padding-inline: 2rem;
+  }
+
+  /* Le rail occupe 15rem : la colonne de contenu en a d'autant moins. Le
+     bouton principal était en « flex: 0 1 auto », donc compressible : son
+     libellé se cassait sur trois lignes et il devenait un pavé au lieu d'un
+     bouton. On l'empêche de rétrécir, et on autorise le groupe à passer à la
+     ligne plutôt qu'à écraser ce qu'il contient. */
+  .cta-groupe {
+    flex-wrap: wrap;
+  }
+  .cta-groupe .principal {
+    flex: 0 0 auto;
+  }
+
+  /* ── l'accroche et sa photographie, côte à côte ─────────────────────── */
+  .hero-zone {
+    display: grid;
+    /* Le texte un peu plus large que l'image : c'est lui qu'on lit d'abord,
+       et la photographie ne doit pas lui disputer l'entrée de page. */
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 3rem;
+    align-items: center;
+    /* La marge haute que portait `.hero` remonte ici : sans elle, l'accroche
+       se colle au filet de l'en-tête. */
+    margin: 2rem 0 2.5rem;
+  }
+  .hero { margin: 0; }
+  /* La mesure du paragraphe d'accroche s'ajuste à sa colonne : le 34rem posé
+     pour un écran étroit y laisserait un décrochement à droite. */
+  .hero-texte { max-width: none; }
+  .hero-zone .illu-bande-large { margin: 0; }
+  /* La photographie prend la hauteur du texte à côté d'elle, au lieu de la
+     bande basse qu'elle formait quand elle occupait toute la largeur. */
+  .hero-zone .illu-bande-large img { max-height: 25rem; }
+
+  /* ── la prose garde sa mesure ───────────────────────────────────────── */
+  .accueil .bloc-intro,
+  .accueil .bloc-chute,
+  .accueil .etapes-accueil {
+    max-width: 44rem;
+  }
+
+  /* ── ce qui peut se lire en deux colonnes ───────────────────────────── */
+  /* Cinq promesses courtes, cinq sources datées : des listes qu'on parcourt,
+     pas qu'on lit en continu. Deux colonnes les rendent embrassables d'un
+     regard au lieu d'étirer la page vers le bas. */
+  .promesses,
+  .sources {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 3rem;
+    align-items: start;
+  }
+
+  /* ── « comment ça marche » : la photographie à côté des étapes ──────── */
+  .etapes-illustrees {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 0 3rem;
+    align-items: start;
+  }
+  .etapes-illustrees .illu-bande { grid-row: 1 / span 3; margin: 0; }
+  .etapes-illustrees .illu-bande img { max-height: 22rem; }
+  .etapes-illustrees > h2,
+  .etapes-illustrees > .etapes-accueil,
+  .etapes-illustrees > .cta-groupe { grid-column: 2; }
+
+  /* ── le pied et l'appel final ───────────────────────────────────────── */
+  .cta-final { padding: 3rem; }
+  .cta-final h2 { font-size: 1.5rem; }
+
+  /* Un bouton large de 1152 px n'est plus un bouton, c'est une barre. La
+     règle de base pose « flex: 1 », qui le fait remplir sa ligne ; le palier
+     de 40rem ne rendait sa taille naturelle qu'au bouton principal. Le même
+     étirement existe entre 640 et 1024 px, où il se voit moins. */
+  .cta-groupe .secondaire {
+    flex: 0 0 auto;
+    width: auto;
+    padding-inline: 2rem;
+  }
+
+  /* ── les vignettes d'articles respirent ─────────────────────────────── */
+  .articles { gap: 1.25rem; }
+  .article-vignette { padding: 1.4rem; }
+}
+
+/* ═══════════════════════════════════════════════════ la carte géographique
+ *
+ * Préfixe « plan- » et non « carte- » : « carte » désigne déjà les cartes à
+ * collectionner. Voir l'en-tête de carte.tsx.
+ *
+ * Aucune dépendance : les tuiles sont des <img> positionnées en absolu dans
+ * un cadre qui déborde. C'est tout ce qu'il faut pour montrer un point.
+ */
+.plan {
+  margin: 1rem 0 0;
+}
+.plan-cadre {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--fond);
+  /* `touch-action: none` : sans lui, un glissement sur téléphone fait défiler
+     la page au lieu de déplacer la carte, et les événements de pointeur
+     n'arrivent jamais. */
+  touch-action: none;
+  cursor: grab;
+}
+.plan-cadre:active {
+  cursor: grabbing;
+}
+.plan-tuile {
+  position: absolute;
+  /* Les tuiles sont décoratives et se recouvrent d'un pixel selon l'arrondi
+     du navigateur ; `display: block` évite la ligne de base qui laisserait
+     une bande claire entre deux rangées. */
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+.plan-repere {
+  position: absolute;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  border: 3px solid var(--carte);
+  border-radius: 50%;
+  background: var(--vif);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 35%);
+  pointer-events: none;
+}
+.plan-zooms {
+  position: absolute;
+  z-index: 3;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: stretch;
+}
+.plan-zooms button {
+  min-width: 2.25rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+}
+.plan-zooms button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.plan-recentrer {
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.plan-mention {
+  margin: 0.4rem 0 0;
+}
+.plan-demande {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+.plan-bouton {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+/* ═══════════════════════════════════ la fiche d'une formation, à son adresse
+ *
+ * Trois onglets de même poids visuel. Aucun n'est mis en avant, aucun ne
+ * porte de couleur de « bon » ou de « mauvais » : les trois questions sont de
+ * nature différente et ne se classent pas (règle 5 de CLAUDE.md).
+ */
+.fiche-formation {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+}
+.fiche-entete {
+  margin-bottom: 1.5rem;
+}
+.fiche-entete h2 {
+  margin: 0 0 0.35rem;
+  font-family: var(--titres);
+  font-size: 1.45rem;
+  line-height: 1.25;
+}
+.fiche-lieu {
+  margin: 0 0 0.35rem;
+  color: var(--doux);
+}
+.fiche-lieu a {
+  color: inherit;
+}
+.fiche-sous-titre {
+  margin: 1.75rem 0 0.75rem;
+  font-family: var(--titres);
+  font-size: 1rem;
+}
+.fiche-source {
+  margin-top: 2rem;
+  color: var(--doux);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.fiche-onglets {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--trait);
+  /* Sur 390 px, trois onglets tiennent ; au-delà, on défile plutôt que de
+     replier, parce qu'un onglet caché derrière un menu n'est jamais ouvert. */
+  overflow-x: auto;
+}
+.onglet {
+  flex: 0 0 auto;
+  padding: 0.7rem 1.1rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--doux);
+  font: inherit;
+  font-family: var(--titres);
+  font-weight: 600;
+  cursor: pointer;
+}
+.onglet:hover {
+  color: var(--encre);
+}
+.onglet-actif {
+  border-bottom-color: var(--vif);
+  color: var(--encre);
+}
+.fiche-panneau {
+  padding-top: 1.25rem;
+}
+
+/* ── les chiffres publiés ─────────────────────────────────────────────── */
+.donnees {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+.donnee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.donnee-valeur {
+  font-family: var(--titres);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.donnee-libelle {
+  color: var(--doux);
+  font-size: 0.85rem;
+  line-height: 1.35;
+}
+/* Une donnée absente reste visible et se lit « non publié » : une case vide
+   passerait pour un oubli du site plutôt que pour une information sur le jeu
+   de données — et c'en est une. */
+.donnee-absente .donnee-valeur {
+  color: var(--doux);
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ── la répartition des mentions ──────────────────────────────────────── */
+.mentions {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+.mention {
+  display: grid;
+  grid-template-columns: minmax(7rem, 9rem) 1fr auto;
+  gap: 0.6rem;
+  align-items: center;
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+}
+.mention-libelle {
+  color: var(--doux);
+}
+.mention-barre {
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--trait);
+}
+.mention-part {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--vif);
+}
+.mention-chiffre {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── l'appel au parcours, depuis l'onglet « Vivre ici » ───────────────── */
+.encadre-action {
+  margin: 1.5rem 0;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--trait);
+  border-left: 4px solid var(--vif);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.encadre-action p {
+  margin: 0 0 0.9rem;
+}
+
+.liens-logement {
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+}
+.liens-logement li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--trait);
+}
+
+/* ═══════════════════════════════════════════ la page d'un établissement */
+.formations-etablissement {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.formation-vignette {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  margin-bottom: 0.6rem;
+  background: var(--carte);
+  color: inherit;
+  text-decoration: none;
+}
+.formation-vignette:hover {
+  border-color: var(--vif);
+}
+.formation-vignette-titre {
+  font-family: var(--titres);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Le titre d'un résultat de recherche est devenu un lien vers la fiche.
+   Il garde l'apparence d'un titre : souligné seulement au survol, dans la
+   couleur du texte. Un titre bleu souligné dans une liste de vingt résultats
+   fait un mur de liens où plus rien ne ressort. */
+.ecole-titre a {
+  color: inherit;
+  text-decoration: none;
+}
+.ecole-titre a:hover,
+.ecole-titre a:focus-visible {
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════ la navigation du site
+ *
+ * Deux navigations, décidées par l'état de connexion :
+ *
+ *   .coque-visiteur — une barre en haut. Le visiteur lit, il navigue peu, et
+ *                     il veut de la largeur pour le texte.
+ *   .coque-app      — un rail à gauche au-dessus de 1024 px, repliable sur
+ *                     ses icônes ; une barre en bas en dessous.
+ *
+ * La barre du bas est à portée de pouce et ne se fait pas recouvrir par le
+ * clavier, contrairement à une barre en haut. Le rail latéral, lui, mangerait
+ * la moitié d'un écran de téléphone.
+ */
+
+/* ---------------------------------------------------- le visiteur : en haut */
+
+.barre-haut {
+  position: sticky;
+  z-index: 40;
+  top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1.25rem;
+  padding: 0.65rem 16px;
+  border-bottom: 1px solid var(--trait);
+  background: var(--carte);
+}
+/* L'ordre explicite tient la première rangée : la marque à gauche, le bouton
+   à droite, et les destinations rejetées à la ligne par leur base de 100 %. */
+.barre-haut-marque {
+  flex: 1 1 auto;
+  order: 1;
+  min-width: 0;
+}
+.barre-haut-marque .marque-mot {
+  height: 1.5rem;
+}
+.barre-haut-compte {
+  flex: 0 0 auto;
+  order: 2;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--accent);
+  border-radius: var(--rayon);
+  background: var(--accent);
+  color: var(--fond);
+  font-family: var(--titres);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.barre-haut-compte.courant {
+  background: transparent;
+  color: var(--accent);
+}
+.barre-haut-nav {
+  flex: 1 0 100%;
+  order: 3;
+  min-width: 0;
+}
+.barre-haut-liste {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.barre-haut-liste > li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.haut-lien {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* 3rem : la taille sous laquelle une cible tactile se rate. */
+  min-height: 3rem;
+  padding: 0.4rem 0.2rem;
+  border-bottom: 2px solid transparent;
+  color: var(--doux);
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+.haut-lien .illu-picto {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+.haut-lien-courant {
+  border-bottom-color: var(--vif);
+  color: var(--encre);
+  font-weight: 600;
+}
+
+/* ----------------------------------------- l'élève connecté : rail ou bas */
+
+.coque-app .coque-page {
+  /* La barre du bas flotte au-dessus du contenu : sans cette réserve, elle
+     recouvre les derniers boutons de chaque page — et c'est justement là que
+     se trouve l'action principale. `safe-area-inset` tient compte de la barre
+     gestuelle des téléphones sans encoche déclarée. */
+  padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.rail {
+  position: fixed;
+  z-index: 40;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  border-top: 1px solid var(--trait);
+  background: var(--carte);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+/* Le bandeau de marque du téléphone. Il ne tient PAS dans la barre du bas :
+   il y prendrait la largeur d'une destination sans en être une. */
+.barre-marque {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  padding: 0.7rem 16px;
+  border-bottom: 1px solid var(--trait);
+  background: var(--carte);
+}
+.barre-marque .marque-logo img {
+  height: 1.55rem;
+}
+/* Sur téléphone, c'est le bandeau ci-dessus qui porte la marque ; la tête du
+   rail — marque et bouton de repli — n'a de sens qu'en colonne. */
+.rail-tete {
+  display: none;
+}
+.rail-liste {
+  display: flex;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rail-liste > li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.rail-lien {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* 3rem de haut au minimum : c'est la taille sous laquelle une cible tactile
+     se rate. */
+  min-height: 3.4rem;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  border-top: 2px solid transparent;
+  background: none;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.7rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.rail-lien .illu-picto {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+}
+.rail-lien-courant {
+  border-top-color: var(--vif);
+  color: var(--encre);
+  font-weight: 600;
+}
+/* Le libellé long est réservé au rail déplié ; ailleurs, la place manque. */
+.rail-libelle {
+  display: none;
+}
+.rail-court {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rail-deconnexion {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  /* `auto` et non une largeur fixe : c'est le rail qui décide de sa largeur
+     selon qu'il est replié ou non, et la colonne suit. Une largeur déclarée
+     ici devrait être répétée à l'identique sur le rail — deux chiffres pour
+     une seule mesure finissent par diverger. */
+  .coque-app {
+    display: grid;
+    grid-template-columns: auto 1fr;
+  }
+  /* `display: none` sort aussi l'élément de la grille : il ne reste que le
+     rail et la page, soit exactement les deux colonnes déclarées. */
+  .barre-marque {
+    display: none;
+  }
+  .coque-page {
+    min-width: 0;
+  }
+  .coque-app .coque-page {
+    padding-bottom: 0;
+  }
+
+  /* La barre du visiteur repasse sur UNE rangée : les destinations quittent
+     la ligne du dessous et se glissent entre la marque et le bouton. */
+  .barre-haut {
+    flex-wrap: nowrap;
+    padding-inline: 2rem;
+  }
+  .barre-haut-marque {
+    flex: 0 0 auto;
+  }
+  /* Le bouton repasse APRÈS les destinations. Sur téléphone il partage la
+     première rangée avec la marque, donc il doit la précéder ; sur une seule
+     rangée, cet ordre le collerait au logo, l'action se lisant alors comme la
+     première destination de la liste. Sa place est au bout. */
+  .barre-haut-compte {
+    order: 4;
+  }
+  .barre-haut-nav {
+    flex: 1 1 auto;
+  }
+  .barre-haut-liste {
+    justify-content: flex-start;
+    gap: 0.25rem;
+  }
+  .barre-haut-liste > li {
+    flex: 0 0 auto;
+  }
+  /* Les icônes sortent : une barre horizontale de destinations se lit par ses
+     mots, et cinq pictogrammes alignés n'ajoutent que du bruit à côté d'eux. */
+  .haut-lien {
+    flex-direction: row;
+    min-height: 0;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.9rem;
+  }
+  .haut-lien .illu-picto {
+    display: none;
+  }
+
+  .rail {
+    position: sticky;
+    top: 0;
+    right: auto;
+    bottom: auto;
+    left: 0;
+    flex-direction: column;
+    width: 15rem;
+    height: 100vh;
+    height: 100dvh;
+    padding: 1.25rem 0.9rem 1.5rem;
+    border-top: none;
+    border-right: 1px solid var(--trait);
+    transition: width 0.18s ease;
+  }
+  .rail-replie {
+    width: 4.5rem;
+    padding-inline: 0.6rem;
+  }
+  .rail-tete {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    margin: 0 0.35rem 1.5rem;
+  }
+  .rail-replie .rail-tete {
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-inline: 0;
+  }
+  .rail-marque {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .rail-toque {
+    display: block;
+    border-radius: 7px;
+  }
+  .rail-bascule {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--doux);
+    cursor: pointer;
+  }
+  .rail-bascule:hover {
+    background: var(--fond);
+    color: var(--encre);
+  }
+  .rail-bascule .illu-picto {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    transition: transform 0.18s ease;
+  }
+  /* Le chevron pointe vers le geste à venir : vers la gauche pour replier,
+     vers la droite pour déplier. Un seul dessin, retourné. */
+  .rail-replie .rail-bascule .illu-picto {
+    transform: scaleX(-1);
+  }
+  .rail-liste {
+    flex: 0 1 auto;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .rail-liste > li {
+    flex: 0 0 auto;
+  }
+  .rail-lien {
+    flex-direction: row;
+    gap: 0.7rem;
+    justify-content: flex-start;
+    min-height: 0;
+    padding: 0.65rem 0.75rem;
+    border-top: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    text-align: left;
+  }
+  .rail-lien:hover {
+    background: var(--fond);
+    color: var(--encre);
+  }
+  .rail-lien-courant,
+  .rail-lien-courant:hover {
+    background: var(--fond);
+    color: var(--encre);
+    box-shadow: inset 3px 0 0 var(--vif);
+  }
+  .rail-libelle {
+    display: inline;
+  }
+  .rail-court {
+    display: none;
+  }
+  /* Replié : l'icône seule, centrée. Le nom reste porté par `aria-label` et
+     par `title`, donc ni un lecteur d'écran ni la souris ne le perdent. */
+  .rail-replie .rail-lien {
+    justify-content: center;
+    gap: 0;
+    padding-inline: 0;
+  }
+  .rail-replie .rail-libelle {
+    display: none;
+  }
+  .rail-deconnexion {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding: 0.55rem 0.75rem;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--doux);
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: pointer;
+    /* Même hauteur de cible que les liens du rail : c'est un bouton comme
+       les autres, même s'il n'est pas une destination. */
+    min-height: 44px;
+  }
+  .rail-deconnexion .illu-picto { flex: 0 0 auto; width: 20px; height: 20px; }
+  .rail-deconnexion:hover {
+    color: var(--encre);
+    text-decoration: underline;
+  }
+  /* Replié, l'icône reste et le libellé s'en va, comme pour les liens.
+     Le bouton disparaissait entièrement, faute d'icône — et comme il n'existe
+     nulle part ailleurs sur cette largeur, replier le rail retirait la
+     déconnexion du site. */
+  .rail-replie .rail-deconnexion {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}
+
+/* Les titres de page qui remplacent l'ancien en-tête à logo. */
+.promesse-parcours,
+.promesse-resultats {
+  margin: 0 0 1.25rem;
+  font-family: var(--titres);
+  font-size: 1.2rem;
+  line-height: 1.3;
+}
+
+/* La carte des résultats de recherche. Ses repères sont cliquables : ce sont
+   de vrais boutons, donc atteignables au clavier, avec le nom de la formation
+   pour nom accessible. */
+.ecoles-carte {
+  margin: 1rem 0 1.5rem;
+}
+.plan-repere-actif {
+  padding: 0;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.plan-repere-actif:hover,
+.plan-repere-actif:focus-visible {
+  background: var(--accent);
+  transform: scale(1.25);
+}
+
+/* Un repère qui en regroupe plusieurs porte leur nombre. Il s'élargit pour
+   que le chiffre tienne, reste rond, et passe AU-DESSUS des repères simples :
+   un groupe recouvert par un voisin ne se clique pas. */
+.plan-repere-groupe {
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  background: var(--accent);
+}
+.plan-repere-compte {
+  color: #fff;
+  font-family: var(--titres);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Un lien qui sort du site. La flèche le dit déjà ; cette règle lui donne
+   seulement de l'air, pour qu'il ne se confonde pas avec le paragraphe qui
+   le précède. */
+.liens-externes {
+  margin: 0.75rem 0 0;
+}
+
+/* ═══════════════════════════════════════════════════════ la liste de vœux
+ *
+ * Une liste ordonnée, et elle en a l'air : le rang est écrit en gros à
+ * gauche, parce que c'est lui qui compte sur Parcoursup.
+ *
+ * Aucun style ne distingue un vœu d'un autre — pas de couleur de « bon »
+ * choix, pas de mise en avant. Les trois critères restent séparés et
+ * l'ordre est celui de l'élève (règles 4 et 5 de CLAUDE.md).
+ */
+/* ─────────────────────────── la page des vœux ───────────────────────────
+   Elle reprend la présentation de l'atelier de lettre, parce que les deux
+   écrans posent le même problème : une colonne de travail longue, et un
+   récapitulatif — combien il en reste, ce qui n'est pas enregistré — qu'on
+   ne voyait qu'en arrivant tout en bas. */
+
+/* L'en-tête se lit, donc il reste étroit même quand la page s'élargit. Les
+   états sans liste (déconnecté, serveur non activé) aussi : un bouton de
+   1 200 px de large n'est pas plus facile à trouver, il est plus difficile
+   à viser. */
+.voeux-tete, .voeux-seul { max-width: 44rem; }
+
+.voeux-atelier { display: block; }
+.voeux-colonne { min-width: 0; }
+
+@media (min-width: 72rem) {
+  .voeux-atelier {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+    gap: 2.4rem;
+    /* PAS `align-items: start` : une case de grille ramenée à la hauteur de
+       son contenu n'offre aucune course au `position: sticky` qu'elle
+       contient, et le récapitulatif redéfilerait hors de l'écran. Appris sur
+       l'atelier de lettre, où le compteur repartait en haut. */
+  }
+  .voeux-cote-collee {
+    position: sticky;
+    /* Sous la barre du haut, qui est elle-même collée et haute de 63 px. */
+    top: 4.75rem;
+    max-height: calc(100vh - 6.25rem);
+    overflow-y: auto;
+    padding-right: 0.4rem;
+  }
+}
+
+/* En une colonne, le récapitulatif vient après la liste et rien ne l'en
+   sépare : un trait suffit pour qu'il ne se lise pas comme un onzième vœu. */
+@media (max-width: 71.99rem) {
+  .voeux-cote {
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--trait);
+  }
+}
+
+.voeux-cote-titre { margin: 0 0 0.5rem; font-size: 1.05rem; }
+.voeux-compte { margin: 0 0 0.6rem; font-size: 0.92rem; color: var(--doux); }
+.voeux-compte strong {
+  font-family: var(--titres);
+  font-weight: 800;
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Les dix crans du plafond. La même idée que la jauge des six questions de
+   l'atelier : « 3 sur 10 » demande une soustraction, dix traits n'en
+   demandent aucune. En `aria-hidden`, la phrase au-dessus le disant déjà. */
+.voeux-jauge {
+  display: flex;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+}
+.voeux-cran {
+  height: 4px;
+  flex: 1 1 0;
+  border-radius: 2px;
+  background: var(--trait);
+}
+.voeux-cran.pose { background: var(--accent); }
+.voeux-cote .note { margin-bottom: 0.8rem; }
+
+.voeux {
+  margin: 1.25rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+.voeu {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0.25rem 0.75rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--trait);
+}
+/* Le rang en pastille, comme le numéro d'une question de l'atelier. Un
+   chiffre gris aligné à droite se lisait comme une décoration ; un rang, ça
+   se déplace avec les flèches d'à côté, et ça doit donc se voir. */
+.voeu-rang {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin-top: 0.1rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--fond);
+  font-family: var(--titres);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.voeu-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+.voeu-titre {
+  font-family: var(--titres);
+  font-weight: 600;
+  line-height: 1.3;
+  color: inherit;
+  text-decoration: none;
+}
+.voeu-titre:hover,
+.voeu-titre:focus-visible {
+  text-decoration: underline;
+}
+.voeu-signalement {
+  margin: 0.35rem 0 0;
+  padding: 0.5rem 0.65rem;
+  border-left: 3px solid var(--orange);
+  border-radius: 0 6px 6px 0;
+  background: var(--fond);
+  font-size: 0.9rem;
+}
+.voeu-note {
+  margin-top: 0.6rem;
+}
+.voeu-note input {
+  width: 100%;
+}
+.voeu-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  align-items: center;
+  grid-column: 2;
+}
+.voeu-fleche {
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  background: var(--carte);
+  color: var(--encre);
+  font: inherit;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.voeu-fleche:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+/* « Retirer » est une action destructrice : elle se distingue des autres
+   sans pour autant crier — un bouton rouge vif à côté de « Noter » ferait
+   hésiter sur tout le reste. */
+.voeu-retirer {
+  color: var(--rouge);
+}
+.voeu-ajout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.8rem;
+  align-items: center;
+  margin-top: 0.9rem;
+}
+.voeu-ajout .secondaire {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+/* Les métiers d'un domaine, sur l'onglet « Après ». Une liste sobre : ces
+   chiffres situent un ordre de grandeur, ils ne classent rien, et une mise
+   en forme qui les hiérarchiserait leur ferait dire plus qu'ils ne disent. */
+
+/* ═══════════════════════════════ les débouchés d'une école, par spécialité
+ *
+ * Une ligne par spécialité : son nom à gauche, ses compteurs à droite. En
+ * dessous de 40 rem les deux passent l'un sous l'autre — deux nombres et un
+ * intitulé de secteur ne tiennent pas côte à côte sur un téléphone.
+ *
+ * Les chiffres sont alignés à droite et non centrés : on les compare d'une
+ * ligne à l'autre, et un alignement flottant rend cette comparaison pénible.
+ */
+.specialites {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.specialite {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--trait);
+}
+.specialite:last-child {
+  border-bottom: 1px solid var(--trait);
+}
+.specialite-tete {
+  min-width: 0;
+}
+.specialite-titre {
+  color: var(--encre);
+  font-family: var(--titres);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.specialite-titre:hover,
+.specialite-titre:focus-visible {
+  text-decoration: underline;
+}
+.specialite-tete .note {
+  margin: 0.2rem 0 0;
+}
+.specialite-chiffres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.5rem;
+}
+.specialite-chiffre strong {
+  font-family: var(--titres);
+  font-size: 1.15rem;
+  /* Chiffres à chasse fixe : sans cela, « 1 246 » et « 9 600 » n'ont pas la
+     même largeur et les colonnes dansent d'une ligne à l'autre. */
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 40rem) {
+  .specialite {
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+  .specialite-chiffres {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    text-align: right;
+  }
+}
+
+/* ══════════════════════════════ les annonces d'emploi, en cartes
+ *
+ * Une colonne sur téléphone, deux à partir de 34 rem, trois à partir de
+ * 62 rem. Les seuils sont ceux des CARTES, pas ceux du site : une annonce
+ * porte un intitulé de métier, souvent long, et trois colonnes sous 62 rem
+ * le coupent en quatre lignes.
+ *
+ * `auto-fit` n'est pas employé ici : avec une seule annonce, il l'étirerait
+ * sur toute la largeur, et une carte pleine largeur ne se lit plus comme un
+ * élément d'une liste.
+ */
+.annonces {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.annonce {
+  display: flex;
+  flex-direction: column;
+  /* Le pied colle en bas quelle que soit la hauteur du titre : sans cela,
+     les contrats et les dates dansent d'une carte à l'autre. */
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.annonce-titre {
+  color: var(--encre);
+  font-family: var(--titres);
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+}
+.annonce-titre:hover,
+.annonce-titre:focus-visible {
+  text-decoration: underline;
+}
+.annonce-lieu {
+  margin: 0;
+  color: var(--doux);
+  font-size: 0.85rem;
+}
+.annonce-salaire {
+  margin: 0.15rem 0 0;
+  font-size: 0.95rem;
+}
+.annonce-salaire strong {
+  font-family: var(--titres);
+  /* Chiffres à chasse fixe : les montants se comparent d'une carte à
+     l'autre, et sans cela les colonnes dansent. */
+  font-variant-numeric: tabular-nums;
+}
+.annonce-pied {
+  margin: auto 0 0;
+  padding-top: 0.4rem;
+  font-size: 0.78rem;
+}
+
+/* Le choix du lieu. Deux boutons, l'actif marqué autrement que par la
+   couleur seule — `aria-pressed` le porte pour qui ne la voit pas. */
+.annonces-ou {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+}
+.annonces-choix {
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--doux);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.annonces-choix:hover {
+  color: var(--encre);
+}
+.annonces-choix.actif {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+  font-weight: 600;
+}
+
+@media (min-width: 34rem) {
+  .annonces {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 62rem) {
+  .annonces {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* ------------------------------------------ l'atelier de lettre de motivation */
+/* Une page où l'on écrit. Elle est donc plus étroite que les autres — une
+   ligne de quatre-vingts caractères se relit, une ligne de cent-vingt non —
+   et les champs y sont hauts : on y tape des phrases, pas des mots. */
+.lettre { max-width: 44rem; }
+.lettre .article-titre { margin: 0 0 0.4rem; }
+/* L'en-tête et le pied restent étroits même quand l'atelier passe à deux
+   colonnes : ce sont des textes à lire, et une ligne de cent-vingt caractères
+   ne se relit pas. Seul l'atelier s'élargit, parce qu'il tient deux colonnes
+   de quarante. */
+.lettre-tete, .lettre-fin { max-width: 44rem; }
+.lettre-chapeau { margin: 0 0 1.2rem; color: var(--doux); }
+.lettre-chapeau strong { color: var(--encre); }
+.lettre-titre { margin: 2rem 0 0.5rem; font-size: 1.05rem; }
+
+/* La phrase du ministère sur les IA. Citée, donc présentée comme une citation
+   — avec sa source visible, et non fondue dans notre propre texte. */
+/* La même règle sert la page des vœux : là-bas, c'est « elle ne part pas sur
+   Parcoursup » — une phrase qu'on ne peut pas se permettre de sauter, donc
+   qui ne se met pas dans le paragraphe qu'on saute. Deux écrans, un seul
+   traitement : une phrase encadrée veut dire la même chose partout. */
+.lettre-avertissement, .voeux-avertissement, .collec-avertissement {
+  margin: 0 0 1.2rem;
+  padding: 0.7rem 0.95rem;
+  border-left: 3px solid var(--orange);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+.lettre-avertissement p { margin: 0; }
+.voeux-avertissement strong, .collec-avertissement strong { color: var(--encre); }
+.lettre-avertissement cite {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  font-style: normal;
+  color: var(--doux);
+}
+
+.lettre-voeu { margin: 0 0 1.1rem; }
+.lettre-voeu .note, .lettre-identite .note { margin-top: 0.35rem; }
+
+/* Le prénom, replié. Il est facultatif et ne sert qu'à une vérification ;
+   déplié en permanence, c'était un champ de saisie de plus à côté de la
+   lettre, qui laissait croire qu'on attendait quelque chose. */
+.lettre-identite { margin-top: 1rem; }
+.lettre-identite > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.4rem 0;
+  min-height: 36px;
+}
+.lettre-identite > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.lettre-ifsi {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+  margin: 0 0 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.lettre-ifsi input { margin-top: 0.25rem; flex: 0 0 auto; }
+.lettre-ifsi-detail {
+  margin: 0 0 1.2rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+}
+.lettre-ifsi-detail h3 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+.lettre-ifsi-detail ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--doux); }
+
+/* La barre des réglages : le vœu et la limite de longueur.
+   Empilés pleine largeur, ils se lisaient comme les deux premières étapes du
+   parcours. Sur une ligne, ils redeviennent ce qu'ils sont — un choix qu'on
+   fait une fois, avant de commencer. */
+.lettre-barre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.6rem 1.6rem;
+  margin: 0 0 1.6rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--trait);
+}
+.lettre-barre .lettre-voeu { flex: 1 1 22rem; margin: 0; max-width: 34rem; }
+.lettre-barre .lettre-reglages { flex: 0 1 auto; margin: 0; padding-top: 1.55rem; }
+
+/* L'atelier : les questions à gauche, ce qu'elles produisent à droite.
+
+   Une seule colonne par défaut — c'est l'ordre du parcours, et celui du DOM.
+   La deuxième colonne n'apparaît que s'il y a la place pour deux colonnes de
+   texte lisibles ; en dessous, la superposer donnerait deux colonnes trop
+   étroites pour qu'on y écrive des phrases. */
+.lettre-atelier { display: block; }
+.lettre-colonne { min-width: 0; }
+
+@media (min-width: 72rem) {
+  /* Plus de largeur propre : la page vit maintenant dans `.app-large`, qui
+     borne à 72 rem et pose la gouttière. Un 76 rem ici aurait débordé de son
+     parent ou rouvert la question de savoir lequel des deux commande. */
+  .lettre { max-width: none; }
+  .lettre-atelier {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr);
+    gap: 2.4rem;
+    /* PAS `align-items: start`.
+       Il paraît juste — la colonne de droite est plus courte — et il casse
+       exactement ce pour quoi elle existe : une case de grille ramenée à la
+       hauteur de son contenu n'offre plus aucune course au `position: sticky`
+       qu'elle contient, et le brouillon défile hors de l'écran comme avant.
+       Étirée sur toute la hauteur de la rangée, elle lui en donne. */
+  }
+  /* Le brouillon suit le regard pendant qu'on répond : c'est tout l'intérêt
+     de la deuxième colonne. `max-height` et le défilement propre évitent
+     qu'une relecture longue dépasse l'écran sans jamais pouvoir remonter. */
+  .lettre-sortie-collee {
+    position: sticky;
+    /* Sous la barre du haut, qui est elle-même collée : `top: 0` glisserait
+       le brouillon DERRIÈRE elle, et on écrirait dans un champ dont on ne
+       voit plus le premier tiers. Mesurée à 63 px, plus un peu d'air. */
+    top: 4.75rem;
+    max-height: calc(100vh - 6.25rem);
+    overflow-y: auto;
+    /* La barre de défilement mangerait le bord droit du champ. */
+    padding-right: 0.4rem;
+  }
+  .lettre-sortie .lettre-titre:first-child { margin-top: 0; }
+}
+
+/* Les questions. Numérotées : elles suivent le plan que la fiche recommande,
+   et leur ordre est celui du texte final.
+
+   La pastille remplace le marqueur de liste : gris et minuscule, il se perdait
+   dans la marge, alors que c'est lui qui dit combien il en reste. Elle change
+   d'aspect dès que la question est remplie. */
+.lettre-questions { list-style: none; margin: 0; padding: 0; }
+/* Plus de pastille dans la marge : une seule question est à l'écran, son
+   numéro est dans le pas-à-pas juste au-dessus, et la répéter à côté du champ
+   volerait 2,4 rem à la ligne de texte sans rien apprendre. */
+.lettre-question {
+  margin: 0 0 1.5rem;
+}
+/* Le pas-à-pas des six questions.
+   Une seule question s'affiche à la fois ; ces crans disent où l'on en est ET
+   mènent à n'importe laquelle. Ce sont donc de vrais boutons, chacun portant
+   son numéro, son état et sa question dans son nom accessible — l'ordre
+   restait libre avant, il doit le rester. */
+.lettre-etapes { margin: 0 0 1.5rem; }
+.lettre-etapes ol {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lettre-etapes li { flex: 1 1 0; display: flex; }
+.lettre-cran {
+  flex: 1 1 0;
+  /* Assez haut pour être visé au doigt ; le trait qui marque l'état est en
+     haut, le chiffre dessous. */
+  min-height: 44px;
+  padding: 0.35rem 0 0;
+  border: 0;
+  border-top: 4px solid var(--trait);
+  border-radius: 2px 2px 0 0;
+  background: none;
+  color: var(--doux);
+  font-family: var(--titres);
+  font-weight: 800;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+.lettre-cran.rempli { border-top-color: var(--accent); color: var(--encre); }
+/* La question affichée se repère autrement que par la couleur : elle est la
+   seule à porter un fond, et `aria-current` le dit à qui écoute. */
+.lettre-cran.courante { background: var(--carte); color: var(--encre); }
+.lettre-cran:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .lettre-cran { transition: none; }
+}
+
+/* La cible du lien « Voir mon brouillon » passerait sous la barre du haut,
+   qui est collée : elle garde sa hauteur en marge de défilement. */
+#brouillon { scroll-margin-top: 5rem; }
+/* Sur un grand écran le brouillon est déjà à l'écran, dans la colonne collée
+   d'à côté : le lien n'a nulle part où emmener. Constaté au navigateur, où il
+   faisait défiler la colonne collée sur elle-même et posait le titre sous la
+   barre du haut.
+
+   `a.` et non `.` seul : `a.principal` porte un `display: inline-flex` de même
+   spécificité, et un sélecteur plus faible se serait fait écraser — c'est
+   exactement ce qui est arrivé au premier jet, où le lien restait affiché. */
+@media (min-width: 72rem) {
+  a.lettre-vers-brouillon { display: none; }
+}
+
+/* Précédente / suivante, sous le champ. */
+.lettre-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+/* L'aide sous un champ. Elle disait la même chose que le label, dans la même
+   taille : deux phrases de poids égal, dont une seule est la question. */
+.lettre-pourquoi { font-size: 0.82rem; margin-top: 0.35rem; }
+.lettre-champ, .lettre-texte {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--trait);
+  border-radius: var(--rayon);
+  background: var(--carte);
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 1rem;
+  line-height: 1.6;
+  resize: vertical;
+}
+.lettre-champ:focus-visible, .lettre-texte:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.lettre-pistes { margin-top: 0.4rem; }
+.lettre-pistes summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.3rem 0;
+}
+.lettre-pistes ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.86rem; }
+
+/* Le compteur, avec sa jauge.
+   « 1 210 sur 1 500 » demande une soustraction ; une barre qui se remplit n'en
+   demande aucune. Le chiffre reste — c'est lui qui est exact, et lui que la
+   jauge illustre. Elle est bornée à 100 % : au-delà, c'est la couleur et la
+   phrase qui disent le dépassement, pas une barre qui sort du cadre. */
+.lettre-compteur { margin: 0.6rem 0 0; font-size: 0.88rem; color: var(--doux); }
+.lettre-remplissage {
+  display: block;
+  height: 4px;
+  margin-bottom: 0.45rem;
+  border-radius: 2px;
+  background: var(--trait);
+  overflow: hidden;
+}
+.lettre-remplissage::before {
+  content: '';
+  display: block;
+  height: 100%;
+  width: var(--part, 0%);
+  background: var(--accent);
+  transition: width 0.25s ease;
+}
+.lettre-compteur.depasse .lettre-remplissage::before { background: var(--rouge); }
+@media (prefers-reduced-motion: reduce) {
+  .lettre-remplissage::before { transition: none; }
+}
+.lettre-compteur strong { font-family: var(--titres); font-variant-numeric: tabular-nums; }
+.lettre-compteur.depasse { color: var(--rouge); }
+.lettre-compteur.depasse strong { color: var(--rouge); }
+.lettre-desync { margin-top: 0.5rem; }
+
+/* Ce que Jean-Paul a vérifié. Deux niveaux seulement : ce qui empêche de
+   recopier dans Parcoursup, et ce qui mérite un coup d'œil. Pas de troisième
+   couleur — trois niveaux ne se distinguent plus. */
+.lettre-remarques { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+.lettre-remarque {
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.45rem;
+  border-left: 3px solid var(--trait);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  background: var(--carte);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.lettre-remarque.bloquant { border-left-color: var(--rouge); }
+.lettre-remarque.conseil { border-left-color: var(--orange); }
+.lettre-ok { margin: 0.6rem 0 0; font-size: 0.9rem; color: var(--doux); }
+
+.lettre-relecture { margin: 0.5rem 0 0.8rem; padding-left: 1.2rem; font-size: 0.92rem; }
+.lettre-relecture li { margin-bottom: 0.3rem; }
+
+.lettre-aides { margin-top: 2rem; }
+.lettre-aides > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.5rem 0;
+}
+/* Quatre listes d'expressions empilées faisaient une page à elles seules.
+   Côte à côte, elles se parcourent — c'est à ça qu'elles servent. */
+.lettre-aides-grille {
+  display: grid;
+  gap: 0.4rem 1.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.lettre-aide { margin-top: 1rem; }
+.lettre-aide h4 { margin: 0 0 0.3rem; font-size: 0.9rem; }
+.lettre-aide ul { margin: 0; padding-left: 1.1rem; font-size: 0.88rem; color: var(--doux); }
+.lettre-aide strong { color: var(--encre); }
+
+.lettre-source { margin-top: 2rem; font-size: 0.8rem; color: var(--doux); line-height: 1.5; }
+
+/* ----------------------------------- l'atelier de lettre, densité mobile */
+/* Sur un téléphone, le chapô, la citation, le vœu, le prénom et le réglage
+   IFSI occupaient trois écrans avant la première question. Le prénom est
+   descendu près de la relecture, le réglage IFSI est replié, et ce qui reste
+   se resserre : on écrit sur cette page, on ne la lit pas. */
+.lettre-avancement {
+  margin: 0.4rem 0 1rem;
+  font-size: 0.88rem;
+  color: var(--doux);
+}
+.lettre-avancement strong {
+  font-family: var(--titres);
+  font-weight: 800;
+  color: var(--encre);
+  font-variant-numeric: tabular-nums;
+}
+
+.lettre-reglages { margin: 0 0 1.2rem; }
+.lettre-reglages > summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.88rem;
+  padding: 0.4rem 0;
+  min-height: 36px;
+}
+.lettre-reglages > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.lettre-reglages .lettre-ifsi { margin-top: 0.5rem; }
+
+/* Le repère du champ pré-rempli. En accent et non en gris : il dit que le
+   texte présent vient de nous, ce qui se remarque ou ne sert à rien. */
+.lettre-prerempli {
+  border-left: 2px solid var(--accent);
+  padding-left: 0.6rem;
+  margin-top: 0.4rem;
+}
+
+@media (max-width: 34rem) {
+  .lettre .article-titre { font-size: 1.5rem; }
+  .lettre-chapeau { font-size: 0.95rem; margin-bottom: 1rem; }
+  .lettre-avertissement { padding: 0.7rem 0.85rem; margin-bottom: 1.1rem; }
+  .lettre-avertissement p { font-size: 0.86rem; line-height: 1.45; }
+  .lettre-avertissement cite { font-size: 0.72rem; }
+  .lettre-titre { margin-top: 1.5rem; }
+  .lettre-question { margin-bottom: 1.2rem; }
+  /* Six boutons sur 24 rem : chacun garde sa cible de 44 px en hauteur, le
+     chiffre rétrécit plutôt que le bouton. */
+  .lettre-cran { font-size: 0.75rem; }
+  .lettre-champ, .lettre-texte { font-size: 0.95rem; padding: 0.5rem 0.6rem; }
+  .lettre-barre { gap: 0.4rem; padding-bottom: 1rem; margin-bottom: 1.2rem; }
+  .lettre-barre .lettre-reglages { padding-top: 0; }
+}
+
+/* Le bouton « se déconnecter » de l'espace personnel. Discret et non rouge :
+   c'est l'action réversible des deux façons de partir, et la confondre avec
+   l'effacement du compte coûterait un compte. */
+.bouton-deconnexion {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.bouton-deconnexion .illu-picto { width: 18px; height: 18px; flex: 0 0 auto; }
+
+/* ------------------------------------------- garder un vœu depuis la liste */
+/* Compact : le bouton est répété sur chaque carte. Il partage la rangée
+   d'actions avec le budget, et vient en premier — c'est le geste qu'on fait
+   en parcourant, l'autre s'ouvre sur une carte déjà retenue. */
+.garder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.8rem;
+  min-height: 44px;
+  border: 1px solid var(--trait);
+  border-radius: 999px;
+  background: var(--carte);
+  color: var(--accent);
+  font-family: var(--titres);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.garder .illu-picto { width: 16px; height: 16px; flex: 0 0 auto; }
+.garder:hover { border-color: var(--accent); }
+.garder:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.garder[disabled] { opacity: 0.6; cursor: default; }
+/* Gardé : l'aplat du marque-page ET la bordure. La couleur seule ne se lit
+   ni en noir et blanc, ni par qui confond le bleu et le gris. */
+.garder.est-garde {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--fond);
+}
+.garder.est-garde:hover { opacity: 0.9; }
+
+.carte-actions .carte-volet-bouton { flex: 1 1 12rem; }
+
+.voeux-message, .voeux-rappel { margin: 0 0 0.8rem; }
+
+/* Identité KitEtudiant : papier ivoire, forêt, sauge et corail.
+   Les styles composés ci-dessous partagent les composants des écrans existants. */
+html { scroll-behavior: smooth; }
+body ::selection { background: var(--surface-citron); color: var(--encre); }
+body button, body input, body select, body textarea { font-family: var(--texte); }
+body .principal { border-radius: 9px; padding: .85rem 1.4rem; font-weight: 600; box-shadow: 0 4px 12px #203d3508; }
+body .principal:hover:not(:disabled) { background: var(--encre); color: var(--fond); transform: translateY(-2px); }
+body .secondaire, body .cta-secondaire { border-radius: 9px; }
+body .app { padding-top: 2.5rem; }
+body .app.accueil { max-width: 72rem; padding: 2rem 3rem 4rem; }
+body .barre-haut { background: var(--fond); border-bottom-color: var(--trait); box-shadow: none; }
+body .barre-haut-compte { border-radius: 9px; background: var(--accent); color: var(--sur-accent); padding: .65rem 1.1rem; }
+body .haut-lien { font-family: var(--texte); font-size: .8rem; }
+body .haut-lien-courant { background: var(--surface-sauge); border-radius: 8px; }
+body .rail { background: var(--fond); border-color: var(--trait); }
+body .rail-lien-courant { background: var(--surface-sauge); color: var(--accent); }
+body .accueil .hero-zone { display: grid; grid-template-columns: 1.08fr 1fr; align-items: center; gap: 3.5rem; margin: 1rem 0 4rem; }
+body .accueil .hero { margin: 0; }
+.kit-ouverture { margin: 0 0 1.3rem; display: flex; align-items: center; gap: 9px; font-size: .78rem; color: var(--doux); }
+.kit-ouverture::before { content: ''; width: 7px; height: 7px; background: var(--vif); border-radius: 50%; }
+body .accueil .promesse { font-size: clamp(2.4rem, 4.3vw, 4rem); line-height: 1.04; letter-spacing: -.05em; font-weight: 600; margin-bottom: 1.5rem; }
+body .accueil .promesse em { display: block; font-family: var(--editorial); font-weight: 400; font-style: italic; color: var(--vif); margin-top: .2em; }
+body .accueil .hero-texte { font-size: .92rem; line-height: 1.8; max-width: 32rem; }
+body .accueil .hero-gratuit { font-size: .82rem; color: var(--doux); line-height: 1.7; max-width: 30rem; }
+body .accueil .hero-mentions { font-size: .74rem; text-align: left; }
+body .accueil .cta-groupe { flex-wrap: wrap; gap: .8rem; }
+body .accueil .cta-groupe .principal { font-size: .88rem; padding: .9rem 1.3rem; }
+body .accueil .cta-secondaire { font-size: .82rem; background: transparent; padding: .85rem .6rem; border: 0; text-decoration: underline; text-underline-offset: 5px; }
+.kit-horizon { position: relative; min-width: 0; height: 580px; border-radius: 160px 160px 18px 18px; background: var(--surface-sauge); isolation: isolate; }
+.kit-horizon-quadrillage { position: absolute; inset: 0; border-radius: inherit; background-image: linear-gradient(var(--trait) 1px,transparent 1px),linear-gradient(90deg,var(--trait) 1px,transparent 1px); background-size: 34px 34px; opacity: .5; z-index: -2; }
+.kit-horizon-chemin { position: absolute; inset: 0; width: 100%; height: 100%; color: var(--surface-citron); z-index: -1; }
+.kit-horizon-note { display: block; text-align: center; padding: 35px 15px 0; font-family: var(--editorial); font-size: .8rem; font-style: italic; }
+.kit-horizon .illu-bande { position: absolute; left: -12px; top: 90px; width: 70%; height: 168px; border: 7px solid var(--carte); border-radius: 12px; margin: 0; transform: rotate(-5deg); box-shadow: 0 12px 30px #1d3d3112; }
+.kit-horizon .illu-bande img { width: 100%; height: 100%; object-fit: cover; max-height: none; }
+.kit-horizon-badge { position: absolute; top: 90px; right: -5px; display: grid; place-content: center; width: 115px; height: 115px; border-radius: 50%; background: #be694c; color: #fff9ec; font-size: .9rem; line-height: 1.4; text-align: center; transform: rotate(12deg); }
+.kit-horizon-badge em { font-family: var(--editorial); font-size: 1.1rem; }
+.kit-apercu-source abbr { text-decoration: none; }
+.kit-apercu { position: absolute; top: 272px; right: -10px; width: 88%; padding: 22px; border-radius: 12px; background: var(--carte); border: 1px solid var(--trait); box-shadow: 0 14px 30px #1d3d3110; transform: rotate(3deg); }
+.kit-apercu-surtitre { display: flex; align-items: center; gap: 8px; font-family: var(--titres); font-size: .88rem; font-weight: 600; margin: 0 0 5px; }
+.kit-apercu-hypothese { font-size: .65rem; color: var(--doux); margin: 0 0 12px; }
+.kit-apercu ul { list-style: none; margin: 0; padding: 0; }
+.kit-apercu li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-top: 1px solid var(--trait); font-size: .78rem; }
+.kit-apercu li strong { font-family: var(--titres); font-size: 1rem; white-space: nowrap; }
+.kit-apercu-source { font-size: .65rem; color: var(--doux); line-height: 1.6; margin: 10px 0 0; }
+body .accueil .bandeau { border-width: 1px 0; border-radius: 0; background: transparent; margin-bottom: 5rem; padding: 25px 0; }
+body .accueil .bandeau-item { background: transparent; padding: 0 25px; border-right: 1px solid var(--trait); }
+body .accueil .bandeau-item:last-child { border-right: 0; }
+body .accueil .bandeau-chiffre { font-size: 2.4rem; font-weight: 600; letter-spacing: -.06em; }
+body .accueil .bandeau-libelle { font-size: .75rem; max-width: 25ch; }
+body .accueil .bloc { margin-bottom: 5rem; }
+body .accueil .bloc h2 { font-size: clamp(1.6rem, 2.7vw, 2.5rem); letter-spacing: -.04em; line-height: 1.15; margin-bottom: 1rem; font-weight: 600; }
+body .accueil .bloc-intro { font-size: .95rem; line-height: 1.8; max-width: 48rem; margin-bottom: 1.8rem; }
+body .accueil .piliers-grille { gap: 18px; }
+body .accueil .pilier { background: var(--surface-sauge); border: 0; padding: 30px; border-radius: 14px; }
+body .accueil .pilier:nth-child(2) { background: var(--surface-citron); }
+body .accueil .pilier:nth-child(3) { background: var(--surface-peche); }
+body .accueil .pilier-numero { background: none; border: 0; color: var(--accent); padding: 0; margin-bottom: 25px; }
+body .accueil .pilier-titre { font-size: 1.2rem; margin-bottom: 7px; }
+body .accueil .pilier-question { font-family: var(--editorial); font-size: .92rem; color: var(--encre); }
+body .accueil .pilier-texte { font-size: .82rem; line-height: 1.8; }
+body .accueil .bloc-chute { color: var(--doux); font-size: .87rem; line-height: 1.8; }
+body .accueil .comparaison { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+body .accueil .comparaison li { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 25px; background: var(--carte); border-radius: 14px; }
+body .accueil .comparaison-montant { font-size: 2.2rem; font-weight: 600; letter-spacing: -.05em; }
+body .accueil .etapes-illustrees { display: block; background: var(--surface-sauge); padding: 35px; border-radius: 18px; }
+body .accueil .etapes-illustrees > .illu-bande { height: 200px; margin: 0 0 28px; }
+body .accueil .etapes-illustrees > .illu-bande img { height: 100%; width: 100%; object-fit: cover; max-height: none; }
+body .accueil .etapes-accueil { list-style: none; padding: 0; counter-reset: chemin; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+body .accueil .etapes-accueil li { position: relative; padding: 19px 0 0; border-top: 1px solid var(--trait); font-size: .85rem; counter-increment: chemin; }
+body .accueil .etapes-accueil li::before { content: '0' counter(chemin); display: block; font-family: var(--editorial); font-size: 1.6rem; color: var(--vif); margin-bottom: 12px; }
+body .accueil .etapes-accueil strong { display: block; margin-bottom: 7px; }
+body .accueil .chrono { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; }
+body .accueil .chrono-phase { padding: 25px 0 0; border-left: 0; border-top: 1px solid var(--trait); }
+body .accueil .chrono-phase::before { display: none; }
+body .accueil .chrono-date { color: var(--accent); }
+body .accueil .cta-final { background: var(--surface-citron); border: 0; padding: 55px 28px; border-radius: 18px; }
+body .accueil .cta-final h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); letter-spacing: -.04em; }
+body .accueil .cta-final > p { font-family: var(--editorial); }
+body .accueil .articles-apercu { gap: 18px; }
+body .accueil .article-apercu { border-radius: 14px; }
+body .app .carte, body .app .choix-carte { border-radius: 16px; box-shadow: 0 6px 20px #203d3505; }
+body .app .choix-carte { padding: 24px; }
+body .app .etape { background: var(--carte); padding: 30px; border: 1px solid var(--trait); border-radius: 18px; }
+body .app .progression { gap: 8px; margin-bottom: 25px; }
+body .app .pas { height: 5px; border-radius: 9px; }
+body .app .choix button, body .app .domaines button { border-radius: 10px; padding: 15px; background: var(--fond); }
+body .app .choix-actif { background: var(--surface-sauge) !important; }
+body .app .champ input, body .app .champ select, body .app .recherche-champ { border-radius: 9px; min-height: 46px; background: var(--carte); }
+body .app .verrou { background: var(--surface-sauge); border: 0; padding: 25px; }
+body .app .bilan { background: var(--surface-sauge); border-radius: 12px; padding: 18px; }
+body .app .compte-form { background: var(--carte); border: 1px solid var(--trait); border-radius: 16px; padding: 25px; }
+body .app .fiche-onglets { border-color: var(--trait); }
+body .app .lettre-brouillon { background: var(--carte); border-radius: 12px; box-shadow: 0 12px 30px #203d3508; }
+@media (max-width: 1000px) {
+ body .app.accueil { padding-inline: 28px; }
+ body .accueil .hero-zone { gap: 25px; }
+ body .accueil .promesse { font-size: 2.8rem; }
+ .kit-horizon { height: 570px; }
+ .kit-horizon-badge { width: 95px; height: 95px; right: 0; font-size: .8rem; }
+ .kit-apercu { padding: 18px; right: 0; }
+ body .accueil .piliers-grille .pilier { padding: 22px; }
+}
+@media (max-width: 720px) {
+ body .app.accueil { padding: 30px 22px 3rem; }
+ body .accueil .hero-zone { grid-template-columns: 1fr; gap: 35px; margin: 0 0 40px; }
+ body .accueil .promesse { font-size: clamp(2.45rem,8.6vw,3.5rem); }
+ body .accueil .hero-texte { font-size: .9rem; }
+ body .accueil .hero-gratuit { font-size: .8rem; }
+ body .accueil .cta-groupe { align-items: stretch; }
+ .kit-horizon { width: calc(100% - 12px); max-width: 460px; height: 550px; margin: auto; }
+ .kit-horizon .illu-bande { width: 72%; height: 150px; left: -4px; }
+ .kit-horizon .kit-apercu { top: 255px; right: -4px; width: 92%; }
+ .kit-horizon-note { font-size: .72rem; padding-top: 32px; }
+ .kit-horizon .kit-horizon-badge { right: -4px; top: 100px; }
+ body .accueil .bandeau { grid-template-columns: repeat(3,minmax(0,1fr)); margin-bottom: 45px; }
+ body .accueil .bandeau-item { padding: 0 10px; }
+ body .accueil .bandeau-item:first-child { padding-left: 0; }
+ body .accueil .bandeau-chiffre { font-size: clamp(1.2rem,5vw,1.8rem); }
+ body .accueil .bandeau-libelle { font-size: .65rem; }
+ body .accueil .bloc { margin-bottom: 45px; }
+ body .accueil .bloc h2 { font-size: 1.8rem; }
+ body .accueil .piliers-grille, body .accueil .comparaison, body .accueil .chrono, body .accueil .etapes-accueil { grid-template-columns: 1fr; }
+ body .accueil .comparaison li { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; padding: 20px; }
+ body .accueil .comparaison-montant { font-size: 1.7rem; }
+ body .accueil .etapes-illustrees { padding: 23px; }
+ body .app .etape { padding: 23px 18px; }
+ body .app .choix-carte { padding: 20px; }
+ body .app .compte-form { padding: 20px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } body .principal:hover:not(:disabled) { transform: none; } }

@@ -1,0 +1,170 @@
+{
+ "millesime_parcoursup": [
+  "2025"
+ ],
+ "millesime_loyers": [
+  "2025"
+ ],
+ "formations": 14252,
+ "formations_etranger": 22,
+ "insee_resolu_pct": 99.31,
+ "insee_resolu_hors_etranger_pct": 99.47,
+ "methodes": {
+  "nom + département": 12487,
+  "arrondissement municipal": 1666,
+  "null": 98,
+  "nom + département (Corse)": 1
+ },
+ "loyer_dispo_pct": 98.95,
+ "loyer_dispo_hors_etranger_pct": 99.11,
+ "qualite_loyer_pct": {
+  "commune": 97.81,
+  "maille": 2.19
+ },
+ "communes_sans_loyer": [
+  {
+   "ville": "Faaa",
+   "dep": "987",
+   "formations": 26
+  },
+  {
+   "ville": "Mamoudzou",
+   "dep": "976",
+   "formations": 15
+  },
+  {
+   "ville": "Papeete",
+   "dep": "987",
+   "formations": 14
+  },
+  {
+   "ville": "Pirae",
+   "dep": "987",
+   "formations": 13
+  },
+  {
+   "ville": "Dembeni",
+   "dep": "976",
+   "formations": 12
+  },
+  {
+   "ville": "Punaauia",
+   "dep": "987",
+   "formations": 8
+  },
+  {
+   "ville": "Lyon",
+   "dep": "69",
+   "formations": 5
+  },
+  {
+   "ville": "Ouangani",
+   "dep": "976",
+   "formations": 4
+  },
+  {
+   "ville": "Pamandzi",
+   "dep": "976",
+   "formations": 4
+  },
+  {
+   "ville": "Papara",
+   "dep": "987",
+   "formations": 4
+  },
+  {
+   "ville": "Mahina",
+   "dep": "987",
+   "formations": 3
+  },
+  {
+   "ville": "Saint-Martin",
+   "dep": "978",
+   "formations": 3
+  },
+  {
+   "ville": "Taiarapu-o",
+   "dep": "987",
+   "formations": 3
+  },
+  {
+   "ville": "Sada",
+   "dep": "976",
+   "formations": 3
+  },
+  {
+   "ville": "Chirongui",
+   "dep": "976",
+   "formations": 3
+  },
+  {
+   "ville": "Uturoa",
+   "dep": "987",
+   "formations": 2
+  },
+  {
+   "ville": "Moorea",
+   "dep": "987",
+   "formations": 1
+  },
+  {
+   "ville": "Mtsamboro",
+   "dep": "976",
+   "formations": 1
+  },
+  {
+   "ville": "Bandraboua",
+   "dep": "976",
+   "formations": 1
+  },
+  {
+   "ville": "Nouméa",
+   "dep": "988",
+   "formations": 1
+  }
+ ],
+ "cartographie": {
+  "millesimes": [
+   "2020",
+   "2021",
+   "2022",
+   "2023",
+   "2024",
+   "2025",
+   "2026"
+  ],
+  "lignes_dernier_millesime": 25810,
+  "uai_parcoursup_couverts_dernier_pct": 98.47,
+  "uai_parcoursup_couverts_tous_pct": 100.0
+ },
+ "cle_formation": {
+  "cod_aff_form_unique": true,
+  "g_ta_cod_extrait_pct": 99.73,
+  "g_ta_cod_dans_carto_dernier_pct": 95.19,
+  "g_ta_cod_dans_carto_tous_pct": 100.0
+ },
+ "onisep": {
+  "actions_de_formation": 28580,
+  "uai_distincts": 6070,
+  "uai_parcoursup_couverts_pct": 93.2,
+  "cout_scolarite_renseigne_pct": 36.4
+ },
+ "crous_logement": {
+  "lignes": 828,
+  "geoloc_exploitable_pct": 100.0,
+  "communes_atteintes": 265,
+  "distance_km_mediane": 1.72,
+  "distance_km_p90": 3.07,
+  "distance_km_max": 26.03,
+  "colonnes_tarif_ou_capacite": []
+ },
+ "crous_restauration": {
+  "lignes": 987,
+  "geoloc_exploitable_pct": 100.0,
+  "communes_atteintes": 311,
+  "distance_km_mediane": 1.64,
+  "distance_km_p90": 3.11,
+  "distance_km_max": 4723.31,
+  "colonnes_tarif_ou_capacite": []
+ }
+}

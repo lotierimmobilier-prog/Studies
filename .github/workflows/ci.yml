@@ -1,0 +1,116 @@
+name: Intégration continue
+
+# Vérifie chaque pull request avant la fusion, et chaque push sur main.
+# Les deux autres workflows (deploy-pages, deploy-vps) restent manuels : celui-ci
+# ne déploie rien, il ne fait que contrôler.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Une seule exécution par branche : un nouveau push annule la précédente.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: Tests, build et typage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Tests unitaires
+        run: npm test
+      - name: Build du front (inclut le typage)
+        run: npm run build
+      - name: Typage du serveur
+        run: npm run typecheck:server
+      - name: Typage des paquets kitetudiant
+        run: npm run typecheck:kitetudiant
+      - name: Build du front KITETUDIANT
+        run: npm run build:kitetudiant
+
+  scripts-python:
+    name: Scripts d'exploration Python
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Contrôle de syntaxe
+        run: python -m compileall -q kitetudiant/scripts kitetudiant/packages
+
+  schema-sql:
+    name: Schéma PostgreSQL + PostGIS
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Appliquer le schéma sur une base neuve
+        env:
+          PGURL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: kitetudiant/db/valider_schema.sh
+      - name: Appliquer les migrations, puis les rejouer
+        env:
+          PGURL: postgresql://postgres:postgres@localhost:5432/migrations
+        run: |
+          # Une base à part : le schéma de conception a déjà été appliqué sur
+          # « postgres », et les deux se marcheraient dessus. Ce qui est
+          # vérifié ici, c'est ce qui TOURNE — pas le document.
+          psql "postgresql://postgres:postgres@localhost:5432/postgres" \
+            -c 'create database migrations'
+          bash kitetudiant/db/migrations/appliquer.sh
+          # Rejouées : une migration déjà appliquée doit être sautée, pas
+          # relancée. Sans ce garde, un second passage casserait la base.
+          sortie=$(bash kitetudiant/db/migrations/appliquer.sh)
+          printf '%s\n' "$sortie"
+          deja=$(printf '%s' "$sortie" | grep -c 'déjà appliquée')
+          test "$deja" -ge 3
+
+      - name: Le pilote et les vœux, contre une vraie base
+        env:
+          DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/migrations
+        run: |
+          npm ci
+          # Les vœux sont éprouvés contre PostgreSQL et jamais contre un
+          # simulacre : ce qu'on vérifie — unicité d'un rang, resserrement
+          # après retrait, cascade à la suppression d'un compte — est tenu par
+          # le schéma, et un simulacre le tiendrait par construction sans rien
+          # prouver.
+          npx vitest run server/__tests__/bd.test.ts server/__tests__/voeux.test.ts
+
+      - name: Vérifier que les contraintes rejettent ce qu'elles doivent rejeter
+        env:
+          PGURL: postgresql://postgres:postgres@localhost:5432/postgres
+        run: |
+          # Trois familles de refus : contraintes CHECK, unicité, et le
+          # déclencheur qui ferme un millésime clos. Le message du déclencheur
+          # est en français : on ne force pas la locale, on cherche les trois.
+          sortie=$(psql "$PGURL" -f kitetudiant/db/tests_contraintes.sql 2>&1 || true)
+          rejets=$(printf '%s' "$sortie" \
+            | grep -cE 'violates check constraint|violates unique constraint|clos : aucune' || true)
+          echo "$rejets écritures interdites ont bien été rejetées"
+          printf '%s' "$sortie" | grep -E '^ERROR|ERROR:' | sed 's/^/  /'
+          test "$rejets" -eq 15

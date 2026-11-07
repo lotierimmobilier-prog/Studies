@@ -1,0 +1,22 @@
+{
+  "cle": "droits_inscription",
+  "libelle": "Droits d'inscription et frais de scolarité de la formation",
+  "unite": "euros_par_an",
+  "description_source": "Montant annuel dû par l'étudiant au titre de son inscription. Fixé par arrêté pour les formations publiques, librement par l'établissement dans le privé.",
+  "valeurs_par_date": {},
+  "references_par_date": {},
+  "derniere_valeur_encore_valide_le": null,
+  "absence_documentee": {
+    "raison": "Aucune source déterministe disponible à ce jour. Le champ « AF coût scolarité » de l'Onisep n'est renseigné que sur 36,40 % des actions de formation et en texte libre (« de 10410 euros jusqu'à 19800 euros en 2023-2024 ») : il n'est pas exploitable sans interprétation, ce que la règle 1 de CLAUDE.md interdit.",
+    "consequence": "Le poste frais de scolarité est rendu comme donnée manquante. Le RAV n'est pas calculé tant qu'aucun montant n'est fourni par une source ou par l'utilisateur.",
+    "pistes": [
+      "Arrêté annuel fixant les droits d'inscription dans les établissements publics sous tutelle du MESR.",
+      "Saisie par l'élève, étiquetée comme déclarative."
+    ]
+  },
+  "provenance": {
+    "origine": "aucune",
+    "parametre": null,
+    "extrait_le": "2026-09-19"
+  }
+}

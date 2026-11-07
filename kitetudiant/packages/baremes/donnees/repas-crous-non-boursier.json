@@ -1,0 +1,55 @@
+{
+  "cle": "repas_crous_non_boursier",
+  "libelle": "Repas en restaurant universitaire, étudiant non boursier",
+  "unite": "euros_par_repas",
+  "description_source": "Montant du repas CROUS pour un étudiant sans condition de ressource particulière",
+  "valeurs_par_date": {
+    "2016-09-01": 3.25,
+    "2019-09-01": 3.3,
+    "2021-01-25": 1,
+    "2021-09-01": 3.3,
+    "2026-05-04": 1
+  },
+  "references_par_date": {
+    "2016-09-01": [
+      {
+        "title": "Délibération du CA du CNOUS du 07/07/2016",
+        "href": "https://www.etudiant.gouv.fr/sites/default/files/imported_files/document/Point-1-a-Releve-de-decision-du-CA-du-7-juillet-2016_680945.pdf"
+      }
+    ],
+    "2019-09-01": [
+      {
+        "title": "Délibération du CA du CNOUS du 04/07/2019",
+        "href": "https://www.etudiant.gouv.fr/sites/default/files/imported_files/document/Deliberation-CA-2019-07-04-4_1157228.pdf"
+      }
+    ],
+    "2021-01-25": [
+      {
+        "title": "Délibération du CA du CNOUS du 11/03/2021",
+        "href": "https://www.etudiant.gouv.fr/sites/default/files/2021-04/202103112-delib-prix-du-ru-5117.pdf"
+      }
+    ],
+    "2021-09-01": [
+      {
+        "title": "Délibération du CA du CNOUS du 12/07/2021",
+        "href": "https://cnous-my.sharepoint.com/personal/vu_cnous_fr/_layouts/15/onedrive.aspx?ga=1&id=%2Fpersonal%2Fvu%5Fcnous%5Ffr%2FDocuments%2FCA%2FCA%20du%2029%20juillet%2F202107136%20D%C3%A9lib%C3%A9ration%20Avis%20pris%20repas%20social%202021%2Epdf&parent=%2Fpersonal%2Fvu%5Fcnous%5Ffr%2FDocuments%2FCA%2FCA%20du%2029%20juillet"
+      }
+    ],
+    "2026-05-04": [
+      {
+        "title": "Repas au Crous à 1 € accessible à tous les étudiants dès le 4 mai 2026",
+        "href": "https://www.service-public.gouv.fr/particuliers/actualites/A18811"
+      },
+      {
+        "title": "Loi n° 2026-103 du 19 février 2026 de finances pour 2026",
+        "href": "https://www.legifrance.gouv.fr/jorf/id/JORFTEXT000053508155"
+      }
+    ]
+  },
+  "derniere_valeur_encore_valide_le": null,
+  "provenance": {
+    "origine": "openfisca-france",
+    "parametre": "prestations_sociales/education/alimentation/montant_repas_non_boursier.yaml",
+    "extrait_le": "2026-09-19"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "cle": "repas_crous_boursier",
+  "libelle": "Repas en restaurant universitaire, étudiant boursier",
+  "unite": "euros_par_repas",
+  "description_source": "Montant du repas CROUS pour un étudiant boursier",
+  "valeurs_par_date": {
+    "2016-09-01": 3.25,
+    "2019-09-01": 3.3,
+    "2020-09-01": 1
+  },
+  "references_par_date": {
+    "2016-09-01": [
+      {
+        "title": "Délibération du CA du CNOUS du 07/07/2016",
+        "href": "https://www.etudiant.gouv.fr/sites/default/files/imported_files/document/Point-1-a-Releve-de-decision-du-CA-du-7-juillet-2016_680945.pdf"
+      }
+    ],
+    "2019-09-01": [
+      {
+        "title": "Délibération du CA du CNOUS du 04/07/2019",
+        "href": "https://www.etudiant.gouv.fr/sites/default/files/imported_files/document/Deliberation-CA-2019-07-04-4_1157228.pdf"
+      }
+    ],
+    "2020-09-01": [
+      {
+        "title": "Délibération du CA du CNOUS du 23/07/2020",
+        "href": "https://www.etudiant.gouv.fr/sites/default/files/imported_files/document/202007231-delib-Prix-du-Ticket-RU-VF_1344376.pdf"
+      }
+    ]
+  },
+  "derniere_valeur_encore_valide_le": null,
+  "provenance": {
+    "origine": "openfisca-france",
+    "parametre": "prestations_sociales/education/alimentation/montant_repas_boursier.yaml",
+    "extrait_le": "2026-09-19"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "cle": "aide_mobilite_parcoursup",
+  "libelle": "Aide à la mobilité Parcoursup",
+  "unite": "euros_une_fois",
+  "description_source": "Montant de l'aide à la mobilité Parcours Sup pour les jeunes parmi les prestations sociales",
+  "valeurs_par_date": {
+    "2019-05-14": 500
+  },
+  "references_par_date": {
+    "2019-05-14": [
+      {
+        "href": "https://www.education.gouv.fr/bo/19/Hebdo20/ESRS1910244C.htm"
+      }
+    ]
+  },
+  "derniere_valeur_encore_valide_le": null,
+  "provenance": {
+    "origine": "openfisca-france",
+    "parametre": "prestations_sociales/education/mobilite/parcoursup/montant.yaml",
+    "extrait_le": "2026-09-19"
+  }
+}

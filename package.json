@@ -11,10 +11,15 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck:server": "tsc -p tsconfig.server.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck:kitetudiant": "tsc -p kitetudiant/tsconfig.json --noEmit",
+    "dev:kitetudiant": "vite --config vite.kitetudiant.config.ts",
+    "build:kitetudiant": "tsc -p kitetudiant/tsconfig.json --noEmit && vite build --config vite.kitetudiant.config.ts && npm run prerendre:kitetudiant",
+    "prerendre:kitetudiant": "tsx kitetudiant/scripts/prerendre.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
+    "postgres": "^3.4.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

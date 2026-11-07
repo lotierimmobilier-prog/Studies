@@ -1,0 +1,28 @@
+{
+  "cle": "cvec",
+  "libelle": "Contribution de vie étudiante et de campus (CVEC)",
+  "unite": "euros_par_an",
+  "description_source": "Montant annuel de la CVEC, dû à l'inscription dans un établissement d'enseignement supérieur.",
+  "valeurs_par_date": {
+    "2026-09-01": 105
+  },
+  "references_par_date": {
+    "2026-09-01": [
+      {
+        "title": "FAQ CVEC — etudiant.gouv.fr : « Le montant de la CVEC est de 105 € pour l'année universitaire 2026/2027 »",
+        "href": "https://www.etudiant.gouv.fr/fr/faq-cvec-2402"
+      }
+    ]
+  },
+  "derniere_valeur_encore_valide_le": "2026-09-19",
+  "exonerations": {
+    "regle": "Sont exonérés les boursiers sur critères sociaux gérés par le Crous, les bénéficiaires d'une allocation annuelle au titre des aides spécifiques annuelles, et les boursiers gérés par les régions.",
+    "non_concernes": "Les personnes inscrites en BTS, DMA ou formations comptables en établissement public ne sont pas concernées par la CVEC.",
+    "source": "https://www.etudiant.gouv.fr/fr/faq-cvec-2402"
+  },
+  "provenance": {
+    "origine": "saisie manuelle depuis la source officielle",
+    "parametre": null,
+    "extrait_le": "2026-09-19"
+  }
+}

@@ -1,0 +1,3476 @@
+{
+ "parcoursup_2025": {
+  "meta": {
+   "titre": "Parcoursup 2025 - vœux de poursuite d'études et de réorientation dans l'enseignement supérieur et réponses des établissements",
+   "lignes_annoncees": 14252,
+   "licence": "Licence Ouverte v2.0 (Etalab)",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf",
+   "modifie": "2026-03-09T16:54:47+00:00",
+   "producteur": "Ministère de l'Enseignement supérieur, de la Recherche et de l'Espace > Sous-Direction des systèmes d'information et des études statistiques (SIES) > Département des études statistiques sur l'enseignement supérieur"
+  },
+  "lignes": 14252,
+  "colonnes_n": 118,
+  "colonnes": [
+   {
+    "colonne": "session",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1,
+    "exemple": "2025"
+   },
+   {
+    "colonne": "contrat_etab",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 4,
+    "exemple": "Public"
+   },
+   {
+    "colonne": "cod_uai",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 4058,
+    "exemple": "0121471J"
+   },
+   {
+    "colonne": "g_ea_lib_vx",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3707,
+    "exemple": "Institut national universitaire Champollion - Campus de Rodez"
+   },
+   {
+    "colonne": "dep",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 106,
+    "exemple": "12"
+   },
+   {
+    "colonne": "dep_lib",
+    "type_portail": "text",
+    "manquant_pct": 0.01,
+    "valeurs_distinctes": 105,
+    "exemple": "Aveyron"
+   },
+   {
+    "colonne": "region_etab_aff",
+    "type_portail": "text",
+    "manquant_pct": 0.68,
+    "valeurs_distinctes": 18,
+    "exemple": "Occitanie"
+   },
+   {
+    "colonne": "acad_mies",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 33,
+    "exemple": "Toulouse"
+   },
+   {
+    "colonne": "ville_etab",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1275,
+    "exemple": "Rodez"
+   },
+   {
+    "colonne": "lib_for_voe_ins",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3150,
+    "exemple": "Licence - Sciences et Techniques des Activités Physiques et Sportives - Parcours"
+   },
+   {
+    "colonne": "select_form",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2,
+    "exemple": "formation non sélective"
+   },
+   {
+    "colonne": "fili",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11,
+    "exemple": "Licence"
+   },
+   {
+    "colonne": "lib_comp_voe_ins",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11891,
+    "exemple": "Institut national universitaire Champollion - Campus de Rodez - Licence - Scienc"
+   },
+   {
+    "colonne": "form_lib_voe_acc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 53,
+    "exemple": "Licence - Sciences - technologies - santé"
+   },
+   {
+    "colonne": "fil_lib_voe_acc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 438,
+    "exemple": "Sciences et Techniques des Activités Physiques et Sportives"
+   },
+   {
+    "colonne": "detail_forma",
+    "type_portail": "text",
+    "manquant_pct": 70.11,
+    "valeurs_distinctes": 2895,
+    "exemple": "Accès Kiné"
+   },
+   {
+    "colonne": "g_olocalisation_des_formations",
+    "type_portail": "geo_point_2d",
+    "manquant_pct": 0.27,
+    "valeurs_distinctes": 5786,
+    "exemple": "44.35624, 2.56417"
+   },
+   {
+    "colonne": "capa_fin",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 348,
+    "exemple": "20"
+   },
+   {
+    "colonne": "voe_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3244,
+    "exemple": "1065"
+   },
+   {
+    "colonne": "voe_tot_f",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2367,
+    "exemple": "395"
+   },
+   {
+    "colonne": "nb_voe_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3182,
+    "exemple": "1065"
+   },
+   {
+    "colonne": "nb_voe_pp_internat",
+    "type_portail": "int",
+    "manquant_pct": 93.08,
+    "valeurs_distinctes": 265,
+    "exemple": "59"
+   },
+   {
+    "colonne": "nb_voe_pp_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2258,
+    "exemple": "729"
+   },
+   {
+    "colonne": "nb_voe_pp_bg_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 699,
+    "exemple": "50"
+   },
+   {
+    "colonne": "nb_voe_pp_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1006,
+    "exemple": "70"
+   },
+   {
+    "colonne": "nb_voe_pp_bt_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 436,
+    "exemple": "10"
+   },
+   {
+    "colonne": "nb_voe_pp_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 684,
+    "exemple": "6"
+   },
+   {
+    "colonne": "nb_voe_pp_bp_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 374,
+    "exemple": "4"
+   },
+   {
+    "colonne": "nb_voe_pp_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1499,
+    "exemple": "260"
+   },
+   {
+    "colonne": "nb_voe_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 461,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_voe_pc_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 203,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_voe_pc_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 137,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_voe_pc_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 90,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_voe_pc_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 335,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_cla_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2628,
+    "exemple": "1065"
+   },
+   {
+    "colonne": "nb_cla_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 281,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_cla_pp_internat",
+    "type_portail": "int",
+    "manquant_pct": 93.08,
+    "valeurs_distinctes": 208,
+    "exemple": "56"
+   },
+   {
+    "colonne": "nb_cla_pp_pasinternat",
+    "type_portail": "int",
+    "manquant_pct": 93.08,
+    "valeurs_distinctes": 668,
+    "exemple": "593"
+   },
+   {
+    "colonne": "nb_cla_pp_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2005,
+    "exemple": "729"
+   },
+   {
+    "colonne": "nb_cla_pp_bg_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 623,
+    "exemple": "50"
+   },
+   {
+    "colonne": "nb_cla_pp_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 802,
+    "exemple": "70"
+   },
+   {
+    "colonne": "nb_cla_pp_bt_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 312,
+    "exemple": "10"
+   },
+   {
+    "colonne": "nb_cla_pp_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 525,
+    "exemple": "6"
+   },
+   {
+    "colonne": "nb_cla_pp_bp_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 274,
+    "exemple": "4"
+   },
+   {
+    "colonne": "nb_cla_pp_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1205,
+    "exemple": "260"
+   },
+   {
+    "colonne": "prop_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1613,
+    "exemple": "62"
+   },
+   {
+    "colonne": "acc_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 462,
+    "exemple": "20"
+   },
+   {
+    "colonne": "acc_tot_f",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 335,
+    "exemple": "9"
+   },
+   {
+    "colonne": "acc_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 440,
+    "exemple": "20"
+   },
+   {
+    "colonne": "acc_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 134,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_debutpp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 280,
+    "exemple": "5"
+   },
+   {
+    "colonne": "acc_datebac",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 375,
+    "exemple": "16"
+   },
+   {
+    "colonne": "acc_finpp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 433,
+    "exemple": "17"
+   },
+   {
+    "colonne": "acc_internat",
+    "type_portail": "int",
+    "manquant_pct": 93.08,
+    "valeurs_distinctes": 65,
+    "exemple": "8"
+   },
+   {
+    "colonne": "acc_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 129,
+    "exemple": "2"
+   },
+   {
+    "colonne": "acc_neobac",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 374,
+    "exemple": "20"
+   },
+   {
+    "colonne": "acc_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 353,
+    "exemple": "19"
+   },
+   {
+    "colonne": "acc_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 97,
+    "exemple": "1"
+   },
+   {
+    "colonne": "acc_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 50,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 207,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_mention_nonrenseignee",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 9,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_sansmention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 173,
+    "exemple": "1"
+   },
+   {
+    "colonne": "acc_ab",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 198,
+    "exemple": "2"
+   },
+   {
+    "colonne": "acc_b",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 169,
+    "exemple": "13"
+   },
+   {
+    "colonne": "acc_tb",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 124,
+    "exemple": "3"
+   },
+   {
+    "colonne": "acc_tbf",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 54,
+    "exemple": "1"
+   },
+   {
+    "colonne": "acc_bg_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 292,
+    "exemple": "18"
+   },
+   {
+    "colonne": "acc_bt_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 83,
+    "exemple": "1"
+   },
+   {
+    "colonne": "acc_bp_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 43,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_term",
+    "type_portail": "int",
+    "manquant_pct": 55.54,
+    "valeurs_distinctes": 41,
+    "exemple": "8"
+   },
+   {
+    "colonne": "acc_term_f",
+    "type_portail": "int",
+    "manquant_pct": 55.54,
+    "valeurs_distinctes": 22,
+    "exemple": "1"
+   },
+   {
+    "colonne": "acc_aca_orig",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 308,
+    "exemple": "18"
+   },
+   {
+    "colonne": "acc_aca_orig_idf",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 330,
+    "exemple": "18"
+   },
+   {
+    "colonne": "pct_acc_debutpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "25.0"
+   },
+   {
+    "colonne": "pct_acc_datebac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 99,
+    "exemple": "80.0"
+   },
+   {
+    "colonne": "pct_acc_finpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 77,
+    "exemple": "85.0"
+   },
+   {
+    "colonne": "pct_f",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "45.0"
+   },
+   {
+    "colonne": "pct_aca_orig",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "90.0"
+   },
+   {
+    "colonne": "pct_aca_orig_idf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "90.0"
+   },
+   {
+    "colonne": "pct_etab_orig",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 98,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_bours",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 92,
+    "exemple": "10.0"
+   },
+   {
+    "colonne": "pct_neobac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "100.0"
+   },
+   {
+    "colonne": "pct_mention_nonrenseignee",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 23,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_sansmention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 97,
+    "exemple": "5.0"
+   },
+   {
+    "colonne": "pct_ab",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 86,
+    "exemple": "10.0"
+   },
+   {
+    "colonne": "pct_b",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 85,
+    "exemple": "65.0"
+   },
+   {
+    "colonne": "pct_tb",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 90,
+    "exemple": "15.0"
+   },
+   {
+    "colonne": "pct_tbf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 62,
+    "exemple": "5.0"
+   },
+   {
+    "colonne": "pct_bg",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "95.0"
+   },
+   {
+    "colonne": "pct_bg_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "90.0"
+   },
+   {
+    "colonne": "pct_bt",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 95,
+    "exemple": "5.0"
+   },
+   {
+    "colonne": "pct_bt_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 95,
+    "exemple": "5.0"
+   },
+   {
+    "colonne": "pct_bp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 97,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_bp_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 97,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "prop_tot_bg",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1264,
+    "exemple": "42.0"
+   },
+   {
+    "colonne": "prop_tot_bg_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 338,
+    "exemple": "2.0"
+   },
+   {
+    "colonne": "prop_tot_bt",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 404,
+    "exemple": "4.0"
+   },
+   {
+    "colonne": "prop_tot_bt_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 145,
+    "exemple": "2.0"
+   },
+   {
+    "colonne": "prop_tot_bp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 178,
+    "exemple": "1.0"
+   },
+   {
+    "colonne": "prop_tot_bp_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 84,
+    "exemple": "1.0"
+   },
+   {
+    "colonne": "prop_tot_at",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 650,
+    "exemple": "15.0"
+   },
+   {
+    "colonne": "lib_grp1",
+    "type_portail": "text",
+    "manquant_pct": 8.69,
+    "valeurs_distinctes": 7,
+    "exemple": "Tous les candidats"
+   },
+   {
+    "colonne": "ran_grp1",
+    "type_portail": "int",
+    "manquant_pct": 0.43,
+    "valeurs_distinctes": 1827,
+    "exemple": "71"
+   },
+   {
+    "colonne": "lib_grp2",
+    "type_portail": "text",
+    "manquant_pct": 58.01,
+    "valeurs_distinctes": 5,
+    "exemple": "Bacheliers technologiques toutes series"
+   },
+   {
+    "colonne": "ran_grp2",
+    "type_portail": "int",
+    "manquant_pct": 57.03,
+    "valeurs_distinctes": 389,
+    "exemple": "358"
+   },
+   {
+    "colonne": "lib_grp3",
+    "type_portail": "text",
+    "manquant_pct": 75.7,
+    "valeurs_distinctes": 2,
+    "exemple": "Bacheliers technologiques toutes series"
+   },
+   {
+    "colonne": "ran_grp3",
+    "type_portail": "int",
+    "manquant_pct": 74.26,
+    "valeurs_distinctes": 238,
+    "exemple": "21"
+   },
+   {
+    "colonne": "list_com",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2,
+    "exemple": "Liste d'appel commune à plusieurs formations"
+   },
+   {
+    "colonne": "tri",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3,
+    "exemple": "1_universités"
+   },
+   {
+    "colonne": "cod_aff_form",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 14252,
+    "exemple": "2519"
+   },
+   {
+    "colonne": "detail_forma2",
+    "type_portail": "text",
+    "manquant_pct": 94.16,
+    "valeurs_distinctes": 118,
+    "exemple": "CESI Ecole d’Ingénieurs"
+   },
+   {
+    "colonne": "lien_form_psup",
+    "type_portail": "text",
+    "manquant_pct": 0.27,
+    "valeurs_distinctes": 14214,
+    "exemple": "https://dossierappel.parcoursup.fr/Candidats/public/fiches/afficherFicheFormatio"
+   },
+   {
+    "colonne": "taux_acces_ens",
+    "type_portail": "int",
+    "manquant_pct": 0.11,
+    "valeurs_distinctes": 101,
+    "exemple": "7"
+   },
+   {
+    "colonne": "part_acces_gen",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "93"
+   },
+   {
+    "colonne": "part_acces_tec",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 96,
+    "exemple": "5"
+   },
+   {
+    "colonne": "part_acces_pro",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "2"
+   },
+   {
+    "colonne": "etablissement_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 100.0,
+    "valeurs_distinctes": 0,
+    "exemple": null
+   },
+   {
+    "colonne": "composante_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 100.0,
+    "valeurs_distinctes": 0,
+    "exemple": null
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "parcoursup_2024": {
+  "meta": {
+   "titre": "Parcoursup 2024 - vœux de poursuite d'études et de réorientation dans l'enseignement supérieur et réponses des établissements",
+   "lignes_annoncees": 14079,
+   "licence": "Licence Ouverte v2.0 (Etalab)",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf",
+   "modifie": "2025-01-16T19:10:50+00:00",
+   "producteur": "Ministère en charge de l'Enseignement supérieur et de la Recherche > Sous-Direction des systèmes d'information et des études statistiques (SIES) > Département des études statistiques sur l'enseignement supérieur"
+  },
+  "lignes": 14079,
+  "colonnes_n": 118,
+  "colonnes": [
+   {
+    "colonne": "session",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1,
+    "exemple": "2024"
+   },
+   {
+    "colonne": "contrat_etab",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 4,
+    "exemple": "Privé enseignement supérieur"
+   },
+   {
+    "colonne": "cod_uai",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3996,
+    "exemple": "0791199Z"
+   },
+   {
+    "colonne": "g_ea_lib_vx",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3641,
+    "exemple": "Facultés libres de l'ouest UCO - Niort"
+   },
+   {
+    "colonne": "dep",
+    "type_portail": "text",
+    "manquant_pct": 0.51,
+    "valeurs_distinctes": 103,
+    "exemple": "79"
+   },
+   {
+    "colonne": "dep_lib",
+    "type_portail": "text",
+    "manquant_pct": 0.01,
+    "valeurs_distinctes": 104,
+    "exemple": "Deux-sèvres"
+   },
+   {
+    "colonne": "region_etab_aff",
+    "type_portail": "text",
+    "manquant_pct": 0.65,
+    "valeurs_distinctes": 18,
+    "exemple": "Nouvelle Aquitaine"
+   },
+   {
+    "colonne": "acad_mies",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 32,
+    "exemple": "Poitiers"
+   },
+   {
+    "colonne": "ville_etab",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1266,
+    "exemple": "Niort"
+   },
+   {
+    "colonne": "lib_for_voe_ins",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3138,
+    "exemple": "Licence - Sciences de l'éducation et de la formation"
+   },
+   {
+    "colonne": "select_form",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2,
+    "exemple": "formation non sélective"
+   },
+   {
+    "colonne": "fili",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11,
+    "exemple": "Licence"
+   },
+   {
+    "colonne": "lib_comp_voe_ins",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11851,
+    "exemple": "Facultés libres de l'ouest UCO - Niort - Licence - Sciences de l'éducation et de"
+   },
+   {
+    "colonne": "form_lib_voe_acc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 53,
+    "exemple": "Licence - Sciences humaines et sociales"
+   },
+   {
+    "colonne": "fil_lib_voe_acc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 452,
+    "exemple": "Sciences de l'éducation et de la formation"
+   },
+   {
+    "colonne": "detail_forma",
+    "type_portail": "text",
+    "manquant_pct": 70.86,
+    "valeurs_distinctes": 2805,
+    "exemple": "Physique - Mathématiques"
+   },
+   {
+    "colonne": "g_olocalisation_des_formations",
+    "type_portail": "geo_point_2d",
+    "manquant_pct": 0.52,
+    "valeurs_distinctes": 5804,
+    "exemple": "46.33037, -0.46114"
+   },
+   {
+    "colonne": "capa_fin",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 352,
+    "exemple": "60"
+   },
+   {
+    "colonne": "voe_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3076,
+    "exemple": "280"
+   },
+   {
+    "colonne": "voe_tot_f",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2234,
+    "exemple": "257"
+   },
+   {
+    "colonne": "nb_voe_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3040,
+    "exemple": "224"
+   },
+   {
+    "colonne": "nb_voe_pp_internat",
+    "type_portail": "int",
+    "manquant_pct": 93.03,
+    "valeurs_distinctes": 227,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_voe_pp_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2198,
+    "exemple": "135"
+   },
+   {
+    "colonne": "nb_voe_pp_bg_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 714,
+    "exemple": "24"
+   },
+   {
+    "colonne": "nb_voe_pp_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 942,
+    "exemple": "30"
+   },
+   {
+    "colonne": "nb_voe_pp_bt_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 450,
+    "exemple": "8"
+   },
+   {
+    "colonne": "nb_voe_pp_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 596,
+    "exemple": "15"
+   },
+   {
+    "colonne": "nb_voe_pp_bp_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 345,
+    "exemple": "3"
+   },
+   {
+    "colonne": "nb_voe_pp_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1336,
+    "exemple": "44"
+   },
+   {
+    "colonne": "nb_voe_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 380,
+    "exemple": "56"
+   },
+   {
+    "colonne": "nb_voe_pc_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 170,
+    "exemple": "12"
+   },
+   {
+    "colonne": "nb_voe_pc_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 119,
+    "exemple": "5"
+   },
+   {
+    "colonne": "nb_voe_pc_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 83,
+    "exemple": "5"
+   },
+   {
+    "colonne": "nb_voe_pc_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 274,
+    "exemple": "34"
+   },
+   {
+    "colonne": "nb_cla_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2530,
+    "exemple": "224"
+   },
+   {
+    "colonne": "nb_cla_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 265,
+    "exemple": "56"
+   },
+   {
+    "colonne": "nb_cla_pp_internat",
+    "type_portail": "int",
+    "manquant_pct": 93.03,
+    "valeurs_distinctes": 180,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_cla_pp_pasinternat",
+    "type_portail": "int",
+    "manquant_pct": 93.03,
+    "valeurs_distinctes": 667,
+    "exemple": "481"
+   },
+   {
+    "colonne": "nb_cla_pp_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1950,
+    "exemple": "135"
+   },
+   {
+    "colonne": "nb_cla_pp_bg_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 648,
+    "exemple": "24"
+   },
+   {
+    "colonne": "nb_cla_pp_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 774,
+    "exemple": "30"
+   },
+   {
+    "colonne": "nb_cla_pp_bt_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 329,
+    "exemple": "8"
+   },
+   {
+    "colonne": "nb_cla_pp_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 475,
+    "exemple": "15"
+   },
+   {
+    "colonne": "nb_cla_pp_bp_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 250,
+    "exemple": "3"
+   },
+   {
+    "colonne": "nb_cla_pp_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1089,
+    "exemple": "44"
+   },
+   {
+    "colonne": "prop_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1618,
+    "exemple": "280"
+   },
+   {
+    "colonne": "acc_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 456,
+    "exemple": "30"
+   },
+   {
+    "colonne": "acc_tot_f",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 334,
+    "exemple": "29"
+   },
+   {
+    "colonne": "acc_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 435,
+    "exemple": "24"
+   },
+   {
+    "colonne": "acc_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 126,
+    "exemple": "6"
+   },
+   {
+    "colonne": "acc_debutpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 263,
+    "exemple": "24.0"
+   },
+   {
+    "colonne": "acc_datebac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 397,
+    "exemple": "25.0"
+   },
+   {
+    "colonne": "acc_finpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 425,
+    "exemple": "29.0"
+   },
+   {
+    "colonne": "acc_internat",
+    "type_portail": "int",
+    "manquant_pct": 93.03,
+    "valeurs_distinctes": 64,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 146,
+    "exemple": "5"
+   },
+   {
+    "colonne": "acc_neobac",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 380,
+    "exemple": "17"
+   },
+   {
+    "colonne": "acc_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 353,
+    "exemple": "9"
+   },
+   {
+    "colonne": "acc_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 103,
+    "exemple": "6"
+   },
+   {
+    "colonne": "acc_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 52,
+    "exemple": "2"
+   },
+   {
+    "colonne": "acc_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 202,
+    "exemple": "13"
+   },
+   {
+    "colonne": "acc_mention_nonrenseignee",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 9,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_sansmention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 176,
+    "exemple": "5"
+   },
+   {
+    "colonne": "acc_ab",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 195,
+    "exemple": "6"
+   },
+   {
+    "colonne": "acc_b",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 165,
+    "exemple": "4"
+   },
+   {
+    "colonne": "acc_tb",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 124,
+    "exemple": "2"
+   },
+   {
+    "colonne": "acc_tbf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 54,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "acc_bg_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 287,
+    "exemple": "5"
+   },
+   {
+    "colonne": "acc_bt_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 81,
+    "exemple": "5"
+   },
+   {
+    "colonne": "acc_bp_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 44,
+    "exemple": "2"
+   },
+   {
+    "colonne": "acc_term",
+    "type_portail": "int",
+    "manquant_pct": 55.06,
+    "valeurs_distinctes": 37,
+    "exemple": "3"
+   },
+   {
+    "colonne": "acc_term_f",
+    "type_portail": "int",
+    "manquant_pct": 55.06,
+    "valeurs_distinctes": 19,
+    "exemple": "1"
+   },
+   {
+    "colonne": "acc_aca_orig",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 299,
+    "exemple": "9"
+   },
+   {
+    "colonne": "acc_aca_orig_idf",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 323,
+    "exemple": "9"
+   },
+   {
+    "colonne": "pct_acc_debutpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "80.0"
+   },
+   {
+    "colonne": "pct_acc_datebac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 99,
+    "exemple": "83.0"
+   },
+   {
+    "colonne": "pct_acc_finpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 82,
+    "exemple": "97.0"
+   },
+   {
+    "colonne": "pct_f",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "97.0"
+   },
+   {
+    "colonne": "pct_aca_orig",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "53.0"
+   },
+   {
+    "colonne": "pct_aca_orig_idf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "53.0"
+   },
+   {
+    "colonne": "pct_etab_orig",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 97,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_bours",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 95,
+    "exemple": "29.0"
+   },
+   {
+    "colonne": "pct_neobac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 99,
+    "exemple": "57.0"
+   },
+   {
+    "colonne": "pct_mention_nonrenseignee",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 20,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_sansmention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 97,
+    "exemple": "29.0"
+   },
+   {
+    "colonne": "pct_ab",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 87,
+    "exemple": "35.0"
+   },
+   {
+    "colonne": "pct_b",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 86,
+    "exemple": "24.0"
+   },
+   {
+    "colonne": "pct_tb",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 88,
+    "exemple": "12.0"
+   },
+   {
+    "colonne": "pct_tbf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 60,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_bg",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "53.0"
+   },
+   {
+    "colonne": "pct_bg_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "29.0"
+   },
+   {
+    "colonne": "pct_bt",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 96,
+    "exemple": "35.0"
+   },
+   {
+    "colonne": "pct_bt_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 98,
+    "exemple": "29.0"
+   },
+   {
+    "colonne": "pct_bp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 98,
+    "exemple": "12.0"
+   },
+   {
+    "colonne": "pct_bp_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 97,
+    "exemple": "12.0"
+   },
+   {
+    "colonne": "prop_tot_bg",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1271,
+    "exemple": "147.0"
+   },
+   {
+    "colonne": "prop_tot_bg_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 374,
+    "exemple": "26.0"
+   },
+   {
+    "colonne": "prop_tot_bt",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 434,
+    "exemple": "35.0"
+   },
+   {
+    "colonne": "prop_tot_bt_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 178,
+    "exemple": "10.0"
+   },
+   {
+    "colonne": "prop_tot_bp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 199,
+    "exemple": "20.0"
+   },
+   {
+    "colonne": "prop_tot_bp_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 110,
+    "exemple": "5.0"
+   },
+   {
+    "colonne": "prop_tot_at",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 642,
+    "exemple": "78.0"
+   },
+   {
+    "colonne": "lib_grp1",
+    "type_portail": "text",
+    "manquant_pct": 5.23,
+    "valeurs_distinctes": 8,
+    "exemple": "Tous les candidats"
+   },
+   {
+    "colonne": "ran_grp1",
+    "type_portail": "text",
+    "manquant_pct": 0.64,
+    "valeurs_distinctes": 2346,
+    "exemple": "224"
+   },
+   {
+    "colonne": "lib_grp2",
+    "type_portail": "text",
+    "manquant_pct": 57.01,
+    "valeurs_distinctes": 7,
+    "exemple": "Bacheliers technologiques toutes series"
+   },
+   {
+    "colonne": "ran_grp2",
+    "type_portail": "text",
+    "manquant_pct": 56.4,
+    "valeurs_distinctes": 441,
+    "exemple": "280"
+   },
+   {
+    "colonne": "lib_grp3",
+    "type_portail": "text",
+    "manquant_pct": 74.33,
+    "valeurs_distinctes": 2,
+    "exemple": "Bacheliers professionnels toutes series"
+   },
+   {
+    "colonne": "ran_grp3",
+    "type_portail": "text",
+    "manquant_pct": 73.56,
+    "valeurs_distinctes": 316,
+    "exemple": "13"
+   },
+   {
+    "colonne": "list_com",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2,
+    "exemple": "Liste d'appel commune à plusieurs formations"
+   },
+   {
+    "colonne": "tri",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3,
+    "exemple": "1_universités"
+   },
+   {
+    "colonne": "cod_aff_form",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 14079,
+    "exemple": "31827"
+   },
+   {
+    "colonne": "detail_forma2",
+    "type_portail": "text",
+    "manquant_pct": 94.92,
+    "valeurs_distinctes": 89,
+    "exemple": "Centre de Ressources, d’Expertise et de Performance Sportive d’Auvergne Rhône-Al"
+   },
+   {
+    "colonne": "lien_form_psup",
+    "type_portail": "text",
+    "manquant_pct": 0.52,
+    "valeurs_distinctes": 14006,
+    "exemple": "https://dossier.parcoursup.fr/Candidats/public/fiches/afficherFicheFormation?g_t"
+   },
+   {
+    "colonne": "taux_acces_ens",
+    "type_portail": "text",
+    "manquant_pct": 0.65,
+    "valeurs_distinctes": 100,
+    "exemple": "100"
+   },
+   {
+    "colonne": "part_acces_gen",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "72.0"
+   },
+   {
+    "colonne": "part_acces_tec",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 88,
+    "exemple": "18.0"
+   },
+   {
+    "colonne": "part_acces_pro",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 99,
+    "exemple": "9.0"
+   },
+   {
+    "colonne": "etablissement_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 52.43,
+    "valeurs_distinctes": 486,
+    "exemple": "7zzqc"
+   },
+   {
+    "colonne": "composante_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 98.27,
+    "valeurs_distinctes": 97,
+    "exemple": "i2Fja"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "parcoursup_2023": {
+  "meta": {
+   "titre": "Parcoursup 2023 - vœux de poursuite d'études et de réorientation dans l'enseignement supérieur et réponses des établissements",
+   "lignes_annoncees": 13869,
+   "licence": "Licence Ouverte v2.0 (Etalab)",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf",
+   "modifie": "2024-07-01T19:23:06+00:00",
+   "producteur": "Ministère de l'Enseignement supérieur et de la Recherche > Sous-Direction des systèmes d'information et des études statistiques (SIES) > Département des études statistiques sur l'enseignement supérieur"
+  },
+  "lignes": 13869,
+  "colonnes_n": 118,
+  "colonnes": [
+   {
+    "colonne": "session",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1,
+    "exemple": "2023"
+   },
+   {
+    "colonne": "contrat_etab",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 4,
+    "exemple": "Privé enseignement supérieur"
+   },
+   {
+    "colonne": "cod_uai",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3965,
+    "exemple": "0561687E"
+   },
+   {
+    "colonne": "g_ea_lib_vx",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3602,
+    "exemple": "Facultés libres de l'ouest - UCO - Bretagne Sud"
+   },
+   {
+    "colonne": "dep",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 104,
+    "exemple": "56"
+   },
+   {
+    "colonne": "dep_lib",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 104,
+    "exemple": "Morbihan"
+   },
+   {
+    "colonne": "region_etab_aff",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 21,
+    "exemple": "Bretagne"
+   },
+   {
+    "colonne": "acad_mies",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 32,
+    "exemple": "Rennes"
+   },
+   {
+    "colonne": "ville_etab",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1255,
+    "exemple": "Arradon"
+   },
+   {
+    "colonne": "lib_for_voe_ins",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3207,
+    "exemple": "Licence - Sciences de l'éducation"
+   },
+   {
+    "colonne": "select_form",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2,
+    "exemple": "formation non sélective"
+   },
+   {
+    "colonne": "fili",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11,
+    "exemple": "Licence"
+   },
+   {
+    "colonne": "lib_comp_voe_ins",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11716,
+    "exemple": "Facultés libres de l'ouest - UCO - Bretagne Sud - Licence - Sciences de l'éducat"
+   },
+   {
+    "colonne": "form_lib_voe_acc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 52,
+    "exemple": "Licence - Sciences humaines et sociales"
+   },
+   {
+    "colonne": "fil_lib_voe_acc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 458,
+    "exemple": "Sciences de l'éducation"
+   },
+   {
+    "colonne": "detail_forma",
+    "type_portail": "text",
+    "manquant_pct": 71.28,
+    "valeurs_distinctes": 2766,
+    "exemple": "Action sociale Santé"
+   },
+   {
+    "colonne": "g_olocalisation_des_formations",
+    "type_portail": "geo_point_2d",
+    "manquant_pct": 0.65,
+    "valeurs_distinctes": 5789,
+    "exemple": "47.6477, -2.80567"
+   },
+   {
+    "colonne": "capa_fin",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 363,
+    "exemple": "84"
+   },
+   {
+    "colonne": "voe_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2999,
+    "exemple": "478"
+   },
+   {
+    "colonne": "voe_tot_f",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2214,
+    "exemple": "432"
+   },
+   {
+    "colonne": "nb_voe_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2985,
+    "exemple": "429"
+   },
+   {
+    "colonne": "nb_voe_pp_internat",
+    "type_portail": "int",
+    "manquant_pct": 92.91,
+    "valeurs_distinctes": 607,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_voe_pp_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2171,
+    "exemple": "255"
+   },
+   {
+    "colonne": "nb_voe_pp_bg_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 690,
+    "exemple": "27"
+   },
+   {
+    "colonne": "nb_voe_pp_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 938,
+    "exemple": "69"
+   },
+   {
+    "colonne": "nb_voe_pp_bt_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 439,
+    "exemple": "9"
+   },
+   {
+    "colonne": "nb_voe_pp_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 599,
+    "exemple": "5"
+   },
+   {
+    "colonne": "nb_voe_pp_bp_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 350,
+    "exemple": "1"
+   },
+   {
+    "colonne": "nb_voe_pp_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1330,
+    "exemple": "100"
+   },
+   {
+    "colonne": "nb_voe_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 364,
+    "exemple": "49"
+   },
+   {
+    "colonne": "nb_voe_pc_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 152,
+    "exemple": "10"
+   },
+   {
+    "colonne": "nb_voe_pc_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 112,
+    "exemple": "4"
+   },
+   {
+    "colonne": "nb_voe_pc_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 81,
+    "exemple": "1"
+   },
+   {
+    "colonne": "nb_voe_pc_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 261,
+    "exemple": "34"
+   },
+   {
+    "colonne": "nb_cla_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2534,
+    "exemple": "429"
+   },
+   {
+    "colonne": "nb_cla_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 248,
+    "exemple": "40"
+   },
+   {
+    "colonne": "nb_cla_pp_internat",
+    "type_portail": "int",
+    "manquant_pct": 92.91,
+    "valeurs_distinctes": 518,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nb_cla_pp_pasinternat",
+    "type_portail": "int",
+    "manquant_pct": 92.91,
+    "valeurs_distinctes": 668,
+    "exemple": "293"
+   },
+   {
+    "colonne": "nb_cla_pp_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1926,
+    "exemple": "255"
+   },
+   {
+    "colonne": "nb_cla_pp_bg_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 625,
+    "exemple": "27"
+   },
+   {
+    "colonne": "nb_cla_pp_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 736,
+    "exemple": "69"
+   },
+   {
+    "colonne": "nb_cla_pp_bt_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 312,
+    "exemple": "9"
+   },
+   {
+    "colonne": "nb_cla_pp_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 463,
+    "exemple": "5"
+   },
+   {
+    "colonne": "nb_cla_pp_bp_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 246,
+    "exemple": "1"
+   },
+   {
+    "colonne": "nb_cla_pp_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1098,
+    "exemple": "100"
+   },
+   {
+    "colonne": "prop_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1610,
+    "exemple": "399"
+   },
+   {
+    "colonne": "acc_tot",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 465,
+    "exemple": "82"
+   },
+   {
+    "colonne": "acc_tot_f",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 345,
+    "exemple": "74"
+   },
+   {
+    "colonne": "acc_pp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 444,
+    "exemple": "74"
+   },
+   {
+    "colonne": "acc_pc",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 129,
+    "exemple": "8"
+   },
+   {
+    "colonne": "acc_debutpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 246,
+    "exemple": "53.0"
+   },
+   {
+    "colonne": "acc_datebac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 425,
+    "exemple": "77.0"
+   },
+   {
+    "colonne": "acc_finpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 425,
+    "exemple": "77.0"
+   },
+   {
+    "colonne": "acc_internat",
+    "type_portail": "int",
+    "manquant_pct": 92.91,
+    "valeurs_distinctes": 66,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_brs",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 149,
+    "exemple": "4"
+   },
+   {
+    "colonne": "acc_neobac",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 381,
+    "exemple": "54"
+   },
+   {
+    "colonne": "acc_bg",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 353,
+    "exemple": "43"
+   },
+   {
+    "colonne": "acc_bt",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 98,
+    "exemple": "9"
+   },
+   {
+    "colonne": "acc_bp",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 50,
+    "exemple": "2"
+   },
+   {
+    "colonne": "acc_at",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 200,
+    "exemple": "28"
+   },
+   {
+    "colonne": "acc_mention_nonrenseignee",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 8,
+    "exemple": "0"
+   },
+   {
+    "colonne": "acc_sansmention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 195,
+    "exemple": "14"
+   },
+   {
+    "colonne": "acc_ab",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 191,
+    "exemple": "29"
+   },
+   {
+    "colonne": "acc_b",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 164,
+    "exemple": "10"
+   },
+   {
+    "colonne": "acc_tb",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 132,
+    "exemple": "1"
+   },
+   {
+    "colonne": "acc_tbf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 60,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "acc_bg_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 300,
+    "exemple": "32"
+   },
+   {
+    "colonne": "acc_bt_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 80,
+    "exemple": "6"
+   },
+   {
+    "colonne": "acc_bp_mention",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 41,
+    "exemple": "2"
+   },
+   {
+    "colonne": "acc_term",
+    "type_portail": "int",
+    "manquant_pct": 54.42,
+    "valeurs_distinctes": 40,
+    "exemple": "4"
+   },
+   {
+    "colonne": "acc_term_f",
+    "type_portail": "int",
+    "manquant_pct": 54.42,
+    "valeurs_distinctes": 21,
+    "exemple": "3"
+   },
+   {
+    "colonne": "acc_aca_orig",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 311,
+    "exemple": "48"
+   },
+   {
+    "colonne": "acc_aca_orig_idf",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 338,
+    "exemple": "48"
+   },
+   {
+    "colonne": "pct_acc_debutpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "65.0"
+   },
+   {
+    "colonne": "pct_acc_datebac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 84,
+    "exemple": "94.0"
+   },
+   {
+    "colonne": "pct_acc_finpp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 78,
+    "exemple": "94.0"
+   },
+   {
+    "colonne": "pct_f",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "90.0"
+   },
+   {
+    "colonne": "pct_aca_orig",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "89.0"
+   },
+   {
+    "colonne": "pct_aca_orig_idf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "89.0"
+   },
+   {
+    "colonne": "pct_etab_orig",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 96,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_bours",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 94,
+    "exemple": "7.0"
+   },
+   {
+    "colonne": "pct_neobac",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 99,
+    "exemple": "66.0"
+   },
+   {
+    "colonne": "pct_mention_nonrenseignee",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 22,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_sansmention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 98,
+    "exemple": "26.0"
+   },
+   {
+    "colonne": "pct_ab",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 87,
+    "exemple": "54.0"
+   },
+   {
+    "colonne": "pct_b",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 84,
+    "exemple": "19.0"
+   },
+   {
+    "colonne": "pct_tb",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 93,
+    "exemple": "2.0"
+   },
+   {
+    "colonne": "pct_tbf",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 63,
+    "exemple": "0.0"
+   },
+   {
+    "colonne": "pct_bg",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "80.0"
+   },
+   {
+    "colonne": "pct_bg_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "59.0"
+   },
+   {
+    "colonne": "pct_bt",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 93,
+    "exemple": "17.0"
+   },
+   {
+    "colonne": "pct_bt_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "11.0"
+   },
+   {
+    "colonne": "pct_bp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 98,
+    "exemple": "4.0"
+   },
+   {
+    "colonne": "pct_bp_mention",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 96,
+    "exemple": "4.0"
+   },
+   {
+    "colonne": "prop_tot_bg",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1246,
+    "exemple": "236.0"
+   },
+   {
+    "colonne": "prop_tot_bg_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 361,
+    "exemple": "26.0"
+   },
+   {
+    "colonne": "prop_tot_bt",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 404,
+    "exemple": "53.0"
+   },
+   {
+    "colonne": "prop_tot_bt_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 160,
+    "exemple": "8.0"
+   },
+   {
+    "colonne": "prop_tot_bp",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 203,
+    "exemple": "3.0"
+   },
+   {
+    "colonne": "prop_tot_bp_brs",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 117,
+    "exemple": "2.0"
+   },
+   {
+    "colonne": "prop_tot_at",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 650,
+    "exemple": "107.0"
+   },
+   {
+    "colonne": "lib_grp1",
+    "type_portail": "text",
+    "manquant_pct": 2.08,
+    "valeurs_distinctes": 6,
+    "exemple": "Tous les candidats"
+   },
+   {
+    "colonne": "ran_grp1",
+    "type_portail": "double",
+    "manquant_pct": 2.08,
+    "valeurs_distinctes": 2355,
+    "exemple": "429.0"
+   },
+   {
+    "colonne": "lib_grp2",
+    "type_portail": "text",
+    "manquant_pct": 55.27,
+    "valeurs_distinctes": 6,
+    "exemple": "Bacheliers technologiques toutes series"
+   },
+   {
+    "colonne": "ran_grp2",
+    "type_portail": "double",
+    "manquant_pct": 55.27,
+    "valeurs_distinctes": 474,
+    "exemple": "338.0"
+   },
+   {
+    "colonne": "lib_grp3",
+    "type_portail": "text",
+    "manquant_pct": 72.31,
+    "valeurs_distinctes": 4,
+    "exemple": "Bacheliers technologiques toutes series"
+   },
+   {
+    "colonne": "ran_grp3",
+    "type_portail": "text",
+    "manquant_pct": 72.31,
+    "valeurs_distinctes": 353,
+    "exemple": "174"
+   },
+   {
+    "colonne": "list_com",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2,
+    "exemple": "Liste d'appel propre à cette formation"
+   },
+   {
+    "colonne": "tri",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3,
+    "exemple": "1_universités"
+   },
+   {
+    "colonne": "cod_aff_form",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 13869,
+    "exemple": "6492"
+   },
+   {
+    "colonne": "detail_forma2",
+    "type_portail": "text",
+    "manquant_pct": 95.19,
+    "valeurs_distinctes": 109,
+    "exemple": "GROUPE ICAM"
+   },
+   {
+    "colonne": "lien_form_psup",
+    "type_portail": "text",
+    "manquant_pct": 0.65,
+    "valeurs_distinctes": 13779,
+    "exemple": "https://dossier.parcoursup.fr/Candidats/public/fiches/afficherFicheFormation?g_t"
+   },
+   {
+    "colonne": "taux_acces_ens",
+    "type_portail": "double",
+    "manquant_pct": 0.92,
+    "valeurs_distinctes": 100,
+    "exemple": "100.0"
+   },
+   {
+    "colonne": "part_acces_gen",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 101,
+    "exemple": "74.0"
+   },
+   {
+    "colonne": "part_acces_tec",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 89,
+    "exemple": "23.0"
+   },
+   {
+    "colonne": "part_acces_pro",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "3.0"
+   },
+   {
+    "colonne": "etablissement_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 52.71,
+    "valeurs_distinctes": 485,
+    "exemple": "7zzqc"
+   },
+   {
+    "colonne": "composante_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 98.29,
+    "valeurs_distinctes": 98,
+    "exemple": "B8z9z"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "cartographie_formations": {
+  "meta": {
+   "titre": "Cartographie des formations Parcoursup",
+   "lignes_annoncees": 157514,
+   "licence": "Licence Ouverte v2.0 (Etalab)",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf",
+   "modifie": "2025-12-17T19:22:59+00:00",
+   "producteur": "Ministère de l'Enseignement supérieur, de la Recherche et de l'Espace"
+  },
+  "lignes": 157514,
+  "colonnes_n": 25,
+  "colonnes": [
+   {
+    "colonne": "annee",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 7,
+    "exemple": "2026"
+   },
+   {
+    "colonne": "etab_uai",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 7686,
+    "exemple": "0134014T"
+   },
+   {
+    "colonne": "etab_nom",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11748,
+    "exemple": "Polytech Marseille (Marseille 13e  Arrondissement - 13)"
+   },
+   {
+    "colonne": "tc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 6,
+    "exemple": "Publics"
+   },
+   {
+    "colonne": "tf",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 86,
+    "exemple": "Formations des écoles d'ingénieurs"
+   },
+   {
+    "colonne": "nm",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11515,
+    "exemple": "Formation d'ingénieur Bac + 5 - Bac général"
+   },
+   {
+    "colonne": "fl",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1928,
+    "exemple": "Formation d'ingénieur Bac + 5"
+   },
+   {
+    "colonne": "app",
+    "type_portail": "text",
+    "manquant_pct": 61.55,
+    "valeurs_distinctes": 1,
+    "exemple": "Formations en apprentissage"
+   },
+   {
+    "colonne": "int",
+    "type_portail": "text",
+    "manquant_pct": 96.69,
+    "valeurs_distinctes": 3,
+    "exemple": "Etablissements avec internat pour filles et garçons"
+   },
+   {
+    "colonne": "amg",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 24,
+    "exemple": "Enseignement en présentiel,Formations avec aménagements pour sportifs haut nivea"
+   },
+   {
+    "colonne": "aut",
+    "type_portail": "text",
+    "manquant_pct": 83.18,
+    "valeurs_distinctes": 8,
+    "exemple": "Des épreuves de sélection sont mises en place pour candidater à cette formation"
+   },
+   {
+    "colonne": "region",
+    "type_portail": "text",
+    "manquant_pct": 0.19,
+    "valeurs_distinctes": 21,
+    "exemple": "Provence-Alpes-Côte d'Azur"
+   },
+   {
+    "colonne": "departement",
+    "type_portail": "text",
+    "manquant_pct": 0.19,
+    "valeurs_distinctes": 104,
+    "exemple": "Bouches-du-Rhône"
+   },
+   {
+    "colonne": "commune",
+    "type_portail": "text",
+    "manquant_pct": 0.49,
+    "valeurs_distinctes": 1843,
+    "exemple": "Marseille"
+   },
+   {
+    "colonne": "fiche",
+    "type_portail": "text",
+    "manquant_pct": 23.13,
+    "valeurs_distinctes": 76377,
+    "exemple": "https://dossierappel.parcoursup.fr/Candidats/public/fiches/afficherFicheFormatio"
+   },
+   {
+    "colonne": "dataviz",
+    "type_portail": "text",
+    "manquant_pct": 42.75,
+    "valeurs_distinctes": 15667,
+    "exemple": "https://data.enseignementsup-recherche.gouv.fr/pages/parcoursup/?disjunctive.fil"
+   },
+   {
+    "colonne": "etab_url",
+    "type_portail": "text",
+    "manquant_pct": 0.71,
+    "valeurs_distinctes": 8758,
+    "exemple": "https://polytech.univ-amu.fr/fr"
+   },
+   {
+    "colonne": "etab_gps",
+    "type_portail": "geo_point_2d",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 11610,
+    "exemple": "43.34517, 5.43469"
+   },
+   {
+    "colonne": "nmc",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1714,
+    "exemple": "FI-BAC5"
+   },
+   {
+    "colonne": "gta",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 34607,
+    "exemple": "9"
+   },
+   {
+    "colonne": "gti",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 31229,
+    "exemple": "7"
+   },
+   {
+    "colonne": "etablissement_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 68.34,
+    "valeurs_distinctes": 505,
+    "exemple": "xJdyB"
+   },
+   {
+    "colonne": "composante_id_paysage",
+    "type_portail": "text",
+    "manquant_pct": 98.83,
+    "valeurs_distinctes": 106,
+    "exemple": "DEiiw"
+   },
+   {
+    "colonne": "rnd",
+    "type_portail": "text",
+    "manquant_pct": 10.79,
+    "valeurs_distinctes": 32902,
+    "exemple": "19509"
+   },
+   {
+    "colonne": "code_formation",
+    "type_portail": "text",
+    "manquant_pct": 10.79,
+    "valeurs_distinctes": 1326,
+    "exemple": "210"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "crous_logement": {
+  "meta": {
+   "titre": "Ensemble des logements proposés aux étudiants par le réseau des CROUS",
+   "lignes_annoncees": 828,
+   "licence": "Licence Ouverte (Etalab)",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2014/05/Licence_Ouverte.pdf",
+   "modifie": "2017-05-12T12:35:07+00:00",
+   "producteur": "Centre National des Œuvres Universitaires et Scolaires (CNOUS)"
+  },
+  "lignes": 828,
+  "colonnes_n": 23,
+  "colonnes": [
+   {
+    "colonne": "id",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 828,
+    "exemple": "930"
+   },
+   {
+    "colonne": "title",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 800,
+    "exemple": "Cité U Arc de Meyran"
+   },
+   {
+    "colonne": "short_desc",
+    "type_portail": "text",
+    "manquant_pct": 31.4,
+    "valeurs_distinctes": 448,
+    "exemple": "En face de l'IUT"
+   },
+   {
+    "colonne": "zone",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 203,
+    "exemple": "Aix-en-Provence"
+   },
+   {
+    "colonne": "infos",
+    "type_portail": "text",
+    "manquant_pct": 3.86,
+    "valeurs_distinctes": 794,
+    "exemple": "329 chambres avec wc, douche, lavabo \r\n\n319 chambres rénovées de 9 m² : 269.00 €"
+   },
+   {
+    "colonne": "services",
+    "type_portail": "text",
+    "manquant_pct": 16.91,
+    "valeurs_distinctes": 527,
+    "exemple": "Interphone, parking, garage vélo, salle de sports, veilleur de nuit"
+   },
+   {
+    "colonne": "contact",
+    "type_portail": "text",
+    "manquant_pct": 0.12,
+    "valeurs_distinctes": 818,
+    "exemple": "Cité U Arc de Meyran \r\n 564 avenue Gaston Berger \r\n 13621 Aix-en-Provence cedex "
+   },
+   {
+    "colonne": "address",
+    "type_portail": "text",
+    "manquant_pct": 2.29,
+    "valeurs_distinctes": 762,
+    "exemple": "565 avenue Gaston Berger  13621 Aix-en-Provence cedex 1"
+   },
+   {
+    "colonne": "mail",
+    "type_portail": "text",
+    "manquant_pct": 16.79,
+    "valeurs_distinctes": 327,
+    "exemple": "cu.arcdemeyran@crous-aix-marseille.fr"
+   },
+   {
+    "colonne": "phone",
+    "type_portail": "text",
+    "manquant_pct": 17.27,
+    "valeurs_distinctes": 320,
+    "exemple": "04 42 93 64 75"
+   },
+   {
+    "colonne": "openinghours",
+    "type_portail": "text",
+    "manquant_pct": 90.22,
+    "valeurs_distinctes": 56,
+    "exemple": "<p><strong>Secrétariat est ouvert du lundi au vendredi de 8h00 à 12h00 et de 13h"
+   },
+   {
+    "colonne": "interneturl",
+    "type_portail": "text",
+    "manquant_pct": 16.18,
+    "valeurs_distinctes": 55,
+    "exemple": "https://www.crous-aix-marseille.fr/"
+   },
+   {
+    "colonne": "appointmenturl",
+    "type_portail": "text",
+    "manquant_pct": 29.59,
+    "valeurs_distinctes": 34,
+    "exemple": "https://www.crous-aix-marseille.fr/"
+   },
+   {
+    "colonne": "virtualvisiturl",
+    "type_portail": "text",
+    "manquant_pct": 75.85,
+    "valeurs_distinctes": 164,
+    "exemple": "https://www.flickr.com/photos/crousaixmarseilleavignon/albums/72157661427292442"
+   },
+   {
+    "colonne": "crousandgourl",
+    "type_portail": "text",
+    "manquant_pct": 99.4,
+    "valeurs_distinctes": 2,
+    "exemple": "https://crousandgo.crous-poitiers.fr/"
+   },
+   {
+    "colonne": "albumurl",
+    "type_portail": "text",
+    "manquant_pct": 98.19,
+    "valeurs_distinctes": 15,
+    "exemple": "https://vr.visite360pro.com/tour/b1WvWnIe5Y-JgbvbhLg5Y?scene=48.267130555556|4.0"
+   },
+   {
+    "colonne": "bookingurl",
+    "type_portail": "text",
+    "manquant_pct": 18.0,
+    "valeurs_distinctes": 38,
+    "exemple": "https://trouverunlogement.lescrous.fr/"
+   },
+   {
+    "colonne": "troubleshootingurl",
+    "type_portail": "text",
+    "manquant_pct": 18.48,
+    "valeurs_distinctes": 41,
+    "exemple": "https://www.crous-aix-marseille.fr/"
+   },
+   {
+    "colonne": "house_services",
+    "type_portail": "text",
+    "manquant_pct": 3.02,
+    "valeurs_distinctes": 653,
+    "exemple": "{\"house_service\": [\"Accessible PMR\", \"Parking PMR\", \"Parking\", \"Garage à vélos\","
+   },
+   {
+    "colonne": "images",
+    "type_portail": "text",
+    "manquant_pct": 66.67,
+    "valeurs_distinctes": 276,
+    "exemple": "{\"url\": [\"https://admin-v2.crous-mobile.fr//media/house/20240227_fcbed58_5_PHOTO"
+   },
+   {
+    "colonne": "geocalisation",
+    "type_portail": "geo_point_2d",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 800,
+    "exemple": "43.51327, 5.453388"
+   },
+   {
+    "colonne": "photo",
+    "type_portail": "text",
+    "manquant_pct": 35.99,
+    "valeurs_distinctes": 382,
+    "exemple": "https://www.flickr.com/photos/crousaixmarseilleavignon/albums/72157661427292442"
+   },
+   {
+    "colonne": "regions",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 17,
+    "exemple": "Provence-Alpes-Côte d'Azur"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "crous_restauration": {
+  "meta": {
+   "titre": "Ensemble des lieux de restauration des CROUS",
+   "lignes_annoncees": 987,
+   "licence": "Licence Ouverte v2.0 (Etalab)",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2017/04/ETALAB-Licence-Ouverte-v2.0.pdf",
+   "modifie": "2017-05-12T11:35:45+00:00",
+   "producteur": "Centre National des Œuvres Universitaires et Scolaires (CNOUS)"
+  },
+  "lignes": 987,
+  "colonnes_n": 14,
+  "colonnes": [
+   {
+    "colonne": "type",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 16,
+    "exemple": "Brasserie"
+   },
+   {
+    "colonne": "zone",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 224,
+    "exemple": "Toulouse"
+   },
+   {
+    "colonne": "title",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 978,
+    "exemple": "Brasserie L'esplanade"
+   },
+   {
+    "colonne": "short_desc",
+    "type_portail": "text",
+    "manquant_pct": 32.32,
+    "valeurs_distinctes": 571,
+    "exemple": "Située sur le toit du restaurant Le Théorème au sein du campus universitaire de "
+   },
+   {
+    "colonne": "id",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 987,
+    "exemple": "r804"
+   },
+   {
+    "colonne": "contact",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 987,
+    "exemple": "Brasserie L'esplanade 115 allées Louis Lareng, 31400 Toulouse Téléphone : 06 07 "
+   },
+   {
+    "colonne": "lat",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 875,
+    "exemple": "43.56238"
+   },
+   {
+    "colonne": "infos",
+    "type_portail": "text",
+    "manquant_pct": 2.33,
+    "valeurs_distinctes": 912,
+    "exemple": "Localisation Située sur le toit du restaurant Le Théorème au sein du campus univ"
+   },
+   {
+    "colonne": "closing",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2,
+    "exemple": "0"
+   },
+   {
+    "colonne": "geolocalisation",
+    "type_portail": "geo_point_2d",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 883,
+    "exemple": "43.56238, 1.46324"
+   },
+   {
+    "colonne": "zone2",
+    "type_portail": "text",
+    "manquant_pct": 90.37,
+    "valeurs_distinctes": 52,
+    "exemple": "Rodez"
+   },
+   {
+    "colonne": "crousandgo",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 15,
+    "exemple": "{\"@src\": \"\"}"
+   },
+   {
+    "colonne": "album",
+    "type_portail": "text",
+    "manquant_pct": 99.29,
+    "valeurs_distinctes": 7,
+    "exemple": "{\"@src\": \"https://flic.kr/s/aHskKk9zDg\", \"@alt\": \"Brasserie L'esplanade\"}"
+   },
+   {
+    "colonne": "photo",
+    "type_portail": "text",
+    "manquant_pct": 3.95,
+    "valeurs_distinctes": 609,
+    "exemple": "http://www.crous-toulouse.fr/wp-content/uploads/sites/36/2017/03/Esplanade.jpg"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "loyers_communes": {
+  "meta": {
+   "titre": "Indicateur des Loyers par Communes millésimé",
+   "lignes_annoncees": 139600,
+   "licence": "Open License v2.0",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf",
+   "modifie": "2026-09-08T12:42:03+00:00",
+   "producteur": "Ministère de la Transition écologique"
+  },
+  "lignes": 139600,
+  "colonnes_n": 17,
+  "colonnes": [
+   {
+    "colonne": "year",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1,
+    "exemple": "2025"
+   },
+   {
+    "colonne": "type_logement",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 4,
+    "exemple": "appartement +3 pièces"
+   },
+   {
+    "colonne": "id_zone",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3081,
+    "exemple": "716"
+   },
+   {
+    "colonne": "insee_c",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 34900,
+    "exemple": "63095"
+   },
+   {
+    "colonne": "libgeo",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 32663,
+    "exemple": "Charnat"
+   },
+   {
+    "colonne": "epci",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1251,
+    "exemple": "200070712"
+   },
+   {
+    "colonne": "dep",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 100,
+    "exemple": "63"
+   },
+   {
+    "colonne": "dep_name",
+    "type_portail": "text",
+    "manquant_pct": 0.13,
+    "valeurs_distinctes": 99,
+    "exemple": "Puy-de-Dôme"
+   },
+   {
+    "colonne": "reg",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 17,
+    "exemple": "84"
+   },
+   {
+    "colonne": "reg_name",
+    "type_portail": "text",
+    "manquant_pct": 0.13,
+    "valeurs_distinctes": 17,
+    "exemple": "Auvergne-Rhône-Alpes"
+   },
+   {
+    "colonne": "loypredm2",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 22800,
+    "exemple": "7.96791994596227"
+   },
+   {
+    "colonne": "lwr_ipm2",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 22800,
+    "exemple": "6.45183606890934"
+   },
+   {
+    "colonne": "upr_ipm2",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 22800,
+    "exemple": "9.84026059980098"
+   },
+   {
+    "colonne": "typpred",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3,
+    "exemple": "maille"
+   },
+   {
+    "colonne": "nbobs_com",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2767,
+    "exemple": "0"
+   },
+   {
+    "colonne": "nbobs_mail",
+    "type_portail": "int",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2518,
+    "exemple": "521"
+   },
+   {
+    "colonne": "r2_adj",
+    "type_portail": "double",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 9417,
+    "exemple": "0.591320179010007"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "onisep_af_sup": {
+  "meta": {
+   "titre": "Idéo-Actions de formation initiale-Univers enseignement supérieur",
+   "lignes_annoncees": 28580,
+   "licence": "Licence ODBL",
+   "licence_url": null,
+   "modifie": "2026-07-06T11:03:36+0200",
+   "producteur": "onisep"
+  },
+  "lignes": 28580,
+  "colonnes_n": 32,
+  "colonnes": [
+   {
+    "colonne": "Action de Formation (AF) identifiant Onisep",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 28444,
+    "exemple": "AF.948"
+   },
+   {
+    "colonne": "Formation (FOR) libellé",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3972,
+    "exemple": "mastère spé. manager du changement et de l'innovation durable"
+   },
+   {
+    "colonne": "FOR URL et ID Onisep",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 3980,
+    "exemple": "https://www.onisep.fr/http/redirection/formation/slug/FOR.999"
+   },
+   {
+    "colonne": "FOR indexation domaine web Onisep",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1721,
+    "exemple": "environnement, énergies, propreté/environnement (généralités)| matières première"
+   },
+   {
+    "colonne": "FOR type",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 50,
+    "exemple": "mastère spécialisé"
+   },
+   {
+    "colonne": "FOR nature du certificat",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 14,
+    "exemple": "Label de la Conférence des grandes écoles (CGE)"
+   },
+   {
+    "colonne": "FOR URL référentiel",
+    "type_portail": "non déclaré",
+    "manquant_pct": 12.32,
+    "valeurs_distinctes": 2258,
+    "exemple": "https://www.francecompetences.fr/recherche/rncp/38265/"
+   },
+   {
+    "colonne": "FOR niveau de sortie",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 9,
+    "exemple": "bac + 6"
+   },
+   {
+    "colonne": "Lieu d'enseignement (ENS) libellé",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 5713,
+    "exemple": "École nationale supérieure d'arts et métiers - campus Arts et Métiers de Paris"
+   },
+   {
+    "colonne": "ENS URL et ID Onisep",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 6529,
+    "exemple": "https://www.onisep.fr/http/redirection/etablissement/slug/ENS.1967"
+   },
+   {
+    "colonne": "ENS code UAI",
+    "type_portail": "non déclaré",
+    "manquant_pct": 1.1,
+    "valeurs_distinctes": 6070,
+    "exemple": "0753472S"
+   },
+   {
+    "colonne": "ENS statut",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 4,
+    "exemple": "public"
+   },
+   {
+    "colonne": "ENS adresse",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.15,
+    "valeurs_distinctes": 5866,
+    "exemple": "151 boulevard de l'Hôpital"
+   },
+   {
+    "colonne": "ENS code postal",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 2682,
+    "exemple": "75013"
+   },
+   {
+    "colonne": "ENS commune",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1322,
+    "exemple": "Paris"
+   },
+   {
+    "colonne": "ENS département",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 103,
+    "exemple": "Paris"
+   },
+   {
+    "colonne": "ENS académie",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 31,
+    "exemple": "Paris"
+   },
+   {
+    "colonne": "ENS région",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 19,
+    "exemple": "Ile-de-France"
+   },
+   {
+    "colonne": "ENS latitude",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 5946,
+    "exemple": "48.8337"
+   },
+   {
+    "colonne": "ENS longitude",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 6183,
+    "exemple": "2.35751"
+   },
+   {
+    "colonne": "ENS n° téléphone",
+    "type_portail": "non déclaré",
+    "manquant_pct": 1.18,
+    "valeurs_distinctes": 6147,
+    "exemple": "01 44 24 62 76"
+   },
+   {
+    "colonne": "ENS site web",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.16,
+    "valeurs_distinctes": 5791,
+    "exemple": "http://www.artsetmetiers.fr"
+   },
+   {
+    "colonne": "ENS hébergement",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1158,
+    "exemple": "sans hébergement (résidences étudiantes attenantes aux différents centres Arts e"
+   },
+   {
+    "colonne": "ENS accessibilité",
+    "type_portail": "non déclaré",
+    "manquant_pct": 48.1,
+    "valeurs_distinctes": 80,
+    "exemple": "Locaux accessibles"
+   },
+   {
+    "colonne": "AF durée cycle standard",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 9,
+    "exemple": "1 an"
+   },
+   {
+    "colonne": "AF modalités scolarité",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1040,
+    "exemple": "temps plein, cours en présentiel"
+   },
+   {
+    "colonne": "AF éléments d'enseignement",
+    "type_portail": "non déclaré",
+    "manquant_pct": 75.1,
+    "valeurs_distinctes": 6040,
+    "exemple": "parcours économies et sociétés"
+   },
+   {
+    "colonne": "AF coût scolarité",
+    "type_portail": "non déclaré",
+    "manquant_pct": 63.6,
+    "valeurs_distinctes": 4683,
+    "exemple": "de 10410 euros jusqu'à 19800 euros en 2026 (de 3470 à 6600 euros par an, selon l"
+   },
+   {
+    "colonne": "AF modalités accueil",
+    "type_portail": "non déclaré",
+    "manquant_pct": 99.61,
+    "valeurs_distinctes": 92,
+    "exemple": "étudiants de L1 et L2 uniquement, L3 à l'UFR Phitem"
+   },
+   {
+    "colonne": "AF page web",
+    "type_portail": "non déclaré",
+    "manquant_pct": 45.66,
+    "valeurs_distinctes": 11595,
+    "exemple": "https://www.ehess.fr/jcms/ehess_30912/fr/master-sciences-economiques-et-sociales"
+   },
+   {
+    "colonne": "AF date de création",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1246,
+    "exemple": "06/06/2020"
+   },
+   {
+    "colonne": "AF date de modification",
+    "type_portail": "non déclaré",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 978,
+    "exemple": "04/07/2023"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ },
+ "georef_communes": {
+  "meta": {
+   "titre": "Communes - France",
+   "lignes_annoncees": 34888,
+   "licence": "Open License v2.0",
+   "licence_url": "https://www.etalab.gouv.fr/wp-content/uploads/2018/11/open-licence.pdf",
+   "modifie": "2025-04-28T08:56:23+00:00",
+   "producteur": "Opendatasoft"
+  },
+  "lignes": 34888,
+  "colonnes_n": 12,
+  "colonnes": [
+   {
+    "colonne": "com_code",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 34888,
+    "exemple": "56063"
+   },
+   {
+    "colonne": "com_current_code",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 34874,
+    "exemple": "56063"
+   },
+   {
+    "colonne": "com_name",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 32648,
+    "exemple": "Gestel"
+   },
+   {
+    "colonne": "com_name_upper",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 32648,
+    "exemple": "GESTEL"
+   },
+   {
+    "colonne": "dep_code",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 107,
+    "exemple": "56"
+   },
+   {
+    "colonne": "dep_name",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 107,
+    "exemple": "Morbihan"
+   },
+   {
+    "colonne": "reg_code",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 24,
+    "exemple": "53"
+   },
+   {
+    "colonne": "reg_name",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 24,
+    "exemple": "Bretagne"
+   },
+   {
+    "colonne": "epci_code",
+    "type_portail": "text",
+    "manquant_pct": 0.05,
+    "valeurs_distinctes": 1255,
+    "exemple": "200042174"
+   },
+   {
+    "colonne": "com_type",
+    "type_portail": "text",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 4,
+    "exemple": "commune"
+   },
+   {
+    "colonne": "geo_point_2d",
+    "type_portail": "geo_point_2d",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 34888,
+    "exemple": "47.808322620976675, -3.4376382171278883"
+   },
+   {
+    "colonne": "year",
+    "type_portail": "date",
+    "manquant_pct": 0.0,
+    "valeurs_distinctes": 1,
+    "exemple": "2025"
+   }
+  ],
+  "colonnes_critiques_absentes": []
+ }
+}
