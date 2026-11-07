@@ -11,7 +11,7 @@ Page unique, statique (HTML/CSS/JS), sans dépendance ni cookie. Les polices son
 
 Tous les textes à remplir sont surlignés en jaune (classe `.todo`) dans `index.html` : rechercher `todo`.
 
-- Association Capendu Infos : adresse du siège, numéro RNA (après déclaration en préfecture), directeur de la publication
+- Adresse postale ou boîte postale de l'éditeur (Jérôme BOUBA), exigée aussi par Brevo dans le pied des e-mails
 - Adresse e-mail de contact (mailto de la section commerçants, politique de confidentialité, mentions légales)
 - Hébergeur du site et prestataire d'envoi (Brevo ou autre)
 - Date de mise à jour de la politique de confidentialité
