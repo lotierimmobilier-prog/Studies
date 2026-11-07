@@ -13,7 +13,7 @@ function require_admin(): void {
 function admin_nav(string $current = ''): string {
     $new = (int)db()->query("SELECT COUNT(*) FROM messages WHERE status = 'new'")->fetchColumn();
     $pend = (int)db()->query("SELECT COUNT(*) FROM partners WHERE status = 'pending'")->fetchColumn();
-    $items = ['partenaires.php' => 'Partenaires' . ($pend ? ' (' . $pend . ')' : ''), 'index.php' => 'Annonces', 'messages.php' => 'Messages' . ($new ? ' (' . $new . ')' : ''), 'stats.php' => 'Statistiques', 'ia.php' => 'Rédiger avec l\'IA', 'export.php' => 'Préparer le numéro', 'motdepasse.php' => 'Mot de passe'];
+    $items = ['partenaires.php' => 'Partenaires' . ($pend ? ' (' . $pend . ')' : ''), 'index.php' => 'Annonces', 'messages.php' => 'Messages' . ($new ? ' (' . $new . ')' : ''), 'stats.php' => 'Clics', 'visites.php' => 'Visites et IA', 'ia.php' => 'Rédiger avec l\'IA', 'export.php' => 'Préparer le numéro', 'motdepasse.php' => 'Mot de passe'];
     $o = '';
     foreach ($items as $f => $l) $o .= '<a href="' . $f . '"' . ($f === $current ? ' aria-current="page"' : '') . '>' . h($l) . '</a> ';
     return $o . '<a href="logout.php">Déconnexion</a>';
