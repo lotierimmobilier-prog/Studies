@@ -78,7 +78,7 @@
   }
 
   $('ia_copy').addEventListener('click', function () {
-    var text = buildPrompt($('ia_notes').value), ok = function () { $('ia_copied').textContent = 'Demande copiée : collez-la dans votre assistant.'; };
+    var text = buildPrompt($('ia_notes').value), ok = function () { $('ia_copied').textContent = 'Demande copiée. Dans Claude, faites « Coller » puis envoyez.'; window.open('https://claude.ai/new', '_blank', 'noopener'); };
     if (navigator.clipboard) { navigator.clipboard.writeText(text).then(ok, function () { window.prompt('Copiez la demande :', text); }); }
     else { window.prompt('Copiez la demande :', text); }
   });

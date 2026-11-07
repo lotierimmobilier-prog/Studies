@@ -2,7 +2,7 @@
 declare(strict_types=1);
 // Rédaction assistée par IA par copier-coller : aucune clé, aucun compte technique, aucune donnée personnelle envoyée.
 
-/** Demande à coller dans un assistant (Claude, ChatGPT…). Ne contient QUE le texte public des annonces. */
+/** Demande à coller dans un assistant (Claude). Ne contient QUE le texte public des annonces. */
 function ia_prompt(array $announcements, string $issue): string {
     $mois = issue_label($issue);
     $o = "Tu es le rédacteur en chef bénévole de « Capendu en bref », la newsletter mensuelle indépendante d'un village de l'Aude. "
