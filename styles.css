@@ -31,7 +31,6 @@ a:hover{color:var(--ink)}
 .site-header{position:sticky;top:0;z-index:50;background:rgba(244,251,250,.97);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding-top:env(safe-area-inset-top,0px);box-shadow:0 1px 0 var(--line),0 8px 24px rgba(18,64,62,.07)}
 .site-header .inner{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:72px}
 .logo{display:flex;align-items:center;gap:10px;font:500 24px/1 var(--head);color:var(--ink);text-decoration:none}
-.logo-mark{width:28px;height:28px;background:var(--wine);border-radius:50% 50% 50% 8px;flex:none}
 .site-header nav{display:flex;align-items:center;gap:6px;font-size:16px;font-weight:600}
 .site-header nav a:not(.btn){color:var(--ink-soft);text-decoration:none;padding:10px 14px;border-radius:999px}
 .site-header nav a:not(.btn):hover{color:var(--ink);background:var(--bg-2)}
@@ -191,3 +190,7 @@ th{background:var(--bg-2);color:var(--ink);font-weight:700}
 .actions-line{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 18px}
 .btn-ghost{background:transparent;color:var(--ink);border:2px solid var(--ink);box-shadow:none}
 .btn-ghost:hover{background:var(--ink);color:#fff}
+
+/* Logo : mot-symbole Capendu en bref */
+.logo img{display:block;height:30px;width:auto}
+@media (max-width:520px){.logo img{height:25px}}

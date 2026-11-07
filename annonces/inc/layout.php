@@ -9,7 +9,7 @@ function layout_top(string $title, string $nav = '', bool $noindex = true): void
     $css = in_subdir() ? '../annonces.css' : 'annonces.css';
     page_head($title, '<link rel="stylesheet" href="' . $css . '">', $noindex, site_root());
     echo '<a class="skip" href="#contenu">Aller au contenu</a>'
-       . '<header class="site-header"><div class="inner"><a class="logo" href="' . site_root() . 'index.html"><span class="logo-mark" aria-hidden="true"></span>Capendu en bref</a>'
+       . '<header class="site-header"><div class="inner"><a class="logo" href="' . site_root() . 'index.html"><img src="' . site_root() . 'logo/logo.svg" alt="Capendu en bref" width="656" height="87"></a>'
        . '<nav aria-label="Navigation">' . $nav . '</nav></div></header><main id="contenu" class="inner page">';
 }
 function layout_bottom(): void {
