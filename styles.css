@@ -202,3 +202,15 @@ th{background:var(--bg-2);color:var(--ink);font-weight:700}
 .site-footer::before{content:"";position:absolute;right:max(20px,calc(50% - 500px));top:14px;width:76px;aspect-ratio:120/132;background:url(images/blason.svg) center/contain no-repeat;opacity:.3;pointer-events:none}
 .site-footer .inner{position:relative;z-index:1}
 @media (max-width:760px){#pourquoi::before{width:78px;opacity:.14;right:14px;top:10px}.site-footer::before{width:60px}}
+
+/* Entrée visible pour les commerçants et les associations */
+.pro-strip{padding-top:8px;padding-bottom:48px}
+.pro-card{display:flex;flex-wrap:wrap;gap:24px 40px;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--r-lg);padding:30px;box-shadow:var(--shadow);border-left:6px solid var(--wine)}
+.pro-text{flex:1 1 420px;min-width:0}
+.pro-text h2{font-size:clamp(26px,3.4vw,34px);margin:6px 0 10px}
+.pro-text p{color:var(--ink-soft)}
+.pro-text .eyebrow{margin-bottom:6px}
+.pro-actions{display:flex;flex-direction:column;gap:12px;align-items:flex-start;flex:0 1 300px}
+.pro-actions .btn{width:100%;text-align:center}
+.pro-actions small{color:var(--ink-soft);font-size:15px;line-height:1.45}
+@media (max-width:860px){.nav-pro{display:none}.pro-actions{flex-basis:100%}}
