@@ -61,3 +61,15 @@ input[type=url]:focus-visible,input[type=month]:focus-visible,input[type=passwor
 .preview table{min-width:0}
 .preview td{border-bottom:0}
 @media (max-width:520px){.site-header nav .btn-small{display:none}}
+
+/* Photo et aide à la rédaction */
+input[type=file]{width:100%;font:400 16px var(--body);color:var(--ink);background:var(--bg);border:2px dashed var(--line);border-radius:var(--r-sm);padding:12px 14px}
+.aide{background:var(--bg-2);border-radius:var(--r-sm);padding:16px 18px;margin-top:18px}
+.aide p{margin:0 0 8px}
+.check{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:16.5px}
+.check li{padding-left:26px;position:relative}
+.check li::before{position:absolute;left:0;top:0;font-weight:800}
+.check .ok::before{content:"✓";color:#17603a}
+.check .ko::before{content:"!";color:#a3202f}
+.exemple{color:var(--ink-soft);font-size:16px;margin-top:10px}
+.fiche-photo{display:block;width:100%;max-height:360px;object-fit:cover;border-radius:var(--r-sm);margin-bottom:16px}

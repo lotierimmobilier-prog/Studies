@@ -1,0 +1,77 @@
+<?php
+declare(strict_types=1);
+require __DIR__ . '/../inc/admin_auth.php';
+security_headers();
+require_admin();
+purge_old();
+
+$msg = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+    $id = (int)($_POST['id'] ?? 0); $act = (string)($_POST['action'] ?? '');
+    $st = db()->prepare('SELECT * FROM partners WHERE id = ?'); $st->execute([$id]); $p = $st->fetch();
+    if ($p) {
+        $now = date('c');
+        if ($act === 'approve') {
+            if ((int)$p['org_verified'] === 0 && empty($_POST['org_ok'])) {
+                $msg = flash('err', 'Inscription non validée : vérifiez d\'abord le numéro officiel dans l\'annuaire, puis cochez la case de vérification.');
+            } else {
+                db()->prepare("UPDATE partners SET status='approved', org_verified = CASE WHEN org_verified = 0 THEN 2 ELSE org_verified END, refusal_reason='', updated_at=? WHERE id=?")->execute([$now, $id]);
+                if (!empty($_POST['notify'])) send_mail($p['contact_email'], 'Votre inscription est validée – Capendu en bref',
+                    "Bonjour {$p['contact_name']},\n\nL'inscription de « {$p['org_name']} » est validée. Vous pouvez maintenant déposer vos annonces :\n"
+                    . "1. ouvrez votre espace partenaire : " . SITE_URL . "/annonces/partenaire/ (un lien de connexion vous est envoyé par e-mail, sans mot de passe) ;\n"
+                    . "2. cliquez sur « Déposer une annonce ».\n\nMerci de participer à la vie de Capendu !\nJérôme BOUBA, Capendu en bref" . auto_notice());
+                $msg = flash('ok', 'Inscription validée : ' . h($p['org_name']) . ' peut maintenant déposer des annonces.');
+            }
+        } elseif ($act === 'refuse') {
+            $reason = one_line((string)($_POST['reason'] ?? ''), 300);
+            db()->prepare("UPDATE partners SET status='refused', refusal_reason=?, updated_at=? WHERE id=?")->execute([$reason, $now, $id]);
+            if (!empty($_POST['notify'])) send_mail($p['contact_email'], 'Votre inscription – Capendu en bref',
+                "Bonjour {$p['contact_name']},\n\nNous ne pouvons pas valider l'inscription de « {$p['org_name']} » pour le moment." . ($reason !== '' ? "\n\nMotif : $reason" : '')
+                . "\n\nLe service est réservé aux entreprises et associations enregistrées. Si vous pensez à une erreur, utilisez le formulaire de contact." . auto_notice());
+            $msg = flash('ok', 'Inscription refusée.');
+        } elseif ($act === 'reopen') {
+            db()->prepare("UPDATE partners SET status='pending', updated_at=? WHERE id=?")->execute([$now, $id]); $msg = flash('ok', 'Remis en attente.');
+        } elseif ($act === 'delete') {                      // supprime le partenaire et toutes ses annonces (droit à l'effacement)
+            $q = db()->prepare('SELECT id, photo FROM announcements WHERE contact_email = ?'); $q->execute([$p['contact_email']]);
+            foreach ($q->fetchAll() as $a) { if ($a['photo'] !== '') delete_photo($a['photo']); }
+            db()->prepare('DELETE FROM announcements WHERE contact_email = ?')->execute([$p['contact_email']]);
+            db()->prepare('DELETE FROM partners WHERE id = ?')->execute([$id]);
+            $msg = flash('ok', 'Partenaire et annonces supprimés.');
+        }
+    }
+}
+
+$s = (string)($_GET['s'] ?? 'pending'); if (!isset(PARTNER_STATUTS[$s])) $s = 'pending';
+$counts = ['pending' => 0, 'approved' => 0, 'refused' => 0];
+foreach (db()->query('SELECT status, COUNT(*) c FROM partners GROUP BY status') as $r) $counts[$r['status']] = (int)$r['c'];
+$st = db()->prepare('SELECT * FROM partners WHERE status = ? ORDER BY created_at DESC'); $st->execute([$s]); $rows = $st->fetchAll();
+
+layout_top('Partenaires – Administration', admin_nav('partenaires.php'));
+echo '<h1>Inscriptions des partenaires</h1>' . $msg;
+echo '<p class="lead">Seules les entreprises et associations enregistrées peuvent déposer des annonces. Vérifiez le numéro officiel avant de valider.</p>';
+echo '<nav class="tabs" aria-label="Filtrer">';
+foreach (PARTNER_STATUTS as $k => $l) echo '<a href="?s=' . h($k) . '"' . ($s === $k ? ' aria-current="page"' : '') . '>' . h($l) . ' (' . $counts[$k] . ')</a>';
+echo '</nav>';
+if (!$rows) echo '<p>Aucune inscription dans cette catégorie.</p>';
+foreach ($rows as $p) {
+    $verif = (int)$p['org_verified'] === 1 ? '<span class="pill pill-validated">Trouvé au registre</span> ' . h($p['org_check'])
+           : ((int)$p['org_verified'] === 2 ? '<span class="pill pill-validated">Vérifié par l\'éditeur</span>' : '<span class="pill pill-pending">À vérifier</span> non confirmé automatiquement');
+    echo '<div class="card"><h2>' . h($p['org_name']) . ' <span class="hint">(' . h(ORG_TYPES[$p['org_type']] ?? '') . ')</span></h2>'
+       . '<dl class="kv"><dt>Numéro officiel</dt><dd>' . h($p['org_id']) . ' <a href="https://annuaire-entreprises.data.gouv.fr/rechercher?terme=' . h(rawurlencode($p['org_id'])) . '" rel="noopener noreferrer" target="_blank">vérifier dans l\'annuaire officiel</a></dd>'
+       . '<dt>Contrôle</dt><dd>' . $verif . '</dd><dt>Contact</dt><dd>' . h($p['contact_name']) . ' · ' . h($p['contact_email']) . ($p['contact_phone'] !== '' ? ' · ' . h($p['contact_phone']) : '') . '</dd>'
+       . '<dt>Reçue le</dt><dd>' . h(date('d/m/Y à H:i', strtotime($p['created_at']))) . '</dd>'
+       . ($p['refusal_reason'] !== '' ? '<dt>Motif du refus</dt><dd>' . h($p['refusal_reason']) . '</dd>' : '') . '</dl>'
+       . '<form method="post" action="partenaires.php?s=' . h($s) . '">' . csrf_field() . '<input type="hidden" name="id" value="' . (int)$p['id'] . '">';
+    if ($p['status'] !== 'approved' && (int)$p['org_verified'] === 0)
+        echo '<div class="consent mt-14"><input id="ok' . (int)$p['id'] . '" name="org_ok" type="checkbox" value="1"><label for="ok' . (int)$p['id'] . '">J\'ai vérifié que cette organisation est bien enregistrée (via le lien ci-dessus).</label></div>';
+    echo '<div class="consent mt-14"><input id="n' . (int)$p['id'] . '" name="notify" type="checkbox" value="1" checked><label for="n' . (int)$p['id'] . '">Prévenir le partenaire par e-mail</label></div>';
+    if ($p['status'] !== 'approved') echo '<div class="field mt-14"><label for="r' . (int)$p['id'] . '">Motif du refus <span class="hint">(visible par le partenaire)</span></label><input id="r' . (int)$p['id'] . '" name="reason" type="text" maxlength="300"></div>';
+    echo '<div class="actions">';
+    if ($p['status'] !== 'approved') echo '<button class="btn" type="submit" name="action" value="approve">Valider l\'inscription</button>';
+    if ($p['status'] === 'pending') echo '<button class="btn btn-danger" type="submit" name="action" value="refuse">Refuser</button>';
+    if ($p['status'] !== 'pending') echo '<button class="btn btn-ghost" type="submit" name="action" value="reopen">Remettre en attente</button>';
+    echo '<button class="btn btn-danger" type="submit" name="action" value="delete" data-confirm="Supprimer ce partenaire ET toutes ses annonces ?">Supprimer</button></div></form></div>';
+}
+echo '<script src="admin.js"></script>';
+layout_bottom(); echo '</body></html>';

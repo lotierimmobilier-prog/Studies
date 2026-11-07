@@ -7,10 +7,18 @@ Base de données : SQLite (un simple fichier), aucune base MySQL à créer.
 
 | Pour qui | Adresse | Fonctions |
 |---|---|---|
-| Commerçants, associations | `annonces/deposer.php` | Formulaire de dépôt (rubrique, titre, Quoi / Où / Quand, conditions, lien, coordonnées privées, consentement) |
-| Commerçants, associations | `annonces/partenaire/` | Espace de suivi : avancement (reçue, validée, publiée, refusée + motif), numéro de parution, **nombre de clics**, retrait d'une annonce. Connexion **sans mot de passe** par lien e-mail (30 min, usage unique) |
-| Vous (éditeur) | `annonces/admin/` | Liste des annonces par statut, relecture et modification du texte, validation pour un numéro, refus avec motif, e-mails automatiques à l'annonceur, **statistiques de clics**, génération du bloc HTML du numéro, changement de mot de passe |
-| Lecteurs | bouton « En savoir plus » | Passe par `annonces/r.php?id=…` : ajoute 1 au compteur (anonyme) puis redirige vers le lien de l'annonceur ou vers `annonces/a.php?id=…` |
+| Entreprises et associations | `annonces/inscription.php` | Inscription (type, numéro SIRET ou RNA, nom, contact). Le numéro est contrôlé automatiquement auprès du registre public « Recherche d'entreprises » (sans clé) ; **l'éditeur valide chaque inscription**. Les particuliers ne peuvent pas s'inscrire. |
+| Partenaires validés | `annonces/partenaire/` | Connexion **sans mot de passe** (lien par e-mail, 30 min, usage unique), dépôt d'annonces, suivi (avancement, numéro de parution, **clics**), retrait d'une annonce, suppression de l'inscription. |
+| Partenaires validés | `annonces/deposer.php` | Dépôt d'annonce : rubrique, titre, Quoi / Où / Quand, conditions, **lien d'inscription facultatif**, **photo facultative**, aide à la rédaction (compteur et conseils, sans IA). Fermé aux non-inscrits. |
+| Vous (éditeur) | `annonces/admin/` | **Partenaires** (valider ou refuser les inscriptions), annonces (relire, corriger, valider, refuser), messages du formulaire de contact, **statistiques de clics**, **Rédiger avec l'IA**, préparation du numéro (bloc HTML), mot de passe. |
+| Tout le monde | `annonces/contact.php` | Formulaire de contact (questions, droits RGPD, aide). Aucun échange par e-mail. |
+| Lecteurs | bouton « En savoir plus » | Passe par `annonces/r.php?id=…` : compteur anonyme, puis redirection vers le lien de l'annonceur ou la page de l'annonce. |
+
+### Rédiger avec l'IA (sans clé ni compte technique)
+`admin/ia.php` génère une demande à **copier-coller** dans un assistant (par exemple Claude sur claude.ai) : consignes de style pour un public de 25 à 85 ans, et les textes publics des annonces validées du numéro. Vous collez la réponse, relisez chaque proposition (avant / après) et appliquez celles que vous retenez. Un édito est aussi proposé. La demande ne contient jamais de nom, d'e-mail, de téléphone ni de photo.
+
+### Photos
+JPEG, PNG ou WebP, 5 Mo maximum. Elles sont ré-encodées (métadonnées supprimées), redimensionnées à 1 200 px, stockées **hors du dossier public** et servies seulement une fois l'annonce validée. Elles sont supprimées avec l'annonce.
 
 ## Installation sur Hostinger (hébergement web avec PHP 8.1 ou plus)
 
@@ -63,6 +71,7 @@ Avec `DEV_LOG_MAIL`, les e-mails sont écrits dans `data/mail.log` au lieu d'êt
 
 ## Limites de cette première version
 
-- Pas de téléversement de photo (l'annonceur peut indiquer un lien ; à ajouter si nécessaire, avec contrôle strict des fichiers).
+- Les photos nécessitent l'extension PHP GD (présente chez Hostinger) : sinon le formulaire propose d'envoyer sans photo.
+- Le contrôle automatique du SIRET/RNA nécessite que PHP puisse appeler un site extérieur (`allow_url_fopen`) : sinon, l'inscription reste « à vérifier » et vous la contrôlez via le lien vers l'annuaire officiel.
 - Un seul compte administrateur.
 - Les clics sont des compteurs journaliers (pas de courbe détaillée par heure).

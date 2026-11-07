@@ -26,7 +26,7 @@ else {
     foreach ($rows as $r) {
         echo '<tr><td>' . h(date('d/m/Y', strtotime($r['created_at']))) . '</td>'
            . '<td><a href="annonce.php?id=' . (int)$r['id'] . '"><strong>' . h($r['title']) . '</strong></a><br><span class="hint">' . h(CATEGORIES[$r['category']][1]) . '</span></td>'
-           . '<td>' . h($r['org_name']) . '</td><td>' . status_pill($r['status']) . '</td>'
+           . '<td>' . h($r['org_name']) . ((int)$r['org_verified'] === 0 ? '<br><span class="pill pill-pending">À vérifier</span>' : '') . '</td><td>' . status_pill($r['status']) . '</td>'
            . '<td>' . h($r['issue'] !== '' ? issue_label($r['issue']) : '–') . '</td>'
            . '<td class="num">' . clicks_total((int)$r['id']) . '</td></tr>';
     }

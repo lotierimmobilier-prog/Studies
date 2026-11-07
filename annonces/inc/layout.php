@@ -16,7 +16,7 @@ function layout_top(string $title, string $nav = '', bool $noindex = true): void
 function layout_bottom(): void {
     $r = site_root();
     echo '</main><footer class="site-footer"><div class="inner"><p><strong>Capendu en bref</strong> · Newsletter indépendante, non affiliée à la mairie de Capendu</p>'
-       . '<p><a href="' . $r . 'index.html#confidentialite">Politique de confidentialité</a> · <a href="' . $r . 'index.html#mentions-legales">Mentions légales</a> · <a href="' . (in_subdir() ? '../' : '') . 'contact.php">Nous écrire</a></p></div></footer>';
+       . '<p><a href="' . $r . 'index.html#confidentialite">Politique de confidentialité</a> · <a href="' . $r . 'index.html#mentions-legales">Mentions légales</a> · <a href="' . $r . 'qui-est-derriere.html">Qui est derrière ?</a> · <a href="' . (in_subdir() ? '../' : '') . 'contact.php">Nous écrire</a></p></div></footer>';
 }
 function flash(string $type, string $msg): string { return '<p class="notice notice-' . h($type) . '" role="status">' . $msg . '</p>'; }
 function status_pill(string $s): string { return '<span class="pill pill-' . h($s) . '">' . h(STATUTS[$s] ?? $s) . '</span>'; }

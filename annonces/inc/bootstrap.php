@@ -19,6 +19,7 @@ const CATEGORIES = [
 ];
 const STATUTS = ['pending' => 'En attente', 'validated' => 'Validée', 'published' => 'Publiée', 'refused' => 'Refusée'];
 const SUJETS = ['question' => 'Une question', 'donnees' => 'Mes données personnelles (accès, effacement, désinscription…)', 'aide' => 'Besoin d\'aide pour m\'inscrire ou utiliser le site', 'autre' => 'Autre'];
+const PARTNER_STATUTS = ['pending' => 'En attente de validation', 'approved' => 'Validé', 'refused' => 'Refusé'];
 const MOIS = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
 function h(?string $s): string { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
@@ -63,9 +64,20 @@ function db(): PDO {
     CREATE INDEX IF NOT EXISTS rate_idx ON rate (ip_hash, kind, ts);
     CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, subject TEXT NOT NULL, name TEXT NOT NULL DEFAULT '',
         reply_to TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new');
+    CREATE TABLE IF NOT EXISTS partners (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
+        org_type TEXT NOT NULL, org_id TEXT NOT NULL, org_name TEXT NOT NULL, contact_name TEXT NOT NULL, contact_email TEXT NOT NULL, contact_phone TEXT NOT NULL DEFAULT '',
+        org_verified INTEGER NOT NULL DEFAULT 0, org_check TEXT NOT NULL DEFAULT '', refusal_reason TEXT NOT NULL DEFAULT '', consent_at TEXT NOT NULL);
+    CREATE UNIQUE INDEX IF NOT EXISTS partners_email ON partners (contact_email);
+    CREATE UNIQUE INDEX IF NOT EXISTS partners_orgid ON partners (org_id);
     CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS clicks (announcement_id INTEGER NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (announcement_id, day));
     CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0);");
+    $cols = array_column($pdo->query('PRAGMA table_info(announcements)')->fetchAll(), 'name');
+    if (!in_array('photo', $cols, true)) $pdo->exec("ALTER TABLE announcements ADD COLUMN photo TEXT NOT NULL DEFAULT ''");
+    if (!in_array('partner_id', $cols, true)) $pdo->exec('ALTER TABLE announcements ADD COLUMN partner_id INTEGER NOT NULL DEFAULT 0');
+    foreach (['org_type' => "TEXT NOT NULL DEFAULT ''", 'org_id' => "TEXT NOT NULL DEFAULT ''", 'org_verified' => 'INTEGER NOT NULL DEFAULT 0', 'org_check' => "TEXT NOT NULL DEFAULT ''"] as $col => $def) {
+        if (!in_array($col, $cols, true)) $pdo->exec("ALTER TABLE announcements ADD COLUMN $col $def");
+    }
     return $pdo;
 }
 
@@ -113,6 +125,7 @@ function clean(string $s, int $max): string {
     $s = preg_replace('/[^\P{C}\n]+/u', '', trim($s)) ?? '';   // retire les caractères de contrôle
     return mb_substr($s, 0, $max);
 }
+function clean_multiline(string $s, int $max): string { return clean($s, $max); }
 function one_line(string $s, int $max): string { return clean(str_replace("\n", ' ', $s), $max); }
 
 function issue_label(string $issue): string {
@@ -156,6 +169,98 @@ function clicks_since(int $id, int $days): int {
     return (int)$st->fetchColumn();
 }
 
+
+// ---------- Photos des annonces : stockées hors du dossier public, ré-encodées (métadonnées supprimées) ----------
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024;
+function photos_dir(): string { $d = DATA_DIR . '/photos'; if (!is_dir($d)) @mkdir($d, 0750, true); return $d; }
+function photo_path(string $name): string { return preg_match('/^[a-f0-9]{32}\.jpg$/', $name) === 1 ? photos_dir() . '/' . $name : ''; }
+function delete_photo(string $name): void { $p = photo_path($name); if ($p !== '' && is_file($p)) @unlink($p); }
+
+/** @return array{0:string,1:string} [nom de fichier ('' si aucune photo), message d'erreur ('' si tout va bien)] */
+function save_photo(array $f): array {
+    $err = (int)($f['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($err === UPLOAD_ERR_NO_FILE) return ['', ''];
+    if ($err !== UPLOAD_ERR_OK || (int)$f['size'] > PHOTO_MAX_BYTES) return ['', 'La photo n\'a pas pu être envoyée : 5 Mo maximum, formats JPEG, PNG ou WebP.'];
+    if (!is_uploaded_file($f['tmp_name']) || !function_exists('imagecreatefromjpeg')) return ['', 'Les photos ne sont pas disponibles pour le moment. Vous pouvez envoyer l\'annonce sans photo.'];
+    $info = @getimagesize($f['tmp_name']);
+    if (!$info || $info[0] < 100 || $info[1] < 100 || $info[0] * $info[1] > 40000000) return ['', 'Cette photo ne peut pas être utilisée (format ou dimensions non valides).'];
+    $type = $info[2];
+    $img = match (true) {
+        $type === IMAGETYPE_JPEG => @imagecreatefromjpeg($f['tmp_name']),
+        $type === IMAGETYPE_PNG => @imagecreatefrompng($f['tmp_name']),
+        $type === IMAGETYPE_WEBP && function_exists('imagecreatefromwebp') => @imagecreatefromwebp($f['tmp_name']),
+        default => false,
+    };
+    if (!$img) return ['', 'Cette photo ne peut pas être lue. Utilisez un fichier JPEG, PNG ou WebP.'];
+    if ($type === IMAGETYPE_JPEG && function_exists('exif_read_data')) {            // redresse les photos de téléphone
+        $ex = @exif_read_data($f['tmp_name']);
+        $o = (int)($ex['Orientation'] ?? 1);
+        $angle = [3 => 180, 6 => -90, 8 => 90][$o] ?? 0;
+        if ($angle !== 0) { $r = imagerotate($img, $angle, 0); if ($r) { imagedestroy($img); $img = $r; } }
+    }
+    $w = imagesx($img); $h = imagesy($img); $max = 1200; $ratio = min(1, $max / max($w, $h));
+    $nw = max(1, (int)round($w * $ratio)); $nh = max(1, (int)round($h * $ratio));
+    $out = imagecreatetruecolor($nw, $nh);
+    imagefill($out, 0, 0, imagecolorallocate($out, 255, 255, 255));
+    imagecopyresampled($out, $img, 0, 0, 0, 0, $nw, $nh, $w, $h);
+    imagedestroy($img);
+    $name = bin2hex(random_bytes(16)) . '.jpg';
+    $ok = @imagejpeg($out, photos_dir() . '/' . $name, 82);
+    imagedestroy($out);
+    return $ok ? [$name, ''] : ['', 'La photo n\'a pas pu être enregistrée. Réessayez.'];
+}
+
+// ---------- Dépôt réservé aux entreprises et associations enregistrées ----------
+const ORG_TYPES = ['entreprise' => 'Entreprise, commerçant ou artisan', 'association' => 'Association ou club'];
+
+function luhn_ok(string $digits): bool {
+    $sum = 0; $alt = false;
+    for ($i = strlen($digits) - 1; $i >= 0; $i--) {
+        $n = (int)$digits[$i];
+        if ($alt) { $n *= 2; if ($n > 9) $n -= 9; }
+        $sum += $n; $alt = !$alt;
+    }
+    return $sum % 10 === 0;
+}
+/** Normalise et valide un identifiant. @return array{0:string,1:string} [identifiant normalisé, message d'erreur] */
+function clean_org_id(string $type, string $raw): array {
+    $id = strtoupper(preg_replace('/[\s.\-]/', '', $raw) ?? '');
+    if ($type === 'association' && preg_match('/^W\d{9}$/', $id)) return [$id, ''];                  // numéro RNA
+    if (preg_match('/^\d{14}$/', $id) && (luhn_ok($id) || str_starts_with($id, '356000000'))) return [$id, ''];   // SIRET (La Poste : exception)
+    return ['', $type === 'association'
+        ? 'Indiquez le numéro RNA de l\'association (W suivi de 9 chiffres) ou son SIRET (14 chiffres).'
+        : 'Indiquez le numéro SIRET de l\'entreprise (14 chiffres, sans espace ou avec).'];
+}
+/**
+ * Contrôle auprès du registre public « Recherche d'entreprises » (data.gouv.fr, sans clé). Meilleur effort :
+ * si le service ne répond pas, l'annonce reste « à vérifier » par l'éditeur.
+ * @return array{0:bool,1:string} [trouvé et actif, libellé officiel]
+ */
+function verify_org(string $id): array {
+    if (defined('ORG_CHECK_DISABLED') && ORG_CHECK_DISABLED) return [false, ''];
+    $ctx = stream_context_create(['http' => ['timeout' => 4, 'ignore_errors' => true, 'header' => "Accept: application/json\r\nUser-Agent: CapenduEnBref/1.0\r\n"]]);
+    $json = @file_get_contents('https://recherche-entreprises.api.gouv.fr/search?per_page=1&q=' . rawurlencode($id), false, $ctx);
+    $data = $json ? json_decode($json, true) : null;
+    $r = $data['results'][0] ?? null;
+    if (!is_array($r)) return [false, ''];
+    $matchSiret = false;
+    foreach (array_merge([$r['siege'] ?? []], $r['matching_etablissements'] ?? []) as $e) { if (($e['siret'] ?? '') === $id) $matchSiret = true; }
+    $matchRna = ($r['complements']['identifiant_association'] ?? '') === $id;
+    if (!$matchSiret && !$matchRna) return [false, ''];
+    $actif = ($r['etat_administratif'] ?? 'A') === 'A';
+    $label = trim(($r['nom_complet'] ?? '') . ' — ' . ($r['siege']['libelle_commune'] ?? '') . ($actif ? '' : ' (cessée)'));
+    return [$actif, mb_substr($label, 0, 200)];
+}
+
+/** Partenaire validé connecté (session) ou null. */
+function current_partner(): ?array {
+    start_session();
+    if (empty($_SESSION['partner_email'])) return null;
+    $st = db()->prepare("SELECT * FROM partners WHERE contact_email = ? AND status = 'approved'");
+    $st->execute([$_SESSION['partner_email']]);
+    return $st->fetch() ?: null;
+}
+
 function auto_notice(): string {
     return "\n\n---\nMessage envoyé automatiquement : merci de ne pas y répondre. Pour nous écrire, utilisez le formulaire : " . SITE_URL . '/annonces/contact.php';
 }
@@ -165,10 +270,21 @@ function purge_old(): void {
     $st = db()->prepare("SELECT v FROM meta WHERE k = 'purge'"); $st->execute();
     if ($st->fetchColumn() === $today) return;
     $pdo = db();
-    $pdo->prepare("DELETE FROM announcements WHERE status = 'refused' AND updated_at < ?")->execute([date('c', strtotime('-30 days'))]);
-    $pdo->prepare("DELETE FROM announcements WHERE status = 'pending' AND created_at < ?")->execute([date('c', strtotime('-90 days'))]);
-    $pdo->prepare("DELETE FROM announcements WHERE status IN ('validated','published') AND created_at < ?")->execute([date('c', strtotime('-365 days'))]);
+    $rules = [
+        ["status = 'refused' AND updated_at < ?", date('c', strtotime('-30 days'))],
+        ["status = 'pending' AND created_at < ?", date('c', strtotime('-90 days'))],
+        ["status IN ('validated','published') AND created_at < ?", date('c', strtotime('-365 days'))],
+    ];
+    foreach ($rules as [$where, $limit]) {
+        $q = $pdo->prepare("SELECT id, photo FROM announcements WHERE $where"); $q->execute([$limit]);
+        foreach ($q->fetchAll() as $r) { if ($r['photo'] !== '') delete_photo($r['photo']); }
+        $pdo->prepare("DELETE FROM announcements WHERE $where")->execute([$limit]);
+    }
     $pdo->prepare('DELETE FROM messages WHERE created_at < ?')->execute([date('c', strtotime('-365 days'))]);
+    $pdo->prepare("DELETE FROM partners WHERE status = 'refused' AND updated_at < ?")->execute([date('c', strtotime('-30 days'))]);
+    $pdo->prepare("DELETE FROM partners WHERE status = 'pending' AND created_at < ?")->execute([date('c', strtotime('-90 days'))]);
+    $lim = date('c', strtotime('-730 days'));       // partenaire validé sans aucune activité depuis 24 mois
+    $pdo->prepare("DELETE FROM partners WHERE status = 'approved' AND updated_at < ? AND NOT EXISTS (SELECT 1 FROM announcements a WHERE a.contact_email = partners.contact_email AND a.created_at >= ?)")->execute([$lim, $lim]);
     $pdo->exec("DELETE FROM clicks WHERE announcement_id NOT IN (SELECT id FROM announcements)");
     $pdo->prepare('DELETE FROM tokens WHERE expires < ?')->execute([time() - 86400]);
     $pdo->prepare("INSERT INTO meta (k, v) VALUES ('purge', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([$today]);

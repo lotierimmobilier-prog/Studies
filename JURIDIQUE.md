@@ -21,6 +21,8 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - **Violation de données** (fuite, piratage) : notification à la CNIL sous 72 h et information des personnes si risque élevé.
 - **Sécurité** : mot de passe fort et unique sur Brevo et sur l'hébergeur, double authentification si disponible.
 - Aucune donnée vendue, louée ni transmise aux commerçants ou associations.
+- **Inscription des partenaires** : entreprises et associations enregistrées uniquement (SIRET ou RNA), validées par l'éditeur ; contrôle du numéro auprès du registre public national (seul le numéro est transmis). Durées : refusée 30 jours, en attente 90 jours, validée 24 mois sans activité.
+- **Aide à la rédaction par IA** : par copier-coller, sans donnée personnelle ni photo ; l'éditeur relit et décide. Mentionnée dans la politique de confidentialité.
 - **Espace annonces** (`annonces/`) : traitement distinct à inscrire au registre (données des annonceurs, durées 30 / 90 jours et 12 mois,
   consentement au dépôt). Un cookie technique de session est déposé uniquement après connexion à l'espace partenaire ou admin
   (exempté de consentement, mentionné dans la politique de confidentialité).

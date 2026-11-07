@@ -12,6 +12,7 @@ if (!$a) { http_response_code(404); layout_top('Annonce introuvable – Capendu 
 layout_top($a['title'] . ' – Capendu en bref');
 ?>
 <article class="fiche-pub">
+  <?php if ($a['photo'] !== ''): ?><img class="fiche-photo" src="photo.php?id=<?= (int)$a['id'] ?>" alt="" loading="lazy"><?php endif; ?>
   <span class="tag<?= $a['category'] === 'offre' ? ' tag-offre' : '' ?>"><?= h($tag) ?></span>
   <h1><?= h($a['title']) ?></h1>
   <p><?= nl2br(h($a['what'])) ?></p>
