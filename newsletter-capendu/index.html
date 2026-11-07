@@ -35,7 +35,7 @@
         <div class="hero-text">
           <p class="eyebrow">Capendu · Aude</p>
           <h1 id="titre-principal">Ce qui se passe à Capendu, de la cave à la salle des fêtes.</h1>
-          <p class="lead">Une newsletter libre, gratuite et indépendante, ouverte aux commerçants et aux associations, pour faire vivre et faire connaître le village.</p>
+          <p class="lead">La vie de tous les jours à Capendu, une fois par mois dans votre boîte mail : sorties, sport, associations, bonnes affaires des commerçants. Libre, gratuite et indépendante.</p>
 
           <form id="inscription" class="signup" method="post" action="REMPLACER-PAR-LIEN-FORMULAIRE-BREVO" novalidate>
             <h2 class="signup-title">Recevoir la lettre, c'est gratuit</h2>
@@ -66,12 +66,13 @@
 
             <div class="consent">
               <input id="consent" name="CONSENTEMENT" type="checkbox" value="oui" required>
-              <label for="consent">J'accepte de recevoir la newsletter <strong>Capendu Infos</strong> à l'adresse indiquée. Je peux me désinscrire à tout moment, en un clic. J'ai pris connaissance de la <a href="#confidentialite">politique de confidentialité</a>.</label>
+              <label for="consent">J'accepte de recevoir la newsletter <strong>Capendu Infos</strong> (actualités du village, sport, associations, offres des commerçants) à l'adresse indiquée. Je peux me désinscrire à tout moment, en un clic. J'ai pris connaissance de la <a href="#confidentialite">politique de confidentialité</a>.</label>
             </div>
 
             <button class="btn" type="submit">Recevoir la lettre</button>
             <p class="signup-note">Vous recevrez d'abord un e-mail de confirmation : l'inscription n'est valide qu'après votre clic. Vos données ne sont ni vendues, ni cédées.</p>
             <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+            <p class="help">Besoin d'aide pour vous inscrire ? Appelez le <span class="todo">[numéro de téléphone]</span> : nous le ferons avec vous.</p>
           </form>
         </div>
 
@@ -93,18 +94,30 @@
       <p class="photo-note">Photos d'illustration : vignobles de l'Aude et du Languedoc. <a href="#mentions-legales">Crédits</a></p>
     </section>
 
-    <!-- POURQUOI -->
+    <!-- CE QU'ON Y TROUVE -->
     <section id="pourquoi" class="band" aria-labelledby="t-pourquoi">
       <div class="inner">
-        <h2 id="t-pourquoi">Une lettre pour tout le village</h2>
-        <p class="section-intro">Capendu Infos n'appartient à personne et ne dépend d'aucune institution. Elle relaie ce que les Capendusiens font et proposent.</p>
-        <ul class="cards">
-          <li><h3>Commerçants</h3><p>Nouveautés, horaires, offres de saison : vos annonces arrivent directement chez les habitants, gratuitement.</p></li>
-          <li><h3>Associations</h3><p>Rendez-vous, vide-greniers, appels à bénévoles : remplissez vos salles et trouvez de nouveaux membres.</p></li>
-          <li><h3>Habitants</h3><p>L'agenda et les bonnes adresses du village, une fois par mois, sans réseaux sociaux ni publicité.</p></li>
+        <h2 id="t-pourquoi">Dans chaque numéro</h2>
+        <p class="section-intro">Tout ce qui fait la vie de la commune, écrit simplement. Que vous ayez 25 ou 85 ans, vous y trouvez ce qui vous concerne.</p>
+        <ul class="cards cards-5">
+          <li><span class="tag tag-offre">Offre</span><h3>Bonnes affaires</h3><p>Promotions, nouveautés et offres commerciales des commerçants et artisans de Capendu. Elles sont toujours signalées « Offre ».</p></li>
+          <li><span class="tag">Sport</span><h3>Actualité sportive</h3><p>Matchs, résultats, tournois, inscriptions dans les clubs, pour les petits comme pour les grands.</p></li>
+          <li><span class="tag">Associations</span><h3>Vie associative</h3><p>Rendez-vous, vide-greniers, repas, appels à bénévoles : de quoi remplir les agendas et les salles.</p></li>
+          <li><span class="tag">Sorties</span><h3>Fêtes et loisirs</h3><p>Concerts, marchés, balades, animations : les idées de sorties du mois, en famille ou entre amis.</p></li>
+          <li><span class="tag">Au quotidien</span><h3>Infos pratiques</h3><p>Horaires, ouvertures, nouveaux services et bonnes adresses. Les informations officielles restent celles de la mairie.</p></li>
         </ul>
         <p class="indep"><strong>Indépendante.</strong> Cette newsletter n'est pas un support officiel de la mairie de Capendu et n'est affiliée à aucun parti ni à aucune institution.</p>
       </div>
+    </section>
+
+    <!-- POUR TOUS -->
+    <section class="inner everyone" aria-labelledby="t-tous">
+      <h2 id="t-tous">Pensée pour tous</h2>
+      <ul class="everyone-grid">
+        <li><h3>Simple à lire</h3><p>Des textes courts, de gros caractères, des phrases claires. Lisible sur téléphone, tablette ou ordinateur.</p></li>
+        <li><h3>Rapide à suivre</h3><p>Un seul rendez-vous par mois, avec un sommaire en haut pour aller droit à ce qui vous intéresse.</p></li>
+        <li><h3>Un coup de main si besoin</h3><p>Pas à l'aise avec l'informatique ? Nous vous aidons à vous inscrire par téléphone.</p></li>
+      </ul>
     </section>
 
     <!-- COMMENT ÇA MARCHE -->
@@ -122,7 +135,7 @@
       <div class="inner two-col">
         <div>
           <h2 id="t-contribuer">Vous êtes commerçant ou association ?</h2>
-          <p class="section-intro">Envoyez-nous vos informations : elles seront publiées dans le prochain numéro, gratuitement.</p>
+          <p class="section-intro">Offre commerciale, match, repas d'association, nouveau service : envoyez-nous vos informations, elles seront publiées dans le prochain numéro, gratuitement.</p>
           <p class="contact-line">Écrivez à <a class="mail" href="mailto:contact@exemple.fr"><span class="todo">contact@exemple.fr</span></a><br>
           <small>Avant le <strong>25 de chaque mois</strong> pour paraître le mois suivant.</small></p>
         </div>
@@ -130,7 +143,9 @@
           <h3>Nos règles éditoriales</h3>
           <ul class="rules">
             <li>Contenus locaux, utiles aux habitants de Capendu et des environs.</li>
-            <li>Gratuit, sans publicité déguisée ni contrepartie.</li>
+            <li>Offres commerciales bienvenues, à condition d'être claires (prix, dates, conditions) et locales. Elles sont signalées « Offre ».</li>
+            <li>Publication gratuite, sans contrepartie. Nous ne vendons pas de publicité.</li>
+            <li>Des textes courts (environ 600 caractères) et simples, avec si possible une photo.</li>
             <li>Pas de contenu partisan, discriminatoire, ni de propos illicites.</li>
             <li>Vous garantissez avoir les droits sur vos textes et vos images.</li>
             <li>Pour toute photo où des personnes sont reconnaissables, vous avez leur accord.</li>
@@ -163,7 +178,7 @@
         <p>Le responsable du traitement est <span class="todo">[NOM DE L'ASSOCIATION OU DE L'ÉDITEUR]</span>, <span class="todo">[adresse postale, Capendu 11700]</span>, éditeur de Capendu Infos. Contact pour toute question relative à vos données : <span class="todo">[adresse e-mail dédiée]</span>.</p>
 
         <h3>2. Pourquoi collectons-nous vos données ?</h3>
-        <p>Une seule finalité : vous envoyer la newsletter locale Capendu Infos (actualités des commerçants, des associations et du village). Vos données ne servent ni à de la publicité ciblée, ni au profilage, ni à aucune autre communication.</p>
+        <p>Une seule finalité : vous envoyer la newsletter locale Capendu Infos, qui peut contenir l'actualité du village, sportive et associative, des informations pratiques et des offres commerciales de commerçants et d'artisans de la commune. Ces offres sont présentées à tous les abonnés de la même façon et signalées « Offre » : les commerçants ne reçoivent pas vos coordonnées et ne vous écrivent pas directement. Vos données ne servent ni à de la publicité ciblée, ni au profilage, ni à aucune autre communication.</p>
 
         <h3>3. Sur quelle base légale ?</h3>
         <p>Votre <strong>consentement</strong> (article 6.1.a du RGPD), donné en cochant la case du formulaire puis en cliquant sur le lien de confirmation reçu par e-mail (« double opt-in »). Vous pouvez le retirer à tout moment, aussi simplement que vous l'avez donné.</p>
@@ -241,7 +256,7 @@
             </ul>
           </dd>
           <dt>Propriété intellectuelle</dt>
-          <dd>Les contenus des annonces appartiennent à leurs auteurs. Les polices Fredoka et Nunito sont distribuées sous licence SIL Open Font License.</dd>
+          <dd>Les annonces et offres commerciales sont publiées sous la responsabilité de leurs auteurs. Les prix, dates et conditions peuvent changer : renseignez-vous auprès du commerçant ou de l'association. Les contenus des annonces appartiennent à leurs auteurs. Les polices Fredoka et Nunito sont distribuées sous licence SIL Open Font License.</dd>
         </dl>
       </div>
     </section>
