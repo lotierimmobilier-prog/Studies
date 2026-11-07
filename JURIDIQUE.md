@@ -31,7 +31,7 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - Envoi uniquement aux personnes ayant **consenti** (consentement qui mentionne les offres des commerçants).
 - Lien de **désinscription** dans chaque numéro, fonctionnel et gratuit.
 - Les offres commerciales sont **clairement identifiées** (étiquette « Offre »), distinctes de l'actualité.
-- L'expéditeur est identifiable : nom, adresse postale ou boîte postale en pied de page (Brevo l'exige aussi).
+- L'expéditeur est identifiable : nom de l'éditeur et adresse e-mail de contact en pied de page. Aucune adresse postale n'est publiée ; à vérifier dans Brevo, qui peut exiger une adresse d'expéditeur dans le compte (voir README).
 
 ## 4. Contenus publiés
 - Droit d'auteur : les annonces et images reçues restent à leurs auteurs. Chaque contributeur garantit ses droits.
@@ -45,7 +45,7 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - Mention « non affiliée à la mairie » conservée sur le site et dans chaque numéro.
 
 ## 6. Avant la mise en ligne
-- [ ] Adresse postale ou boîte postale renseignée (mentions légales, politique de confidentialité, pied des e-mails).
+- [ ] Coordonnées complètes de l'éditeur communiquées à l'hébergeur (compte Hostinger à son nom) et à Brevo.
 - [ ] Hébergeur et prestataire d'envoi renseignés.
 - [ ] Date de mise à jour de la politique de confidentialité.
 - [ ] DPA Brevo signé ; politique de confidentialité relue en regard de ce contrat.
