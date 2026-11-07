@@ -1,14 +1,294 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Simulez votre taux d'admission dans les formations Parcoursup selon vos résultats scolaires, votre géolocalisation, vos passions et votre motivation." />
-    <title>Cap Sup — Ton prochain chapitre</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capendu en bref – la newsletter libre du village</title>
+  <meta name="description" content="Capendu en bref : la newsletter mensuelle, libre, gratuite et indépendante des commerçants et des associations de Capendu (Aude). Inscription sans engagement, données protégées (RGPD).">
+  <!-- Aucune ressource externe : tout est servi par ce site (pas de Google Fonts, pas de statistiques, pas de cookie). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; form-action 'self' https://*.sibforms.com https://*.brevo.com; base-uri 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#f2fbf9">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="#haut" id="haut"><span class="logo-mark" aria-hidden="true"></span>Capendu en bref</a>
+      <nav aria-label="Navigation principale">
+        <a href="#pourquoi">Pourquoi</a>
+        <a href="#contribuer">Commerçants &amp; associations</a>
+        <a href="#confidentialite">Vos données</a>
+        <a class="btn btn-small" href="#inscription">S'abonner</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenu">
+
+    <!-- HERO + INSCRIPTION -->
+    <section class="hero" aria-labelledby="titre-principal">
+      <div class="inner hero-grid">
+        <div class="hero-text">
+          <p class="eyebrow">Newsletter mensuelle · Capendu</p>
+          <h1 id="titre-principal">Ce qui se passe à Capendu, de la cave à la salle des fêtes.</h1>
+          <p class="lead">La vie de tous les jours à Capendu, chaque mois dans votre boîte mail : sorties, sport, associations, bonnes affaires des commerçants. Libre, gratuite et indépendante.</p>
+
+          <form id="inscription" class="signup" method="post" action="REMPLACER-PAR-LIEN-FORMULAIRE-BREVO" novalidate>
+            <h2 class="signup-title">Recevoir la lettre, c'est gratuit</h2>
+
+            <div class="field">
+              <label for="email">Adresse e-mail <span class="req">(obligatoire)</span></label>
+              <input id="email" name="EMAIL" type="email" autocomplete="email" inputmode="email" required placeholder="vous@exemple.fr">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="prenom">Prénom <span class="opt">(facultatif)</span></label>
+                <input id="prenom" name="PRENOM" type="text" autocomplete="given-name">
+              </div>
+              <div class="field">
+                <label for="profil">Vous êtes <span class="opt">(facultatif)</span></label>
+                <select id="profil" name="PROFIL">
+                  <option value="">Je préfère ne pas le dire</option>
+                  <option value="habitant">Habitant(e)</option>
+                  <option value="commercant">Commerçant(e) ou artisan(e)</option>
+                  <option value="association">Membre d'une association</option>
+                  <option value="autre">Autre</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Champ piège anti-robots : doit rester vide, invisible pour les humains -->
+            <div class="hp" aria-hidden="true"><label>Ne pas remplir <input type="text" name="email_confirmation" tabindex="-1" autocomplete="off"></label></div>
+
+            <div class="consent">
+              <input id="consent" name="CONSENTEMENT" type="checkbox" value="oui" required>
+              <label for="consent">J'accepte de recevoir la newsletter <strong>Capendu en bref</strong> (actualités du village, sport, associations, offres des commerçants) à l'adresse indiquée. Je peux me désinscrire à tout moment, en un clic. J'ai pris connaissance de la <a href="#confidentialite">politique de confidentialité</a>.</label>
+            </div>
+
+            <button class="btn" type="submit">Recevoir la lettre</button>
+            <p class="signup-note">Vous recevrez d'abord un e-mail de confirmation : l'inscription n'est valide qu'après votre clic. Vos données ne sont ni vendues, ni cédées.</p>
+            <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+            <p class="help"><strong>Besoin d'aide pour vous inscrire ?</strong> Rendez-vous chez l'un de nos partenaires locaux (commerçants et associations de Capendu) : ils vous aident à vous inscrire. <a href="#partenaires">Voir les partenaires</a></p>
+          </form>
+        </div>
+
+        <figure class="art">
+          <img src="images/hero.jpg" width="1280" height="800" alt="Vignes aux couleurs d'automne au pied d'une colline, dans le Languedoc" fetchpriority="high">
+        </figure>
+      </div>
+    </section>
+
+
+    <!-- PHOTOS D'ILLUSTRATION -->
+    <section class="inner photos" aria-labelledby="t-photos">
+      <h2 id="t-photos" class="sr-only">Les vignes de l'Aude en images</h2>
+      <ul class="photo-grid">
+        <li><figure><img src="images/vigne-corbieres-1.jpg" width="960" height="720" loading="lazy" alt="Rangs de vigne sur un coteau des Corbières sous un ciel bleu"></figure></li>
+        <li><figure><img src="images/vigne-corbieres-2.jpg" width="960" height="720" loading="lazy" alt="Ceps de vigne en gobelet et collines des Corbières"></figure></li>
+        <li><figure><img src="images/vigne-minervois.jpg" width="960" height="720" loading="lazy" alt="Rangs de vigne dans la plaine du Minervois, montagnes au loin"></figure></li>
+      </ul>
+      <p class="photo-note">Photos d'illustration : vignobles de l'Aude et du Languedoc. <a href="#mentions-legales">Crédits</a></p>
+    </section>
+
+    <!-- CE QU'ON Y TROUVE -->
+    <section id="pourquoi" class="band" aria-labelledby="t-pourquoi">
+      <div class="inner">
+        <h2 id="t-pourquoi">Dans chaque numéro</h2>
+        <p class="section-intro">Tout ce qui fait la vie de la commune, écrit simplement. Que vous ayez 25 ou 85 ans, vous y trouvez ce qui vous concerne.</p>
+        <ul class="cards cards-5">
+          <li><span class="tag tag-offre">Offre</span><h3>Bonnes affaires</h3><p>Promotions, nouveautés et offres commerciales des commerçants et artisans de Capendu. Elles sont toujours signalées « Offre ».</p></li>
+          <li><span class="tag">Sport</span><h3>Actualité sportive</h3><p>Matchs, résultats, tournois, inscriptions dans les clubs, pour les petits comme pour les grands.</p></li>
+          <li><span class="tag">Associations</span><h3>Vie associative</h3><p>Rendez-vous, vide-greniers, repas, appels à bénévoles : de quoi remplir les agendas et les salles.</p></li>
+          <li><span class="tag">Sorties</span><h3>Fêtes et loisirs</h3><p>Concerts, marchés, balades, animations : les idées de sorties du mois, en famille ou entre amis.</p></li>
+          <li><span class="tag">Au quotidien</span><h3>Infos pratiques</h3><p>Horaires, ouvertures, nouveaux services et bonnes adresses. Les informations officielles restent celles de la mairie.</p></li>
+        </ul>
+        <p class="indep"><strong>Indépendante.</strong> Cette newsletter n'est pas un support officiel de la mairie de Capendu et n'est affiliée à aucun parti ni à aucune institution.</p>
+      </div>
+    </section>
+
+    <!-- POUR TOUS -->
+    <section class="inner everyone" aria-labelledby="t-tous">
+      <h2 id="t-tous">Pensée pour tous</h2>
+      <ul class="everyone-grid">
+        <li><h3>Simple à lire</h3><p>Des textes courts, de gros caractères, des phrases claires. Lisible sur téléphone, tablette ou ordinateur.</p></li>
+        <li><h3>Un rendez-vous par mois</h3><p>Une newsletter mensuelle, jamais plus, avec un sommaire en haut pour aller droit à ce qui vous intéresse.</p></li>
+        <li><h3>Un coup de main si besoin</h3><p>Pas à l'aise avec l'informatique ? Nos partenaires locaux, commerçants et associations, vous aident à vous inscrire.</p></li>
+      </ul>
+    </section>
+
+    <!-- COMMENT ÇA MARCHE -->
+    <section class="inner steps-section" aria-labelledby="t-steps">
+      <h2 id="t-steps">Comment ça marche</h2>
+      <ol class="steps">
+        <li><h3>Je m'inscris</h3><p>Une adresse e-mail suffit. Le prénom et le profil sont facultatifs.</p></li>
+        <li><h3>Je confirme</h3><p>Je clique sur le lien reçu par e-mail. Sans clic, rien n'est enregistré.</p></li>
+        <li><h3>Je reçois la lettre</h3><p>Une newsletter mensuelle, en début de mois. Chaque numéro contient un lien pour se désinscrire en un clic.</p></li>
+      </ol>
+    </section>
+
+    <!-- PARTENAIRES D'AIDE -->
+    <section id="partenaires" class="inner partners" aria-labelledby="t-partenaires">
+      <h2 id="t-partenaires">Besoin d'un coup de main pour vous inscrire ?</h2>
+      <p class="section-intro">Pas d'ordinateur, pas à l'aise avec le téléphone ou les e-mails ? Passez voir l'un de nos partenaires locaux. Il vous aide à remplir le formulaire, en toute simplicité.</p>
+      <ul class="partner-list">
+        <li><span class="todo">[Nom du commerce ou de l'association partenaire]</span><br><small>Adresse, horaires</small></li>
+        <li><span class="todo">[Nom du commerce ou de l'association partenaire]</span><br><small>Adresse, horaires</small></li>
+        <li><span class="todo">[Nom du commerce ou de l'association partenaire]</span><br><small>Adresse, horaires</small></li>
+      </ul>
+      <p class="photo-note">Votre inscription reste personnelle : vous restez maître de vos données et vous devez confirmer vous-même par e-mail. Le partenaire ne conserve rien. <a href="#confidentialite">En savoir plus</a></p>
+    </section>
+
+    <!-- CONTRIBUER -->
+    <section id="contribuer" class="band band-alt" aria-labelledby="t-contribuer">
+      <div class="inner two-col">
+        <div>
+          <h2 id="t-contribuer">Vous êtes commerçant ou association ?</h2>
+          <p class="section-intro">Offre commerciale, match, repas d'association, nouveau service : envoyez-nous vos informations, elles seront publiées dans le prochain numéro, gratuitement.</p>
+          <p class="actions-line"><a class="btn" href="annonces/deposer.php">Déposer une annonce</a> <a class="btn btn-ghost" href="annonces/partenaire/">Espace partenaire</a></p>
+          <p class="contact-line">Ou écrivez à <a class="mail" href="mailto:jeromebouba@outlook.fr">jeromebouba@outlook.fr</a><br>
+          <small>Avant le <strong>25 de chaque mois</strong> pour paraître le mois suivant.</small></p>
+        </div>
+        <div>
+          <h3>Nos règles éditoriales</h3>
+          <ul class="rules">
+            <li>Contenus locaux, utiles aux habitants de Capendu et des environs.</li>
+            <li>Offres commerciales bienvenues, à condition d'être claires (prix, dates, conditions) et locales. Elles sont signalées « Offre ».</li>
+            <li>Publication gratuite, sans contrepartie. Nous ne vendons pas de publicité.</li>
+            <li>Des textes courts (environ 600 caractères) et simples, avec si possible une photo.</li>
+            <li>Pas de contenu partisan, discriminatoire, ni de propos illicites.</li>
+            <li>Vous garantissez avoir les droits sur vos textes et vos images.</li>
+            <li>Pour toute photo où des personnes sont reconnaissables, vous avez leur accord.</li>
+            <li>La rédaction peut reformuler, raccourcir ou refuser un contenu.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- RGPD EN BREF -->
+    <section class="inner rgpd-brief" aria-labelledby="t-brief">
+      <h2 id="t-brief">Vos données en bref</h2>
+      <ul class="brief">
+        <li><strong>Peu de données.</strong> Une adresse e-mail suffit.</li>
+        <li><strong>Votre accord d'abord.</strong> Case à cocher et e-mail de confirmation.</li>
+        <li><strong>Jamais revendues.</strong> Utilisées uniquement pour envoyer la lettre.</li>
+        <li><strong>Sortie en un clic.</strong> Dans chaque numéro, et suppression sur simple demande.</li>
+        <li><strong>Aucun cookie, aucun traceur</strong> sur ce site.</li>
+      </ul>
+      <p><a href="#confidentialite">Lire la politique de confidentialité complète</a></p>
+    </section>
+
+    <!-- POLITIQUE DE CONFIDENTIALITÉ -->
+    <section id="confidentialite" class="legal" aria-labelledby="t-conf">
+      <div class="inner legal-inner">
+        <h2 id="t-conf">Politique de confidentialité</h2>
+        <p class="maj">Dernière mise à jour : <span class="todo">JJ mois AAAA</span></p>
+
+        <h3>1. Qui est responsable de vos données ?</h3>
+        <p>Le responsable du traitement est <strong>Jérôme BOUBA</strong>, éditeur de Capendu en bref à titre personnel, <span class="todo">[adresse postale ou boîte postale, 11700 Capendu]</span>. Contact pour toute question relative à vos données : <a href="mailto:jeromebouba@outlook.fr">jeromebouba@outlook.fr</a>.</p>
+
+        <h3>2. Pourquoi collectons-nous vos données ?</h3>
+        <p>Une seule finalité : vous envoyer la newsletter locale Capendu en bref, qui peut contenir l'actualité du village, sportive et associative, des informations pratiques et des offres commerciales de commerçants et d'artisans de la commune. Ces offres sont présentées à tous les abonnés de la même façon et signalées « Offre » : les commerçants ne reçoivent pas vos coordonnées et ne vous écrivent pas directement. Vos données ne servent ni à de la publicité ciblée, ni au profilage, ni à aucune autre communication.</p>
+
+        <h3>3. Sur quelle base légale ?</h3>
+        <p>Votre <strong>consentement</strong> (article 6.1.a du RGPD), donné en cochant la case du formulaire puis en cliquant sur le lien de confirmation reçu par e-mail (« double opt-in »). Vous pouvez le retirer à tout moment, aussi simplement que vous l'avez donné.</p>
+
+        <h3>4. Quelles données exactement ?</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Donnée</th><th>Caractère</th><th>Utilité</th></tr></thead>
+            <tbody>
+              <tr><td>Adresse e-mail</td><td>Obligatoire</td><td>Envoyer la newsletter</td></tr>
+              <tr><td>Prénom</td><td>Facultatif</td><td>Personnaliser le message</td></tr>
+              <tr><td>Profil (habitant, commerçant, association…)</td><td>Facultatif</td><td>Mieux adapter les contenus</td></tr>
+              <tr><td>Date, heure et adresse IP du consentement</td><td>Automatique</td><td>Prouver que vous avez consenti</td></tr>
+              <tr><td>Ouvertures et clics sur la newsletter</td><td>Automatique</td><td>Savoir si la lettre est lue, et supprimer les contacts inactifs</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Nous ne collectons aucune donnée sensible.</p>
+
+        <h3>5. Combien de temps les conservons-nous ?</h3>
+        <ul>
+          <li>Tant que vous restez abonné(e).</li>
+          <li>Votre adresse est supprimée dès votre désinscription ou votre demande, ou après <strong>3 ans sans aucune interaction</strong> (ni ouverture, ni clic).</li>
+          <li>La preuve de votre consentement est conservée de façon restreinte pendant la durée de prescription légale applicable.</li>
+        </ul>
+
+        <h3>6. Qui reçoit vos données ?</h3>
+        <p>Uniquement l'éditeur et notre prestataire d'envoi, <span class="todo">Brevo (société française)</span>, qui agit comme sous-traitant selon un contrat conforme à l'article 28 du RGPD. Vos données ne sont ni vendues, ni louées, ni cédées à des tiers, y compris aux commerçants et aux associations dont les annonces figurent dans la lettre. Ceux-ci ne voient jamais la liste des abonnés.</p>
+
+        <h3>6 bis. Aide à l'inscription par un partenaire local</h3>
+        <p>Si vous le souhaitez, un commerçant ou une association partenaire peut vous aider à remplir le formulaire, à votre demande et en votre présence. Il ne fait que saisir les informations que vous lui indiquez : il ne les conserve pas, ne les note nulle part et ne les utilise pas pour autre chose. Votre consentement reste personnel et l'inscription n'est valide qu'après votre clic sur le lien reçu par e-mail.</p>
+
+        <h3>7. Quels sont vos droits ?</h3>
+        <p>Vous pouvez à tout moment : <strong>accéder</strong> à vos données, les <strong>rectifier</strong>, les <strong>faire effacer</strong>, vous <strong>opposer</strong> à leur traitement, en demander la <strong>limitation</strong>, les récupérer (<strong>portabilité</strong>) et <strong>retirer votre consentement</strong>. Écrivez à <a href="mailto:jeromebouba@outlook.fr">jeromebouba@outlook.fr</a> : je réponds sous un mois. Vous pouvez aussi vous désinscrire en un clic grâce au lien présent en bas de chaque numéro.</p>
+        <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez déposer une réclamation auprès de la <strong>CNIL</strong> : <a href="https://www.cnil.fr/fr/plaintes" rel="noopener noreferrer" target="_blank">cnil.fr/fr/plaintes</a>.</p>
+
+        <h3>8. Cookies et traceurs</h3>
+        <p>Ce site n'utilise <strong>aucun cookie</strong> pour les visiteurs et aucun outil de mesure d'audience ou de publicité. Seul l'espace partenaire dépose un cookie technique de session après connexion (voir le point 10). Les polices de caractères sont hébergées sur le site lui-même : aucune requête n'est envoyée à des services tiers lors de la consultation de cette page. Aucun bandeau de consentement n'est donc nécessaire.</p>
+
+        <h3>9. Mineurs</h3>
+        <p>La newsletter s'adresse aux personnes de 15 ans et plus. En dessous de cet âge, l'inscription requiert l'accord d'un parent ou d'un titulaire de l'autorité parentale.</p>
+
+        <h3>10. Annonces déposées par les commerçants et les associations</h3>
+        <p>Si vous déposez une annonce (formulaire ou e-mail), vos coordonnées (nom, organisation, e-mail, téléphone facultatif) servent uniquement à échanger avec vous au sujet de cette annonce et à vous donner accès à votre espace partenaire. Elles ne sont pas publiées dans la newsletter, sauf le contact que vous demandez expressément d'y faire figurer. Base légale : votre consentement, donné en cochant la case du formulaire. Durée : les annonces refusées sont supprimées après 30 jours, les annonces en attente après 90 jours, les autres au plus tard 12 mois après le dépôt. Vous pouvez retirer une annonce non publiée à tout moment depuis votre espace partenaire, ou demander l'effacement de vos données par e-mail. Les textes et images publiés restent sous votre responsabilité.</p>
+        <p>L'accès à l'espace partenaire se fait sans mot de passe, par un lien envoyé à votre adresse e-mail (valable 30 minutes, à usage unique). Un cookie technique de session, indispensable à la connexion, est alors déposé : il ne sert ni à la publicité ni à la mesure d'audience, et il disparaît à la fermeture du navigateur.</p>
+
+        <h3>10 bis. Statistiques de clics sur les annonces</h3>
+        <p>Pour que chaque annonceur sache si son annonce intéresse, le bouton « En savoir plus » de la newsletter passe par un compteur. Ce compteur ajoute simplement 1 au nombre de clics de l'annonce du jour : <strong>aucune adresse IP, aucun identifiant et aucun cookie</strong> ne sont enregistrés, et les visites de robots sont écartées. Ces chiffres anonymes sont visibles par l'annonceur concerné et par l'éditeur. Brevo peut par ailleurs mesurer les ouvertures et les clics de la newsletter, comme indiqué au point 4.</p>
+
+        <h3>11. Sécurité</h3>
+        <p>Le site est servi en HTTPS. L'accès à la liste des abonnés est limité à l'éditeur et protégé par un mot de passe personnel.</p>
+
+        <h3>12. Modifications</h3>
+        <p>Cette politique peut évoluer. La date de mise à jour figure en haut de cette section. Toute évolution importante vous sera signalée dans la newsletter.</p>
+      </div>
+    </section>
+
+    <!-- MENTIONS LÉGALES -->
+    <section id="mentions-legales" class="legal legal-alt" aria-labelledby="t-mentions">
+      <div class="inner legal-inner">
+        <h2 id="t-mentions">Mentions légales</h2>
+        <dl class="defs">
+          <dt>Éditeur du site</dt>
+          <dd><strong>Jérôme BOUBA</strong>, à titre personnel (publication non professionnelle, sans but lucratif : l'éditeur ne perçoit aucune rémunération), <span class="todo">[adresse ou boîte postale], 11700 Capendu</span></dd>
+          <dt>Directeur de la publication</dt>
+          <dd>Jérôme BOUBA</dd>
+          <dt>Contact</dt>
+          <dd><a href="mailto:jeromebouba@outlook.fr">jeromebouba@outlook.fr</a></dd>
+          <dt>Hébergeur</dt>
+          <dd><span class="todo">[Nom de l'hébergeur, adresse, site web]</span></dd>
+          <dt>Prestataire d'envoi des e-mails</dt>
+          <dd><span class="todo">[Brevo, adresse, site web]</span></dd>
+          <dt>Indépendance</dt>
+          <dd>Capendu en bref est une initiative indépendante. Elle n'est ni éditée, ni validée, ni financée par la commune de Capendu.</dd>
+          <dt>Crédits photos</dt>
+          <dd>Photos d'illustration, recadrées et redimensionnées, issues de Wikimedia Commons :
+            <ul class="credits">
+              <li>Vignes près du Pic de Vissou (en-tête) : Christian Ferrer, <a href="https://commons.wikimedia.org/wiki/File:Vignes_pr%C3%A8s_du_Pic_de_Vissou_-_October_2020.jpg" rel="noopener noreferrer" target="_blank">source</a>, licence <a href="https://creativecommons.org/licenses/by/4.0/deed.fr" rel="noopener noreferrer" target="_blank">CC BY 4.0</a>.</li>
+              <li>Cascastel des Corbières vineyards : Richard Randall, <a href="https://commons.wikimedia.org/wiki/File:Cascastel_des_Corbieres_vineyards.jpg" rel="noopener noreferrer" target="_blank">source</a>, licence <a href="https://creativecommons.org/licenses/by-sa/2.0/deed.fr" rel="noopener noreferrer" target="_blank">CC BY-SA 2.0</a>.</li>
+              <li>Vignes des Corbières : www.zoqy.net, <a href="https://commons.wikimedia.org/wiki/File:Vignes_des_Corbi%C3%A8res.jpg" rel="noopener noreferrer" target="_blank">source</a>, licence <a href="https://creativecommons.org/licenses/by-sa/2.0/deed.fr" rel="noopener noreferrer" target="_blank">CC BY-SA 2.0</a>.</li>
+              <li>Vigne Minervois : Ossi Vopel, <a href="https://commons.wikimedia.org/wiki/File:Vigne_Minervois.jpg" rel="noopener noreferrer" target="_blank">source</a>, licence <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr" rel="noopener noreferrer" target="_blank">CC BY-SA 4.0</a>.</li>
+            </ul>
+          </dd>
+          <dt>Propriété intellectuelle</dt>
+          <dd>Les annonces et offres commerciales sont publiées sous la responsabilité de leurs auteurs. Les prix, dates et conditions peuvent changer : renseignez-vous auprès du commerçant ou de l'association. Les contenus des annonces appartiennent à leurs auteurs. Les polices Fredoka et Nunito sont distribuées sous licence SIL Open Font License.</dd>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <p><strong>Capendu en bref</strong> · Newsletter indépendante, non affiliée à la mairie de Capendu</p>
+      <p><a href="#confidentialite">Politique de confidentialité</a> · <a href="#mentions-legales">Mentions légales</a> · <a href="annonces/partenaire/">Espace partenaire</a> · <a href="#haut">Haut de page</a></p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
 </html>

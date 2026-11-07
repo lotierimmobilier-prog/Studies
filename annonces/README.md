@@ -56,7 +56,7 @@ Base de données : SQLite (un simple fichier), aucune base MySQL à créer.
 
 ## Test en local
 
-    cd newsletter-capendu && cp annonces/config.sample.php annonces/config.php   # y ajouter define('DEV_LOG_MAIL', true);
+    cp annonces/config.sample.php annonces/config.php   # y ajouter define('DEV_LOG_MAIL', true);
     php -S 127.0.0.1:8099 -t .                                                    # puis http://127.0.0.1:8099/annonces/
 
 Avec `DEV_LOG_MAIL`, les e-mails sont écrits dans `data/mail.log` au lieu d'être envoyés.
