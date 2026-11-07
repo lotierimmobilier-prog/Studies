@@ -74,12 +74,12 @@ echo '<p class="notice notice-info"><strong>Calendrier :</strong> pour paraître
 ?>
 <details class="assistant" open data-org="<?= h($partner['org_name']) ?>" data-issue="<?= h($issueLabel) ?>" data-deadline="<?= h($deadlineLabel) ?>">
   <summary>Assistant IA : organisez votre publication</summary>
-  <p>Racontez en vrac ce que vous voulez annoncer. L'assistant prépare une demande à coller dans l'IA de votre choix (Claude, ChatGPT…), qui vous renvoie une annonce claire, rangée dans la bonne rubrique avec un conseil de calendrier. Vous collez sa réponse ici et le formulaire se remplit tout seul. Vous relisez et vous gardez la main.</p>
+  <p>Racontez en vrac ce que vous voulez annoncer. L'assistant prépare une demande pour Claude, l'assistant IA gratuit de claude.ai (aucune clé ni installation), qui vous renvoie une annonce claire, rangée dans la bonne rubrique avec un conseil de calendrier. Vous collez sa réponse ici et le formulaire se remplit tout seul. Vous relisez et vous gardez la main.</p>
   <ol class="assist-steps">
     <li><label for="ia_notes"><strong>1. Vos idées en vrac</strong> <span class="hint">(événement, prix, dates, lieu, public…)</span></label>
       <textarea id="ia_notes" placeholder="Ex. : repas de fin d'année de l'association le 12 décembre à la salle des fêtes, cassoulet et tombola, 15 euros, réservation avant le 8"></textarea></li>
-    <li><strong>2. Copiez la demande</strong> <button class="btn btn-small" type="button" id="ia_copy">Copier la demande pour l'IA</button> <span class="hint" id="ia_copied" role="status"></span><br>
-      <span class="hint">Collez-la dans votre assistant : <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">claude.ai</a> ou <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">chatgpt.com</a>. Ne lui donnez aucune donnée personnelle (noms de particuliers, téléphones).</span></li>
+    <li><strong>2. Envoyez-la à Claude</strong> <button class="btn btn-small" type="button" id="ia_copy">Copier et ouvrir Claude</button> <span class="hint" id="ia_copied" role="status"></span><br>
+      <span class="hint">La demande est copiée et <a href="https://claude.ai/new" target="_blank" rel="noopener noreferrer">claude.ai</a> s'ouvre dans un nouvel onglet : faites « Coller » puis envoyez. Ne lui donnez aucune donnée personnelle (noms de particuliers, téléphones).</span></li>
     <li><label for="ia_reply"><strong>3. Collez sa réponse</strong></label>
       <textarea id="ia_reply" placeholder="RUBRIQUE: …&#10;TITRE: …&#10;TEXTE: …"></textarea>
       <button class="btn btn-small btn-ghost" type="button" id="ia_fill">Remplir le formulaire avec la réponse</button> <span class="hint" id="ia_status" role="status"></span>
