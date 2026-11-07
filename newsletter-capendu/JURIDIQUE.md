@@ -21,6 +21,10 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - **Violation de données** (fuite, piratage) : notification à la CNIL sous 72 h et information des personnes si risque élevé.
 - **Sécurité** : mot de passe fort et unique sur Brevo et sur l'hébergeur, double authentification si disponible.
 - Aucune donnée vendue, louée ni transmise aux commerçants ou associations.
+- **Espace annonces** (`annonces/`) : traitement distinct à inscrire au registre (données des annonceurs, durées 30 / 90 jours et 12 mois,
+  consentement au dépôt). Un cookie technique de session est déposé uniquement après connexion à l'espace partenaire ou admin
+  (exempté de consentement, mentionné dans la politique de confidentialité).
+- **Compteur de clics** : anonyme (aucune IP, aucun cookie), donc hors consentement ; la mention figure au point 10 bis de la politique.
 - Aide à l'inscription par un partenaire : il ne conserve rien. Le rappeler à chaque partenaire.
 
 ## 3. Prospection et publicité par e-mail

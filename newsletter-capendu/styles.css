@@ -187,3 +187,7 @@ th{background:var(--bg-2);color:var(--ink);font-weight:700}
 .partner-list li{background:var(--card);border-radius:var(--r);padding:20px 22px;box-shadow:var(--shadow);font-weight:700}
 .partner-list small{font-weight:500;color:var(--ink-soft);font-size:15.5px}
 .help strong{display:block;margin-bottom:2px}
+
+.actions-line{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 18px}
+.btn-ghost{background:transparent;color:var(--ink);border:2px solid var(--ink);box-shadow:none}
+.btn-ghost:hover{background:var(--ink);color:#fff}
