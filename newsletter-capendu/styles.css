@@ -141,9 +141,9 @@ th{background:var(--bg-2);color:var(--ink);font-weight:700}
 .site-footer strong{color:var(--ink)}
 
 /* Croix occitane inclinée, en filigrane */
-.hero::before,.band-alt::before{content:"";position:absolute;background:url(images/croix-occitane.svg) center/contain no-repeat;pointer-events:none;opacity:.1;transform:rotate(-18deg)}
-.hero::before{width:380px;aspect-ratio:1;right:calc(50% - 540px);bottom:30px}
-.band-alt::before{width:440px;aspect-ratio:1;right:-140px;top:-90px;opacity:.08}
+.hero::before,.band-alt::before{content:"";position:absolute;background:url(images/croix-occitane.png) center/contain no-repeat;pointer-events:none;opacity:.16;transform:rotate(-18deg)}
+.hero::before{width:380px;aspect-ratio:1;right:calc(50% - 540px);bottom:110px}
+.band-alt::before{width:440px;aspect-ratio:1;right:-140px;top:-90px;opacity:.12}
 .band-alt{position:relative;overflow:clip}
 .hero>.inner,.band-alt>.inner{position:relative;z-index:1}
 @media (max-width:860px){.hero::before{width:280px;right:-80px;bottom:-30px}}
