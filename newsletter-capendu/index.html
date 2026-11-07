@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capendu Infos – la newsletter libre du village</title>
+  <meta name="description" content="Capendu Infos : la newsletter libre, gratuite et indépendante des commerçants et des associations de Capendu (Aude). Inscription sans engagement, données protégées (RGPD).">
+  <!-- Aucune ressource externe : tout est servi par ce site (pas de Google Fonts, pas de statistiques, pas de cookie). -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; form-action 'self' https://*.sibforms.com https://*.brevo.com; base-uri 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#1c2819">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#contenu">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="#haut" id="haut"><span class="logo-mark" aria-hidden="true"></span>Capendu Infos</a>
+      <nav aria-label="Navigation principale">
+        <a href="#pourquoi">Pourquoi</a>
+        <a href="#contribuer">Commerçants &amp; associations</a>
+        <a href="#confidentialite">Vos données</a>
+        <a class="btn btn-small" href="#inscription">S'abonner</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenu">
+
+    <!-- HERO + INSCRIPTION -->
+    <section class="hero" aria-labelledby="titre-principal">
+      <div class="inner hero-grid">
+        <div class="hero-text">
+          <p class="eyebrow">Capendu · Aude</p>
+          <h1 id="titre-principal">Ce qui se passe à Capendu, de la cave à la salle des fêtes.</h1>
+          <p class="lead">Une newsletter libre, gratuite et indépendante, ouverte aux commerçants et aux associations, pour faire vivre et faire connaître le village.</p>
+
+          <form id="inscription" class="signup" method="post" action="REMPLACER-PAR-LIEN-FORMULAIRE-BREVO" novalidate>
+            <h2 class="signup-title">Recevoir la lettre, c'est gratuit</h2>
+
+            <div class="field">
+              <label for="email">Adresse e-mail <span class="req">(obligatoire)</span></label>
+              <input id="email" name="EMAIL" type="email" autocomplete="email" inputmode="email" required placeholder="vous@exemple.fr">
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="prenom">Prénom <span class="opt">(facultatif)</span></label>
+                <input id="prenom" name="PRENOM" type="text" autocomplete="given-name">
+              </div>
+              <div class="field">
+                <label for="profil">Vous êtes <span class="opt">(facultatif)</span></label>
+                <select id="profil" name="PROFIL">
+                  <option value="">Je préfère ne pas le dire</option>
+                  <option value="habitant">Habitant(e)</option>
+                  <option value="commercant">Commerçant(e) ou artisan(e)</option>
+                  <option value="association">Membre d'une association</option>
+                  <option value="autre">Autre</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Champ piège anti-robots : doit rester vide, invisible pour les humains -->
+            <div class="hp" aria-hidden="true"><label>Ne pas remplir <input type="text" name="email_confirmation" tabindex="-1" autocomplete="off"></label></div>
+
+            <div class="consent">
+              <input id="consent" name="CONSENTEMENT" type="checkbox" value="oui" required>
+              <label for="consent">J'accepte de recevoir la newsletter <strong>Capendu Infos</strong> à l'adresse indiquée. Je peux me désinscrire à tout moment, en un clic. J'ai pris connaissance de la <a href="#confidentialite">politique de confidentialité</a>.</label>
+            </div>
+
+            <button class="btn" type="submit">Recevoir la lettre</button>
+            <p class="signup-note">Vous recevrez d'abord un e-mail de confirmation : l'inscription n'est valide qu'après votre clic. Vos données ne sont ni vendues, ni cédées.</p>
+            <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+
+        <figure class="art" aria-hidden="true">
+          <svg viewBox="0 0 320 240" preserveAspectRatio="xMidYMid slice" focusable="false">
+            <rect width="320" height="240" fill="#14200f"/>
+            <circle cx="240" cy="52" r="24" fill="#eef0e0"/>
+            <path d="M0 118 C60 96 120 104 170 112 C230 94 280 100 320 114 L320 240 L0 240Z" fill="#26391f"/>
+            <g fill="#0d1609"><rect x="70" y="92" width="34" height="20"/><path d="M70 92 l17 -12 l17 12z"/><rect x="118" y="78" width="10" height="34"/><path d="M118 78 l5 -10 l5 10z"/><rect x="138" y="96" width="26" height="16"/></g>
+            <g stroke="#7ea84a" stroke-width="2.5" stroke-linecap="round">
+              <path d="M160 118 L-20 240"/><path d="M160 118 L40 240"/><path d="M160 118 L110 240"/><path d="M160 118 L160 240"/><path d="M160 118 L210 240"/><path d="M160 118 L280 240"/><path d="M160 118 L340 240"/>
+            </g>
+            <g fill="#d4506a"><circle cx="124" cy="190" r="4"/><circle cx="131" cy="196" r="4"/><circle cx="128" cy="203" r="4"/></g>
+          </svg>
+        </figure>
+      </div>
+    </section>
+
+    <!-- POURQUOI -->
+    <section id="pourquoi" class="band" aria-labelledby="t-pourquoi">
+      <div class="inner">
+        <h2 id="t-pourquoi">Une lettre pour tout le village</h2>
+        <p class="section-intro">Capendu Infos n'appartient à personne et ne dépend d'aucune institution. Elle relaie ce que les Capendusiens font et proposent.</p>
+        <ul class="cards">
+          <li><h3>Commerçants</h3><p>Nouveautés, horaires, offres de saison : vos annonces arrivent directement chez les habitants, gratuitement.</p></li>
+          <li><h3>Associations</h3><p>Rendez-vous, vide-greniers, appels à bénévoles : remplissez vos salles et trouvez de nouveaux membres.</p></li>
+          <li><h3>Habitants</h3><p>L'agenda et les bonnes adresses du village, une fois par mois, sans réseaux sociaux ni publicité.</p></li>
+        </ul>
+        <p class="indep"><strong>Indépendante.</strong> Cette newsletter n'est pas un support officiel de la mairie de Capendu et n'est affiliée à aucun parti ni à aucune institution.</p>
+      </div>
+    </section>
+
+    <!-- COMMENT ÇA MARCHE -->
+    <section class="inner steps-section" aria-labelledby="t-steps">
+      <h2 id="t-steps">Comment ça marche</h2>
+      <ol class="steps">
+        <li><h3>Je m'inscris</h3><p>Une adresse e-mail suffit. Le prénom et le profil sont facultatifs.</p></li>
+        <li><h3>Je confirme</h3><p>Je clique sur le lien reçu par e-mail. Sans clic, rien n'est enregistré.</p></li>
+        <li><h3>Je reçois la lettre</h3><p>Une fois par mois, en début de mois. Chaque numéro contient un lien pour se désinscrire en un clic.</p></li>
+      </ol>
+    </section>
+
+    <!-- CONTRIBUER -->
+    <section id="contribuer" class="band band-alt" aria-labelledby="t-contribuer">
+      <div class="inner two-col">
+        <div>
+          <h2 id="t-contribuer">Vous êtes commerçant ou association ?</h2>
+          <p class="section-intro">Envoyez-nous vos informations : elles seront publiées dans le prochain numéro, gratuitement.</p>
+          <p class="contact-line">Écrivez à <a class="mail" href="mailto:contact@exemple.fr"><span class="todo">contact@exemple.fr</span></a><br>
+          <small>Avant le <strong>25 de chaque mois</strong> pour paraître le mois suivant.</small></p>
+        </div>
+        <div>
+          <h3>Nos règles éditoriales</h3>
+          <ul class="rules">
+            <li>Contenus locaux, utiles aux habitants de Capendu et des environs.</li>
+            <li>Gratuit, sans publicité déguisée ni contrepartie.</li>
+            <li>Pas de contenu partisan, discriminatoire, ni de propos illicites.</li>
+            <li>Vous garantissez avoir les droits sur vos textes et vos images.</li>
+            <li>Pour toute photo où des personnes sont reconnaissables, vous avez leur accord.</li>
+            <li>La rédaction peut reformuler, raccourcir ou refuser un contenu.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- RGPD EN BREF -->
+    <section class="inner rgpd-brief" aria-labelledby="t-brief">
+      <h2 id="t-brief">Vos données en bref</h2>
+      <ul class="brief">
+        <li><strong>Peu de données.</strong> Une adresse e-mail suffit.</li>
+        <li><strong>Votre accord d'abord.</strong> Case à cocher et e-mail de confirmation.</li>
+        <li><strong>Jamais revendues.</strong> Utilisées uniquement pour envoyer la lettre.</li>
+        <li><strong>Sortie en un clic.</strong> Dans chaque numéro, et suppression sur simple demande.</li>
+        <li><strong>Aucun cookie, aucun traceur</strong> sur ce site.</li>
+      </ul>
+      <p><a href="#confidentialite">Lire la politique de confidentialité complète</a></p>
+    </section>
+
+    <!-- POLITIQUE DE CONFIDENTIALITÉ -->
+    <section id="confidentialite" class="legal" aria-labelledby="t-conf">
+      <div class="inner legal-inner">
+        <h2 id="t-conf">Politique de confidentialité</h2>
+        <p class="maj">Dernière mise à jour : <span class="todo">JJ mois AAAA</span></p>
+
+        <h3>1. Qui est responsable de vos données ?</h3>
+        <p>Le responsable du traitement est <span class="todo">[NOM DE L'ASSOCIATION OU DE L'ÉDITEUR]</span>, <span class="todo">[adresse postale, Capendu 11700]</span>, éditeur de Capendu Infos. Contact pour toute question relative à vos données : <span class="todo">[adresse e-mail dédiée]</span>.</p>
+
+        <h3>2. Pourquoi collectons-nous vos données ?</h3>
+        <p>Une seule finalité : vous envoyer la newsletter locale Capendu Infos (actualités des commerçants, des associations et du village). Vos données ne servent ni à de la publicité ciblée, ni au profilage, ni à aucune autre communication.</p>
+
+        <h3>3. Sur quelle base légale ?</h3>
+        <p>Votre <strong>consentement</strong> (article 6.1.a du RGPD), donné en cochant la case du formulaire puis en cliquant sur le lien de confirmation reçu par e-mail (« double opt-in »). Vous pouvez le retirer à tout moment, aussi simplement que vous l'avez donné.</p>
+
+        <h3>4. Quelles données exactement ?</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Donnée</th><th>Caractère</th><th>Utilité</th></tr></thead>
+            <tbody>
+              <tr><td>Adresse e-mail</td><td>Obligatoire</td><td>Envoyer la newsletter</td></tr>
+              <tr><td>Prénom</td><td>Facultatif</td><td>Personnaliser le message</td></tr>
+              <tr><td>Profil (habitant, commerçant, association…)</td><td>Facultatif</td><td>Mieux adapter les contenus</td></tr>
+              <tr><td>Date, heure et adresse IP du consentement</td><td>Automatique</td><td>Prouver que vous avez consenti</td></tr>
+              <tr><td>Ouvertures et clics sur la newsletter</td><td>Automatique</td><td>Savoir si la lettre est lue, et supprimer les contacts inactifs</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Nous ne collectons aucune donnée sensible.</p>
+
+        <h3>5. Combien de temps les conservons-nous ?</h3>
+        <ul>
+          <li>Tant que vous restez abonné(e).</li>
+          <li>Votre adresse est supprimée dès votre désinscription ou votre demande, ou après <strong>3 ans sans aucune interaction</strong> (ni ouverture, ni clic).</li>
+          <li>La preuve de votre consentement est conservée de façon restreinte pendant la durée de prescription légale applicable.</li>
+        </ul>
+
+        <h3>6. Qui reçoit vos données ?</h3>
+        <p>Uniquement l'éditeur et notre prestataire d'envoi, <span class="todo">Brevo (société française)</span>, qui agit comme sous-traitant selon un contrat conforme à l'article 28 du RGPD. Vos données ne sont ni vendues, ni louées, ni cédées à des tiers, y compris aux commerçants et aux associations dont les annonces figurent dans la lettre. Ceux-ci ne voient jamais la liste des abonnés.</p>
+
+        <h3>7. Quels sont vos droits ?</h3>
+        <p>Vous pouvez à tout moment : <strong>accéder</strong> à vos données, les <strong>rectifier</strong>, les <strong>faire effacer</strong>, vous <strong>opposer</strong> à leur traitement, en demander la <strong>limitation</strong>, les récupérer (<strong>portabilité</strong>) et <strong>retirer votre consentement</strong>. Écrivez à <span class="todo">[adresse e-mail dédiée]</span> : nous répondons sous un mois. Vous pouvez aussi vous désinscrire en un clic grâce au lien présent en bas de chaque numéro.</p>
+        <p>Si vous estimez que vos droits ne sont pas respectés, vous pouvez déposer une réclamation auprès de la <strong>CNIL</strong> : <a href="https://www.cnil.fr/fr/plaintes" rel="noopener noreferrer" target="_blank">cnil.fr/fr/plaintes</a>.</p>
+
+        <h3>8. Cookies et traceurs</h3>
+        <p>Ce site n'utilise <strong>aucun cookie</strong> et aucun outil de mesure d'audience ou de publicité. Les polices de caractères sont hébergées sur le site lui-même : aucune requête n'est envoyée à des services tiers lors de la consultation de cette page. Aucun bandeau de consentement n'est donc nécessaire.</p>
+
+        <h3>9. Mineurs</h3>
+        <p>La newsletter s'adresse aux personnes de 15 ans et plus. En dessous de cet âge, l'inscription requiert l'accord d'un parent ou d'un titulaire de l'autorité parentale.</p>
+
+        <h3>10. Contenus transmis par les commerçants et les associations</h3>
+        <p>Si vous nous envoyez une annonce, nous utilisons les coordonnées de contact transmises uniquement pour échanger avec vous à ce sujet. Les textes et images publiés restent sous votre responsabilité.</p>
+
+        <h3>11. Sécurité</h3>
+        <p>Le site est servi en HTTPS. L'accès à la liste des abonnés est limité à l'éditeur et protégé par un mot de passe personnel.</p>
+
+        <h3>12. Modifications</h3>
+        <p>Cette politique peut évoluer. La date de mise à jour figure en haut de cette section. Toute évolution importante vous sera signalée dans la newsletter.</p>
+      </div>
+    </section>
+
+    <!-- MENTIONS LÉGALES -->
+    <section id="mentions-legales" class="legal legal-alt" aria-labelledby="t-mentions">
+      <div class="inner legal-inner">
+        <h2 id="t-mentions">Mentions légales</h2>
+        <dl class="defs">
+          <dt>Éditeur du site</dt>
+          <dd><span class="todo">[Nom ou dénomination de l'association], [statut juridique], [adresse], 11700 Capendu</span></dd>
+          <dt>Directeur de la publication</dt>
+          <dd><span class="todo">[Prénom NOM]</span></dd>
+          <dt>Contact</dt>
+          <dd><span class="todo">[adresse e-mail]</span></dd>
+          <dt>Hébergeur</dt>
+          <dd><span class="todo">[Nom de l'hébergeur, adresse, site web]</span></dd>
+          <dt>Prestataire d'envoi des e-mails</dt>
+          <dd><span class="todo">[Brevo, adresse, site web]</span></dd>
+          <dt>Indépendance</dt>
+          <dd>Capendu Infos est une initiative indépendante. Elle n'est ni éditée, ni validée, ni financée par la commune de Capendu.</dd>
+          <dt>Propriété intellectuelle</dt>
+          <dd>Les contenus des annonces appartiennent à leurs auteurs. Les illustrations de cette page ont été créées pour Capendu Infos. Les polices Young Serif et Work Sans sont distribuées sous licence SIL Open Font License.</dd>
+        </dl>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <p><strong>Capendu Infos</strong> · Newsletter indépendante, non affiliée à la mairie de Capendu</p>
+      <p><a href="#confidentialite">Politique de confidentialité</a> · <a href="#mentions-legales">Mentions légales</a> · <a href="#haut">Haut de page</a></p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
