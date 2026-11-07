@@ -179,5 +179,5 @@ function page_head(string $title, string $extraCss = '', bool $noindex = false, 
         . '<title>' . h($title) . '</title>'
         . ($noindex ? '<meta name="robots" content="noindex, nofollow">' : '')
         . '<link rel="icon" href="' . $base . 'favicon.svg" type="image/svg+xml">'
-        . '<link rel="stylesheet" href="' . $base . 'styles.css">' . $extraCss . '</head><body>';
+        . '<link rel="stylesheet" href="' . $base . 'styles.css?v=' . (int)@filemtime(dirname(__DIR__, 2) . '/styles.css') . '">' . $extraCss . '</head><body>';
 }
