@@ -193,3 +193,12 @@ th{background:var(--bg-2);color:var(--ink);font-weight:700}
 /* Logo : mot-symbole Capendu en bref */
 .logo img{display:block;height:30px;width:auto}
 @media (max-width:520px){.logo img{height:25px}}
+
+/* Blason de la commune en filigrane (couleurs du site), très discret */
+#pourquoi{position:relative;overflow:clip}
+#pourquoi::before{content:"";position:absolute;right:max(24px,calc(50% - 500px));top:34px;width:165px;aspect-ratio:120/132;background:url(images/blason.svg) center/contain no-repeat;opacity:.2;pointer-events:none}
+#pourquoi>.inner{position:relative;z-index:1}
+.site-footer{position:relative;overflow:clip}
+.site-footer::before{content:"";position:absolute;right:max(20px,calc(50% - 500px));top:14px;width:76px;aspect-ratio:120/132;background:url(images/blason.svg) center/contain no-repeat;opacity:.3;pointer-events:none}
+.site-footer .inner{position:relative;z-index:1}
+@media (max-width:760px){#pourquoi::before{width:78px;opacity:.14;right:14px;top:10px}.site-footer::before{width:60px}}
