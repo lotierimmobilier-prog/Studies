@@ -73,3 +73,15 @@ input[type=file]{width:100%;font:400 16px var(--body);color:var(--ink);backgroun
 .check .ko::before{content:"!";color:#a3202f}
 .exemple{color:var(--ink-soft);font-size:16px;margin-top:10px}
 .fiche-photo{display:block;width:100%;max-height:360px;object-fit:cover;border-radius:var(--r-sm);margin-bottom:16px}
+
+/* Liste des partenaires */
+.partners-grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.partner-card{display:flex;gap:18px;align-items:flex-start;background:var(--card);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);border-top:5px solid var(--gold);min-width:0}
+.partner-logo{width:96px;height:96px;object-fit:contain;flex:none;border-radius:var(--r-sm);background:var(--bg)}
+.partner-initials{display:grid;place-items:center;width:96px;height:96px;flex:none;border-radius:var(--r-sm);background:var(--ink);color:#fff;font:800 30px/1 var(--head)}
+.partner-info{min-width:0}
+.partner-info h2{font-size:21px;margin:8px 0 6px;overflow-wrap:anywhere}
+.partner-line{margin:2px 0;color:var(--ink-soft);font-size:17px}
+.partner-help{margin:10px 0 0;font-size:15px;font-weight:700;color:#17603a;background:#e3f6ea;border-radius:6px;padding:4px 10px;display:inline-block}
+.admin-logo{width:88px;height:88px;object-fit:contain;border-radius:var(--r-sm);background:var(--bg);border:1px solid var(--line);vertical-align:middle}
+@media (max-width:420px){.partner-card{flex-direction:column}}

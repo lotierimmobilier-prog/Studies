@@ -16,6 +16,7 @@ const CATEGORIES = [
     'asso'     => ['Associations', 'Vie associative'],
     'sortie'   => ['Sorties',      'Fêtes et loisirs'],
     'pratique' => ['Au quotidien', 'Infos pratiques'],
+    'retour'   => ['Retour',       'Retour sur les événements'],
 ];
 const STATUTS = ['pending' => 'En attente', 'validated' => 'Validée', 'published' => 'Publiée', 'refused' => 'Refusée'];
 const SUJETS = ['question' => 'Une question', 'donnees' => 'Mes données personnelles (accès, effacement, désinscription…)', 'aide' => 'Besoin d\'aide pour m\'inscrire ou utiliser le site', 'autre' => 'Autre'];
@@ -74,6 +75,10 @@ function db(): PDO {
     CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0);");
     $cols = array_column($pdo->query('PRAGMA table_info(announcements)')->fetchAll(), 'name');
     if (!in_array('photo', $cols, true)) $pdo->exec("ALTER TABLE announcements ADD COLUMN photo TEXT NOT NULL DEFAULT ''");
+    $pcols = array_column($pdo->query('PRAGMA table_info(partners)')->fetchAll(), 'name');
+    foreach (['address' => "TEXT NOT NULL DEFAULT ''", 'public_phone' => "TEXT NOT NULL DEFAULT ''", 'logo' => "TEXT NOT NULL DEFAULT ''", 'can_help' => 'INTEGER NOT NULL DEFAULT 0'] as $col => $def) {
+        if (!in_array($col, $pcols, true)) $pdo->exec("ALTER TABLE partners ADD COLUMN $col $def");
+    }
     if (!in_array('partner_id', $cols, true)) $pdo->exec('ALTER TABLE announcements ADD COLUMN partner_id INTEGER NOT NULL DEFAULT 0');
     foreach (['org_type' => "TEXT NOT NULL DEFAULT ''", 'org_id' => "TEXT NOT NULL DEFAULT ''", 'org_verified' => 'INTEGER NOT NULL DEFAULT 0', 'org_check' => "TEXT NOT NULL DEFAULT ''"] as $col => $def) {
         if (!in_array($col, $cols, true)) $pdo->exec("ALTER TABLE announcements ADD COLUMN $col $def");
@@ -252,6 +257,40 @@ function verify_org(string $id): array {
     return [$actif, mb_substr($label, 0, 200)];
 }
 
+// ---------- Logos des partenaires : réduits, conservés en PNG (transparence), servis seulement pour les partenaires validés ----------
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
+function logos_dir(): string { $d = DATA_DIR . '/logos'; if (!is_dir($d)) @mkdir($d, 0750, true); return $d; }
+function logo_path(string $name): string { return preg_match('/^[a-f0-9]{32}\.png$/', $name) === 1 ? logos_dir() . '/' . $name : ''; }
+function delete_logo(string $name): void { $p = logo_path($name); if ($p !== '' && is_file($p)) @unlink($p); }
+
+/** @return array{0:string,1:string} [nom de fichier ('' si aucun logo), message d'erreur] */
+function save_logo(array $f): array {
+    $err = (int)($f['error'] ?? UPLOAD_ERR_NO_FILE);
+    if ($err === UPLOAD_ERR_NO_FILE) return ['', ''];
+    if ($err !== UPLOAD_ERR_OK || (int)$f['size'] > LOGO_MAX_BYTES) return ['', 'Le logo n\'a pas pu être envoyé : 2 Mo maximum, formats JPEG, PNG ou WebP.'];
+    if (!is_uploaded_file($f['tmp_name']) || !function_exists('imagecreatefrompng')) return ['', 'Les logos ne sont pas disponibles pour le moment. Vous pourrez l\'ajouter plus tard.'];
+    $info = @getimagesize($f['tmp_name']);
+    if (!$info || $info[0] < 40 || $info[1] < 40 || $info[0] * $info[1] > 25000000) return ['', 'Ce logo ne peut pas être utilisé (format ou dimensions non valides).'];
+    $img = match (true) {
+        $info[2] === IMAGETYPE_JPEG => @imagecreatefromjpeg($f['tmp_name']),
+        $info[2] === IMAGETYPE_PNG => @imagecreatefrompng($f['tmp_name']),
+        $info[2] === IMAGETYPE_WEBP && function_exists('imagecreatefromwebp') => @imagecreatefromwebp($f['tmp_name']),
+        default => false,
+    };
+    if (!$img) return ['', 'Ce logo ne peut pas être lu. Utilisez un fichier JPEG, PNG ou WebP.'];
+    $w = imagesx($img); $h = imagesy($img); $ratio = min(1, 400 / max($w, $h));
+    $nw = max(1, (int)round($w * $ratio)); $nh = max(1, (int)round($h * $ratio));
+    $out = imagecreatetruecolor($nw, $nh);
+    imagealphablending($out, false); imagesavealpha($out, true);
+    imagefill($out, 0, 0, imagecolorallocatealpha($out, 255, 255, 255, 127));
+    imagecopyresampled($out, $img, 0, 0, 0, 0, $nw, $nh, $w, $h);
+    imagedestroy($img);
+    $name = bin2hex(random_bytes(16)) . '.png';
+    $ok = @imagepng($out, logos_dir() . '/' . $name, 6);
+    imagedestroy($out);
+    return $ok ? [$name, ''] : ['', 'Le logo n\'a pas pu être enregistré. Réessayez.'];
+}
+
 /** Partenaire validé connecté (session) ou null. */
 function current_partner(): ?array {
     start_session();
@@ -281,10 +320,17 @@ function purge_old(): void {
         $pdo->prepare("DELETE FROM announcements WHERE $where")->execute([$limit]);
     }
     $pdo->prepare('DELETE FROM messages WHERE created_at < ?')->execute([date('c', strtotime('-365 days'))]);
-    $pdo->prepare("DELETE FROM partners WHERE status = 'refused' AND updated_at < ?")->execute([date('c', strtotime('-30 days'))]);
-    $pdo->prepare("DELETE FROM partners WHERE status = 'pending' AND created_at < ?")->execute([date('c', strtotime('-90 days'))]);
     $lim = date('c', strtotime('-730 days'));       // partenaire validé sans aucune activité depuis 24 mois
-    $pdo->prepare("DELETE FROM partners WHERE status = 'approved' AND updated_at < ? AND NOT EXISTS (SELECT 1 FROM announcements a WHERE a.contact_email = partners.contact_email AND a.created_at >= ?)")->execute([$lim, $lim]);
+    $prules = [
+        ["status = 'refused' AND updated_at < ?", [date('c', strtotime('-30 days'))]],
+        ["status = 'pending' AND created_at < ?", [date('c', strtotime('-90 days'))]],
+        ["status = 'approved' AND updated_at < ? AND NOT EXISTS (SELECT 1 FROM announcements a WHERE a.contact_email = partners.contact_email AND a.created_at >= ?)", [$lim, $lim]],
+    ];
+    foreach ($prules as [$where, $params]) {
+        $q = $pdo->prepare("SELECT logo FROM partners WHERE $where"); $q->execute($params);
+        foreach ($q->fetchAll() as $r) { if ($r['logo'] !== '') delete_logo($r['logo']); }
+        $pdo->prepare("DELETE FROM partners WHERE $where")->execute($params);
+    }
     $pdo->exec("DELETE FROM clicks WHERE announcement_id NOT IN (SELECT id FROM announcements)");
     $pdo->prepare('DELETE FROM tokens WHERE expires < ?')->execute([time() - 86400]);
     $pdo->prepare("INSERT INTO meta (k, v) VALUES ('purge', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([$today]);
