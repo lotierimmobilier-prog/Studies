@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $q = db()->prepare('SELECT id, photo FROM announcements WHERE contact_email = ?'); $q->execute([$p['contact_email']]);
             foreach ($q->fetchAll() as $a) { if ($a['photo'] !== '') delete_photo($a['photo']); }
             db()->prepare('DELETE FROM announcements WHERE contact_email = ?')->execute([$p['contact_email']]);
+            if ($p['logo'] !== '') delete_logo($p['logo']);
             db()->prepare('DELETE FROM partners WHERE id = ?')->execute([$id]);
             $msg = flash('ok', 'Partenaire et annonces supprimés.');
         }
@@ -60,6 +61,7 @@ foreach ($rows as $p) {
     echo '<div class="card"><h2>' . h($p['org_name']) . ' <span class="hint">(' . h(ORG_TYPES[$p['org_type']] ?? '') . ')</span></h2>'
        . '<dl class="kv"><dt>Numéro officiel</dt><dd>' . h($p['org_id']) . ' <a href="https://annuaire-entreprises.data.gouv.fr/rechercher?terme=' . h(rawurlencode($p['org_id'])) . '" rel="noopener noreferrer" target="_blank">vérifier dans l\'annuaire officiel</a></dd>'
        . '<dt>Contrôle</dt><dd>' . $verif . '</dd><dt>Contact</dt><dd>' . h($p['contact_name']) . ' · ' . h($p['contact_email']) . ($p['contact_phone'] !== '' ? ' · ' . h($p['contact_phone']) : '') . '</dd>'
+       . '<dt>Fiche publique</dt><dd>' . ($p['logo'] !== '' ? '<img class="admin-logo" src="logo.php?id=' . (int)$p['id'] . '" alt="Logo"> ' : 'Pas de logo (initiales affichées). ') . '<br>' . h($p['address'] ?: 'Adresse non renseignée') . ' · ' . h($p['public_phone'] ?: 'Téléphone non renseigné') . ((int)$p['can_help'] ? '<br><span class="pill pill-validated">Peut aider à l\'inscription</span>' : '') . '</dd>'
        . '<dt>Reçue le</dt><dd>' . h(date('d/m/Y à H:i', strtotime($p['created_at']))) . '</dd>'
        . ($p['refusal_reason'] !== '' ? '<dt>Motif du refus</dt><dd>' . h($p['refusal_reason']) . '</dd>' : '') . '</dl>'
        . '<form method="post" action="partenaires.php?s=' . h($s) . '">' . csrf_field() . '<input type="hidden" name="id" value="' . (int)$p['id'] . '">';

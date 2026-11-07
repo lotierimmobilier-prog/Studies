@@ -9,6 +9,7 @@
     sport: 'Exemple : « Tournoi de pétanque ouvert à tous, par équipes de deux. Inscriptions sur place dès 13 h 30. Buvette sur place. »',
     asso: 'Exemple : « Repas de fin d\'année de l\'association. Au programme : cassoulet, tombola et musique. Réservation avant le 10 décembre. »',
     sortie: 'Exemple : « Marché de Noël sur la place du village. Une trentaine d\'exposants, vin chaud et animations pour les enfants. »',
+    retour: 'Exemple : « Merci aux 120 participants du repas de l\'association ! Retour en photos sur une belle journée. Rendez-vous l\'an prochain. »',
     pratique: 'Exemple : « La mairie annexe change ses horaires : ouverte le mardi et le jeudi de 9 h à 12 h. »'
   };
   function cat() { var c = document.querySelector('input[name="category"]:checked'); return c ? c.value : ''; }

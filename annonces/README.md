@@ -7,10 +7,11 @@ Base de données : SQLite (un simple fichier), aucune base MySQL à créer.
 
 | Pour qui | Adresse | Fonctions |
 |---|---|---|
-| Entreprises et associations | `annonces/inscription.php` | Inscription (type, numéro SIRET ou RNA, nom, contact). Le numéro est contrôlé automatiquement auprès du registre public « Recherche d'entreprises » (sans clé) ; **l'éditeur valide chaque inscription**. Les particuliers ne peuvent pas s'inscrire. |
+| Entreprises et associations | `devenir-partenaire.html` puis `annonces/inscription.php` | Page qui explique le but (vitrine gratuite : événements, tarifs promotionnels, actualité, événements passés), puis inscription : type, numéro SIRET ou RNA, nom, **logo, adresse et téléphone publics**, contact privé. Le numéro est contrôlé automatiquement auprès du registre public « Recherche d'entreprises » (sans clé) ; **l'éditeur valide chaque inscription**. Les particuliers ne peuvent pas s'inscrire. |
 | Partenaires validés | `annonces/partenaire/` | Connexion **sans mot de passe** (lien par e-mail, 30 min, usage unique), dépôt d'annonces, suivi (avancement, numéro de parution, **clics**), retrait d'une annonce, suppression de l'inscription. |
 | Partenaires validés | `annonces/deposer.php` | Dépôt d'annonce : rubrique, titre, Quoi / Où / Quand, conditions, **lien d'inscription facultatif**, **photo facultative**, aide à la rédaction (compteur et conseils, sans IA). Fermé aux non-inscrits. |
 | Vous (éditeur) | `annonces/admin/` | **Partenaires** (valider ou refuser les inscriptions), annonces (relire, corriger, valider, refuser), messages du formulaire de contact, **statistiques de clics**, **Rédiger avec l'IA**, préparation du numéro (bloc HTML), mot de passe. |
+| Tout le monde | `annonces/partenaires.php` | **Liste publique des partenaires validés** : logo (ou initiales), nom, adresse, téléphone, mention « peut vous aider à vous inscrire ». Le partenaire modifie sa fiche dans `partenaire/fiche.php`. |
 | Tout le monde | `annonces/contact.php` | Formulaire de contact (questions, droits RGPD, aide). Aucun échange par e-mail. |
 | Lecteurs | bouton « En savoir plus » | Passe par `annonces/r.php?id=…` : compteur anonyme, puis redirection vers le lien de l'annonceur ou la page de l'annonce. |
 
