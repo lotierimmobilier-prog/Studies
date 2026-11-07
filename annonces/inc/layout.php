@@ -7,6 +7,7 @@ function site_root(): string { return in_subdir() ? '../../' : '../'; }   // dos
 
 function layout_top(string $title, string $nav = '', bool $noindex = true): void {
     $css = in_subdir() ? '../annonces.css' : 'annonces.css';
+    $css .= '?v=' . (int)@filemtime(dirname(__DIR__) . '/annonces.css');
     page_head($title, '<link rel="stylesheet" href="' . $css . '">', $noindex, site_root());
     echo '<a class="skip" href="#contenu">Aller au contenu</a>'
        . '<header class="site-header"><div class="inner"><a class="logo" href="' . site_root() . 'index.html"><img src="' . site_root() . 'logo/logo.svg" alt="Capendu en bref" width="656" height="87"></a>'

@@ -13,3 +13,10 @@ Options -Indexes
 <FilesMatch "(^\.(?!htaccess$)|\.md$|\.sample\.php$)">
   Require all denied
 </FilesMatch>
+
+# Cache : CSS et JS rechargés au plus tard toutes les heures (les images et polices restent en cache long)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "public, max-age=3600, must-revalidate"
+  </FilesMatch>
+</IfModule>

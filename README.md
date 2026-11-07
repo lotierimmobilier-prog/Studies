@@ -31,3 +31,8 @@ Tous les textes à remplir sont surlignés en jaune (classe `.todo`) dans `index
 ## Registre des traitements (hors site)
 
 Compléter le modèle gratuit de la CNIL : finalité, base légale, données, durée, destinataires, sécurité.
+
+## Cache et mises à jour
+
+Hostinger met en cache les fichiers statiques. Les pages PHP versionnent automatiquement les feuilles de style.
+Dans `index.html`, quand `styles.css` ou `script.js` change, **changer le numéro `?v=` de leurs adresses** pour que les visiteurs reçoivent la nouvelle version immédiatement.
