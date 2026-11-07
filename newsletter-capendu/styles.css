@@ -51,14 +51,31 @@ h1{font-size:clamp(36px,5.2vw,58px);margin-bottom:20px}
 .lead{font-size:20px;color:var(--ink-soft);max-width:46ch;margin-bottom:32px}
 .art{margin:0;border-radius:999px 999px var(--r-lg) var(--r-lg);overflow:hidden;aspect-ratio:4/5;position:sticky;top:100px;box-shadow:var(--shadow);border:6px solid var(--card)}
 .art img{display:block;width:100%;height:100%;object-fit:cover;object-position:35% 50%}
-@media (max-width:860px){.hero-grid{grid-template-columns:1fr}.art{aspect-ratio:16/10;position:static;order:-1;border-radius:var(--r-lg)}}
+@media (max-width:860px){
+  .hero-grid{grid-template-columns:1fr;gap:32px}
+  .art{aspect-ratio:21/9;position:static;order:-1;border-radius:var(--r-lg)}   /* tablette : photo en bandeau, moins haute */
+  .hero .signup{max-width:none}                                                       /* tablette : la bulle prend toute la largeur */
+  .lead{max-width:60ch}
+}
+@media (max-width:600px){
+  .art{aspect-ratio:16/10}
+  .hero{padding-top:20px}
+}
 
 /* Formulaire */
 .signup{background:var(--card);border-radius:var(--r-lg);padding:30px;display:flex;flex-direction:column;gap:18px;max-width:580px;box-shadow:var(--shadow)}
 .signup-title{font-size:26px}
 .field{display:flex;flex-direction:column;gap:7px;min-width:0}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:520px){.field-row{grid-template-columns:1fr}}
+@media (max-width:520px){
+  .field-row{grid-template-columns:1fr}
+  .signup{padding:22px 18px;border-radius:28px;gap:16px}                        /* mobile : bulle plus compacte, mieux remplie */
+  .signup-title{font-size:23px}
+  .consent{padding:14px}
+  .consent label{font-size:15.5px}
+  .signup .btn{align-self:stretch;width:100%;text-align:center}                 /* gros bouton facile à toucher */
+  .art{border-width:4px}
+}
 label{font-size:16px;font-weight:700}
 .req,.opt{font-weight:500;color:var(--ink-soft);font-size:14px}
 input[type=email],input[type=text],select{width:100%;font:400 17px var(--body);color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:var(--r-sm);padding:12px 16px;min-height:52px}
