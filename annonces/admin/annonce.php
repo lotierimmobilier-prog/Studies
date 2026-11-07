@@ -29,14 +29,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         db()->prepare("UPDATE announcements SET status='validated', issue=?, refusal_reason='', updated_at=? WHERE id=?")->execute([$issue, $now, $id]);
         if (!empty($_POST['notify'])) send_mail($a['contact_email'], 'Votre annonce est validée – Capendu en bref',
             "Bonjour {$a['contact_name']},\n\nVotre annonce « " . $a['title'] . " » est validée. Elle paraîtra dans le numéro de " . issue_label($issue) . ".\n"
-            . "Vous pouvez suivre son avancement et le nombre de clics dans votre espace partenaire : " . SITE_URL . "/annonces/partenaire/\n\nMerci !\nJérôme BOUBA, Capendu en bref");
+            . "Vous pouvez suivre son avancement et le nombre de clics dans votre espace partenaire : " . SITE_URL . "/annonces/partenaire/\n\nMerci !\nJérôme BOUBA, Capendu en bref" . auto_notice());
         $msg .= flash('ok', 'Annonce validée pour le numéro de ' . h(issue_label($issue)) . '.');
     } elseif ($act === 'refuse') {
         $reason = one_line((string)($_POST['reason'] ?? ''), 300);
         db()->prepare("UPDATE announcements SET status='refused', refusal_reason=?, issue='', updated_at=? WHERE id=?")->execute([$reason, $now, $id]);
         if (!empty($_POST['notify'])) send_mail($a['contact_email'], 'Votre annonce – Capendu en bref',
             "Bonjour {$a['contact_name']},\n\nMerci pour votre annonce « " . $a['title'] . " ». Nous ne pouvons pas la publier cette fois-ci."
-            . ($reason !== '' ? "\n\nMotif : $reason" : '') . "\n\nVous pouvez la modifier et la déposer à nouveau sur " . SITE_URL . "/annonces/deposer.php\n\nJérôme BOUBA, Capendu en bref");
+            . ($reason !== '' ? "\n\nMotif : $reason" : '') . "\n\nVous pouvez la modifier et la déposer à nouveau sur " . SITE_URL . "/annonces/deposer.php\n\nJérôme BOUBA, Capendu en bref" . auto_notice());
         $msg .= flash('ok', 'Annonce refusée.');
     } elseif ($act === 'reopen') {
         db()->prepare("UPDATE announcements SET status='pending', issue='', updated_at=? WHERE id=?")->execute([$now, $id]);
