@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 200 200" fill="#0f6f6a">
+  <title>Croix occitane</title>
+  <defs>
+    <g id="bras">
+      <rect x="-8" y="-8" width="76" height="16"/>
+      <circle cx="80" cy="0" r="12"/>
+      <circle cx="68" cy="-15" r="12"/>
+      <circle cx="68" cy="15" r="12"/>
+    </g>
+  </defs>
+  <use href="#bras"/>
+  <use href="#bras" transform="rotate(90)"/>
+  <use href="#bras" transform="rotate(180)"/>
+  <use href="#bras" transform="rotate(270)"/>
+</svg>
