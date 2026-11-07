@@ -11,7 +11,8 @@ function require_admin(): void {
     header('Location: login.php'); exit;
 }
 function admin_nav(string $current = ''): string {
-    $items = ['index.php' => 'Annonces', 'stats.php' => 'Statistiques', 'export.php' => 'Préparer le numéro', 'motdepasse.php' => 'Mot de passe'];
+    $new = (int)db()->query("SELECT COUNT(*) FROM messages WHERE status = 'new'")->fetchColumn();
+    $items = ['index.php' => 'Annonces', 'messages.php' => 'Messages' . ($new ? ' (' . $new . ')' : ''), 'stats.php' => 'Statistiques', 'export.php' => 'Préparer le numéro', 'motdepasse.php' => 'Mot de passe'];
     $o = '';
     foreach ($items as $f => $l) $o .= '<a href="' . $f . '"' . ($f === $current ? ' aria-current="page"' : '') . '>' . h($l) . '</a> ';
     return $o . '<a href="logout.php">Déconnexion</a>';

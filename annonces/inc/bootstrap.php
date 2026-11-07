@@ -18,6 +18,7 @@ const CATEGORIES = [
     'pratique' => ['Au quotidien', 'Infos pratiques'],
 ];
 const STATUTS = ['pending' => 'En attente', 'validated' => 'Validée', 'published' => 'Publiée', 'refused' => 'Refusée'];
+const SUJETS = ['question' => 'Une question', 'donnees' => 'Mes données personnelles (accès, effacement, désinscription…)', 'aide' => 'Besoin d\'aide pour m\'inscrire ou utiliser le site', 'autre' => 'Autre'];
 const MOIS = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 
 function h(?string $s): string { return htmlspecialchars((string)$s, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
@@ -60,6 +61,8 @@ function db(): PDO {
     CREATE TABLE IF NOT EXISTS admin (id INTEGER PRIMARY KEY CHECK (id = 1), password_hash TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS rate (ip_hash TEXT NOT NULL, kind TEXT NOT NULL, ts INTEGER NOT NULL);
     CREATE INDEX IF NOT EXISTS rate_idx ON rate (ip_hash, kind, ts);
+    CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, subject TEXT NOT NULL, name TEXT NOT NULL DEFAULT '',
+        reply_to TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new');
     CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS clicks (announcement_id INTEGER NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (announcement_id, day));
     CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0);");
@@ -123,7 +126,7 @@ function send_mail(string $to, string $subject, string $body): bool {
     if (defined('MAIL_DISABLED') && MAIL_DISABLED) return false;
     if (!filter_var($to, FILTER_VALIDATE_EMAIL) || preg_match('/[\r\n]/', $to)) return false;
     $subject = str_replace(["\r", "\n"], ' ', $subject);
-    $headers = 'From: ' . SITE_NAME . ' <' . MAIL_FROM . ">\r\nReply-To: " . ADMIN_EMAIL
+    $headers = 'From: ' . SITE_NAME . ' <' . MAIL_FROM . ">"
         . "\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit";
     return @mail($to, mb_encode_mimeheader($subject, 'UTF-8'), $body, $headers);
 }
@@ -153,6 +156,10 @@ function clicks_since(int $id, int $days): int {
     return (int)$st->fetchColumn();
 }
 
+function auto_notice(): string {
+    return "\n\n---\nMessage envoyé automatiquement : merci de ne pas y répondre. Pour nous écrire, utilisez le formulaire : " . SITE_URL . '/annonces/contact.php';
+}
+
 function purge_old(): void {
     $today = date('Y-m-d');
     $st = db()->prepare("SELECT v FROM meta WHERE k = 'purge'"); $st->execute();
@@ -161,6 +168,7 @@ function purge_old(): void {
     $pdo->prepare("DELETE FROM announcements WHERE status = 'refused' AND updated_at < ?")->execute([date('c', strtotime('-30 days'))]);
     $pdo->prepare("DELETE FROM announcements WHERE status = 'pending' AND created_at < ?")->execute([date('c', strtotime('-90 days'))]);
     $pdo->prepare("DELETE FROM announcements WHERE status IN ('validated','published') AND created_at < ?")->execute([date('c', strtotime('-365 days'))]);
+    $pdo->prepare('DELETE FROM messages WHERE created_at < ?')->execute([date('c', strtotime('-365 days'))]);
     $pdo->exec("DELETE FROM clicks WHERE announcement_id NOT IN (SELECT id FROM announcements)");
     $pdo->prepare('DELETE FROM tokens WHERE expires < ?')->execute([time() - 86400]);
     $pdo->prepare("INSERT INTO meta (k, v) VALUES ('purge', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v")->execute([$today]);

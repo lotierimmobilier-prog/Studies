@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 db()->prepare('INSERT INTO tokens (hash, email, expires) VALUES (?, ?, ?)')->execute([hash('sha256', $token), $asked, time() + 1800]);
                 send_mail($asked, 'Votre lien de connexion – Capendu en bref',
                     "Bonjour,\n\nPour accéder à votre espace partenaire, ouvrez ce lien (valable 30 minutes, utilisable une seule fois) :\n\n"
-                    . SITE_URL . '/annonces/partenaire/lien.php?t=' . $token . "\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\nJérôme BOUBA, Capendu en bref");
+                    . SITE_URL . '/annonces/partenaire/lien.php?t=' . $token . "\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez ce message.\n\nJérôme BOUBA, Capendu en bref" . auto_notice());
             }
             // Même réponse dans tous les cas : on ne révèle pas quelles adresses sont connues.
             $msg = flash('ok', 'Si cette adresse a déjà servi à déposer une annonce, un e-mail avec un lien de connexion vient de vous être envoyé. Pensez à regarder dans les courriers indésirables.');

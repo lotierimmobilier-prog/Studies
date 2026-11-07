@@ -11,9 +11,9 @@ Page unique, statique (HTML/CSS/JS), sans dépendance ni cookie. Les polices son
 
 Tous les textes à remplir sont surlignés en jaune (classe `.todo`) dans `index.html` : rechercher `todo`.
 
-- Adresse postale ou boîte postale de l'éditeur (Jérôme BOUBA), exigée aussi par Brevo dans le pied des e-mails
-- Adresse e-mail de contact (mailto de la section commerçants, politique de confidentialité, mentions légales)
-- Hébergeur du site et prestataire d'envoi (Brevo ou autre)
+- Aucune adresse postale n'est publiée (choix de l'éditeur bénévole). À vérifier dans Brevo : le paramétrage du compte demande une adresse d'expéditeur, qui peut figurer dans le pied des e-mails ; si Brevo l'impose, utiliser une boîte postale ou une adresse de domiciliation plutôt qu'un domicile
+- Aucune adresse e-mail publique : contact et annonces par formulaire uniquement (annonces/contact.php, annonces/deposer.php)
+- (Fait) Date de mise à jour : 15 octobre 2026. Hébergeur : Hostinger ; prestataire d'envoi : Brevo. Vérifier leurs mentions sur hostinger.fr et brevo.com
 - Date de mise à jour de la politique de confidentialité
 - Retirer ensuite la classe `todo` (le surlignage jaune disparaît)
 
