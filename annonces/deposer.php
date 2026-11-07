@@ -1,19 +1,28 @@
 <?php
 declare(strict_types=1);
+// Dépôt d'une annonce : réservé aux partenaires (entreprises et associations enregistrées) dont l'inscription a été validée.
 require __DIR__ . '/inc/layout.php';
 security_headers();
 start_session();
+$partner = current_partner();
+
+if (!$partner) {
+    layout_top('Déposer une annonce – Capendu en bref', '<a class="btn btn-small btn-ghost" href="partenaire/">Espace partenaire</a>');
+    echo '<h1>Déposer une annonce</h1>';
+    echo '<p class="notice notice-info"><strong>Réservé aux entreprises et associations enregistrées.</strong> Pour déposer une annonce, votre organisation doit d\'abord être inscrite et validée par l\'éditeur. Les particuliers ne peuvent pas déposer d\'annonce.</p>';
+    echo '<div class="card"><h2>1. Inscrivez votre organisation</h2><p>Il suffit d\'un numéro SIRET (ou RNA pour une association). L\'éditeur valide votre inscription après vérification.</p><div class="actions"><a class="btn" href="inscription.php">Inscrire mon organisation</a></div></div>';
+    echo '<div class="card"><h2>2. Déjà inscrit et validé ?</h2><p>Ouvrez votre espace partenaire : un lien de connexion est envoyé à votre adresse e-mail, sans mot de passe. Vous pourrez alors déposer vos annonces.</p><div class="actions"><a class="btn btn-ghost" href="partenaire/">Ouvrir mon espace partenaire</a></div></div>';
+    layout_bottom(); echo '</body></html>'; exit;
+}
 
 $errors = [];
-$v = ['category' => '', 'title' => '', 'what' => '', 'place' => '', 'whenx' => '', 'conditions' => '', 'public_contact' => '', 'link_url' => '',
-      'org_name' => '', 'contact_name' => '', 'contact_email' => $_SESSION['partner_email'] ?? '', 'contact_phone' => ''];
+$v = ['category' => '', 'title' => '', 'what' => '', 'place' => '', 'whenx' => '', 'conditions' => '', 'public_contact' => '', 'link_url' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    if (!empty($_POST['website'])) { header('Location: deposer.php?ok=1'); exit; }          // champ piège rempli : robot
+    if (!empty($_POST['website'])) { header('Location: deposer.php?ok=1'); exit; }
     if (!form_stamp_ok((string)($_POST['stamp'] ?? ''))) $errors[] = 'Le formulaire a expiré ou a été envoyé trop vite. Merci de réessayer.';
-    if (rate_count('submit', 3600) >= 5) $errors[] = 'Trop d\'envois depuis votre connexion. Réessayez dans une heure.';
-
+    if (rate_count('submit', 3600) >= 10) $errors[] = 'Trop d\'envois depuis votre connexion. Réessayez dans une heure.';
     $v['category']       = (string)($_POST['category'] ?? '');
     $v['title']          = one_line((string)($_POST['title'] ?? ''), 90);
     $v['what']           = clean((string)($_POST['what'] ?? ''), 700);
@@ -22,49 +31,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['conditions']     = one_line((string)($_POST['conditions'] ?? ''), 240);
     $v['public_contact'] = one_line((string)($_POST['public_contact'] ?? ''), 140);
     $v['link_url']       = trim((string)($_POST['link_url'] ?? ''));
-    $v['org_name']       = one_line((string)($_POST['org_name'] ?? ''), 90);
-    $v['contact_name']   = one_line((string)($_POST['contact_name'] ?? ''), 90);
-    $v['contact_email']  = one_line((string)($_POST['contact_email'] ?? ''), 150);
-    $v['contact_phone']  = one_line((string)($_POST['contact_phone'] ?? ''), 30);
 
     if (!isset(CATEGORIES[$v['category']])) $errors[] = 'Choisissez une rubrique.';
     if ($v['title'] === '') $errors[] = 'Indiquez un titre.';
     if (mb_strlen($v['what']) < 20) $errors[] = 'Décrivez votre annonce en quelques phrases (20 caractères au minimum).';
     if ($v['category'] !== 'pratique' && $v['whenx'] === '') $errors[] = 'Indiquez la date ou la période (rubrique « Quand »).';
     if ($v['place'] === '') $errors[] = 'Indiquez le lieu (rubrique « Où »).';
-    if ($v['org_name'] === '') $errors[] = 'Indiquez le nom de votre commerce ou de votre association.';
-    if ($v['contact_name'] === '') $errors[] = 'Indiquez votre nom.';
-    if (!filter_var($v['contact_email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Indiquez une adresse e-mail valide.';
     if ($v['link_url'] !== '' && safe_url($v['link_url']) === '') $errors[] = 'Le lien doit commencer par https:// (ou laissez le champ vide).';
-    if (empty($_POST['consent'])) $errors[] = 'Cochez la case de consentement pour envoyer votre annonce.';
+    if (empty($_POST['consent'])) $errors[] = 'Cochez la case qui garantit vos droits sur les textes et images.';
+    $hasPhoto = (int)($_FILES['photo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+    if ($hasPhoto && empty($_POST['photo_rights'])) $errors[] = 'Pour joindre une photo, cochez la case qui garantit vos droits sur la photo.';
 
+    $photo = '';
+    if (!$errors) { [$photo, $photoErr] = save_photo($_FILES['photo'] ?? []); if ($photoErr !== '') $errors[] = $photoErr; }
     if (!$errors) {
         $now = date('c');
         db()->prepare('INSERT INTO announcements (created_at, updated_at, status, category, title, what, place, whenx, conditions, public_contact, link_url,
-                        org_name, contact_name, contact_email, contact_phone, consent_at)
-                       VALUES (?, ?, \'pending\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-            ->execute([$now, $now, $v['category'], $v['title'], $v['what'], $v['place'], $v['whenx'], $v['conditions'], $v['public_contact'],
-                       safe_url($v['link_url']), $v['org_name'], $v['contact_name'], strtolower($v['contact_email']), $v['contact_phone'], $now]);
+                        org_name, contact_name, contact_email, contact_phone, consent_at, photo, org_type, org_id, org_verified, org_check, partner_id)
+                       VALUES (?, ?, \'pending\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 2, ?, ?)')
+            ->execute([$now, $now, $v['category'], $v['title'], $v['what'], $v['place'], $v['whenx'], $v['conditions'], $v['public_contact'], safe_url($v['link_url']),
+                       $partner['org_name'], $partner['contact_name'], $partner['contact_email'], $partner['contact_phone'], $now, $photo,
+                       $partner['org_type'], $partner['org_id'], 'Partenaire validé par l\'éditeur', (int)$partner['id']]);
+        db()->prepare('UPDATE partners SET updated_at = ? WHERE id = ?')->execute([$now, $partner['id']]);
         rate_hit('submit');
         $id = (int)db()->lastInsertId();
-        send_mail(ADMIN_EMAIL, 'Nouvelle annonce à valider (n°' . $id . ')',
-            "Une nouvelle annonce attend votre validation.\n\nConnectez-vous à l'espace de validation : " . SITE_URL . "/annonces/admin/\n");
+        send_mail(ADMIN_EMAIL, 'Nouvelle annonce à valider (n°' . $id . ')', "Une nouvelle annonce attend votre validation.\n\nConnectez-vous à l'espace de validation : " . SITE_URL . "/annonces/admin/\n");
         header('Location: deposer.php?ok=1'); exit;
     }
 }
 
-layout_top('Déposer une annonce – Capendu en bref', '<a class="btn btn-small btn-ghost" href="partenaire/">Espace partenaire</a>');
+layout_top('Déposer une annonce – Capendu en bref', '<a class="btn btn-small btn-ghost" href="partenaire/">Mon espace partenaire</a>');
 echo '<h1>Déposer une annonce</h1>';
-echo '<p class="lead">Commerçants, artisans, associations, clubs : votre annonce sera relue puis publiée gratuitement dans la newsletter mensuelle. Vous serez prévenu(e) par e-mail et vous pourrez suivre son avancement dans votre <a href="partenaire/">espace partenaire</a>.</p>';
-
+echo '<p class="lead">Au nom de <strong>' . h($partner['org_name']) . '</strong>. Votre annonce sera relue puis publiée gratuitement dans la newsletter mensuelle. Vous suivez son avancement dans votre <a href="partenaire/">espace partenaire</a>.</p>';
 if (isset($_GET['ok'])) {
-    echo flash('ok', 'Merci ! Votre annonce a bien été reçue. Elle sera relue avant publication. Vous pouvez suivre son avancement dans votre <a href="partenaire/">espace partenaire</a>.');
+    echo flash('ok', 'Merci ! Votre annonce a bien été reçue. Elle sera relue avant publication. Suivez son avancement dans votre <a href="partenaire/">espace partenaire</a>.');
     echo '<p><a class="btn" href="deposer.php">Déposer une autre annonce</a></p>';
     layout_bottom(); echo '</body></html>'; exit;
 }
 if ($errors) echo flash('err', '<strong>Quelques points à corriger :</strong><br>' . implode('<br>', array_map('h', $errors)));
 ?>
-<form class="card" method="post" action="deposer.php" novalidate>
+<form class="card" method="post" action="deposer.php" enctype="multipart/form-data" novalidate>
   <?= csrf_field() ?>
   <input type="hidden" name="stamp" value="<?= h(form_stamp()) ?>">
   <div class="hp" aria-hidden="true"><label>Ne pas remplir <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
@@ -83,22 +89,18 @@ if ($errors) echo flash('err', '<strong>Quelques points à corriger :</strong><b
     <div class="field"><label for="whenx">Quand <span class="hint">(date complète)</span></label><input id="whenx" name="whenx" type="text" maxlength="140" value="<?= h($v['whenx']) ?>"></div>
     <div class="field full"><label for="conditions">Conditions <span class="hint">(pour une offre : prix, dates, restrictions – facultatif)</span></label><input id="conditions" name="conditions" type="text" maxlength="240" value="<?= h($v['conditions']) ?>"></div>
     <div class="field"><label for="public_contact">Contact à publier <span class="hint">(facultatif)</span></label><input id="public_contact" name="public_contact" type="text" maxlength="140" value="<?= h($v['public_contact']) ?>"></div>
-    <div class="field"><label for="link_url">Lien vers votre site ou votre page <span class="hint">(facultatif, https://…)</span></label><input id="link_url" name="link_url" type="url" maxlength="300" value="<?= h($v['link_url']) ?>"></div>
+    <div class="field"><label for="link_url">Lien d'inscription ou d'information <span class="hint">(facultatif, https://…)</span></label><input id="link_url" name="link_url" type="url" maxlength="300" value="<?= h($v['link_url']) ?>" placeholder="Page d'inscription, billetterie, site…"></div>
+    <div class="field full"><label for="photo">Photo <span class="hint">(facultatif : JPEG, PNG ou WebP, 5 Mo maximum)</span></label><input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp"></div>
+    <div class="consent full"><input id="photo_rights" name="photo_rights" type="checkbox" value="1"><label for="photo_rights">Si je joins une photo : je garantis en détenir les droits et avoir l'accord des personnes qui y sont reconnaissables. Elle est redimensionnée et ses données cachées (lieu, appareil) sont supprimées.</label></div>
   </div>
-
-  <h2 class="mt-26">Vos coordonnées <span class="hint">(privées, non publiées)</span></h2>
-  <div class="form-grid">
-    <div class="field"><label for="org_name">Commerce ou association</label><input id="org_name" name="org_name" type="text" maxlength="90" value="<?= h($v['org_name']) ?>" required></div>
-    <div class="field"><label for="contact_name">Votre nom</label><input id="contact_name" name="contact_name" type="text" maxlength="90" autocomplete="name" value="<?= h($v['contact_name']) ?>" required></div>
-    <div class="field"><label for="contact_email">Votre e-mail</label><input id="contact_email" name="contact_email" type="email" maxlength="150" autocomplete="email" value="<?= h($v['contact_email']) ?>" required></div>
-    <div class="field"><label for="contact_phone">Téléphone <span class="hint">(facultatif)</span></label><input id="contact_phone" name="contact_phone" type="text" maxlength="30" autocomplete="tel" value="<?= h($v['contact_phone']) ?>"></div>
-  </div>
+  <div id="aide" class="aide" aria-live="polite" data-max="700"></div>
 
   <div class="consent mt-18">
     <input id="consent" name="consent" type="checkbox" value="1" required>
-    <label for="consent">J'accepte que mes coordonnées servent uniquement à échanger au sujet de mon annonce et à me donner accès à mon espace partenaire. Elles ne sont ni publiées ni cédées, et supprimées au plus tard 12 mois après le dépôt (<a href="<?= h(site_root()) ?>index.html#confidentialite">politique de confidentialité</a>). Je garantis détenir les droits sur les textes et images fournis.</label>
+    <label for="consent">Je garantis détenir les droits sur les textes et images fournis et j'accepte leur publication gratuite dans la newsletter et sur le site de Capendu en bref (<a href="<?= h(site_root()) ?>index.html#confidentialite">politique de confidentialité</a>).</label>
   </div>
   <div class="actions"><button class="btn" type="submit">Envoyer mon annonce</button></div>
 </form>
+<script src="deposer.js?v=<?= (int)@filemtime(__DIR__ . '/deposer.js') ?>"></script>
 <?php layout_bottom(); ?>
 </body></html>

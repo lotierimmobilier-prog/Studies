@@ -17,6 +17,7 @@ if ($row && $_SERVER['REQUEST_METHOD'] === 'POST') {
     session_regenerate_id(true);
     $_SESSION['partner_email'] = $row['email'];
     $_SESSION['partner_seen'] = time();
+    db()->prepare('UPDATE partners SET updated_at = ? WHERE contact_email = ?')->execute([date('c'), $row['email']]);
     header('Location: index.php'); exit;
 }
 layout_top('Connexion – Espace partenaire');

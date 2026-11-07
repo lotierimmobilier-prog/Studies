@@ -16,8 +16,9 @@ function x_fiche(array $a): string {
                . '<td style="padding:3px 0;font:400 17px/1.5 ' . X_BODY . ';color:' . X_TEAL . ';">' . nl2br(h($v)) . '</td></tr>';
     }
     $url = SITE_URL . '/annonces/r.php?id=' . (int)$a['id'];
+    $img = ($a['photo'] ?? '') !== '' ? '<img src="' . h(SITE_URL . '/annonces/photo.php?id=' . (int)$a['id']) . '" alt="' . h($a['title']) . '" width="520" style="display:block;width:100%;max-width:520px;height:auto;border-radius:10px;margin:0 0 12px;">' : '';
     return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 14px;background:#ffffff;border:1px solid ' . X_LINE . ';border-radius:12px;"><tr><td style="padding:18px 20px;">'
-        . '<div style="font:700 20px/1.3 ' . X_HEAD . ';color:' . X_TEAL . ';margin-bottom:8px;">' . h($a['title']) . '</div>'
+        . $img . '<div style="font:700 20px/1.3 ' . X_HEAD . ';color:' . X_TEAL . ';margin-bottom:8px;">' . h($a['title']) . '</div>'
         . '<table role="presentation" cellpadding="0" cellspacing="0">' . $rows . '</table>'
         . '<table role="presentation" cellpadding="0" cellspacing="0" style="margin-top:12px;"><tr><td align="center" bgcolor="' . X_WINE . '" style="border-radius:10px;">'
         . '<a href="' . h($url) . '" style="display:inline-block;padding:12px 24px;font:700 16px/1 ' . X_BODY . ';color:#ffffff;text-decoration:none;border-radius:10px;">En savoir plus</a></td></tr></table>'
