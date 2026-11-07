@@ -1,7 +1,7 @@
 # Logo « Capendu en bref »
 
-Mot-symbole : « Capendu » en gras vert-bleu profond, « en bref » en léger lie-de-vin, point final lie-de-vin.
-Police : Fredoka (texte transformé en tracés, aucune installation nécessaire). Icône : pastille ronde lie-de-vin avec un « c » blanc.
+Mot-symbole : « Capendu » en gras vert-bleu profond, « en bref » en moyen lie-de-vin, point final lie-de-vin.
+Police : Manrope, gras 800 et moyen 500 (texte transformé en tracés, aucune installation nécessaire). Icône : pastille ronde lie-de-vin avec un « c » blanc.
 
 | Fichier | Usage |
 |---|---|
