@@ -54,3 +54,7 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - [ ] DPA Brevo signé ; politique de confidentialité relue en regard de ce contrat.
 - [ ] Registre des traitements créé.
 - [ ] Test de l'inscription complète (formulaire, e-mail de confirmation, désinscription).
+
+## Mesure d'audience anonyme (ajout)
+
+Le site compte, côté serveur et sans cookie, les visites par jour, la provenance générale (Facebook, Instagram, TikTok, moteur de recherche, newsletter, autre site) et le passage des robots des moteurs et des IA. Aucune adresse IP n'est conservée : une empreinte salée, propre à la journée, sert à ne pas compter deux fois un visiteur et est supprimée le lendemain. Les totaux (agrégés par jour) sont conservés 5 ans et consultés dans l'espace admin, page « Visites et IA ». La politique de confidentialité du site (point 8) en informe les visiteurs.

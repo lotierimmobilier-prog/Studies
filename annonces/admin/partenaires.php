@@ -19,6 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 . "1. ouvrez votre espace partenaire : " . SITE_URL . "/annonces/partenaire/ (un lien de connexion vous est envoyé par e-mail, sans mot de passe) ;\n"
                 . "2. cliquez sur « Déposer une annonce ».\n\nMerci de participer à la vie de Capendu !\nJérôme BOUBA, Capendu en bref" . auto_notice());
             $msg = flash('ok', 'Inscription validée : ' . h($p['org_name']) . ' peut maintenant déposer des annonces.');
+        } elseif ($act === 'logo') {                        // l'administrateur ajoute, remplace ou retire le logo d'un partenaire
+            $logo = (string)$p['logo']; $err = '';
+            if (!empty($_POST['remove_logo']) && $logo !== '') { delete_logo($logo); $logo = ''; $msg = flash('ok', 'Logo retiré : les initiales sont affichées.'); }
+            [$newLogo, $logoErr] = save_logo($_FILES['logo'] ?? []);
+            if ($logoErr !== '') $msg = flash('err', $logoErr);
+            elseif ($newLogo !== '') { if ($logo !== '') delete_logo($logo); $logo = $newLogo; $msg = flash('ok', 'Logo enregistré pour ' . h($p['org_name']) . '.'); }
+            elseif (empty($_POST['remove_logo'])) $msg = flash('err', 'Choisissez un fichier JPEG, PNG ou WebP.');
+            db()->prepare('UPDATE partners SET logo = ?, updated_at = ? WHERE id = ?')->execute([$logo, $now, $id]);
         } elseif ($act === 'refuse') {
             $reason = one_line((string)($_POST['reason'] ?? ''), 300);
             db()->prepare("UPDATE partners SET status='refused', refusal_reason=?, updated_at=? WHERE id=?")->execute([$reason, $now, $id]);
@@ -58,6 +66,10 @@ foreach ($rows as $p) {
        . '<dt>Fiche publique</dt><dd><strong>Siège social :</strong> ' . h($p['address'] ?: 'non renseigné') . '<br>' . ($p['logo'] !== '' ? '<img class="admin-logo" src="logo.php?id=' . (int)$p['id'] . '" alt="Logo"> ' : 'Pas de logo (initiales affichées). ') . '<br>' . h($p['public_phone'] ?: 'Téléphone non renseigné') . ((int)$p['can_help'] ? '<br><span class="pill pill-validated">Peut aider à l\'inscription</span>' : '') . '</dd>'
        . '<dt>Reçue le</dt><dd>' . h(date('d/m/Y à H:i', strtotime($p['created_at']))) . '</dd>'
        . ($p['refusal_reason'] !== '' ? '<dt>Motif du refus</dt><dd>' . h($p['refusal_reason']) . '</dd>' : '') . '</dl>'
+       . '<form method="post" action="partenaires.php?s=' . h($s) . '" enctype="multipart/form-data" class="mt-14">' . csrf_field() . '<input type="hidden" name="id" value="' . (int)$p['id'] . '"><input type="hidden" name="action" value="logo">'
+       . '<div class="field"><label for="lg' . (int)$p['id'] . '">' . ($p['logo'] !== '' ? 'Remplacer le logo' : 'Ajouter un logo') . ' <span class="hint">(JPEG, PNG ou WebP, 2 Mo maximum)</span></label><input id="lg' . (int)$p['id'] . '" name="logo" type="file" accept="image/jpeg,image/png,image/webp"></div>'
+       . ($p['logo'] !== '' ? '<div class="consent"><input id="rl' . (int)$p['id'] . '" name="remove_logo" type="checkbox" value="1"><label for="rl' . (int)$p['id'] . '">Retirer le logo actuel</label></div>' : '')
+       . '<button class="btn btn-small btn-ghost" type="submit">Enregistrer le logo</button></form>'
        . '<form method="post" action="partenaires.php?s=' . h($s) . '">' . csrf_field() . '<input type="hidden" name="id" value="' . (int)$p['id'] . '">';
     echo '<div class="consent mt-14"><input id="n' . (int)$p['id'] . '" name="notify" type="checkbox" value="1" checked><label for="n' . (int)$p['id'] . '">Prévenir le partenaire par e-mail</label></div>';
     if ($p['status'] !== 'approved') echo '<div class="field mt-14"><label for="r' . (int)$p['id'] . '">Motif du refus <span class="hint">(visible par le partenaire)</span></label><input id="r' . (int)$p['id'] . '" name="reason" type="text" maxlength="300"></div>';

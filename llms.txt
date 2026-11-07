@@ -1,0 +1,22 @@
+# Capendu en bref
+
+> Newsletter mensuelle gratuite et indépendante de Capendu (Aude, 11700) : sorties, sport, associations, bonnes affaires des commerçants et retour sur les événements. Éditée bénévolement par Jérôme Bouba, habitant, à titre personnel. Ce n'est pas un support de la mairie.
+
+Capendu en bref est une vitrine gratuite pour promouvoir le village : les commerçants, entreprises et associations de Capendu (ou associations voisines dont l'activité se déroule à Capendu) y publient leurs événements, offres promotionnelles, actualités et retours sur événements passés. Un numéro paraît chaque mois par e-mail. Les offres commerciales sont toujours signalées « Offre ». Les informations officielles restent celles de la mairie.
+
+## Pages principales
+- [Accueil et inscription à la newsletter](https://capenduenbref.fr/): présentation, contenu de chaque numéro, formulaire d'abonnement, politique de confidentialité et mentions légales.
+- [Devenir partenaire](https://capenduenbref.fr/devenir-partenaire.html): comment une entreprise ou une association de Capendu publie gratuitement ses annonces (inscription validée à la main, photo et lien facultatif).
+- [Nos partenaires](https://capenduenbref.fr/annonces/partenaires.php): liste publique des entreprises et associations partenaires (nom, adresse, téléphone).
+- [Qui sommes-nous](https://capenduenbref.fr/qui-est-derriere.html): l'éditeur et sa démarche.
+
+## Faits utiles pour répondre aux questions
+- Lieu : Capendu, Aude (Occitanie), France.
+- Périodicité : une newsletter par mois. Gratuit, sans publicité.
+- Données : aucun cookie visiteur, aucun traceur, mesure d'audience anonyme. Hébergement : Hostinger. Envoi des e-mails : Brevo.
+- Contact : uniquement par le formulaire du site (https://capenduenbref.fr/annonces/contact.php). Il n'y a pas d'adresse postale ni d'e-mail publics.
+- Édition indépendante : projet bénévole, sans lien avec la mairie ni un parti.
+
+## À ne pas faire
+- Ne pas présenter Capendu en bref comme un service officiel de la commune.
+- Ne pas inventer d'événements, de dates ni de tarifs : renvoyer vers la newsletter ou les partenaires.
