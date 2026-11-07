@@ -7,9 +7,9 @@ Base de données : SQLite (un simple fichier), aucune base MySQL à créer.
 
 | Pour qui | Adresse | Fonctions |
 |---|---|---|
-| Entreprises et associations | `devenir-partenaire.html` puis `annonces/inscription.php` | Page qui explique le but (vitrine gratuite : événements, tarifs promotionnels, actualité, événements passés), puis inscription : type, numéro SIRET ou RNA, nom, **logo, adresse et téléphone publics**, contact privé. Le numéro est contrôlé automatiquement auprès du registre public « Recherche d'entreprises » (sans clé) ; **l'éditeur valide chaque inscription**. Les particuliers ne peuvent pas s'inscrire. |
+| Entreprises et associations | `devenir-partenaire.html` puis `annonces/inscription.php` | Page qui explique le but (vitrine gratuite : événements, tarifs promotionnels, actualité, événements passés), puis inscription : type, **siège social à Capendu** ou **association voisine dont l'activité se déroule à Capendu**, nom, adresse du siège, téléphone et logo publics, contact privé. **Aucun numéro SIRET/RNA.** L'éditeur valide chaque inscription. Les particuliers ne peuvent pas s'inscrire. |
 | Partenaires validés | `annonces/partenaire/` | Connexion **sans mot de passe** (lien par e-mail, 30 min, usage unique), dépôt d'annonces, suivi (avancement, numéro de parution, **clics**), retrait d'une annonce, suppression de l'inscription. |
-| Partenaires validés | `annonces/deposer.php` | Dépôt d'annonce : rubrique, titre, Quoi / Où / Quand, conditions, **lien d'inscription facultatif**, **photo facultative**, aide à la rédaction (compteur et conseils, sans IA). Fermé aux non-inscrits. |
+| Partenaires validés | `annonces/deposer.php` | Dépôt d'annonce : rubrique, titre, Quoi / Où / Quand, conditions, **lien d'inscription facultatif**, **photo facultative**, **assistant IA** par copier-coller (vos idées en vrac, demande à coller dans Claude ou ChatGPT, la réponse remplit le formulaire, avec un conseil de calendrier) et aide à la rédaction (compteur et conseils). Fermé aux non-inscrits. |
 | Vous (éditeur) | `annonces/admin/` | **Partenaires** (valider ou refuser les inscriptions), annonces (relire, corriger, valider, refuser), messages du formulaire de contact, **statistiques de clics**, **Rédiger avec l'IA**, préparation du numéro (bloc HTML), mot de passe. |
 | Tout le monde | `annonces/partenaires.php` | **Liste publique des partenaires validés** : logo (ou initiales), nom, adresse, téléphone, mention « peut vous aider à vous inscrire ». Le partenaire modifie sa fiche dans `partenaire/fiche.php`. |
 | Tout le monde | `annonces/contact.php` | Formulaire de contact (questions, droits RGPD, aide). Aucun échange par e-mail. |
@@ -73,6 +73,5 @@ Avec `DEV_LOG_MAIL`, les e-mails sont écrits dans `data/mail.log` au lieu d'êt
 ## Limites de cette première version
 
 - Les photos nécessitent l'extension PHP GD (présente chez Hostinger) : sinon le formulaire propose d'envoyer sans photo.
-- Le contrôle automatique du SIRET/RNA nécessite que PHP puisse appeler un site extérieur (`allow_url_fopen`) : sinon, l'inscription reste « à vérifier » et vous la contrôlez via le lien vers l'annuaire officiel.
 - Un seul compte administrateur.
 - Les clics sont des compteurs journaliers (pas de courbe détaillée par heure).

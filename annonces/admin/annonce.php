@@ -28,10 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                        field('public_contact', 140), safe_url($link), $now, $id]);
         if ($link !== '' && safe_url($link) === '') $msg .= flash('err', 'Le lien n\'a pas été enregistré : il doit commencer par https://.');
     }
-    if ($act === 'validate' && (int)$a['org_verified'] === 0 && empty($_POST['org_ok'])) {
-        $msg .= flash('err', 'Annonce non validée : vérifiez d\'abord que l\'organisation est bien enregistrée (numéro SIRET ou RNA), puis cochez la case de vérification.');
-    } elseif ($act === 'validate') {
-        if ((int)$a['org_verified'] === 0) db()->prepare('UPDATE announcements SET org_verified = 2 WHERE id = ?')->execute([$id]);
+    if ($act === 'validate') {
         $issue = preg_match('/^\d{4}-\d{2}$/', (string)($_POST['issue'] ?? '')) ? $_POST['issue'] : next_issue();
         db()->prepare("UPDATE announcements SET status='validated', issue=?, refusal_reason='', updated_at=? WHERE id=?")->execute([$issue, $now, $id]);
         if (!empty($_POST['notify'])) send_mail($a['contact_email'], 'Votre annonce est validée – Capendu en bref',
@@ -68,8 +65,6 @@ if (in_array($a['status'], ['validated', 'published'], true))
   <h2>Annonceur <span class="hint">(privé)</span></h2>
   <dl class="kv">
     <dt>Organisation</dt><dd><?= h($a['org_name']) ?> <span class="hint">(<?= h(ORG_TYPES[$a['org_type']] ?? 'type non renseigné') ?>)</span></dd>
-    <dt>Numéro officiel</dt><dd><?= h($a['org_id'] ?: '–') ?> <?php if ($a['org_id'] !== ''): ?><a href="https://annuaire-entreprises.data.gouv.fr/rechercher?terme=<?= h(rawurlencode($a['org_id'])) ?>" rel="noopener noreferrer" target="_blank">vérifier dans l'annuaire officiel</a><?php endif; ?></dd>
-    <dt>Contrôle</dt><dd><?php if ((int)$a['org_verified'] === 1): ?><span class="pill pill-validated">Trouvé au registre</span> <?= h($a['org_check']) ?><?php elseif ((int)$a['org_verified'] === 2): ?><span class="pill pill-validated">Vérifié par l'éditeur</span><?php else: ?><span class="pill pill-pending">À vérifier</span> non confirmé automatiquement<?php endif; ?></dd>
     <dt>Nom</dt><dd><?= h($a['contact_name']) ?></dd>
     <dt>E-mail</dt><dd><?= h($a['contact_email']) ?></dd>
     <dt>Téléphone</dt><dd><?= h($a['contact_phone'] ?: '–') ?></dd>
@@ -93,7 +88,6 @@ if (in_array($a['status'], ['validated', 'published'], true))
     <div class="field"><label for="link_url">Lien du bouton « En savoir plus » (inscription ou information)</label><input id="link_url" name="link_url" type="url" maxlength="300" value="<?= h($a['link_url']) ?>" placeholder="Vide = page de l'annonce sur le site"></div>
   </div>
   <?php if ($a['photo'] !== ''): ?><div class="mt-18"><p class="hint">Photo jointe (non publique tant que l'annonce n'est pas validée)</p><img class="fiche-photo" src="photo.php?id=<?= $id ?>" alt="Photo jointe à l'annonce"><div class="consent"><input id="remove_photo" name="remove_photo" type="checkbox" value="1"><label for="remove_photo">Retirer la photo de cette annonce</label></div></div><?php endif; ?>
-  <?php if ((int)$a['org_verified'] === 0): ?><div class="consent mt-18"><input id="org_ok" name="org_ok" type="checkbox" value="1"><label for="org_ok">J'ai vérifié que cette organisation est bien enregistrée (SIRET ou RNA), via le lien « vérifier dans l'annuaire officiel ».</label></div><?php endif; ?>
   <div class="consent mt-18"><input id="notify" name="notify" type="checkbox" value="1" checked><label for="notify">Prévenir l'annonceur par e-mail (validation ou refus)</label></div>
   <div class="form-grid mt-18">
     <div class="field"><label for="issue">Numéro de parution</label><input id="issue" name="issue" type="month" value="<?= h($a['issue'] !== '' ? $a['issue'] : next_issue()) ?>"></div>

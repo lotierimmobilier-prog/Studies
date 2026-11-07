@@ -66,17 +66,17 @@ function db(): PDO {
     CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, subject TEXT NOT NULL, name TEXT NOT NULL DEFAULT '',
         reply_to TEXT NOT NULL DEFAULT '', message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new');
     CREATE TABLE IF NOT EXISTS partners (id INTEGER PRIMARY KEY AUTOINCREMENT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
-        org_type TEXT NOT NULL, org_id TEXT NOT NULL, org_name TEXT NOT NULL, contact_name TEXT NOT NULL, contact_email TEXT NOT NULL, contact_phone TEXT NOT NULL DEFAULT '',
+        org_type TEXT NOT NULL, org_id TEXT NOT NULL DEFAULT '', org_name TEXT NOT NULL, contact_name TEXT NOT NULL, contact_email TEXT NOT NULL, contact_phone TEXT NOT NULL DEFAULT '',
         org_verified INTEGER NOT NULL DEFAULT 0, org_check TEXT NOT NULL DEFAULT '', refusal_reason TEXT NOT NULL DEFAULT '', consent_at TEXT NOT NULL);
     CREATE UNIQUE INDEX IF NOT EXISTS partners_email ON partners (contact_email);
-    CREATE UNIQUE INDEX IF NOT EXISTS partners_orgid ON partners (org_id);
+    DROP INDEX IF EXISTS partners_orgid;
     CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS clicks (announcement_id INTEGER NOT NULL, day TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (announcement_id, day));
     CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0);");
     $cols = array_column($pdo->query('PRAGMA table_info(announcements)')->fetchAll(), 'name');
     if (!in_array('photo', $cols, true)) $pdo->exec("ALTER TABLE announcements ADD COLUMN photo TEXT NOT NULL DEFAULT ''");
     $pcols = array_column($pdo->query('PRAGMA table_info(partners)')->fetchAll(), 'name');
-    foreach (['address' => "TEXT NOT NULL DEFAULT ''", 'public_phone' => "TEXT NOT NULL DEFAULT ''", 'logo' => "TEXT NOT NULL DEFAULT ''", 'can_help' => 'INTEGER NOT NULL DEFAULT 0'] as $col => $def) {
+    foreach (['address' => "TEXT NOT NULL DEFAULT ''", 'public_phone' => "TEXT NOT NULL DEFAULT ''", 'logo' => "TEXT NOT NULL DEFAULT ''", 'can_help' => 'INTEGER NOT NULL DEFAULT 0', 'eligibility' => "TEXT NOT NULL DEFAULT 'siege'", 'activity_place' => "TEXT NOT NULL DEFAULT ''"] as $col => $def) {
         if (!in_array($col, $pcols, true)) $pdo->exec("ALTER TABLE partners ADD COLUMN $col $def");
     }
     if (!in_array('partner_id', $cols, true)) $pdo->exec('ALTER TABLE announcements ADD COLUMN partner_id INTEGER NOT NULL DEFAULT 0');
@@ -215,46 +215,32 @@ function save_photo(array $f): array {
     return $ok ? [$name, ''] : ['', 'La photo n\'a pas pu être enregistrée. Réessayez.'];
 }
 
-// ---------- Dépôt réservé aux entreprises et associations enregistrées ----------
+// ---------- Éligibilité : siège social à Capendu, ou association voisine dont l'activité se déroule à Capendu ----------
 const ORG_TYPES = ['entreprise' => 'Entreprise, commerçant ou artisan', 'association' => 'Association ou club'];
+const ELIGIBILITY = ['siege' => 'Mon siège social est à Capendu', 'voisine' => 'Association voisine : mon activité se déroule à Capendu'];
 
-function luhn_ok(string $digits): bool {
-    $sum = 0; $alt = false;
-    for ($i = strlen($digits) - 1; $i >= 0; $i--) {
-        $n = (int)$digits[$i];
-        if ($alt) { $n *= 2; if ($n > 9) $n -= 9; }
-        $sum += $n; $alt = !$alt;
+function mentions_capendu(string $text): bool { return preg_match('/\bcapendu\b|\b11700\b/iu', $text) === 1; }
+
+/** Règles d'inscription. @return string[] messages d'erreur */
+function check_eligibility(string $type, string $elig, string $address, string $activity): array {
+    $e = [];
+    if (!isset(ORG_TYPES[$type])) $e[] = 'Indiquez si vous inscrivez une entreprise ou une association.';
+    if (!isset(ELIGIBILITY[$elig])) { $e[] = 'Indiquez où se trouve votre siège social ou où se déroule votre activité.'; return $e; }
+    if ($elig === 'siege' && !mentions_capendu($address)) $e[] = 'Le siège social doit être à Capendu (11700). Si vous êtes une association voisine dont l\'activité se déroule à Capendu, choisissez « association voisine ».';
+    if ($elig === 'voisine') {
+        if ($type !== 'association') $e[] = 'Seules les associations voisines peuvent s\'inscrire sans siège social à Capendu.';
+        if (!mentions_capendu($activity)) $e[] = 'Indiquez le lieu de votre activité à Capendu (par exemple « Salle des fêtes de Capendu »).';
     }
-    return $sum % 10 === 0;
+    return $e;
 }
-/** Normalise et valide un identifiant. @return array{0:string,1:string} [identifiant normalisé, message d'erreur] */
-function clean_org_id(string $type, string $raw): array {
-    $id = strtoupper(preg_replace('/[\s.\-]/', '', $raw) ?? '');
-    if ($type === 'association' && preg_match('/^W\d{9}$/', $id)) return [$id, ''];                  // numéro RNA
-    if (preg_match('/^\d{14}$/', $id) && (luhn_ok($id) || str_starts_with($id, '356000000'))) return [$id, ''];   // SIRET (La Poste : exception)
-    return ['', $type === 'association'
-        ? 'Indiquez le numéro RNA de l\'association (W suivi de 9 chiffres) ou son SIRET (14 chiffres).'
-        : 'Indiquez le numéro SIRET de l\'entreprise (14 chiffres, sans espace ou avec).'];
-}
-/**
- * Contrôle auprès du registre public « Recherche d'entreprises » (data.gouv.fr, sans clé). Meilleur effort :
- * si le service ne répond pas, l'annonce reste « à vérifier » par l'éditeur.
- * @return array{0:bool,1:string} [trouvé et actif, libellé officiel]
- */
-function verify_org(string $id): array {
-    if (defined('ORG_CHECK_DISABLED') && ORG_CHECK_DISABLED) return [false, ''];
-    $ctx = stream_context_create(['http' => ['timeout' => 4, 'ignore_errors' => true, 'header' => "Accept: application/json\r\nUser-Agent: CapenduEnBref/1.0\r\n"]]);
-    $json = @file_get_contents('https://recherche-entreprises.api.gouv.fr/search?per_page=1&q=' . rawurlencode($id), false, $ctx);
-    $data = $json ? json_decode($json, true) : null;
-    $r = $data['results'][0] ?? null;
-    if (!is_array($r)) return [false, ''];
-    $matchSiret = false;
-    foreach (array_merge([$r['siege'] ?? []], $r['matching_etablissements'] ?? []) as $e) { if (($e['siret'] ?? '') === $id) $matchSiret = true; }
-    $matchRna = ($r['complements']['identifiant_association'] ?? '') === $id;
-    if (!$matchSiret && !$matchRna) return [false, ''];
-    $actif = ($r['etat_administratif'] ?? 'A') === 'A';
-    $label = trim(($r['nom_complet'] ?? '') . ' — ' . ($r['siege']['libelle_commune'] ?? '') . ($actif ? '' : ' (cessée)'));
-    return [$actif, mb_substr($label, 0, 200)];
+
+/** Prochain numéro et date limite de dépôt (le 25 de chaque mois). @return array{0:string,1:string} [mois du numéro, date limite] */
+function next_deadline(): array {
+    $day = (int)date('j');
+    $monthsAhead = $day <= 25 ? 1 : 2;
+    $issue = strtotime('first day of +' . $monthsAhead . ' month');
+    $deadline = $day <= 25 ? strtotime(date('Y-m-25')) : strtotime(date('Y-m-25', strtotime('first day of next month')));
+    return [MOIS[(int)date('n', $issue)] . ' ' . date('Y', $issue), (int)date('j', $deadline) . ' ' . MOIS[(int)date('n', $deadline)]];
 }
 
 // ---------- Logos des partenaires : réduits, conservés en PNG (transparence), servis seulement pour les partenaires validés ----------

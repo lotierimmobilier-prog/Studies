@@ -15,24 +15,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($_POST['remove_logo']) && $logo !== '') { delete_logo($logo); $logo = ''; }
     [$newLogo, $logoErr] = save_logo($_FILES['logo'] ?? []);
     if ($logoErr !== '') $err = $logoErr; elseif ($newLogo !== '') { if ($logo !== '') delete_logo($logo); $logo = $newLogo; }
-    if ($address === '') $err = $err ?: 'Indiquez l\'adresse de votre organisation.';
+    $activity = $p['eligibility'] === 'voisine' ? one_line((string)($_POST['activity_place'] ?? ''), 200) : '';
+    $elig = check_eligibility($p['org_type'], $p['eligibility'], $address, $activity ?: (string)$p['activity_place']);
+    if ($elig) $err = $err ?: $elig[0];
+    elseif ($address === '') $err = $err ?: 'Indiquez l\'adresse du siège social.';
     elseif (!preg_match('/\d{2}/', $phone)) $err = $err ?: 'Indiquez un numéro de téléphone.';
     if ($err !== '') $msg = flash('err', h($err));
     else {
-        db()->prepare('UPDATE partners SET address = ?, public_phone = ?, logo = ?, can_help = ?, updated_at = ? WHERE id = ?')->execute([$address, $phone, $logo, $help, date('c'), $p['id']]);
+        db()->prepare('UPDATE partners SET address = ?, public_phone = ?, logo = ?, can_help = ?, activity_place = CASE WHEN eligibility = \'voisine\' THEN ? ELSE \'\' END, updated_at = ? WHERE id = ?')->execute([$address, $phone, $logo, $help, $activity !== '' ? $activity : (string)$p['activity_place'], date('c'), $p['id']]);
         send_mail(ADMIN_EMAIL, 'Fiche partenaire modifiée', "Le partenaire « {$p['org_name']} » a modifié sa fiche publique.\n" . SITE_URL . "/annonces/admin/partenaires.php?s=approved\n");
         $msg = flash('ok', 'Votre fiche a été mise à jour.');
         $st = db()->prepare('SELECT * FROM partners WHERE id = ?'); $st->execute([$p['id']]); $p = $st->fetch();
     }
 }
 layout_top('Ma fiche partenaire – Capendu en bref', '<a class="btn btn-small btn-ghost" href="index.php">Mon espace</a>');
-echo '<h1>Ma fiche partenaire</h1>' . $msg . '<p class="lead">Ces informations sont publiques : elles apparaissent sur la <a href="../partenaires.php">liste des partenaires</a>. Le nom et le numéro officiel ne peuvent pas être modifiés ici.</p>';
+echo '<h1>Ma fiche partenaire</h1>' . $msg . '<p class="lead">Ces informations sont publiques : elles apparaissent sur la <a href="../partenaires.php">liste des partenaires</a>. Le nom de l\'organisation ne peut pas être modifié ici.</p>';
 ?>
 <form class="card" method="post" action="fiche.php" enctype="multipart/form-data" novalidate>
   <?= csrf_field() ?>
-  <dl class="kv"><dt>Organisation</dt><dd><?= h($p['org_name']) ?></dd><dt>Numéro officiel</dt><dd><?= h($p['org_id']) ?></dd></dl>
+  <dl class="kv"><dt>Organisation</dt><dd><?= h($p['org_name']) ?></dd><dt>Statut</dt><dd><?= h(ELIGIBILITY[$p['eligibility']] ?? '') ?></dd></dl>
   <div class="form-grid mt-18">
-    <div class="field full"><label for="address">Adresse de l'organisation</label><input id="address" name="address" type="text" maxlength="200" value="<?= h($p['address']) ?>" required></div>
+    <div class="field full"><label for="address">Adresse du siège social</label><input id="address" name="address" type="text" maxlength="200" value="<?= h($p['address']) ?>" required></div>
+    <?php if ($p['eligibility'] === 'voisine'): ?><div class="field full"><label for="activity_place">Lieu de l'activité à Capendu</label><input id="activity_place" name="activity_place" type="text" maxlength="200" value="<?= h($p['activity_place']) ?>"></div><?php endif; ?>
     <div class="field"><label for="public_phone">Téléphone de l'organisation</label><input id="public_phone" name="public_phone" type="text" maxlength="30" value="<?= h($p['public_phone']) ?>" required></div>
     <div class="field"><label for="logo">Nouveau logo <span class="hint">(JPEG, PNG ou WebP, 2 Mo maximum)</span></label><input id="logo" name="logo" type="file" accept="image/jpeg,image/png,image/webp"></div>
   </div>

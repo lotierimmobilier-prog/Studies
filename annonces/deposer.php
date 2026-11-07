@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-// Dépôt d'une annonce : réservé aux partenaires (entreprises et associations enregistrées) dont l'inscription a été validée.
+// Dépôt d'une annonce : réservé aux partenaires (siège social à Capendu, ou association voisine active à Capendu) dont l'inscription a été validée.
 require __DIR__ . '/inc/layout.php';
 security_headers();
 start_session();
@@ -9,8 +9,8 @@ $partner = current_partner();
 if (!$partner) {
     layout_top('Déposer une annonce – Capendu en bref', '<a class="btn btn-small btn-ghost" href="partenaire/">Espace partenaire</a>');
     echo '<h1>Déposer une annonce</h1>';
-    echo '<p class="notice notice-info"><strong>Réservé aux entreprises et associations enregistrées.</strong> Pour déposer une annonce, votre organisation doit d\'abord être inscrite et validée par l\'éditeur. Les particuliers ne peuvent pas déposer d\'annonce.</p>';
-    echo '<div class="card"><h2>1. Inscrivez votre organisation</h2><p>Il suffit d\'un numéro SIRET (ou RNA pour une association). L\'éditeur valide votre inscription après vérification.</p><div class="actions"><a class="btn" href="inscription.php">Inscrire mon organisation</a></div></div>';
+    echo '<p class="notice notice-info"><strong>Réservé aux entreprises et associations dont le siège social est à Capendu,</strong> et aux associations voisines dont l\'activité se déroule sur la commune. Votre organisation doit d\'abord être inscrite et validée par l\'éditeur. Les particuliers ne peuvent pas déposer d\'annonce.</p>';
+    echo '<div class="card"><h2>1. Inscrivez votre organisation</h2><p>Il suffit de quelques informations sur votre organisation (nom, adresse du siège social, téléphone, logo). L\'éditeur valide votre inscription.</p><div class="actions"><a class="btn" href="inscription.php">Inscrire mon organisation</a></div></div>';
     echo '<div class="card"><h2>2. Déjà inscrit et validé ?</h2><p>Ouvrez votre espace partenaire : un lien de connexion est envoyé à votre adresse e-mail, sans mot de passe. Vous pourrez alors déposer vos annonces.</p><div class="actions"><a class="btn btn-ghost" href="partenaire/">Ouvrir mon espace partenaire</a></div></div>';
     layout_bottom(); echo '</body></html>'; exit;
 }
@@ -69,7 +69,23 @@ if (isset($_GET['ok'])) {
     layout_bottom(); echo '</body></html>'; exit;
 }
 if ($errors) echo flash('err', '<strong>Quelques points à corriger :</strong><br>' . implode('<br>', array_map('h', $errors)));
+[$issueLabel, $deadlineLabel] = next_deadline();
+echo '<p class="notice notice-info"><strong>Calendrier :</strong> pour paraître dans le numéro de <strong>' . h($issueLabel) . '</strong>, déposez votre annonce <strong>avant le ' . h($deadlineLabel) . '</strong>. Pensez à publier une annonce avant votre événement, puis un « retour sur les événements » après.</p>';
 ?>
+<details class="assistant" open data-org="<?= h($partner['org_name']) ?>" data-issue="<?= h($issueLabel) ?>" data-deadline="<?= h($deadlineLabel) ?>">
+  <summary>Assistant IA : organisez votre publication</summary>
+  <p>Racontez en vrac ce que vous voulez annoncer. L'assistant prépare une demande à coller dans l'IA de votre choix (Claude, ChatGPT…), qui vous renvoie une annonce claire, rangée dans la bonne rubrique avec un conseil de calendrier. Vous collez sa réponse ici et le formulaire se remplit tout seul. Vous relisez et vous gardez la main.</p>
+  <ol class="assist-steps">
+    <li><label for="ia_notes"><strong>1. Vos idées en vrac</strong> <span class="hint">(événement, prix, dates, lieu, public…)</span></label>
+      <textarea id="ia_notes" placeholder="Ex. : repas de fin d'année de l'association le 12 décembre à la salle des fêtes, cassoulet et tombola, 15 euros, réservation avant le 8"></textarea></li>
+    <li><strong>2. Copiez la demande</strong> <button class="btn btn-small" type="button" id="ia_copy">Copier la demande pour l'IA</button> <span class="hint" id="ia_copied" role="status"></span><br>
+      <span class="hint">Collez-la dans votre assistant : <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">claude.ai</a> ou <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">chatgpt.com</a>. Ne lui donnez aucune donnée personnelle (noms de particuliers, téléphones).</span></li>
+    <li><label for="ia_reply"><strong>3. Collez sa réponse</strong></label>
+      <textarea id="ia_reply" placeholder="RUBRIQUE: …&#10;TITRE: …&#10;TEXTE: …"></textarea>
+      <button class="btn btn-small btn-ghost" type="button" id="ia_fill">Remplir le formulaire avec la réponse</button> <span class="hint" id="ia_status" role="status"></span>
+      <p id="ia_conseil" class="ia-conseil" hidden></p></li>
+  </ol>
+</details>
 <form class="card" method="post" action="deposer.php" enctype="multipart/form-data" novalidate>
   <?= csrf_field() ?>
   <input type="hidden" name="stamp" value="<?= h(form_stamp()) ?>">
