@@ -31,3 +31,57 @@
   ['input', 'change'].forEach(function (e) { document.querySelector('form').addEventListener(e, refresh); });
   refresh();
 })();
+
+// ---------- Assistant IA : tout se passe dans votre navigateur ; rien n'est envoyé à une IA par ce site ----------
+(function () {
+  var box = document.querySelector('.assistant');
+  if (!box) return;
+  var $ = function (id) { return document.getElementById(id); };
+  var RUBRIQUES = { offre: 'offre', 'bonnes affaires': 'offre', promo: 'offre', sport: 'sport', asso: 'asso', association: 'asso', 'vie associative': 'asso',
+                    sortie: 'sortie', sorties: 'sortie', loisirs: 'sortie', fetes: 'sortie', 'fêtes': 'sortie', retour: 'retour', 'retour sur les événements': 'retour',
+                    pratique: 'pratique', 'infos pratiques': 'pratique', quotidien: 'pratique' };
+
+  function buildPrompt(notes) {
+    var org = box.getAttribute('data-org') || '', issue = box.getAttribute('data-issue') || '', dl = box.getAttribute('data-deadline') || '';
+    return "Tu aides une organisation de Capendu (Aude) à rédiger une annonce pour la newsletter mensuelle « Capendu en bref ». Les lecteurs ont de 25 à 85 ans.\n\n" +
+      "ORGANISATION : " + org + "\nPROCHAIN NUMÉRO : " + issue + " (annonces à déposer avant le " + dl + ")\n\n" +
+      "RÈGLES\n- Phrases courtes, mots simples, ton chaleureux et neutre, vouvoiement.\n- Garde tous les faits exacts (dates, heures, lieux, prix, conditions). N'invente rien ; si une information manque, laisse le champ vide.\n" +
+      "- Titre : 70 caractères maximum. Texte : 450 caractères maximum, sans émoji ni majuscules criardes.\n- Une offre commerciale doit rester clairement une offre, avec prix, dates et conditions.\n\n" +
+      "FORMAT DE RÉPONSE (à respecter strictement, sans autre commentaire)\nRUBRIQUE: offre, sport, asso, sortie, retour ou pratique (retour = compte rendu d'un événement passé)\nTITRE: ...\nTEXTE: ...\nOU: ...\nQUAND: ...\nCONDITIONS: ...\n" +
+      "CONSEIL: une phrase pour organiser la publication (moment idéal pour déposer, et idée de suite comme un « retour sur l'événement » après la date)\n\n" +
+      "MES IDÉES EN VRAC\n" + (notes || '(à compléter)');
+  }
+
+  function parse(text) {
+    var out = {}, key = null, lines = String(text || '').replace(/\r/g, '').replace(/\*\*/g, '').split('\n');
+    var re = /^\s*(RUBRIQUE|TITRE|TEXTE|OU|OÙ|QUAND|CONDITIONS|CONSEIL)\s*:\s*(.*)$/i;
+    lines.forEach(function (l) {
+      var m = l.match(re);
+      if (m) { key = m[1].toUpperCase().replace('Ù', 'U'); out[key] = m[2].trim(); }
+      else if (key === 'TEXTE' && l.trim() !== '') out[key] += ' ' + l.trim();
+    });
+    return out;
+  }
+
+  function set(id, v) { var el = $(id); if (el && v) { el.value = v; } }
+  function fill() {
+    var r = parse($('ia_reply').value), st = $('ia_status'), n = 0;
+    if (!r.TITRE && !r.TEXTE) { st.textContent = 'Réponse non reconnue : elle doit contenir « TITRE: » et « TEXTE: ».'; $('ia_conseil').hidden = true; return; }
+    set('title', (r.TITRE || '').slice(0, 90)); set('what', (r.TEXTE || '').slice(0, 700)); set('place', (r.OU || '').slice(0, 140));
+    set('whenx', (r.QUAND || '').slice(0, 140)); set('conditions', (r.CONDITIONS || '').slice(0, 240));
+    var rub = RUBRIQUES[(r.RUBRIQUE || '').trim().toLowerCase()];
+    if (rub) { var radio = document.querySelector('input[name="category"][value="' + rub + '"]'); if (radio) radio.checked = true; }
+    ['title', 'what', 'place', 'whenx', 'conditions'].forEach(function (i) { if ($(i) && $(i).value) n++; });
+    st.textContent = n + ' champ(s) rempli(s) : relisez et corrigez avant d\'envoyer.';
+    var c = $('ia_conseil'); if (r.CONSEIL) { c.textContent = 'Conseil : ' + r.CONSEIL; c.hidden = false; } else { c.hidden = true; }
+    $('what').dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  $('ia_copy').addEventListener('click', function () {
+    var text = buildPrompt($('ia_notes').value), ok = function () { $('ia_copied').textContent = 'Demande copiée : collez-la dans votre assistant.'; };
+    if (navigator.clipboard) { navigator.clipboard.writeText(text).then(ok, function () { window.prompt('Copiez la demande :', text); }); }
+    else { window.prompt('Copiez la demande :', text); }
+  });
+  $('ia_fill').addEventListener('click', fill);
+  window.CBAide = { parse: parse, buildPrompt: buildPrompt };
+})();

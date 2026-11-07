@@ -58,11 +58,11 @@ layout_top('Espace partenaire – Capendu en bref', $nav);
 echo '<h1>Espace partenaire</h1>' . $msg;
 
 if (!$email) {
-    echo '<p class="lead">Espace réservé aux entreprises et associations <strong>inscrites et validées</strong>. Déposez vos annonces, suivez leur avancement, le numéro de parution et le nombre de clics. Pas de mot de passe : indiquez l\'adresse e-mail de votre inscription, nous vous envoyons un lien de connexion.</p>';
+    echo '<p class="lead">Espace réservé aux entreprises et associations <strong>inscrites et validées</strong> (siège social à Capendu, ou association voisine dont l\'activité se déroule à Capendu). Déposez vos annonces, suivez leur avancement, le numéro de parution et le nombre de clics. Pas de mot de passe : indiquez l\'adresse e-mail de votre inscription, nous vous envoyons un lien de connexion.</p>';
     echo '<form class="card" method="post" action="index.php">' . csrf_field() . '<input type="hidden" name="action" value="link">'
        . '<div class="field"><label for="email">Votre adresse e-mail</label><input id="email" name="email" type="email" autocomplete="email" required></div>'
        . '<div class="actions"><button class="btn" type="submit">Recevoir mon lien de connexion</button></div></form>';
-    echo '<div class="card"><h2>Pas encore inscrit ?</h2><p>Inscrivez votre entreprise ou votre association : l\'éditeur valide votre inscription après vérification de votre numéro SIRET ou RNA.</p><div class="actions"><a class="btn" href="../inscription.php">Inscrire mon organisation</a></div></div>';
+    echo '<div class="card"><h2>Pas encore inscrit ?</h2><p>Inscrivez votre entreprise ou votre association (siège social à Capendu, ou association voisine dont l\'activité se déroule à Capendu) : l\'éditeur valide votre inscription.</p><div class="actions"><a class="btn" href="../inscription.php">Inscrire mon organisation</a></div></div>';
     layout_bottom(); echo '</body></html>'; exit;
 }
 

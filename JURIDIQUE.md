@@ -22,8 +22,8 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - **Sécurité** : mot de passe fort et unique sur Brevo et sur l'hébergeur, double authentification si disponible.
 - Aucune donnée vendue, louée ni transmise aux commerçants ou associations.
 - **Liste publique des partenaires** : nom, logo, adresse et téléphone de l'organisation publiés avec l'autorisation cochée à l'inscription (distincts des coordonnées personnelles du représentant, qui restent privées). Modification et suppression possibles par le partenaire.
-- **Inscription des partenaires** : entreprises et associations enregistrées uniquement (SIRET ou RNA), validées par l'éditeur ; contrôle du numéro auprès du registre public national (seul le numéro est transmis). Durées : refusée 30 jours, en attente 90 jours, validée 24 mois sans activité.
-- **Aide à la rédaction par IA** : par copier-coller, sans donnée personnelle ni photo ; l'éditeur relit et décide. Mentionnée dans la politique de confidentialité.
+- **Inscription des partenaires** : entreprises et associations dont le siège social est à Capendu, et associations voisines dont l'activité se déroule à Capendu, validées par l'éditeur. Aucun numéro d'immatriculation collecté, aucun appel à un service extérieur. Durées : refusée 30 jours, en attente 90 jours, validée 24 mois sans activité.
+- **Assistants d'écriture par IA** (partenaires et éditeur) : par copier-coller, sans clé ni envoi de données par le site ; les partenaires sont invités à ne coller aucune donnée personnelle ; l'éditeur relit et décide. Mentionnés dans la politique de confidentialité.
 - **Espace annonces** (`annonces/`) : traitement distinct à inscrire au registre (données des annonceurs, durées 30 / 90 jours et 12 mois,
   consentement au dépôt). Un cookie technique de session est déposé uniquement après connexion à l'espace partenaire ou admin
   (exempté de consentement, mentionné dans la politique de confidentialité).

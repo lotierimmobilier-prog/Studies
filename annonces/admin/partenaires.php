@@ -13,22 +13,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($p) {
         $now = date('c');
         if ($act === 'approve') {
-            if ((int)$p['org_verified'] === 0 && empty($_POST['org_ok'])) {
-                $msg = flash('err', 'Inscription non validée : vérifiez d\'abord le numéro officiel dans l\'annuaire, puis cochez la case de vérification.');
-            } else {
-                db()->prepare("UPDATE partners SET status='approved', org_verified = CASE WHEN org_verified = 0 THEN 2 ELSE org_verified END, refusal_reason='', updated_at=? WHERE id=?")->execute([$now, $id]);
-                if (!empty($_POST['notify'])) send_mail($p['contact_email'], 'Votre inscription est validée – Capendu en bref',
-                    "Bonjour {$p['contact_name']},\n\nL'inscription de « {$p['org_name']} » est validée. Vous pouvez maintenant déposer vos annonces :\n"
-                    . "1. ouvrez votre espace partenaire : " . SITE_URL . "/annonces/partenaire/ (un lien de connexion vous est envoyé par e-mail, sans mot de passe) ;\n"
-                    . "2. cliquez sur « Déposer une annonce ».\n\nMerci de participer à la vie de Capendu !\nJérôme BOUBA, Capendu en bref" . auto_notice());
-                $msg = flash('ok', 'Inscription validée : ' . h($p['org_name']) . ' peut maintenant déposer des annonces.');
-            }
+            db()->prepare("UPDATE partners SET status='approved', org_verified = 2, refusal_reason='', updated_at=? WHERE id=?")->execute([$now, $id]);
+            if (!empty($_POST['notify'])) send_mail($p['contact_email'], 'Votre inscription est validée – Capendu en bref',
+                "Bonjour {$p['contact_name']},\n\nL'inscription de « {$p['org_name']} » est validée. Vous pouvez maintenant déposer vos annonces :\n"
+                . "1. ouvrez votre espace partenaire : " . SITE_URL . "/annonces/partenaire/ (un lien de connexion vous est envoyé par e-mail, sans mot de passe) ;\n"
+                . "2. cliquez sur « Déposer une annonce ».\n\nMerci de participer à la vie de Capendu !\nJérôme BOUBA, Capendu en bref" . auto_notice());
+            $msg = flash('ok', 'Inscription validée : ' . h($p['org_name']) . ' peut maintenant déposer des annonces.');
         } elseif ($act === 'refuse') {
             $reason = one_line((string)($_POST['reason'] ?? ''), 300);
             db()->prepare("UPDATE partners SET status='refused', refusal_reason=?, updated_at=? WHERE id=?")->execute([$reason, $now, $id]);
             if (!empty($_POST['notify'])) send_mail($p['contact_email'], 'Votre inscription – Capendu en bref',
                 "Bonjour {$p['contact_name']},\n\nNous ne pouvons pas valider l'inscription de « {$p['org_name']} » pour le moment." . ($reason !== '' ? "\n\nMotif : $reason" : '')
-                . "\n\nLe service est réservé aux entreprises et associations enregistrées. Si vous pensez à une erreur, utilisez le formulaire de contact." . auto_notice());
+                . "\n\nLe service est réservé aux entreprises et associations dont le siège social est à Capendu, et aux associations voisines dont l'activité se déroule à Capendu. Si vous pensez à une erreur, utilisez le formulaire de contact." . auto_notice());
             $msg = flash('ok', 'Inscription refusée.');
         } elseif ($act === 'reopen') {
             db()->prepare("UPDATE partners SET status='pending', updated_at=? WHERE id=?")->execute([$now, $id]); $msg = flash('ok', 'Remis en attente.');
@@ -50,23 +46,19 @@ $st = db()->prepare('SELECT * FROM partners WHERE status = ? ORDER BY created_at
 
 layout_top('Partenaires – Administration', admin_nav('partenaires.php'));
 echo '<h1>Inscriptions des partenaires</h1>' . $msg;
-echo '<p class="lead">Seules les entreprises et associations enregistrées peuvent déposer des annonces. Vérifiez le numéro officiel avant de valider.</p>';
+echo '<p class="lead">Seules les entreprises et associations dont le <strong>siège social est à Capendu</strong>, et les <strong>associations voisines dont l\'activité se déroule à Capendu</strong>, peuvent déposer des annonces. Vérifiez cette condition avant de valider.</p>';
 echo '<nav class="tabs" aria-label="Filtrer">';
 foreach (PARTNER_STATUTS as $k => $l) echo '<a href="?s=' . h($k) . '"' . ($s === $k ? ' aria-current="page"' : '') . '>' . h($l) . ' (' . $counts[$k] . ')</a>';
 echo '</nav>';
 if (!$rows) echo '<p>Aucune inscription dans cette catégorie.</p>';
 foreach ($rows as $p) {
-    $verif = (int)$p['org_verified'] === 1 ? '<span class="pill pill-validated">Trouvé au registre</span> ' . h($p['org_check'])
-           : ((int)$p['org_verified'] === 2 ? '<span class="pill pill-validated">Vérifié par l\'éditeur</span>' : '<span class="pill pill-pending">À vérifier</span> non confirmé automatiquement');
+    $elig = $p['eligibility'] === 'voisine' ? '<span class="pill pill-pending">Association voisine</span> activité à Capendu : ' . h($p['activity_place']) : '<span class="pill pill-validated">Siège social à Capendu</span>';
     echo '<div class="card"><h2>' . h($p['org_name']) . ' <span class="hint">(' . h(ORG_TYPES[$p['org_type']] ?? '') . ')</span></h2>'
-       . '<dl class="kv"><dt>Numéro officiel</dt><dd>' . h($p['org_id']) . ' <a href="https://annuaire-entreprises.data.gouv.fr/rechercher?terme=' . h(rawurlencode($p['org_id'])) . '" rel="noopener noreferrer" target="_blank">vérifier dans l\'annuaire officiel</a></dd>'
-       . '<dt>Contrôle</dt><dd>' . $verif . '</dd><dt>Contact</dt><dd>' . h($p['contact_name']) . ' · ' . h($p['contact_email']) . ($p['contact_phone'] !== '' ? ' · ' . h($p['contact_phone']) : '') . '</dd>'
-       . '<dt>Fiche publique</dt><dd>' . ($p['logo'] !== '' ? '<img class="admin-logo" src="logo.php?id=' . (int)$p['id'] . '" alt="Logo"> ' : 'Pas de logo (initiales affichées). ') . '<br>' . h($p['address'] ?: 'Adresse non renseignée') . ' · ' . h($p['public_phone'] ?: 'Téléphone non renseigné') . ((int)$p['can_help'] ? '<br><span class="pill pill-validated">Peut aider à l\'inscription</span>' : '') . '</dd>'
+       . '<dl class="kv"><dt>Éligibilité</dt><dd>' . $elig . '</dd><dt>Contact</dt><dd>' . h($p['contact_name']) . ' · ' . h($p['contact_email']) . ($p['contact_phone'] !== '' ? ' · ' . h($p['contact_phone']) : '') . '</dd>'
+       . '<dt>Fiche publique</dt><dd><strong>Siège social :</strong> ' . h($p['address'] ?: 'non renseigné') . '<br>' . ($p['logo'] !== '' ? '<img class="admin-logo" src="logo.php?id=' . (int)$p['id'] . '" alt="Logo"> ' : 'Pas de logo (initiales affichées). ') . '<br>' . h($p['public_phone'] ?: 'Téléphone non renseigné') . ((int)$p['can_help'] ? '<br><span class="pill pill-validated">Peut aider à l\'inscription</span>' : '') . '</dd>'
        . '<dt>Reçue le</dt><dd>' . h(date('d/m/Y à H:i', strtotime($p['created_at']))) . '</dd>'
        . ($p['refusal_reason'] !== '' ? '<dt>Motif du refus</dt><dd>' . h($p['refusal_reason']) . '</dd>' : '') . '</dl>'
        . '<form method="post" action="partenaires.php?s=' . h($s) . '">' . csrf_field() . '<input type="hidden" name="id" value="' . (int)$p['id'] . '">';
-    if ($p['status'] !== 'approved' && (int)$p['org_verified'] === 0)
-        echo '<div class="consent mt-14"><input id="ok' . (int)$p['id'] . '" name="org_ok" type="checkbox" value="1"><label for="ok' . (int)$p['id'] . '">J\'ai vérifié que cette organisation est bien enregistrée (via le lien ci-dessus).</label></div>';
     echo '<div class="consent mt-14"><input id="n' . (int)$p['id'] . '" name="notify" type="checkbox" value="1" checked><label for="n' . (int)$p['id'] . '">Prévenir le partenaire par e-mail</label></div>';
     if ($p['status'] !== 'approved') echo '<div class="field mt-14"><label for="r' . (int)$p['id'] . '">Motif du refus <span class="hint">(visible par le partenaire)</span></label><input id="r' . (int)$p['id'] . '" name="reason" type="text" maxlength="300"></div>';
     echo '<div class="actions">';
