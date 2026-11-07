@@ -7,7 +7,7 @@
 
 :root{
   --bg:#f4fbfa; --bg-2:#e6f5f2; --bg-3:#d8efeb; --ink:#12403e; --ink-soft:#3a625f;
-  --pampre:#0b6b66; --wine:#c0455e; --wine-dark:#a23650; --line:#cfe6e2; --card:#ffffff;
+  --pampre:#0b6b66; --gold:#f2c230; --gold-pale:#fbefb3; --wine:#c0455e; --wine-dark:#a23650; --line:#cfe6e2; --card:#ffffff;
   --r-sm:10px; --r:14px; --r-lg:20px; --shadow:0 10px 30px rgba(18,64,62,.08);
   --head:'Manrope','Segoe UI',system-ui,sans-serif; --body:'Source Sans 3','Segoe UI',system-ui,sans-serif;
   --gutter:max(20px,env(safe-area-inset-left,0px)); --gutter-r:max(20px,env(safe-area-inset-right,0px));
@@ -196,9 +196,32 @@ th{background:var(--bg-2);color:var(--ink);font-weight:700}
 
 /* Blason de la commune en filigrane (couleurs du site), très discret */
 #pourquoi{position:relative;overflow:clip}
-#pourquoi::before{content:"";position:absolute;right:max(24px,calc(50% - 500px));top:34px;width:165px;aspect-ratio:120/132;background:url(images/blason.svg) center/contain no-repeat;opacity:.2;pointer-events:none}
+#pourquoi::before{content:"";position:absolute;right:max(24px,calc(50% - 500px));top:34px;width:165px;aspect-ratio:120/132;background:url(images/blason.svg) center/contain no-repeat;opacity:.24;pointer-events:none}
 #pourquoi>.inner{position:relative;z-index:1}
 .site-footer{position:relative;overflow:clip}
 .site-footer::before{content:"";position:absolute;right:max(20px,calc(50% - 500px));top:14px;width:76px;aspect-ratio:120/132;background:url(images/blason.svg) center/contain no-repeat;opacity:.3;pointer-events:none}
 .site-footer .inner{position:relative;z-index:1}
 @media (max-width:760px){#pourquoi::before{width:78px;opacity:.14;right:14px;top:10px}.site-footer::before{width:60px}}
+
+/* Entrée visible pour les commerçants et les associations */
+.pro-strip{padding-top:8px;padding-bottom:48px}
+.pro-card{display:flex;flex-wrap:wrap;gap:24px 40px;align-items:center;justify-content:space-between;background:var(--card);border-radius:var(--r-lg);padding:30px;box-shadow:var(--shadow);border-left:6px solid var(--wine)}
+.pro-text{flex:1 1 420px;min-width:0}
+.pro-text h2{font-size:clamp(26px,3.4vw,34px);margin:6px 0 10px}
+.pro-text p{color:var(--ink-soft)}
+.pro-text .eyebrow{margin-bottom:6px}
+.pro-actions{display:flex;flex-direction:column;gap:12px;align-items:flex-start;flex:0 1 300px}
+.pro-actions .btn{width:100%;text-align:center}
+.pro-actions small{color:var(--ink-soft);font-size:15px;line-height:1.45}
+@media (max-width:860px){.nav-pro{display:none}.pro-actions{flex-basis:100%}}
+
+/* Jaune du village : touches décoratives (le texte reste en vert-bleu profond pour la lisibilité) */
+.site-header{border-top:5px solid var(--gold)}
+.eyebrow{background:var(--gold-pale);color:var(--ink)}
+.pro-card{border-left-color:var(--gold)}
+.indep{border-left:5px solid var(--gold)}
+.steps li::before{background:var(--gold);color:var(--ink)}
+.site-footer{border-top:5px solid var(--gold);margin-top:8px}
+main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:56px;height:5px;border-radius:3px;background:var(--gold);margin-top:12px}
+.pro-text h2::after,.band h2::after{margin-top:12px}
+.tag-offre{background:var(--gold-pale);color:#7a5a00}
