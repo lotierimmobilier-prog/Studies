@@ -353,3 +353,11 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
   .timeline li{text-align:left;padding:0 0 0 56px}
   .timeline li::before{left:0;transform:none}
 }
+
+/* Page RGPD : tableau des informations légales */
+.rgpd-table{display:flex;flex-direction:column;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+.rgpd-table [role=row]{display:grid;grid-template-columns:minmax(150px,1fr) 2fr;gap:6px 20px;padding:14px 20px;border-top:1px solid var(--line);font-size:17px}
+.rgpd-table [role=row]:first-child{border-top:0}
+.rgpd-table [role=rowheader]{font-weight:700;color:var(--ink)}
+.rgpd-table [role=cell]{color:var(--ink-soft)}
+@media (max-width:640px){.rgpd-table [role=row]{grid-template-columns:1fr}}

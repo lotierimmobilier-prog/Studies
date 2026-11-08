@@ -14,7 +14,7 @@ $sum = function (string $where, array $args = []) use ($pdo): array {
 $uniq = function (string $from, string $to) use ($pdo): int { $st = $pdo->prepare('SELECT COALESCE(SUM(n),0) FROM uniques WHERE day BETWEEN ? AND ?'); $st->execute([$from, $to]); return (int)$st->fetchColumn(); };
 
 layout_top('Visites et IA – Administration', admin_nav('visites.php'));
-echo '<h1>Visites et robots IA</h1><p class="lead">Mesure anonyme, sans cookie : on compte des visites, jamais des personnes. Les robots des IA (ChatGPT, Claude, Perplexity…) sont comptés à part. Les visites sont comptées sur les trois pages publiques du site.</p>';
+echo '<h1>Visites et robots IA</h1><p class="lead">Mesure anonyme, sans cookie : on compte des visites, jamais des personnes. Les robots des IA (ChatGPT, Claude, Perplexity…) sont comptés à part. Les visites sont comptées sur les pages publiques du site (accueil, devenir partenaire, qui sommes-nous, RGPD).</p>';
 
 $today = date('Y-m-d'); $d30 = date('Y-m-d', strtotime('-29 days')); $m1 = date('Y-m-01'); $y1 = date('Y-01-01');
 $t = $sum('day = ?', [$today]); $m = $sum('day >= ?', [$m1]); $y = $sum('day >= ?', [$y1]); $l = $sum('day >= ?', [$d30]);
