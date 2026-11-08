@@ -361,3 +361,12 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 .rgpd-table [role=rowheader]{font-weight:700;color:var(--ink)}
 .rgpd-table [role=cell]{color:var(--ink-soft)}
 @media (max-width:640px){.rgpd-table [role=row]{grid-template-columns:1fr}}
+
+/* Bouton « Devenir partenaire » avec ruban GRATUIT dans l'angle */
+.btn-free{position:relative;overflow:hidden;background:linear-gradient(135deg,var(--pampre),#0e8a83);padding-right:64px;box-shadow:0 10px 24px rgba(11,107,102,.35);animation:free-pulse 2.4s ease-in-out infinite}
+.btn-free:hover{background:linear-gradient(135deg,#095c58,#0b7a74)}
+.btn-free .rib{position:absolute;top:13px;right:-32px;width:116px;text-align:center;transform:rotate(38deg);background:var(--gold);color:var(--ink);font:900 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:6px 0;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+@keyframes free-pulse{0%,100%{box-shadow:0 10px 24px rgba(11,107,102,.35),0 0 0 0 rgba(242,194,48,.6)}50%{box-shadow:0 10px 24px rgba(11,107,102,.35),0 0 0 14px rgba(242,194,48,0)}}
+@media (prefers-reduced-motion:reduce){.btn-free{animation:none}}
+.menu-m-panel .menu-m-pro .pro-join.btn-free{position:relative;overflow:hidden;justify-content:flex-start;padding:0 64px 0 18px;background:linear-gradient(135deg,var(--pampre),#0e8a83);color:#fff;font-size:17px}
+.menu-m-panel .menu-m-pro .pro-join.btn-free:hover{background:linear-gradient(135deg,#095c58,#0b7a74)}
