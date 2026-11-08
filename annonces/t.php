@@ -7,6 +7,7 @@ const T_FILES = [
     'devenir'    => ['devenir-partenaire.html', 'text/html; charset=utf-8'],
     'qui'        => ['qui-est-derriere.html', 'text/html; charset=utf-8'],
     'histoire'   => ['capendu-histoire.html', 'text/html; charset=utf-8'],
+    'liens'      => ['liens.html', 'text/html; charset=utf-8'],
     'rgpd'       => ['rgpd.html', 'text/html; charset=utf-8'],
     'llms'       => ['llms.txt', 'text/plain; charset=utf-8'],
     'robots'     => ['robots.txt', 'text/plain; charset=utf-8'],
