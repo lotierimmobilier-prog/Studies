@@ -77,6 +77,7 @@ unset($r);
 $me = current_partner();
 echo '<p class="lead">' . ($me ? 'Organisation : <strong>' . h($me['org_name']) . '</strong> · ' : '') . 'connecté(e) avec <strong>' . h($email) . '</strong>. <a href="logout.php">Se déconnecter</a></p>';
 echo '<p class="actions-line"><a class="btn" href="../deposer.php">Déposer une annonce</a> <a class="btn btn-ghost" href="fiche.php">Ma fiche partenaire</a> <a class="btn btn-ghost" href="../partenaires.php">Voir la liste des partenaires</a></p>';
+echo planning_block(true);
 echo '<div class="stats"><div class="stat"><b>' . count($rows) . '</b><span>annonces déposées</span></div>'
    . '<div class="stat"><b>' . $pub . '</b><span>validées ou publiées</span></div>'
    . '<div class="stat"><b>' . $total . '</b><span>clics au total</span></div>'
