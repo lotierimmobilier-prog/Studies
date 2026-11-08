@@ -75,6 +75,8 @@ function db(): PDO {
     CREATE TABLE IF NOT EXISTS visits (day TEXT NOT NULL, kind TEXT NOT NULL, bot TEXT NOT NULL DEFAULT '', page TEXT NOT NULL, src TEXT NOT NULL DEFAULT 'direct', hits INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, kind, bot, page, src));
     CREATE TABLE IF NOT EXISTS ref_hosts (day TEXT NOT NULL, host TEXT NOT NULL, hits INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, host));
     CREATE TABLE IF NOT EXISTS uniques (day TEXT PRIMARY KEY, n INTEGER NOT NULL DEFAULT 0);
+    CREATE TABLE IF NOT EXISTS visit_ua (day TEXT NOT NULL, fam TEXT NOT NULL, hits INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, fam));
+    CREATE TABLE IF NOT EXISTS visit_hours (day TEXT NOT NULL, hr INTEGER NOT NULL, hits INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, hr));
     CREATE TABLE IF NOT EXISTS seen_today (day TEXT NOT NULL, h TEXT NOT NULL, PRIMARY KEY (day, h));
     CREATE TABLE IF NOT EXISTS tokens (hash TEXT PRIMARY KEY, email TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0);");
     $cols = array_column($pdo->query('PRAGMA table_info(announcements)')->fetchAll(), 'name');
@@ -322,7 +324,7 @@ function purge_old(): void {
         $pdo->prepare("DELETE FROM announcements WHERE $where")->execute([$limit]);
     }
     $pdo->prepare('DELETE FROM messages WHERE created_at < ?')->execute([date('c', strtotime('-365 days'))]);
-    foreach (['visits', 'ref_hosts', 'uniques'] as $t) $pdo->prepare("DELETE FROM $t WHERE day < ?")->execute([date('Y-m-d', strtotime('-5 years'))]);
+    foreach (['visits', 'ref_hosts', 'uniques', 'visit_ua', 'visit_hours'] as $t) $pdo->prepare("DELETE FROM $t WHERE day < ?")->execute([date('Y-m-d', strtotime('-5 years'))]);
     $lim = date('c', strtotime('-730 days'));       // partenaire validé sans aucune activité depuis 24 mois
     $prules = [
         ["status = 'refused' AND updated_at < ?", [date('c', strtotime('-30 days'))]],
