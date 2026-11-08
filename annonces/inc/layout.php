@@ -11,7 +11,8 @@ function layout_top(string $title, string $nav = '', bool $noindex = true): void
     page_head($title, '<link rel="stylesheet" href="' . $css . '">', $noindex, site_root());
     echo '<a class="skip" href="#contenu">Aller au contenu</a>'
        . '<header class="site-header"><div class="inner"><a class="logo" href="' . site_root() . 'index.html"><img src="' . site_root() . 'logo/logo.svg" alt="Capendu en bref" width="656" height="87"></a>'
-       . '<nav aria-label="Navigation">' . $nav . '</nav></div>'
+       . '<nav aria-label="Navigation">' . $nav . '</nav>'
+       . '<details class="menu-m"><summary aria-label="Menu"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>Menu</span></summary><div class="menu-m-panel"><a href="' . site_root() . 'index.html">Accueil</a><a href="' . site_root() . 'annonces/partenaires.php">Nos partenaires</a><a href="' . site_root() . 'devenir-partenaire.html">Devenir partenaire</a><a href="' . site_root() . 'annonces/partenaire/">Connexion partenaire</a><a href="' . site_root() . 'index.html#pourquoi">Pourquoi une newsletter</a><a href="' . site_root() . 'index.html#confidentialite">Vos données</a><a href="' . site_root() . 'qui-est-derriere.html">Qui sommes-nous ?</a><a href="' . site_root() . 'annonces/contact.php">Nous écrire</a></div></details></div>'
        . '<nav class="nav-mobile" aria-label="Menu"><div class="nav-mobile-row">'
        . '<a href="' . site_root() . 'index.html#pourquoi">Pourquoi</a><a href="' . site_root() . 'annonces/partenaires.php">Nos partenaires</a>'
        . '<a href="' . site_root() . 'devenir-partenaire.html">Devenir partenaire</a>'
