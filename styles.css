@@ -370,3 +370,10 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 @media (prefers-reduced-motion:reduce){.btn-free{animation:none}}
 .menu-m-panel .menu-m-pro .pro-join.btn-free{position:relative;overflow:hidden;justify-content:flex-start;padding:0 64px 0 18px;background:linear-gradient(135deg,var(--pampre),#0e8a83);color:#fff;font-size:17px}
 .menu-m-panel .menu-m-pro .pro-join.btn-free:hover{background:linear-gradient(135deg,#095c58,#0b7a74)}
+
+/* Page de liens */
+.link-cards{list-style:none;margin:0 0 18px;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.link-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;background:var(--card);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);border-top:5px solid var(--gold)}
+.link-card h3{margin:2px 0 0;font-size:22px}
+.link-card p{margin:0 0 8px;color:var(--ink-soft);font-size:17px}
+.link-card .btn{margin-top:auto}
