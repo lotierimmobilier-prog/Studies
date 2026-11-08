@@ -80,7 +80,7 @@ function db(): PDO {
     $cols = array_column($pdo->query('PRAGMA table_info(announcements)')->fetchAll(), 'name');
     if (!in_array('photo', $cols, true)) $pdo->exec("ALTER TABLE announcements ADD COLUMN photo TEXT NOT NULL DEFAULT ''");
     $pcols = array_column($pdo->query('PRAGMA table_info(partners)')->fetchAll(), 'name');
-    foreach (['address' => "TEXT NOT NULL DEFAULT ''", 'public_phone' => "TEXT NOT NULL DEFAULT ''", 'logo' => "TEXT NOT NULL DEFAULT ''", 'can_help' => 'INTEGER NOT NULL DEFAULT 0', 'eligibility' => "TEXT NOT NULL DEFAULT 'siege'", 'activity_place' => "TEXT NOT NULL DEFAULT ''"] as $col => $def) {
+    foreach (['address' => "TEXT NOT NULL DEFAULT ''", 'public_phone' => "TEXT NOT NULL DEFAULT ''", 'logo' => "TEXT NOT NULL DEFAULT ''", 'can_help' => 'INTEGER NOT NULL DEFAULT 0', 'eligibility' => "TEXT NOT NULL DEFAULT 'siege'", 'activity_place' => "TEXT NOT NULL DEFAULT ''", 'postal_code' => "TEXT NOT NULL DEFAULT ''", 'city' => "TEXT NOT NULL DEFAULT ''"] as $col => $def) {
         if (!in_array($col, $pcols, true)) $pdo->exec("ALTER TABLE partners ADD COLUMN $col $def");
     }
     if (!in_array('partner_id', $cols, true)) $pdo->exec('ALTER TABLE announcements ADD COLUMN partner_id INTEGER NOT NULL DEFAULT 0');
@@ -135,6 +135,18 @@ function clean(string $s, int $max): string {
     return mb_substr($s, 0, $max);
 }
 function clean_multiline(string $s, int $max): string { return clean($s, $max); }
+/** Adresse complète d'un partenaire : rue, code postal, ville (les anciennes fiches n'ont que l'adresse saisie en une ligne). */
+function full_address(array $p): string {
+    $town = trim(trim((string)($p['postal_code'] ?? '')) . ' ' . trim((string)($p['city'] ?? '')));
+    $street = trim((string)($p['address'] ?? ''));
+    return $street !== '' && $town !== '' ? $street . ', ' . $town : ($street !== '' ? $street : $town);
+}
+/** Valide code postal et ville. @return string message d'erreur ('' si correct) */
+function check_town(string $postal, string $city): string {
+    if (!preg_match('/^\d{5}$/', $postal)) return 'Le code postal doit comporter 5 chiffres (par exemple 11700).';
+    if ($city === '') return 'Indiquez la ville.';
+    return '';
+}
 function one_line(string $s, int $max): string { return clean(str_replace("\n", ' ', $s), $max); }
 
 function issue_label(string $issue): string {
