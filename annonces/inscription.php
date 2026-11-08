@@ -7,7 +7,7 @@ security_headers();
 start_session();
 
 $errors = [];
-$v = ['org_type' => '', 'eligibility' => '', 'org_name' => '', 'address' => '', 'activity_place' => '', 'public_phone' => '', 'contact_name' => '', 'contact_email' => '', 'contact_phone' => ''];
+$v = ['org_type' => '', 'eligibility' => '', 'org_name' => '', 'address' => '', 'postal_code' => '11700', 'city' => 'Capendu', 'activity_place' => '', 'public_phone' => '', 'contact_name' => '', 'contact_email' => '', 'contact_phone' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -18,6 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['eligibility']    = (string)($_POST['eligibility'] ?? '');
     $v['org_name']       = one_line((string)($_POST['org_name'] ?? ''), 90);
     $v['address']        = one_line((string)($_POST['address'] ?? ''), 200);
+    $v['postal_code']    = preg_replace('/\s+/', '', one_line((string)($_POST['postal_code'] ?? ''), 10));
+    $v['city']           = one_line((string)($_POST['city'] ?? ''), 80);
     $v['activity_place'] = one_line((string)($_POST['activity_place'] ?? ''), 200);
     $v['public_phone']   = one_line((string)($_POST['public_phone'] ?? ''), 30);
     $v['contact_name']   = one_line((string)($_POST['contact_name'] ?? ''), 90);
@@ -25,9 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['contact_phone']  = one_line((string)($_POST['contact_phone'] ?? ''), 30);
     $canHelp = !empty($_POST['can_help']) ? 1 : 0;
 
-    foreach (check_eligibility($v['org_type'], $v['eligibility'], $v['address'], $v['activity_place']) as $m) $errors[] = $m;
+    foreach (check_eligibility($v['org_type'], $v['eligibility'], full_address($v), $v['activity_place']) as $m) $errors[] = $m;
     if ($v['org_name'] === '') $errors[] = 'Indiquez le nom de votre commerce ou de votre association.';
     if ($v['address'] === '') $errors[] = 'Indiquez l\'adresse du siège social (elle figurera dans la liste des partenaires).';
+    if ($v['address'] !== '' && ($te = check_town($v['postal_code'], $v['city'])) !== '') $errors[] = $te;
     if (!preg_match('/\d{2}/', $v['public_phone'])) $errors[] = 'Indiquez un numéro de téléphone pour la liste des partenaires.';
     if ($v['contact_name'] === '') $errors[] = 'Indiquez votre nom.';
     if (!filter_var($v['contact_email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Indiquez une adresse e-mail valide.';
@@ -44,10 +47,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$errors) {
         $now = date('c');
         db()->prepare('INSERT INTO partners (created_at, updated_at, status, org_type, org_id, org_name, contact_name, contact_email, contact_phone, org_verified, org_check, consent_at,
-                        address, public_phone, logo, can_help, eligibility, activity_place)
-                       VALUES (?, ?, \'pending\', ?, \'\', ?, ?, ?, ?, 0, \'\', ?, ?, ?, ?, ?, ?, ?)')
+                        address, postal_code, city, public_phone, logo, can_help, eligibility, activity_place)
+                       VALUES (?, ?, \'pending\', ?, \'\', ?, ?, ?, ?, 0, \'\', ?, ?, ?, ?, ?, ?, ?, ?, ?)')
             ->execute([$now, $now, $v['org_type'], $v['org_name'], $v['contact_name'], $v['contact_email'], $v['contact_phone'], $now,
-                       $v['address'], $v['public_phone'], $logo, $canHelp, $v['eligibility'], $v['eligibility'] === 'voisine' ? $v['activity_place'] : '']);
+                       $v['address'], $v['postal_code'], $v['city'], $v['public_phone'], $logo, $canHelp, $v['eligibility'], $v['eligibility'] === 'voisine' ? $v['activity_place'] : '']);
         rate_hit('signup');
         send_mail(ADMIN_EMAIL, 'Nouvelle inscription partenaire à valider', "Une organisation demande son inscription.\n\nValidez-la dans l'administration : " . SITE_URL . "/annonces/admin/partenaires.php\n");
         header('Location: inscription.php?ok=1'); exit;
@@ -85,7 +88,9 @@ if ($errors) echo flash('err', '<strong>Quelques points à corriger :</strong><b
   <p class="hint">Ces informations seront visibles par tous sur la page des partenaires. Indiquez les coordonnées <strong>de l'organisation</strong> (et non votre numéro personnel si vous ne souhaitez pas qu'il soit public).</p>
   <div class="form-grid mt-14">
     <div class="field full"><label for="org_name">Nom du commerce ou de l'association</label><input id="org_name" name="org_name" type="text" maxlength="90" value="<?= h($v['org_name']) ?>" required></div>
-    <div class="field full"><label for="address">Adresse du siège social</label><input id="address" name="address" type="text" maxlength="200" value="<?= h($v['address']) ?>" autocomplete="street-address" placeholder="Rue, code postal, commune" required></div>
+    <div class="field full"><label for="address">Adresse du siège social <span class="hint">(numéro et rue)</span></label><input id="address" name="address" type="text" maxlength="200" value="<?= h($v['address']) ?>" autocomplete="address-line1" placeholder="Ex. : 19 avenue du Languedoc" required></div>
+    <div class="field"><label for="postal_code">Code postal</label><input id="postal_code" name="postal_code" type="text" inputmode="numeric" pattern="[0-9]{5}" maxlength="5" value="<?= h($v['postal_code']) ?>" autocomplete="postal-code" required></div>
+    <div class="field"><label for="city">Ville</label><input id="city" name="city" type="text" maxlength="80" value="<?= h($v['city']) ?>" autocomplete="address-level2" required></div>
     <div class="field full"><label for="activity_place">Lieu de l'activité à Capendu <span class="hint">(uniquement pour une association voisine)</span></label><input id="activity_place" name="activity_place" type="text" maxlength="200" value="<?= h($v['activity_place']) ?>" placeholder="Ex. Salle des fêtes de Capendu, stade de Capendu"></div>
     <div class="field"><label for="public_phone">Téléphone de l'organisation</label><input id="public_phone" name="public_phone" type="text" maxlength="30" value="<?= h($v['public_phone']) ?>" autocomplete="tel" required></div>
     <div class="field"><label for="logo">Logo <span class="hint">(recommandé : JPEG, PNG ou WebP, 2 Mo maximum)</span></label><input id="logo" name="logo" type="file" accept="image/jpeg,image/png,image/webp"></div>

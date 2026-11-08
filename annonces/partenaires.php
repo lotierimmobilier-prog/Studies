@@ -32,7 +32,7 @@ if (!$rows) {
         echo $p['logo'] !== '' ? '<img class="partner-logo" src="logo.php?id=' . (int)$p['id'] . '" alt="Logo de ' . h($p['org_name']) . '" loading="lazy">' : '<div class="partner-initials" aria-hidden="true">' . h(initials($p['org_name'])) . '</div>';
         echo '<div class="partner-info"><span class="tag">' . h($p['eligibility'] === 'voisine' ? 'Association voisine' : ($p['org_type'] === 'association' ? 'Association' : 'Entreprise')) . '</span>'
            . '<h2>' . h($p['org_name']) . '</h2>'
-           . ($p['address'] !== '' ? '<p class="partner-line"><span class="hint">Siège social :</span> ' . h($p['address']) . '</p>' : '')
+           . (full_address($p) !== '' ? '<p class="partner-line"><span class="hint">Siège social :</span> ' . h(full_address($p)) . '</p>' : '')
            . ($p['eligibility'] === 'voisine' && $p['activity_place'] !== '' ? '<p class="partner-line"><span class="hint">Activité à Capendu :</span> ' . h($p['activity_place']) . '</p>' : '')
            . ($tel !== '' ? '<p class="partner-line"><a href="tel:' . h($tel) . '">' . h($p['public_phone']) . '</a></p>' : '')
            . ((int)$p['can_help'] ? '<p class="partner-help">Peut vous aider à vous inscrire à la newsletter</p>' : '') . '</div></li>';
