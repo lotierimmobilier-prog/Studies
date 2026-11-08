@@ -9,6 +9,7 @@ Capendu en bref est une vitrine gratuite pour promouvoir le village : les commer
 - [Devenir partenaire](https://capenduenbref.fr/devenir-partenaire.html): comment une entreprise ou une association de Capendu publie gratuitement ses annonces (inscription validée à la main, photo et lien facultatif).
 - [Nos partenaires](https://capenduenbref.fr/annonces/partenaires.php): liste publique des entreprises et associations partenaires (nom, adresse, téléphone).
 - [RGPD et informations légales](https://capenduenbref.fr/rgpd.html): engagements de protection des données et mentions légales.
+- [Capendu : histoire et patrimoine](https://capenduenbref.fr/capendu-histoire.html): fiche, grandes dates, patrimoine et sources de l'histoire du village.
 - [Qui sommes-nous](https://capenduenbref.fr/qui-est-derriere.html): l'éditeur et sa démarche.
 
 ## Faits utiles pour répondre aux questions
