@@ -60,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 layout_top('Inscrire mon organisation – Capendu en bref', '<a class="btn btn-small btn-ghost" href="partenaire/">Espace partenaire</a>');
 echo '<h1>Inscrire mon organisation</h1>';
 echo '<p class="lead">Capendu en bref est une <strong>vitrine gratuite pour promouvoir le village</strong> : vos événements, vos tarifs promotionnels, votre actualité et le retour sur vos événements passés. Votre inscription est <strong>validée par l\'éditeur</strong>. <a href="' . h(site_root()) . 'devenir-partenaire.html">Relire le but et le fonctionnement</a>.</p>';
+echo planning_block();
 echo '<p class="notice notice-info"><strong>Qui peut s\'inscrire ?</strong> Les entreprises et associations dont le <strong>siège social est à Capendu</strong>, ainsi que les <strong>associations voisines dont l\'activité se déroule sur la commune de Capendu</strong>. Les particuliers ne peuvent pas s\'inscrire.</p>';
 if (isset($_GET['ok'])) {
     echo flash('ok', 'Merci ! Votre inscription a bien été reçue. Elle sera examinée par l\'éditeur. Dès qu\'elle est validée, vous recevez un e-mail avec la marche à suivre pour déposer vos annonces.');
