@@ -14,15 +14,15 @@ $sum = function (string $where, array $args = []) use ($pdo): array {
 $uniq = function (string $from, string $to) use ($pdo): int { $st = $pdo->prepare('SELECT COALESCE(SUM(n),0) FROM uniques WHERE day BETWEEN ? AND ?'); $st->execute([$from, $to]); return (int)$st->fetchColumn(); };
 
 layout_top('Visites et IA – Administration', admin_nav('visites.php'));
-echo '<h1>Visites et robots IA</h1><p class="lead">Mesure anonyme, sans cookie : on compte des visites, jamais des personnes. Les robots des IA (ChatGPT, Claude, Perplexity…) sont comptés à part. Les visites sont comptées sur les pages publiques du site (accueil, devenir partenaire, qui sommes-nous, RGPD).</p>';
+echo '<h1>Visites et robots IA</h1><p class="lead">Mesure anonyme, sans cookie : on compte des pages vues (un visiteur qui lit deux pages compte deux fois), jamais des personnes. Les robots des IA (ChatGPT, Claude, Perplexity…) sont comptés à part. Les visites sont comptées sur les pages publiques du site (accueil, devenir partenaire, qui sommes-nous, RGPD).</p>';
 
 $today = date('Y-m-d'); $d30 = date('Y-m-d', strtotime('-29 days')); $m1 = date('Y-m-01'); $y1 = date('Y-01-01');
 $t = $sum('day = ?', [$today]); $m = $sum('day >= ?', [$m1]); $y = $sum('day >= ?', [$y1]); $l = $sum('day >= ?', [$d30]);
 echo '<div class="stats">'
-   . '<div class="stat"><b>' . $n($t['human']) . '</b><span>visites aujourd\'hui</span></div>'
-   . '<div class="stat"><b>' . $n($l['human']) . '</b><span>visites sur 30 jours (' . $n($uniq($d30, $today)) . ' visiteurs distincts par jour, cumulés)</span></div>'
-   . '<div class="stat"><b>' . $n($m['human']) . '</b><span>visites ce mois-ci</span></div>'
-   . '<div class="stat"><b>' . $n($y['human']) . '</b><span>visites cette année</span></div>'
+   . '<div class="stat"><b>' . $n($t['human']) . '</b><span>pages vues aujourd\'hui</span></div>'
+   . '<div class="stat"><b>' . $n($l['human']) . '</b><span>pages vues sur 30 jours (' . $n($uniq($d30, $today)) . ' visiteurs distincts par jour, cumulés)</span></div>'
+   . '<div class="stat"><b>' . $n($m['human']) . '</b><span>pages vues ce mois-ci</span></div>'
+   . '<div class="stat"><b>' . $n($y['human']) . '</b><span>pages vues cette année</span></div>'
    . '<div class="stat"><b>' . $n($l['ia']) . '</b><span>passages de robots IA sur 30 jours</span></div></div>';
 
 echo '<h2>D\'où viennent les visiteurs (30 jours)</h2>';
@@ -44,7 +44,7 @@ echo '<h2 class="mt-26">Par jour (31 derniers jours)</h2>';
 $st = $pdo->prepare("SELECT day, SUM(CASE WHEN kind='human' THEN hits ELSE 0 END) h, SUM(CASE WHEN kind='ia' THEN hits ELSE 0 END) i, SUM(CASE WHEN kind='bot' THEN hits ELSE 0 END) b FROM visits WHERE day >= ? GROUP BY day");
 $st->execute([date('Y-m-d', strtotime('-30 days'))]); $byDay = []; foreach ($st->fetchAll() as $r) $byDay[$r['day']] = $r;
 $st = $pdo->prepare('SELECT day, n FROM uniques WHERE day >= ?'); $st->execute([date('Y-m-d', strtotime('-30 days'))]); $un = []; foreach ($st->fetchAll() as $r) $un[$r['day']] = (int)$r['n'];
-echo '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Jour</th><th class="num">Visites</th><th class="num">Visiteurs distincts</th><th class="num">Robots IA</th><th class="num">Autres robots</th></tr></thead><tbody>';
+echo '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Jour</th><th class="num">Pages vues</th><th class="num">Visiteurs distincts</th><th class="num">Robots IA</th><th class="num">Autres robots</th></tr></thead><tbody>';
 for ($i = 0; $i < 31; $i++) {
     $d = date('Y-m-d', strtotime("-$i days")); $r = $byDay[$d] ?? ['h' => 0, 'i' => 0, 'b' => 0];
     echo '<tr><td>' . h(date('d/m/Y', strtotime($d))) . '</td><td class="num">' . $n((int)$r['h']) . '</td><td class="num">' . $n($un[$d] ?? 0) . '</td><td class="num">' . $n((int)$r['i']) . '</td><td class="num">' . $n((int)$r['b']) . '</td></tr>';
@@ -56,7 +56,7 @@ foreach ([['mois', 'Cumul par mois', 7, 'substr(day,1,7)'], ['année', 'Cumul pa
     $uq = []; foreach ($pdo->query("SELECT $expr p, SUM(n) n FROM uniques GROUP BY p")->fetchAll() as $r) $uq[$r['p']] = (int)$r['n'];
     echo '<h2 class="mt-26">' . $title . '</h2>';
     if (!$rows) { echo '<p>Pas encore de données.</p>'; continue; }
-    echo '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>' . ($k === 'mois' ? 'Mois' : 'Année') . '</th><th class="num">Visites</th><th class="num">Visiteurs distincts (somme des jours)</th><th class="num">Robots IA</th><th class="num">Autres robots</th></tr></thead><tbody>';
+    echo '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>' . ($k === 'mois' ? 'Mois' : 'Année') . '</th><th class="num">Pages vues</th><th class="num">Visiteurs distincts (somme des jours)</th><th class="num">Robots IA</th><th class="num">Autres robots</th></tr></thead><tbody>';
     foreach (array_slice($rows, 0, $k === 'mois' ? 36 : 10) as $r) {
         $lab = $k === 'mois' ? MOIS[(int)substr($r['p'], 5, 2)] . ' ' . substr($r['p'], 0, 4) : $r['p'];
         echo '<tr><td>' . h($lab) . '</td><td class="num">' . $n((int)$r['h']) . '</td><td class="num">' . $n($uq[$r['p']] ?? 0) . '</td><td class="num">' . $n((int)$r['i']) . '</td><td class="num">' . $n((int)$r['b']) . '</td></tr>';
@@ -64,6 +64,19 @@ foreach ([['mois', 'Cumul par mois', 7, 'substr(day,1,7)'], ['année', 'Cumul pa
     echo '</tbody></table></div>';
 }
 
+echo '<h2 class="mt-26">Diagnostic : qui sont ces visiteurs ? (7 jours)</h2>';
+$d7 = date('Y-m-d', strtotime('-6 days'));
+$st = $pdo->prepare('SELECT fam, SUM(hits) t FROM visit_ua WHERE day >= ? GROUP BY fam ORDER BY t DESC LIMIT 12'); $st->execute([$d7]); $fams = $st->fetchAll();
+if (!$fams) echo '<p>Pas encore de détail (il se remplit à partir des prochaines visites).</p>';
+else {
+    echo '<p class="hint">Navigateurs et systèmes des visites comptées comme personnes. Une répartition très concentrée sur un seul type, ou sur une seule heure, trahit souvent un robot plutôt qu\'une vraie audience.</p><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Navigateur · système</th><th class="num">Visites</th></tr></thead><tbody>';
+    foreach ($fams as $r) echo '<tr><td>' . h($r['fam']) . '</td><td class="num">' . $n((int)$r['t']) . '</td></tr>';
+    echo '</tbody></table></div>';
+    $st = $pdo->prepare('SELECT hr, SUM(hits) t FROM visit_hours WHERE day = ? GROUP BY hr ORDER BY hr'); $st->execute([$today]); $hrs = []; foreach ($st->fetchAll() as $r) $hrs[(int)$r['hr']] = (int)$r['t'];
+    if ($hrs) { echo '<h3 class="mt-26">Aujourd\'hui, heure par heure</h3><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Heure</th><th class="num">Visites</th></tr></thead><tbody>';
+        foreach ($hrs as $hh => $t) echo '<tr><td>' . sprintf('%02d h', $hh) . '</td><td class="num">' . $n($t) . '</td></tr>';
+        echo '</tbody></table></div>'; }
+}
 echo '<h2 class="mt-26">Robots IA : qui passe, et quoi lisent-ils</h2>';
 $st = $pdo->prepare("SELECT bot, SUM(CASE WHEN day >= ? THEN hits ELSE 0 END) r30, SUM(hits) tot, MAX(day) last FROM visits WHERE kind = 'ia' GROUP BY bot ORDER BY r30 DESC, tot DESC"); $st->execute([$d30]);
 $bots = $st->fetchAll();
