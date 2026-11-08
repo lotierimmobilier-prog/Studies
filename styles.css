@@ -295,3 +295,7 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 .vs-news li{color:var(--ink)}
 .vs-news li::before{content:"✓";color:var(--pampre)}
 @media (max-width:760px){.vs{grid-template-columns:1fr}}
+
+/* Cadenas discret vers l'administration */
+.admin-lock{display:inline-flex;vertical-align:middle;margin-left:6px;padding:6px;color:var(--ink-soft);opacity:.35;border-bottom:0!important;text-decoration:none!important;border-radius:6px}
+.admin-lock:hover,.admin-lock:focus-visible{opacity:1;color:var(--ink)}
