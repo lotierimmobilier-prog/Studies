@@ -6,6 +6,14 @@ security_headers();
 require_admin();
 
 $pdo = db();
+$msg = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_check();
+    if (($_POST['action'] ?? '') === 'reset_stats') {   // remise à zéro de la mesure d'audience (les clics des annonces ne sont pas touchés)
+        foreach (['visits', 'ref_hosts', 'uniques', 'visit_ua', 'visit_hours', 'seen_today'] as $t) $pdo->exec("DELETE FROM $t");
+        $msg = flash('ok', 'Statistiques de visites remises à zéro. Les clics sur les annonces n\'ont pas été touchés.');
+    }
+}
 $n = fn(int $v): string => number_format($v, 0, ',', ' ');
 $sum = function (string $where, array $args = []) use ($pdo): array {
     $st = $pdo->prepare("SELECT kind, COALESCE(SUM(hits),0) t FROM visits WHERE $where GROUP BY kind"); $st->execute($args);
@@ -14,6 +22,7 @@ $sum = function (string $where, array $args = []) use ($pdo): array {
 $uniq = function (string $from, string $to) use ($pdo): int { $st = $pdo->prepare('SELECT COALESCE(SUM(n),0) FROM uniques WHERE day BETWEEN ? AND ?'); $st->execute([$from, $to]); return (int)$st->fetchColumn(); };
 
 layout_top('Visites et IA – Administration', admin_nav('visites.php'));
+echo $msg;
 echo '<h1>Visites et robots IA</h1><p class="lead">Mesure anonyme, sans cookie : on compte des pages vues (un visiteur qui lit deux pages compte deux fois), jamais des personnes. Les robots des IA (ChatGPT, Claude, Perplexity…) sont comptés à part. Les visites sont comptées sur les pages publiques du site (accueil, devenir partenaire, qui sommes-nous, RGPD).</p>';
 
 $today = date('Y-m-d'); $d30 = date('Y-m-d', strtotime('-29 days')); $m1 = date('Y-m-01'); $y1 = date('Y-01-01');
@@ -90,5 +99,6 @@ else {
     foreach ($st->fetchAll() as $r) echo '<tr><td>' . h($r['page']) . '</td><td class="num">' . $n((int)$r['t']) . '</td></tr>';
     echo '</tbody></table></div>';
 }
+echo '<form class="card mt-26" method="post" action="visites.php">' . csrf_field() . '<input type="hidden" name="action" value="reset_stats"><h2>Remettre à zéro</h2><p>Efface toutes les statistiques de visites et de robots pour repartir sur une base propre (par exemple après vos tests). Les clics sur les annonces ne sont pas concernés. Action définitive.</p><div class="actions"><button class="btn btn-danger" type="submit" data-confirm="Effacer définitivement toutes les statistiques de visites et de robots ?">Remettre les statistiques à zéro</button></div></form>';
 echo '<p class="hint">Les visites de robots ne sont jamais mêlées aux visites de personnes. Données agrégées par jour, conservées 5 ans, sans adresse IP ni identifiant.</p>';
-layout_bottom(); echo '</body></html>';
+echo '<script src="admin.js"></script>'; layout_bottom(); echo '</body></html>';
