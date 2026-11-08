@@ -9,6 +9,14 @@ function layout_top(string $title, string $nav = '', bool $noindex = true): void
     $css = in_subdir() ? '../annonces.css' : 'annonces.css';
     $css .= '?v=' . (int)@filemtime(dirname(__DIR__) . '/annonces.css');
     page_head($title, '<link rel="stylesheet" href="' . $css . '">', $noindex, site_root());
+    $admin = strpos($nav, '<!--admin-->') === 0;
+    $logo = '<a class="logo" href="' . site_root() . 'index.html"><img src="' . site_root() . 'logo/logo.svg" alt="Capendu en bref" width="656" height="87"></a>';
+    if ($admin) {   // espace d'administration : barre de menu toujours visible, sans menu public
+        echo '<a class="skip" href="#contenu">Aller au contenu</a><header class="site-header"><div class="inner">' . $logo
+           . '<span class="admin-tag">Administration</span><a class="btn btn-small btn-ghost admin-site" href="' . site_root() . 'index.html">Voir le site</a></div></header>'
+           . '<div class="inner"><nav class="admin-bar" aria-label="Administration">' . substr($nav, 12) . '</nav></div><main id="contenu" class="inner page">';
+        return;
+    }
     echo '<a class="skip" href="#contenu">Aller au contenu</a>'
        . '<header class="site-header"><div class="inner"><a class="logo" href="' . site_root() . 'index.html"><img src="' . site_root() . 'logo/logo.svg" alt="Capendu en bref" width="656" height="87"></a>'
        . '<nav aria-label="Navigation">' . $nav . '</nav>'

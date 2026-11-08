@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 session_regenerate_id(true);
                 $_SESSION['admin'] = true; $_SESSION['admin_seen'] = time();
                 if (password_needs_rehash($hash, PASSWORD_DEFAULT)) db()->prepare('UPDATE admin SET password_hash = ? WHERE id = 1')->execute([password_hash($pw, PASSWORD_DEFAULT)]);
-                header('Location: index.php'); exit;
+                header('Location: accueil.php'); exit;
             }
             rate_hit('adminfail'); usleep(400000);
             $msg = flash('err', 'Mot de passe incorrect.');

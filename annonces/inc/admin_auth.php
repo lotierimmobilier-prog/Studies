@@ -13,8 +13,12 @@ function require_admin(): void {
 function admin_nav(string $current = ''): string {
     $new = (int)db()->query("SELECT COUNT(*) FROM messages WHERE status = 'new'")->fetchColumn();
     $pend = (int)db()->query("SELECT COUNT(*) FROM partners WHERE status = 'pending'")->fetchColumn();
-    $items = ['partenaires.php' => 'Partenaires' . ($pend ? ' (' . $pend . ')' : ''), 'index.php' => 'Annonces', 'messages.php' => 'Messages' . ($new ? ' (' . $new . ')' : ''), 'stats.php' => 'Clics', 'visites.php' => 'Visites et IA', 'ia.php' => 'Rédiger avec l\'IA', 'export.php' => 'Préparer le numéro', 'motdepasse.php' => 'Mot de passe'];
-    $o = '';
-    foreach ($items as $f => $l) $o .= '<a href="' . $f . '"' . ($f === $current ? ' aria-current="page"' : '') . '>' . h($l) . '</a> ';
-    return $o . '<a href="logout.php">Déconnexion</a>';
+    $apend = (int)db()->query("SELECT COUNT(*) FROM announcements WHERE status = 'pending'")->fetchColumn();
+    $items = [
+        'accueil.php' => ['Tableau de bord', 0], 'partenaires.php' => ['Partenaires', $pend], 'index.php' => ['Annonces', $apend], 'messages.php' => ['Messages', $new],
+        'stats.php' => ['Clics', 0], 'visites.php' => ['Visites et IA', 0], 'ia.php' => ['Rédiger avec l\'IA', 0], 'export.php' => ['Préparer le numéro', 0], 'motdepasse.php' => ['Mot de passe', 0],
+    ];
+    $o = '<!--admin-->';
+    foreach ($items as $f => [$l, $n]) $o .= '<a href="' . $f . '"' . ($f === $current ? ' aria-current="page"' : '') . '>' . h($l) . ($n ? ' <b class="badge">' . $n . '</b>' : '') . '</a>';
+    return $o . '<a class="admin-out" href="logout.php">Déconnexion</a>';
 }
