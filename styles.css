@@ -393,3 +393,8 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 .reach-note{margin:0;font-size:15.5px;color:var(--ink-soft);max-width:none}
 .reach-note a{color:var(--pampre)}
 @media (max-width:640px){.reach-list li{grid-template-columns:1fr auto}.reach-bar{grid-column:1 / -1;order:3}.reach{padding:20px}}
+.w-40{width:40%}.w-76{width:76%}
+.reach-bar{position:relative}
+.reach-bar .reach-fill{position:absolute;left:0;top:0}
+.reach-top .reach-range{background:linear-gradient(90deg,rgba(11,107,102,.35),rgba(14,138,131,.35))}
+.reach-top .reach-solid{background:linear-gradient(90deg,var(--pampre),#0e8a83)}
