@@ -20,7 +20,7 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - **Conservation** : suppression à la désinscription ou après 3 ans sans interaction.
 - **Violation de données** (fuite, piratage) : notification à la CNIL sous 72 h et information des personnes si risque élevé.
 - **Sécurité** : mot de passe fort et unique sur Brevo et sur l'hébergeur, double authentification si disponible.
-- Aucune donnée vendue, louée ni transmise aux commerçants ou associations.
+- Aucune donnée vendue, louée ni transmise aux entreprises ou associations.
 - **Liste publique des partenaires** : nom, logo, adresse et téléphone de l'organisation publiés avec l'autorisation cochée à l'inscription (distincts des coordonnées personnelles du représentant, qui restent privées). Modification et suppression possibles par le partenaire.
 - **Inscription des partenaires** : entreprises et associations dont le siège social est à Capendu, et associations voisines dont l'activité se déroule à Capendu, validées par l'éditeur. Aucun numéro d'immatriculation collecté, aucun appel à un service extérieur. Durées : refusée 30 jours, en attente 90 jours, validée 24 mois sans activité.
 - **Assistants d'écriture par IA** (partenaires et éditeur) : par copier-coller, sans clé ni envoi de données par le site ; les partenaires sont invités à ne coller aucune donnée personnelle ; l'éditeur relit et décide. Mentionnés dans la politique de confidentialité.
@@ -31,7 +31,7 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - Aide à l'inscription par un partenaire : il ne conserve rien. Le rappeler à chaque partenaire.
 
 ## 3. Prospection et publicité par e-mail
-- Envoi uniquement aux personnes ayant **consenti** (consentement qui mentionne les offres des commerçants).
+- Envoi uniquement aux personnes ayant **consenti** (consentement qui mentionne les offres des entreprises).
 - Lien de **désinscription** dans chaque numéro, fonctionnel et gratuit.
 - Les offres commerciales sont **clairement identifiées** (étiquette « Offre »), distinctes de l'actualité.
 - L'expéditeur est identifiable : nom de l'éditeur et adresse e-mail de contact en pied de page. Aucune adresse postale n'est publiée ; à vérifier dans Brevo, qui peut exiger une adresse d'expéditeur dans le compte (voir README).
@@ -41,7 +41,7 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - Droit à l'image : accord des personnes reconnaissables sur les photos.
 - Photos du site : licences CC BY / CC BY-SA, crédits visibles dans les mentions légales (à ne pas retirer).
 - Pas de contenu partisan, discriminatoire ou diffamatoire.
-- Offres : prix, dates et conditions vérifiés ; l'éditeur n'est pas partie au contrat entre commerçant et client.
+- Offres : prix, dates et conditions vérifiés ; l'éditeur n'est pas partie au contrat entre entreprise et client.
 
 ## 5. Indépendance vis-à-vis de la mairie
 - Ne pas utiliser le blason, le logo ou la charte de la commune.

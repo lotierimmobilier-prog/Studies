@@ -23,7 +23,7 @@ layout_top($a['title'] . ' – Capendu en bref');
     <dt>Proposé par</dt><dd><?= h($a['org_name']) ?></dd>
     <?php if ($a['public_contact'] !== ''): ?><dt>Contact</dt><dd><?= h($a['public_contact']) ?></dd><?php endif; ?>
   </dl>
-  <?php if ($a['category'] === 'offre'): ?><p class="hint mt-14">Offre commerciale publiée sous la responsabilité du commerçant. Prix, dates et conditions peuvent changer.</p><?php endif; ?>
+  <?php if ($a['category'] === 'offre'): ?><p class="hint mt-14">Offre commerciale publiée sous la responsabilité de l'entreprise. Prix, dates et conditions peuvent changer.</p><?php endif; ?>
 </article>
 <p class="mt-20"><a href="../index.html">← Capendu en bref</a></p>
 <?php layout_bottom(); ?>

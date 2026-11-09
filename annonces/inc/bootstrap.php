@@ -234,7 +234,7 @@ function save_photo(array $f): array {
 }
 
 // ---------- Éligibilité : siège social à Capendu, ou association voisine dont l'activité se déroule à Capendu ----------
-const ORG_TYPES = ['entreprise' => 'Entreprise, commerçant ou artisan', 'association' => 'Association ou club'];
+const ORG_TYPES = ['entreprise' => 'Entreprise, commerce ou artisan', 'association' => 'Association ou club'];
 const ELIGIBILITY = ['siege' => 'Mon siège social est à Capendu', 'voisine' => 'Association voisine : mon activité se déroule à Capendu'];
 
 function mentions_capendu(string $text): bool { return preg_match('/\bcapendu\b|\b11700\b/iu', $text) === 1; }
