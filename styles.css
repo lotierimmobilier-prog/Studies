@@ -412,3 +412,22 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 /* Les paragraphes de pages de texte (histoire, conditions, RGPD) ne sont pas la grille de la page À propos */
 p.about-body{display:block;grid-template-columns:none;max-width:78ch;padding:0 0 14px;font-size:18.5px;line-height:1.7;color:var(--ink)}
 p.about-body + p.about-body{padding-top:4px}
+
+/* Histoire : texte à gauche, frise des dates à droite */
+.hist-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:44px;align-items:start}
+.hist-text .purpose{padding-left:0;padding-right:0}
+.hist-text .purpose:first-child{padding-top:0}
+.frise{position:sticky;top:96px;background:var(--card);border-radius:var(--r);padding:22px 22px 14px;box-shadow:var(--shadow);border-top:5px solid var(--gold);max-height:calc(100vh - 130px);overflow:auto;margin-top:26px}
+.frise h2{font-size:22px;margin:0 0 14px}
+.frise h2::after{display:none}
+.frise ol{list-style:none;margin:0;padding:0 0 0 22px;position:relative}
+.frise ol::before{content:"";position:absolute;left:6px;top:6px;bottom:10px;width:3px;border-radius:2px;background:linear-gradient(180deg,var(--gold),var(--pampre))}
+.frise li{position:relative;display:flex;flex-direction:column;gap:2px;padding:0 0 14px}
+.frise li::before{content:"";position:absolute;left:-22px;top:5px;width:15px;height:15px;border-radius:50%;background:var(--card);border:3px solid var(--pampre)}
+.frise li b{color:var(--pampre);font-size:16px;letter-spacing:.01em}
+.frise li span{color:var(--ink-soft);font-size:15.5px;line-height:1.45}
+.frise li.now::before{background:var(--gold);border-color:var(--gold)}
+@media (max-width:980px){
+  .hist-layout{grid-template-columns:1fr;gap:10px}
+  .frise{position:static;max-height:none;margin-top:6px}
+}
