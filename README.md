@@ -22,7 +22,7 @@ Tous les textes à remplir sont surlignés en jaune (classe `.todo`) dans `index
 1. Créer un compte Brevo, une liste « Capendu en bref » et un formulaire d'inscription avec **double opt-in**
    (e-mail de confirmation). Signer l'accord de sous-traitance (DPA) proposé par Brevo.
 2. Dans Brevo, créer les attributs `PRENOM` et `PROFIL`, et activer l'enregistrement du consentement.
-3. Remplacer `REMPLACER-PAR-LIEN-FORMULAIRE-BREVO` dans l'attribut `action` du formulaire (`index.html`)
+3. (Fait le 9 novembre 2026) L'attribut `action` du formulaire (`index.html`) pointe vers le formulaire Brevo (`…sibforms.com/serve/…`) ; le champ piège s'appelle `email_address_check` et le champ caché `locale` vaut `fr`, comme Brevo l'attend. Ancienne consigne :  remplacer `REMPLACER-PAR-LIEN-FORMULAIRE-BREVO` dans l'attribut `action` du formulaire (`index.html`)
    par l'URL de soumission du formulaire Brevo, et adapter les noms de champs si Brevo en impose d'autres.
 4. Vérifier que la politique de confidentialité (section 6, localisation et sous-traitants) correspond bien
    à ce que Brevo indique dans son DPA.

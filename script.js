@@ -12,7 +12,7 @@
     say('');
     email.removeAttribute('aria-invalid');
     // Anti-robots : le champ piège doit rester vide.
-    if (form.elements['email_confirmation'] && form.elements['email_confirmation'].value) { e.preventDefault(); return; }
+    if (form.elements['email_address_check'] && form.elements['email_address_check'].value) { e.preventDefault(); return; }
     if (!email.value || !email.checkValidity()) {
       e.preventDefault(); email.setAttribute('aria-invalid', 'true');
       say('Veuillez saisir une adresse e-mail valide.', 'err'); email.focus(); return;
