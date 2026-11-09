@@ -435,3 +435,7 @@ p.about-body + p.about-body{padding-top:4px}
 /* Boutons en fin de section : plus d'air au-dessus et entre eux */
 .purpose .actions-line,.check-list + .actions-line{margin-top:30px;gap:16px}
 p.about-body + .actions-line{margin-top:22px}
+
+/* Icônes des boutons de partage */
+.share-actions .btn{gap:9px}
+.share-actions .ico{width:20px;height:20px;flex:none}
