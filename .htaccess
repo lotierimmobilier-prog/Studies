@@ -27,11 +27,22 @@ Options -Indexes
   RewriteRule ^$ annonces/t.php?f=index [L]
   RewriteRule ^index\.html$ annonces/t.php?f=index [L]
   RewriteRule ^devenir-partenaire\.html$ annonces/t.php?f=devenir [L]
-  RewriteRule ^qui-est-derriere\.html$ annonces/t.php?f=qui [L]
+  RewriteRule ^qui-est-derriere\.html$ /a-propos.html [R=301,L]
+  RewriteRule ^a-propos\.html$ annonces/t.php?f=qui [L]
+  RewriteRule ^conditions\.html$ annonces/t.php?f=conditions [L]
   RewriteRule ^capendu-histoire\.html$ annonces/t.php?f=histoire [L]
   RewriteRule ^liens\.html$ annonces/t.php?f=liens [L]
+  RewriteRule ^mcp$ annonces/mcp.php [L]
   RewriteRule ^rgpd\.html$ annonces/t.php?f=rgpd [L]
   RewriteRule ^llms\.txt$ annonces/t.php?f=llms [L]
   RewriteRule ^robots\.txt$ annonces/t.php?f=robots [L]
   RewriteRule ^sitemap\.xml$ annonces/t.php?f=sitemap [L]
+</IfModule>
+
+# Carte du serveur MCP : lisible par n'importe quel agent
+<IfModule mod_headers.c>
+  <FilesMatch "^server-card\.json$">
+    Header set Access-Control-Allow-Origin "*"
+    Header set Cache-Control "public, max-age=3600"
+  </FilesMatch>
 </IfModule>

@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://capenduenbref.fr/</loc></url>
-  <url><loc>https://capenduenbref.fr/devenir-partenaire.html</loc></url>
-  <url><loc>https://capenduenbref.fr/qui-est-derriere.html</loc></url>
-  <url><loc>https://capenduenbref.fr/annonces/partenaires.php</loc></url>
-  <url><loc>https://capenduenbref.fr/rgpd.html</loc></url>
-  <url><loc>https://capenduenbref.fr/capendu-histoire.html</loc></url>
-  <url><loc>https://capenduenbref.fr/liens.html</loc></url>
+  <url><loc>https://capenduenbref.fr/</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://capenduenbref.fr/devenir-partenaire.html</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://capenduenbref.fr/a-propos.html</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://capenduenbref.fr/conditions.html</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://capenduenbref.fr/rgpd.html</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://capenduenbref.fr/capendu-histoire.html</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://capenduenbref.fr/liens.html</loc><lastmod>2026-11-09</lastmod></url>
+  <url><loc>https://capenduenbref.fr/annonces/partenaires.php</loc><lastmod>2026-11-08</lastmod></url>
 </urlset>

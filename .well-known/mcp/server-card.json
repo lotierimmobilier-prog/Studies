@@ -1,0 +1,19 @@
+{
+  "name": "fr.capenduenbref/capendu-en-bref",
+  "title": "Capendu en bref",
+  "version": "1.0.0",
+  "description": "Informations publiques sur Capendu en bref, la newsletter locale, gratuite et indépendante de Capendu (Aude) : présentation, calendrier de parution et liste des entreprises et associations partenaires. Lecture seule, sans donnée personnelle.",
+  "websiteUrl": "https://capenduenbref.fr/",
+  "documentationUrl": "https://capenduenbref.fr/llms.txt",
+  "protocolVersion": "2025-06-18",
+  "serverInfo": { "name": "capendu-en-bref", "title": "Capendu en bref", "version": "1.0.0" },
+  "endpoint": "https://capenduenbref.fr/mcp",
+  "transport": { "type": "streamable-http", "endpoint": "https://capenduenbref.fr/mcp" },
+  "authentication": { "required": false },
+  "capabilities": { "tools": { "listChanged": false } },
+  "tools": [
+    { "name": "get_site_info", "description": "Présente Capendu en bref et donne les adresses utiles." },
+    { "name": "get_publication_schedule", "description": "Rythme de la newsletter, date limite des annonces et prochaine échéance." },
+    { "name": "list_partners", "description": "Entreprises et associations partenaires (informations déjà publiques)." }
+  ]
+}

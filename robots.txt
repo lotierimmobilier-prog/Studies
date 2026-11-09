@@ -1,6 +1,8 @@
 # Capendu en bref : les robots des moteurs de recherche et des assistants IA sont les bienvenus sur les pages publiques.
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
+Disallow: /mcp
 Disallow: /annonces/admin/
 Disallow: /annonces/partenaire/
 Disallow: /annonces/a.php
@@ -24,8 +26,10 @@ User-agent: Google-Extended
 User-agent: Applebot-Extended
 User-agent: DuckAssistBot
 User-agent: MistralAI-User
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
 Allow: /llms.txt
+Disallow: /mcp
 Disallow: /annonces/admin/
 Disallow: /annonces/partenaire/
 Disallow: /annonces/a.php

@@ -5,7 +5,8 @@ declare(strict_types=1);
 const T_FILES = [
     'index'      => ['index.html', 'text/html; charset=utf-8'],
     'devenir'    => ['devenir-partenaire.html', 'text/html; charset=utf-8'],
-    'qui'        => ['qui-est-derriere.html', 'text/html; charset=utf-8'],
+    'qui'        => ['a-propos.html', 'text/html; charset=utf-8'],
+    'conditions' => ['conditions.html', 'text/html; charset=utf-8'],
     'histoire'   => ['capendu-histoire.html', 'text/html; charset=utf-8'],
     'liens'      => ['liens.html', 'text/html; charset=utf-8'],
     'rgpd'       => ['rgpd.html', 'text/html; charset=utf-8'],
@@ -27,6 +28,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && is_file(__DIR__ . '/confi
         track_hit($file);
         ob_end_clean();
     } catch (Throwable $e) { while (ob_get_level()) ob_end_clean(); }
+}
+// Résumé des ressources utiles aux agents (RFC 8288) et négociation du format (HTML ou Markdown)
+$isHtml = str_starts_with($type, 'text/html');
+header('Link: </llms.txt>; rel="describedby"; type="text/plain"; title="llms.txt", </sitemap.xml>; rel="sitemap"; type="application/xml", '
+     . '</.well-known/mcp/server-card.json>; rel="describedby"; type="application/json"; title="MCP Server Card", '
+     . '<https://capenduenbref.fr/' . ($file === 'index.html' ? '' : $file) . '>; rel="alternate"; type="text/markdown"');
+if ($isHtml) {
+    header('Vary: Accept');
+    require_once __DIR__ . '/inc/markdown.php';
+    if (wants_markdown((string)($_SERVER['HTTP_ACCEPT'] ?? ''))) {
+        $md = html_to_markdown((string)file_get_contents($path), 'https://capenduenbref.fr/' . ($file === 'index.html' ? '' : $file));
+        header('Content-Type: text/markdown; charset=utf-8');
+        header('Cache-Control: no-cache');
+        header('x-markdown-tokens: ' . (int)ceil(strlen($md) / 4));
+        header('Content-Signal: search=yes, ai-input=yes, ai-train=no');
+        echo $md; exit;
+    }
 }
 header('Content-Type: ' . $type);
 header('Cache-Control: no-cache');
