@@ -21,6 +21,21 @@
       e.preventDefault();
       say('Pour vous abonner, cochez la case d\'acceptation.', 'err'); consent.focus(); return;
     }
+    // Envoi au formulaire Brevo sans quitter le site : on affiche notre propre page de remerciement.
+    if (/sibforms\.com\/serve\//.test(form.getAttribute('action')) && window.fetch && window.FormData) {
+      e.preventDefault();
+      var btn = form.querySelector('button[type=submit]'); if (btn) btn.disabled = true;
+      say('Envoi en cours…', '');
+      fetch(form.getAttribute('action'), { method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+          if (res && res.success) { window.location.href = 'merci.html'; return; }
+          if (btn) btn.disabled = false;
+          say('Votre inscription n\'a pas pu être enregistrée. Vérifiez votre adresse e-mail et réessayez.', 'err');
+        })
+        .catch(function () { form.submit(); });   // en dernier recours : envoi classique, qui inscrit quand même
+      return;
+    }
     // Tant que le formulaire Brevo n'est pas branché, on n'envoie rien.
     if (/REMPLACER/.test(form.getAttribute('action'))) {
       e.preventDefault();
