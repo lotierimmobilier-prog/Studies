@@ -32,7 +32,7 @@
 
 | Quand | Quoi |
 |---|---|
-| Du 1er au 25 | Collecte des annonces (commerçants, associations, clubs) |
+| Du 1er au 25 | Collecte des annonces (entreprises, associations, clubs) |
 | 26 – 29 | Rédaction, relecture, mise en page |
 | 30 | Envoi de test, corrections |
 | Début du mois suivant | Envoi à tous les abonnés |
@@ -42,5 +42,5 @@
 - [ ] Plus aucun texte jaune ni crochet.
 - [ ] Lien de désinscription et lien « version navigateur » qui fonctionnent.
 - [ ] Éditeur et adresse présents en pied de page.
-- [ ] Offres : prix, dates et conditions vérifiés auprès du commerçant.
+- [ ] Offres : prix, dates et conditions vérifiés auprès de l'entreprise.
 - [ ] Test lu sur téléphone, sur ordinateur et dans le dossier spam.

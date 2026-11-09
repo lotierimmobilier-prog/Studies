@@ -60,7 +60,7 @@ JPEG, PNG ou WebP, 5 Mo maximum. Elles sont ré-encodées (métadonnées supprim
 - Données annonceur : nom, organisation, e-mail, téléphone facultatif, date de consentement.
 - Suppression automatique : annonces refusées après 30 jours, en attente après 90 jours, validées ou publiées après 12 mois.
 - Suppression à la demande : bouton « Retirer » côté partenaire, « Supprimer définitivement » côté admin.
-- À inscrire au **registre des traitements** : « Gestion des annonces de commerçants et d'associations ».
+- À inscrire au **registre des traitements** : « Gestion des annonces d'entreprises et d'associations ».
 - La politique de confidentialité du site décrit déjà ce traitement (points 10 et 10 bis).
 
 ## Test en local
