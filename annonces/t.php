@@ -18,7 +18,7 @@ $key = (string)($_GET['f'] ?? 'index');
 if (!isset(T_FILES[$key])) $key = 'index';
 [$file, $type] = T_FILES[$key];
 $path = dirname(__DIR__) . '/' . $file;
-if (!is_file($path)) { http_response_code(404); exit('Page introuvable'); }
+if (!is_file($path)) { http_response_code(404); header('Cache-Control: no-store'); exit('Page introuvable'); }
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && is_file(__DIR__ . '/config.php')) {
     try {
