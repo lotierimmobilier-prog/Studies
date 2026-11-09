@@ -431,3 +431,7 @@ p.about-body + p.about-body{padding-top:4px}
   .hist-layout{grid-template-columns:1fr;gap:10px}
   .frise{position:static;max-height:none;margin-top:6px}
 }
+
+/* Boutons en fin de section : plus d'air au-dessus et entre eux */
+.purpose .actions-line,.check-list + .actions-line{margin-top:30px;gap:16px}
+p.about-body + .actions-line{margin-top:22px}
