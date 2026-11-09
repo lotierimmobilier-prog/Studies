@@ -7,7 +7,7 @@ const IA_BOTS = ['GPTBot', 'ChatGPT-User', 'OAI-SearchBot', 'ClaudeBot', 'Claude
     'Google-Extended', 'GoogleOther', 'Gemini', 'Bytespider', 'CCBot', 'Amazonbot', 'Applebot-Extended', 'meta-externalagent', 'cohere-ai', 'Diffbot', 'YouBot', 'DuckAssistBot',
     'MistralAI-User', 'Timpibot', 'ImagesiftBot', 'Omgilibot', 'PetalBot'];
 const SRC_LABELS = ['direct' => 'Accès direct', 'newsletter' => 'Newsletter', 'facebook' => 'Facebook', 'instagram' => 'Instagram', 'tiktok' => 'TikTok',
-    'moteur' => 'Moteur de recherche', 'lien' => 'Lien depuis un autre site'];
+    'moteur' => 'Moteur de recherche', 'partage' => 'Partage (WhatsApp, e-mail…)', 'lien' => 'Lien depuis un autre site'];
 
 /** @return array{0:string,1:string} [nature, nom du robot] : human | ia | bot */
 function track_classify_ua(string $ua): array {
@@ -42,6 +42,7 @@ function track_source(string $ref, array $q, string $ownHost): array {
         if (strpos($p, 'face') !== false || $p === 'fb') return ['facebook', ''];
         if (strpos($p, 'insta') !== false || $p === 'ig') return ['instagram', ''];
         if (strpos($p, 'tiktok') !== false) return ['tiktok', ''];
+        if (in_array($p, ['partage', 'share', 'whatsapp', 'wa', 'sms'], true)) return ['partage', ''];
     }
     if (isset($q['fbclid'])) return ['facebook', ''];
     $host = strtolower((string)parse_url($ref, PHP_URL_HOST));

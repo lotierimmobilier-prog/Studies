@@ -398,3 +398,13 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 .reach-bar .reach-fill{position:absolute;left:0;top:0}
 .reach-top .reach-range{background:linear-gradient(90deg,rgba(11,107,102,.35),rgba(14,138,131,.35))}
 .reach-top .reach-solid{background:linear-gradient(90deg,var(--pampre),#0e8a83)}
+
+/* Partage : messages prêts à envoyer */
+.share-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:6px}
+.share-card{background:var(--card);border-radius:var(--r);padding:22px;box-shadow:var(--shadow);border-top:5px solid var(--gold);display:flex;flex-direction:column;gap:12px}
+.share-card h3{margin:0;font-size:21px}
+.share-msg{margin:0;padding:14px 16px;border-radius:12px;background:var(--bg-2);color:var(--ink);font-size:16px;line-height:1.55}
+.share-actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn-wa{background:#128c7e}
+.btn-wa:hover{background:#0e6f64}
+.share-ok{margin:0;min-height:1.4em;color:var(--pampre);font-weight:700;font-size:15px}
