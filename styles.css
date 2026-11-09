@@ -377,3 +377,19 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 .link-card h3{margin:2px 0 0;font-size:22px}
 .link-card p{margin:0 0 8px;color:var(--ink-soft);font-size:17px}
 .link-card .btn{margin-top:auto}
+
+/* Portée comparée : newsletter, Facebook, Instagram */
+.reach{background:var(--card);border-radius:var(--r);padding:24px;box-shadow:var(--shadow);margin:0 0 22px;display:flex;flex-direction:column;gap:14px}
+.reach h3{margin:0;font-size:22px}
+.reach-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.reach-list li{display:grid;grid-template-columns:minmax(150px,230px) 1fr auto;align-items:center;gap:6px 14px}
+.reach-name{font-weight:700;color:var(--ink);font-size:17px}
+.reach-bar{display:block;height:20px;border-radius:10px;background:var(--bg-2);overflow:hidden}
+.reach-fill{display:block;height:100%;border-radius:10px;background:var(--line)}
+.reach-top .reach-fill{background:linear-gradient(90deg,var(--pampre),#0e8a83)}
+.reach-list li b{color:var(--ink);font-size:18px;min-width:96px;text-align:right}
+.reach-top b{color:var(--pampre)}
+.w-4{width:4%}.w-11{width:11%}.w-79{width:79%}.w-89{width:89%}
+.reach-note{margin:0;font-size:15.5px;color:var(--ink-soft);max-width:none}
+.reach-note a{color:var(--pampre)}
+@media (max-width:640px){.reach-list li{grid-template-columns:1fr auto}.reach-bar{grid-column:1 / -1;order:3}.reach{padding:20px}}
