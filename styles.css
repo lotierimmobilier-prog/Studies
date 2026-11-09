@@ -408,3 +408,7 @@ main h2:not(.signup-title):not(.sr-only)::after{content:"";display:block;width:5
 .btn-wa{background:#128c7e}
 .btn-wa:hover{background:#0e6f64}
 .share-ok{margin:0;min-height:1.4em;color:var(--pampre);font-weight:700;font-size:15px}
+
+/* Les paragraphes de pages de texte (histoire, conditions, RGPD) ne sont pas la grille de la page À propos */
+p.about-body{display:block;grid-template-columns:none;max-width:78ch;padding:0 0 14px;font-size:18.5px;line-height:1.7;color:var(--ink)}
+p.about-body + p.about-body{padding-top:4px}
