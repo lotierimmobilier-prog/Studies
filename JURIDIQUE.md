@@ -12,7 +12,7 @@ Ce document est une liste de contrôle pratique, pas un avis juridique. En cas d
 - Mentions légales : identité de l'éditeur, contact, hébergeur (nom, adresse, site). Déjà prévues dans `index.html`.
 
 ## 2. RGPD (données des abonnés)
-- Base légale : **consentement** explicite (case non pré-cochée) + double confirmation par e-mail.
+- Base légale : **consentement** explicite (case non pré-cochée). Pas de double confirmation par e-mail pour l'instant (non activée dans Brevo) : l'activer renforcerait la preuve du consentement et éviterait les inscriptions avec l'adresse d'un tiers.
 - Données minimales : e-mail ; prénom et profil facultatifs.
 - **Registre des traitements** : à tenir (modèle gratuit sur cnil.fr). Pas de délégué à la protection des données requis.
 - **Sous-traitant** (Brevo) : accord de sous-traitance (DPA) signé, hébergement dans l'UE vérifié.
