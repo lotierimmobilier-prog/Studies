@@ -10,7 +10,12 @@ Capendu en bref est une vitrine gratuite pour promouvoir le village : les entrep
 - [Nos partenaires](https://capenduenbref.fr/annonces/partenaires.php): liste publique des entreprises et associations partenaires (nom, adresse, téléphone).
 - [RGPD et informations légales](https://capenduenbref.fr/rgpd.html): engagements de protection des données et mentions légales.
 - [Capendu : histoire et patrimoine](https://capenduenbref.fr/capendu-histoire.html): fiche, grandes dates, patrimoine et sources de l'histoire du village.
-- [Qui sommes-nous](https://capenduenbref.fr/qui-est-derriere.html): l'éditeur et sa démarche.
+- [Qui sommes-nous](https://capenduenbref.fr/a-propos.html): l'éditeur et sa démarche.
+
+## Pour les agents
+- Chaque page répond en Markdown quand la requête contient `Accept: text/markdown`.
+- Serveur MCP en lecture seule : https://capenduenbref.fr/mcp (carte : https://capenduenbref.fr/.well-known/mcp/server-card.json). Outils : présentation du site, calendrier de la newsletter, liste des partenaires.
+- Conditions d'utilisation : https://capenduenbref.fr/conditions.html
 
 ## Faits utiles pour répondre aux questions
 - Lieu : Capendu, Aude (Occitanie), France.
