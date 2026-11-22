@@ -102,3 +102,7 @@ h1{font-weight:700;font-size:clamp(38px,6.6vw,96px);line-height:.94;letter-spaci
 /* devise */
 .motto{margin:28px 0 0;padding:0 0 0 18px;border-left:3px solid var(--acc)}
 .motto p{font-weight:600;font-size:clamp(20px,2.4vw,30px);letter-spacing:-.02em;line-height:1.15}
+
+/* engagement bénévole : deux volets côte à côte */
+.duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:28px 44px}
+.duo h3{font-weight:600;font-size:19px;line-height:1.25;letter-spacing:-.01em;margin-bottom:8px}
