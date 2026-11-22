@@ -19,14 +19,14 @@ Contact : jerome.bouba@lotier-immobilier.com
 
 ## Formation en intelligence artificielle
 
-Parcours validés à la Claude Academy (Anthropic), novembre 2026 :
+Parcours validés à la Claude Academy (Anthropic) :
 
-- Building with the Claude API (21 novembre 2026)
-- Tool use with the Messages API (21 novembre 2026)
-- Claude on Google Cloud (21 novembre 2026)
-- Model Context Protocol: Advanced topics (20 novembre 2026)
-- Claude 101 (19 novembre 2026)
-- Introduction to Claude Cowork (19 novembre 2026)
+- Building with the Claude API
+- Tool use with the Messages API
+- Claude on Google Cloud
+- Model Context Protocol: Advanced topics
+- Claude 101
+- Introduction to Claude Cowork
 
 Également formé à l'OpenAI Academy.
 
