@@ -1,6 +1,6 @@
 # Jérôme Bouba
 
-> Jérôme Bouba est un entrepreneur de l'immobilier installé en Occitanie (France). Il a cofondé l'agence LOTIER Immobilier en 2018, édite les logiciels Signabail et Constatio et écrit des livres sur l'immobilier et la gestion locative.
+> Jérôme Bouba est un entrepreneur de l'immobilier installé en Occitanie (France). Il a cofondé l'agence LOTIER Immobilier en 2018, développe des applications pour les acteurs de l'immobilier (Signabail, Constatio) et a écrit deux livres sur l'immobilier et l'intelligence artificielle. Il est ancien président national de la Table Ronde Française. Sa devise : « La seule limite, c'est l'Homme. »
 
 Contact : jerome.bouba@lotier-immobilier.com
 
@@ -13,6 +13,11 @@ Contact : jerome.bouba@lotier-immobilier.com
 ## Livres
 
 - [L'immobilier à l'heure de l'intelligence artificielle](https://www.amazon.fr/dp/B0HSLJJDK9) : le guide pratique de la gestion locative pour les particuliers et les professionnels. Paru le 22 novembre 2026, 206 pages, ISBN 979-8144812603. 32 chapitres, 4 cas pratiques, 40 prompts, 8 modèles de courriers.
+- [Communiquer sans les portails](https://www.amazon.fr/dp/B0HSLXC6PD) : construire l'audience de son agence immobilière grâce à l'intelligence artificielle. Paru le 22 novembre 2026, format Kindle. 24 chapitres, 2 cas pratiques, 30 prompts.
+
+## Engagement associatif
+
+- Ancien président national de la Table Ronde Française, mouvement de clubs service.
 
 ## Profils
 

@@ -98,3 +98,7 @@ h1{font-weight:700;font-size:clamp(38px,6.6vw,96px);line-height:.94;letter-spaci
 
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 @media print{.hd nav,.skip{display:none}.sec{break-inside:avoid}}
+
+/* devise */
+.motto{margin:28px 0 0;padding:0 0 0 18px;border-left:3px solid var(--acc)}
+.motto p{font-weight:600;font-size:clamp(20px,2.4vw,30px);letter-spacing:-.02em;line-height:1.15}
