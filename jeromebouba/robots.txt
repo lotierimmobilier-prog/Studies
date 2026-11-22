@@ -1,0 +1,5 @@
+# jeromebouba.fr : tout le site est ouvert aux moteurs de recherche et aux assistants IA.
+User-agent: *
+Allow: /
+
+Sitemap: https://jeromebouba.fr/sitemap.xml
