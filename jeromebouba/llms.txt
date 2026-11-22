@@ -1,6 +1,6 @@
 # Jérôme Bouba
 
-> Jérôme Bouba est un entrepreneur de l'immobilier installé en Occitanie (France). Il a cofondé l'agence LOTIER Immobilier en 2018. Expert en intelligence artificielle, certifié OpenAI Academy et Anthropic Academy, il développe des applications pour les acteurs de l'immobilier (Signabail, Constatio) exploite trois laveries automatiques et a écrit trois livres. Bénévole engagé, il a été président national de la Table Ronde Française en 2021-2022 et participe à la vie associative de son village, Capendu (Aude). Sa devise : « La seule limite, c'est l'Homme. »
+> Jérôme Bouba est un entrepreneur de l'immobilier installé en Occitanie (France). Il a cofondé l'agence LOTIER Immobilier en 2018. Formé à l'intelligence artificielle à la Claude Academy d'Anthropic (six parcours validés) et à l'OpenAI Academy, il développe des applications pour les acteurs de l'immobilier (Signabail, Constatio) exploite trois laveries automatiques et a écrit trois livres. Bénévole engagé, il a été président national de la Table Ronde Française en 2021-2022 et participe à la vie associative de son village, Capendu (Aude). Sa devise : « La seule limite, c'est l'Homme. »
 
 Contact : jerome.bouba@lotier-immobilier.com
 
@@ -16,6 +16,19 @@ Contact : jerome.bouba@lotier-immobilier.com
 - [L'immobilier à l'heure de l'intelligence artificielle](https://www.amazon.fr/dp/B0HSLJJDK9) : le guide pratique de la gestion locative pour les particuliers et les professionnels. Paru le 22 novembre 2026, 206 pages, ISBN 979-8144812603. 32 chapitres, 4 cas pratiques, 40 prompts, 8 modèles de courriers.
 - [Communiquer sans les portails](https://www.amazon.fr/dp/B0HSLXC6PD) : construire l'audience de son agence immobilière grâce à l'intelligence artificielle. Paru le 22 novembre 2026, format Kindle. 24 chapitres, 2 cas pratiques, 30 prompts.
 - [Histoire des Laveries, tome I](https://www.amazon.fr/dp/B0HJWJYD4W) : des fouloneries romaines à la laverie automatique. Paru en septembre 2026, 95 pages, ISBN 979-8173937360. Le tome II sera consacré à la création et à l'exploitation d'une laverie automatique en France.
+
+## Formation en intelligence artificielle
+
+Parcours validés à la Claude Academy (Anthropic), novembre 2026 :
+
+- Building with the Claude API (21 novembre 2026)
+- Tool use with the Messages API (21 novembre 2026)
+- Claude on Google Cloud (21 novembre 2026)
+- Model Context Protocol: Advanced topics (20 novembre 2026)
+- Claude 101 (19 novembre 2026)
+- Introduction to Claude Cowork (19 novembre 2026)
+
+Également formé à l'OpenAI Academy.
 
 ## Engagement bénévole
 

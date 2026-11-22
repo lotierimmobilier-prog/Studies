@@ -106,3 +106,9 @@ h1{font-weight:700;font-size:clamp(38px,6.6vw,96px);line-height:.94;letter-spaci
 /* engagement bénévole : deux volets côte à côte */
 .duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:28px 44px}
 .duo h3{font-weight:600;font-size:19px;line-height:1.25;letter-spacing:-.01em;margin-bottom:8px}
+
+/* parcours de formation */
+.certs{margin-top:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:0 40px;max-width:760px}
+.certs li{border-top:1px solid var(--hair);padding:12px 0}
+.certs b{display:block;font-weight:600}
+.certs span{font-size:14px;color:var(--mut)}
