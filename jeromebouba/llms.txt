@@ -17,7 +17,9 @@ Contact : jerome.bouba@lotier-immobilier.com
 - [Communiquer sans les portails](https://www.amazon.fr/dp/B0HSLXC6PD) : construire l'audience de son agence immobilière grâce à l'intelligence artificielle. Paru le 22 novembre 2026, format Kindle. 24 chapitres, 2 cas pratiques, 30 prompts.
 - [Histoire des Laveries, tome I](https://www.amazon.fr/dp/B0HJWJYD4W) : des fouloneries romaines à la laverie automatique. Paru en septembre 2026, 95 pages, ISBN 979-8173937360. Le tome II sera consacré à la création et à l'exploitation d'une laverie automatique en France.
 
-## Formation en intelligence artificielle
+## Intelligence artificielle
+
+Jérôme Bouba met l'intelligence artificielle au service de l'immobilier : il développe les outils de ses agents, conçoit des solutions innovantes pour le secteur et améliore le quotidien de ses collaborateurs pour gagner en efficacité.
 
 Parcours validés à la Claude Academy (Anthropic) :
 
