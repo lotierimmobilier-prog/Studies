@@ -147,3 +147,31 @@ h1{font-weight:700;font-size:clamp(38px,6.6vw,96px);line-height:.94;letter-spaci
   .go{display:inline-block;padding:4px 0}
   .contact .mail{font-size:19px}
 }
+
+/* téléphone, finitions : boutons pleine largeur, repères de défilement, rythme */
+@media(max-width:700px){
+  body{line-height:1.55}
+  .hd .in{padding-top:8px}
+  .hd nav{position:relative}
+  .hd nav::after{content:"";position:absolute;right:-16px;top:0;bottom:0;width:40px;background:linear-gradient(90deg,rgba(255,255,255,0),var(--bg) 70%);pointer-events:none}
+  .hd nav ul{padding-right:40px}
+  .lead{font-size:17px}
+  .sec{padding-block:36px}
+  .sec h2{font-size:25px;margin-bottom:14px}
+  .nums{display:grid;grid-template-columns:1fr 1fr;gap:0 20px;border-top:1px solid var(--hair);margin-top:20px}
+  .nums li{padding:12px 0;border-bottom:1px solid var(--hair)}
+  .nums li:only-child{grid-column:1/-1}
+  .links{display:grid;gap:10px;margin-top:20px}
+  .links .go{display:block;text-align:center;text-decoration:none;border:1.5px solid var(--fg);padding:13px 16px;font-size:16px}
+  .links .go:active{background:var(--acc);border-color:var(--acc);color:#fff}
+  .book .links .go{background:var(--fg);color:var(--bg)}
+  .soc{text-align:center;padding-top:4px}
+  .book+.book{border-top:1px solid var(--hair);padding-top:28px}
+  .books{gap:28px}
+  .book .meta{clear:both;padding-top:6px}
+  .contact .mail{display:block;text-align:center;text-decoration:none;background:var(--fg);color:var(--bg);padding:15px 10px;font-size:16px;letter-spacing:0}
+  .contact ul{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .contact ul .go{display:block;text-align:center;text-decoration:none;border:1.5px solid var(--fg);padding:13px 10px}
+  .qa summary{padding:16px 0}
+  .ft .in{justify-content:center;text-align:center;padding-bottom:max(22px,env(safe-area-inset-bottom))}
+}
