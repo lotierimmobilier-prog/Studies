@@ -14,7 +14,7 @@ Contact : jerome.bouba@lotier-immobilier.com
 ## Livres
 
 - [L'immobilier à l'heure de l'intelligence artificielle](https://www.amazon.fr/dp/B0HSLJJDK9) : le guide pratique de la gestion locative pour les particuliers et les professionnels. Paru le 22 novembre 2026, 206 pages, ISBN 979-8144812603. 32 chapitres, 4 cas pratiques, 40 prompts, 8 modèles de courriers.
-- [Communiquer sans les portails](https://www.amazon.fr/dp/B0HSLXC6PD) : construire l'audience de son agence immobilière grâce à l'intelligence artificielle. Paru le 22 novembre 2026, format Kindle. 24 chapitres, 2 cas pratiques, 30 prompts.
+- [Communiquer sans les portails](https://www.amazon.fr/dp/B0HSLWFWVT) : construire l'audience de son agence immobilière grâce à l'intelligence artificielle. Paru le 22 novembre 2026, 148 pages, ISBN 979-8144913119. 24 chapitres, 2 cas pratiques, 30 prompts.
 - [Histoire des Laveries, tome I](https://www.amazon.fr/dp/B0HJWJYD4W) : des fouloneries romaines à la laverie automatique. Paru en septembre 2026, 95 pages, ISBN 979-8173937360. Le tome II sera consacré à la création et à l'exploitation d'une laverie automatique en France.
 
 ## Intelligence artificielle
