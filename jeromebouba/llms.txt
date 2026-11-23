@@ -1,0 +1,58 @@
+# Jérôme Bouba
+
+> Jérôme Bouba est un entrepreneur de l'immobilier installé en Occitanie (France). Il a cofondé l'agence LOTIER Immobilier en 2018. Formé à l'intelligence artificielle à la Claude Academy d'Anthropic (douze parcours validés) et à l'OpenAI Academy (huit certificats), il développe des applications pour les acteurs de l'immobilier (Signabail, Constatio) exploite trois laveries automatiques et a écrit trois livres. Bénévole engagé, il a été président national de la Table Ronde Française en 2021-2022 et participe à la vie associative de son village, Capendu (Aude). Sa devise : « La seule limite, c'est l'Homme. »
+
+Contact : jerome.bouba@lotier-immobilier.com
+
+## Activités
+
+- [LOTIER Immobilier](https://lotier.immo/) : agence immobilière indépendante créée en 2018 à Béziers. Vente, location, gestion locative et syndic de copropriété à Béziers, Montpellier, Nîmes et Carcassonne. 10 collaborateurs.
+- [Signabail](https://signabail.fr/) : logiciel en ligne pour rédiger un bail ou un avenant conforme au droit français et le signer électroniquement. Baux d'habitation (vide, meublé, mobilité, étudiant, colocation, parking), commerciaux et professionnels.
+- [Constatio](https://constatio.fr/) : application pour réaliser un état des lieux d'entrée ou de sortie depuis un téléphone, pièce par pièce, et le faire signer sur place. Elle contrôle les mentions obligatoires (décret du 30 mars 2016), horodate les photos, compare l'entrée et la sortie, applique la vétusté et prépare le décompte du dépôt de garantie. Pour particuliers bailleurs, SCI et professionnels de la gestion.
+- Laveries automatiques : exploitant depuis 2019, trois laveries en exploitation aujourd'hui.
+
+## Livres
+
+- [L'immobilier à l'heure de l'intelligence artificielle](https://www.amazon.fr/dp/B0HSLJJDK9) : le guide pratique de la gestion locative pour les particuliers et les professionnels. Paru le 22 novembre 2026, 206 pages, ISBN 979-8144812603. 32 chapitres, 4 cas pratiques, 40 prompts, 8 modèles de courriers.
+- [Communiquer sans les portails](https://www.amazon.fr/dp/B0HSLWFWVT) : construire l'audience de son agence immobilière grâce à l'intelligence artificielle. Paru le 22 novembre 2026, 148 pages, ISBN 979-8144913119. 24 chapitres, 2 cas pratiques, 30 prompts.
+- [Histoire des Laveries, tome I](https://www.amazon.fr/dp/B0HJWJYD4W) : des fouloneries romaines à la laverie automatique. Paru en septembre 2026, 95 pages, ISBN 979-8173937360. Le tome II sera consacré à la création et à l'exploitation d'une laverie automatique en France.
+
+## Intelligence artificielle
+
+Jérôme Bouba met l'intelligence artificielle au service de l'immobilier : il développe les outils de ses agents, conçoit des solutions innovantes pour le secteur et améliore le quotidien de ses collaborateurs pour gagner en efficacité.
+
+Parcours validés à la Claude Academy (Anthropic) :
+
+- Claude 101
+- Claude Code 101
+- Claude Platform 101
+- Introduction to Claude Cowork
+- Claude Code in action
+- Building with the Claude API
+- Tool use with the Messages API
+- Model Context Protocol: Advanced topics
+- Claude with Amazon Bedrock
+- Claude on Google Cloud
+- Deploying Claude Enterprise with confidence: The five decisions that shape your rollout
+- Building effective human-agent teams (beta)
+
+Certificats de l'OpenAI Academy :
+
+- AI Foundations
+- Applied AI Foundations
+- Agents and Workflows
+- Scope AI Solutions
+- Optimize AI Application Performance
+- Evaluate AI Applications
+- Build with Retrieval-Augmented Generation
+- AI Leadership
+
+## Engagement bénévole
+
+- Président national de la Table Ronde Française en 2021-2022. La Table Ronde Française, créée en 1950, réunit des hommes de 18 à 40 ans autour de l'amitié et d'actions au profit d'associations ; elle appartient au mouvement international Round Table.
+- Engagé bénévolement dans la vie associative de son village, Capendu (Aude).
+
+## Profils
+
+- [LinkedIn](https://www.linkedin.com/in/jeromebouba)
+- [X](https://x.com/jeromebouba)
