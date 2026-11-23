@@ -1,6 +1,6 @@
 # Jérôme Bouba
 
-> Jérôme Bouba est un entrepreneur de l'immobilier installé en Occitanie (France). Il a cofondé l'agence LOTIER Immobilier en 2018. Formé à l'intelligence artificielle à la Claude Academy d'Anthropic (six parcours validés) et à l'OpenAI Academy (huit certificats), il développe des applications pour les acteurs de l'immobilier (Signabail, Constatio) exploite trois laveries automatiques et a écrit trois livres. Bénévole engagé, il a été président national de la Table Ronde Française en 2021-2022 et participe à la vie associative de son village, Capendu (Aude). Sa devise : « La seule limite, c'est l'Homme. »
+> Jérôme Bouba est un entrepreneur de l'immobilier installé en Occitanie (France). Il a cofondé l'agence LOTIER Immobilier en 2018. Formé à l'intelligence artificielle à la Claude Academy d'Anthropic (douze parcours validés) et à l'OpenAI Academy (huit certificats), il développe des applications pour les acteurs de l'immobilier (Signabail, Constatio) exploite trois laveries automatiques et a écrit trois livres. Bénévole engagé, il a été président national de la Table Ronde Française en 2021-2022 et participe à la vie associative de son village, Capendu (Aude). Sa devise : « La seule limite, c'est l'Homme. »
 
 Contact : jerome.bouba@lotier-immobilier.com
 
@@ -23,12 +23,18 @@ Jérôme Bouba met l'intelligence artificielle au service de l'immobilier : il d
 
 Parcours validés à la Claude Academy (Anthropic) :
 
+- Claude 101
+- Claude Code 101
+- Claude Platform 101
+- Introduction to Claude Cowork
+- Claude Code in action
 - Building with the Claude API
 - Tool use with the Messages API
-- Claude on Google Cloud
 - Model Context Protocol: Advanced topics
-- Claude 101
-- Introduction to Claude Cowork
+- Claude with Amazon Bedrock
+- Claude on Google Cloud
+- Deploying Claude Enterprise with confidence: The five decisions that shape your rollout
+- Building effective human-agent teams (beta)
 
 Certificats de l'OpenAI Academy :
 
