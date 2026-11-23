@@ -183,6 +183,16 @@ h1{font-weight:700;font-size:clamp(38px,6.6vw,96px);line-height:.94;letter-spaci
   .hero{display:grid;grid-template-columns:minmax(0,1fr) clamp(210px,24vw,320px);column-gap:clamp(28px,5vw,72px);align-items:end}
 }
 @media(max-width:700px){
-  .hero{display:flex;flex-direction:column}
-  .portrait{order:-1;width:150px;margin-bottom:22px}
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) 104px;column-gap:12px;grid-template-areas:"kind kind" "titre photo" "lead lead" "devise devise"}
+  .hero-tx{display:contents}
+  .hero .kind{grid-area:kind}
+  .hero h1{grid-area:titre;font-size:clamp(29px,9vw,40px)}
+  .hero .lead{grid-area:lead}
+  .hero .motto{grid-area:devise}
+  .portrait{grid-area:photo;align-self:end;width:104px}
+}
+@media(max-width:350px){
+  .hero{grid-template-columns:minmax(0,1fr) 80px;column-gap:10px}
+  .hero h1{font-size:27px}
+  .portrait{width:80px}
 }
